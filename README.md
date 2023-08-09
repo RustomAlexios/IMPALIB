@@ -148,3 +148,47 @@ There are three different ways for implementing IMPALIB:
 ```bash
     ./demo
 ```
+
+Graphical Model of the above code:
+- reward_team and reward_project are represented by arrows on the left and right equality constraints, respectively.
+- teams_weights_per_department are represented by red (weight$=2$) or blue (weight$=1$) edges.
+
+![graphicalModel](./img/demoGraphicalModel.png)
+
+##### **2. Pure Python code**
+
+To run pure code using sample datasets:
+- Navigate to ``IMPALIB/test/python/src``
+- Run: 
+```bash
+    python3 main_pure_optimized.py --nITER=400 --filterFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
+```
+
+##### **3. C++ code with a python wrapper**
+
+To run wrapper code using sample datasets:
+- Navigate to ``IMPALIB/src``
+- Compile:
+```bash 
+    g++ BCJR_wrapper_optimized.cpp -O3 -march=native -fPIC -shared -o ../build/shared_library/libCfunc.so
+```
+        OR 
+```bash 
+    clang++ -std=c++11 -stdlib=libc++ -arch x86_64 BCJR_wrapper_optimized.cpp -shared -o ../build/shared_library/libCfunc.so
+```
+- Run:  
+```bash 
+    python3 main_wrapper_optimized.py --nITER=400 --filterFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001 
+```
+
+### **Requirements and Installation**
+- A C++$11$-compatible compiler
+- Python $3.9.7$
+- To perform unit testing: randomized simulations using a pure python code and a python wrapper around a C++ code are carried out. A checking routine on the stored numpy files is executed to compare results. An external library called [cnpy](https://github.com/rogersce/cnpy) is used to save and load numpy arrays in C++
+
+### **License**
+Distributed under the MIT License.
+See accompanying file [`LICENSE`](https://github.com/RustomAlexios/IMPALIB/blob/main/LICENSE) or at
+[https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT))
+
+
