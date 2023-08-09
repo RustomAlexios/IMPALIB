@@ -1,5 +1,6 @@
 # **IMPALIB**
 =============
+
 Table of contents
 -----------------
 
@@ -10,6 +11,7 @@ Table of contents
 * [Usage](#usage)
 * [Requirements and Installation](#requirements-and-installation)
 * [License](#license)
+
 ### **Introduction**
 ------------
 
