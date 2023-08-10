@@ -151,7 +151,7 @@ There are three different ways for implementing IMPALIB:
 
 Graphical Model of the above code:
 - reward_team and reward_project are represented by arrows on the left and right equality constraints, respectively.
-- teams_weights_per_department are represented by red (weight$=2$) or blue (weight$=1$) edges.
+- teams_weights_per_department are represented by red (weight $=2$) or blue (weight $=1$) edges.
 
 ![graphicalModel](./img/demoGraphicalModel.png)
 
