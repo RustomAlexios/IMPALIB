@@ -1,6 +1,0 @@
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/lib/libcnpy.so
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/lib/libcnpy.a
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/include/cnpy.h
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/bin/mat2npz
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/bin/npy2mat
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/bin/npz2mat

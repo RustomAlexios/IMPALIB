@@ -1,9 +1,0 @@
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/cnpy.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/cnpy-static.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/example1.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/edit_cache.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/rebuild_cache.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/list_install_components.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/install.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/install/local.dir
-/home/arustom/Caliola/FBA/codes/pythonWrapperOptimized/build/cnpylib/CMakeFiles/install/strip.dir
