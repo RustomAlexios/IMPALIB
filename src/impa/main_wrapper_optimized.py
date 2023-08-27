@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
 # Copyright 2023, Alexios Rustom.
 # https://github.com/RustomAlexios/IMPALIB
 # Distributed under the MIT License.
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import *
-from IMPA import *
+from impa.environmentModule import *
+from impa.IMPA import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--nITER', type=int,default=400,help="Number of Iterations of IMPA")

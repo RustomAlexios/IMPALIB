@@ -4,7 +4,7 @@
 // (See accompanying LICENSE file or at
 //  https://opensource.org/licenses/MIT)
 
-#include "../include/impalib/impalib.hpp"
+#include "impalib/impalib.hpp"
 
 
 //g++ BCJR_wrapper_optimized.cpp -O3 -march=native -fPIC -shared -o ../build/shared_library/libCfunc.so

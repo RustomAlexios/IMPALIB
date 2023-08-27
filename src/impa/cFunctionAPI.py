@@ -5,9 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import ctypes
-from environmentModule import *
+from impa.environmentModule import *
 
-c_lib = ctypes.CDLL("../build/shared_library/libCfunc.so")
+#c_lib = ctypes.CDLL("../build/shared_library/libCfunc.so")
+c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
 c_int_p = ctypes.POINTER(ctypes.c_int)
 c_double_p = ctypes.POINTER(ctypes.c_double)
 #c_bool_p = ctypes.POINTER(ctypes.c_bool)

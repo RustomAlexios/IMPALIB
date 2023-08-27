@@ -4,9 +4,9 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import *
-from initializationModule import *
-from cFunctionAPI import *
+from impa.environmentModule import *
+from impa.initializationModule import *
+from impa.cFunctionAPI import *
 
 class IMPA:
     

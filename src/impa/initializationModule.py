@@ -4,7 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import *
+from impa.environmentModule import *
 
 fighters_count = np.array((1, 1, 2, 2, 2))
 weasels_count = np.array((0, 1, 0, 1, 2))

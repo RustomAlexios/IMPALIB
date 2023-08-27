@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "common.hpp"
+#include "impalib/common.hpp"
 
 /// core
-#include "input_output.hpp"
-#include "knapsack.hpp"
-#include "update_equality_constraint.hpp"
-#include "update_or_inequality_constraint.hpp"
-#include "project_inequality_constraint.hpp"
-#include "graphical_model.hpp"
+#include "impalib/input_output.hpp"
+#include "impalib/knapsack.hpp"
+#include "impalib/update_equality_constraint.hpp"
+#include "impalib/update_or_inequality_constraint.hpp"
+#include "impalib/project_inequality_constraint.hpp"
+#include "impalib/graphical_model.hpp"
