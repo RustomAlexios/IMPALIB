@@ -145,21 +145,19 @@ To run pure code using sample datasets:
 ```
 
 ##### **3. C++ code with a python wrapper**
+To compile the C++ library and install the Python wrapper, navigate to the project root and use: 
+```bash
+    python3 -m pip install . -v
+```
 
 To run wrapper code using sample datasets:
-- Navigate to ``IMPALIB/src``
-- Compile:
-```bash 
-    g++ BCJR_wrapper_optimized.cpp -O3 -march=native -fPIC -shared -o ../build/shared_library/libCfunc.so
-```
-        OR 
-```bash 
-    clang++ -std=c++11 -stdlib=libc++ -arch x86_64 BCJR_wrapper_optimized.cpp -shared -o ../build/shared_library/libCfunc.so
-```
 - Run:  
 ```bash 
     python3 main_wrapper_optimized.py --nITER=400 --filterFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001 
 ```
+
+**Note**: currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory.
+This will be fixed in a future version.
 
 ### **Requirements and Installation**
 - A C++$11$-compatible compiler
