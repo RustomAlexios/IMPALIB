@@ -7,7 +7,7 @@ setup(
     description="A package for MPA-based solvers to linear programs",
     author='BP-OPT Team',
     license="MIT",
-    package_dir={"impa": "src/impa"},
+    package_dir={"": "src"},
     packages=['impa'],
     python_requires=">=3.7",
     install_requires=["bitstring", "tqdm"],
