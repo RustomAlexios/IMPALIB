@@ -2,3 +2,4 @@
 build/
 _skbuild
 *.egg-info/
+.idea/
