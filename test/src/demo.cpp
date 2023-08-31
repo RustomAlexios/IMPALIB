@@ -4,7 +4,7 @@
 // (See accompanying LICENSE file or at
 //  https://opensource.org/licenses/MIT)
 
-#include "../include/impalib_unit_tests.hpp"
+#include "impalib/impalib.hpp"
 
 //demonstration of the use of the library in c++
 //
@@ -59,7 +59,7 @@ int main(){
                         pNON_ZERO_WEIGHT_INDICES_SIZES, p_NON_ZERO_WEIGHT_INDICES, pREWARD_PROJECT, 
                         pMAX_STATE);
     model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES);
-    //for (int i=0; i<N_TEAMS; i++){
-    //    cout<<model_graph.outputs.ExtrinsicOutputTeam[i]+model_graph.modelInputs_.RewardTeam[i]<<endl;
-    //}
+    for (int i=0; i<N_TEAMS; i++){
+        cout<<model_graph.outputs.ExtrinsicOutputTeam[i]+model_graph.modelInputs_.RewardTeam[i]<<endl;
+    }
 }
