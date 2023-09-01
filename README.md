@@ -150,6 +150,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
     python3 -m pip install . -v
 ```
 
+- Navigate to ``IMPALIB/src/impa``
 To run wrapper code using sample datasets:
 - Run:  
 ```bash 
@@ -160,7 +161,7 @@ To run wrapper code using sample datasets:
 This will be fixed in a future version.
 
 ### **Requirements and Installation**
-- A C++$11$-compatible compiler
+- A C++ $11$ -compatible compiler
 - Python $3.9.7$
 - To perform unit testing: randomized simulations using a pure python code and a python wrapper around a C++ code are carried out. A checking routine on the stored numpy files is executed to compare results. An external library called [cnpy](https://github.com/rogersce/cnpy) is used to save and load numpy arrays in C++
 
