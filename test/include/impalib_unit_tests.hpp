@@ -8,7 +8,7 @@
 
 
 #include "impalib/impalib.hpp"
-#include "cnpy.h"
+#include "../external/cnpy/cnpy.h"
 
 #include "ut_graphical_model.hpp"
 #include "ut_input_output.hpp"
