@@ -150,6 +150,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
     python3 -m pip install . -v
 ```
 
+- Navigate to ``IMPALIB/src/impa``
 To run wrapper code using sample datasets:
 - Run:  
 ```bash 
