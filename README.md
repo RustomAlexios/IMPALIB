@@ -64,20 +64,12 @@ There are three different ways for implementing IMPALIB:
 3. using a C++ code with a python wrapper which is relatively fast
 
 ##### **1. Header-only C++ library**
-- Navigate to: ``IMPALIB/test/src``
-
-- Compile the main code:
-```bash 
-    g++ ../../src/BCJR_wrapper_optimized.cpp -O3 -march=native -fPIC -shared -o ../../build/shared_library/libCfunc.so
-```
-        OR 
-```bash 
-    clang++ -std=c++11 -stdlib=libc++ -arch x86_64 ../../src/BCJR_wrapper_optimized.cpp -shared -o ../../build/shared_library/libCfunc.so
-```
+The headers in the `include` directory can be directly copied to your project.
+We assume in the code samples below you've copied them to an `impalib` subdirectory of one of your project's include directories.
 
 - Include header files of the library:
 ```cpp
-    #include "../include/impalib_unit_tests.hpp"
+    #include "impalib/impalib.hpp"
 ```
 
 - Demo code:
@@ -88,7 +80,7 @@ There are three different ways for implementing IMPALIB:
     // (See accompanying LICENSE file or at
     //  https://opensource.org/licenses/MIT)
 
-    #include "../include/impalib_unit_tests.hpp"
+    #include "impalib/impalib.hpp"
 
     int main(){
         const int N_PROJECTS = 2; //number of projects
@@ -131,22 +123,10 @@ There are three different ways for implementing IMPALIB:
                             pNON_ZERO_WEIGHT_INDICES_SIZES, p_NON_ZERO_WEIGHT_INDICES, pREWARD_PROJECT, 
                             pMAX_STATE);
         model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES);
-        //for (int i=0; i<N_TEAMS; i++){
-        //    cout<<model_graph.outputs.ExtrinsicOutputTeam[i]+model_graph.modelInputs_.RewardTeam[i]<<endl;
-        //}
+        for (int i=0; i<N_TEAMS; i++) {
+            cout << model_graph.outputs.ExtrinsicOutputTeam[i]+model_graph.modelInputs_.RewardTeam[i]<<endl;
         }
-```
-- Compile Demo code:
-```bash
-    export LD_LIBRARY_PATH=../../build/cnpylib
-```
-```bash
-    g++ -o demo demo.cpp -L../../build/cnpylib -lcnpy -lz --std=c++11
-```
-
-- Run Demo code:
-```bash
-    ./demo
+        }
 ```
 
 Graphical Model of the above code:
@@ -165,21 +145,19 @@ To run pure code using sample datasets:
 ```
 
 ##### **3. C++ code with a python wrapper**
+To compile the C++ library and install the Python wrapper, navigate to the project root and use: 
+```bash
+    python3 -m pip install . -v
+```
 
 To run wrapper code using sample datasets:
-- Navigate to ``IMPALIB/src``
-- Compile:
-```bash 
-    g++ BCJR_wrapper_optimized.cpp -O3 -march=native -fPIC -shared -o ../build/shared_library/libCfunc.so
-```
-        OR 
-```bash 
-    clang++ -std=c++11 -stdlib=libc++ -arch x86_64 BCJR_wrapper_optimized.cpp -shared -o ../build/shared_library/libCfunc.so
-```
 - Run:  
 ```bash 
     python3 main_wrapper_optimized.py --nITER=400 --filterFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001 
 ```
+
+**Note**: currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory.
+This will be fixed in a future version.
 
 ### **Requirements and Installation**
 - A C++ $11$ -compatible compiler

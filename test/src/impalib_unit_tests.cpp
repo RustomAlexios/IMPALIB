@@ -6,7 +6,7 @@
 
 //#define IMPALIB_FLOAT_TYPE double
 
-#include "../include/impalib_unit_tests.hpp"
+#include "impalib_unit_tests.hpp"
 
 
 int main(){

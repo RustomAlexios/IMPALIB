@@ -7,8 +7,8 @@
 #pragma once
 
 
-#include "../../include/impalib/impalib.hpp"
-#include "../../build/cnpylib/include/cnpy.h"
+#include "impalib/impalib.hpp"
+#include "cnpy.h"
 
 #include "ut_graphical_model.hpp"
 #include "ut_input_output.hpp"
