@@ -8,7 +8,7 @@
 
 #include "impalib/impalib.hpp"
 
-class EqualityConstraint{
+class EqualityConstraintKcMwm{
     private:
         int numTeams_;
         int numProjects_;
@@ -19,17 +19,17 @@ class EqualityConstraint{
 
         void project_eq_constraint_to_oric_update(vector<vector<impalib_type>>&, vector<vector<impalib_type>>&, vector<vector<impalib_type>>&);
 
-    EqualityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS);
+    EqualityConstraintKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS);
 };
 
-EqualityConstraint::EqualityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS){
+EqualityConstraintKcMwm::EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS){
     numProjects_ = N_PROJECTS;
     numTeams_ = N_TEAMS;
     numDepartments_ = N_DEPARTMENTS;
 
 };
 
-    void EqualityConstraint::team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rExtrinsicOutputDepartment, 
+    void EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rExtrinsicOutputDepartment, 
                                 vector<impalib_type> &rTeam2OricM, vector<impalib_type>& rewardTeam){
 
         vector <impalib_type> intermediate_team_to_oric_m(numTeams_,0);
@@ -42,7 +42,7 @@ EqualityConstraint::EqualityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PRO
                                     rewardTeam.begin(), rTeam2OricM.begin(), std::plus<impalib_type>());
         }
 
-    void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
+    void EqualityConstraintKcMwm::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
                                         vector<vector<impalib_type>> &rEqConstraint2OricM, vector<vector<impalib_type>>& rewardProject){
         for (int project_index=0; project_index < rProject2EqConstraintM.size(); project_index++){
             transform(rProject2EqConstraintM[project_index].begin(), rProject2EqConstraintM[project_index].end(), 

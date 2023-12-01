@@ -25,7 +25,7 @@ void ut_eq_constraint(string ut_name){
     const int N_DEPARTMENTS = atoi(n_departments_bash);  
     const int N_PROJECTS = atoi(n_projects_bash);
 
-    EqualityConstraint modelEqConstraint(N_DEPARTMENTS, N_TEAMS, N_PROJECTS);
+    EqualityConstraintKcMwm modelEqConstraint(N_DEPARTMENTS, N_TEAMS, N_PROJECTS);
 
     cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_EqConstraint/ut_"+ ut_name+"/reward_project_pure.npy");
     impalib_type* reward_project_pure = input2.data<impalib_type>();

@@ -28,7 +28,7 @@ def ut_eq_consraint(ut_name, n_departments, n_teams , n_projects):
     f_reward_team_path  = os.getcwd() + '/../ut_inputs/ut_EqConstraint/ut_'+ ut_name+'/reward_team_pure.npy'
     np.save(f_reward_team_path, reward_team_pure.flatten())
 
-    model_eq_constraint = eq_constraint.EqualityConstraint(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_team_pure, reward_project_pure)
+    model_eq_constraint = eq_constraint.EqualityConstraintKcMwm(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_team_pure, reward_project_pure)
         
     if (ut_name == "TeamEc2OricUpdate"):
 

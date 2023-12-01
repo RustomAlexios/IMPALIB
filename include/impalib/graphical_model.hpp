@@ -26,7 +26,7 @@ class GraphicalModelKcMwm{
                 vector<impalib_type> team2OricM_;
                 Knapsack modelKnapsacks_;
                 InequalityConstraint projectIneqConstraint_;
-                EqualityConstraint modelEqConstraint_; 
+                EqualityConstraintKcMwm modelEqConstraint_; 
                 OrInequalityConstraint modelOric_;
 
         public: 

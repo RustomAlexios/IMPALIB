@@ -6,7 +6,7 @@
 
 from environmentModule import *
 
-class EqualityConstraint:
+class EqualityConstraintKcMwm:
     def __init__(self, N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_team, reward_project):
         self.num_bins = N_DEPARTMENTS
         self.num_items = N_TEAMS
