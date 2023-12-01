@@ -7,7 +7,7 @@
 #pragma once
 
 #include "impalib/impalib.hpp"
-class GraphicalModel{
+class GraphicalModelKcMwm{
         private:
                 int numProjects_;
                 int numTeams_;
@@ -36,10 +36,10 @@ class GraphicalModel{
                         const int*, const int*, const impalib_type*, 
                         const int*);
                 void iterate(const int*);
-                GraphicalModel(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG, const impalib_type ALPHA);
+                GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG, const impalib_type ALPHA);
 };
 
-GraphicalModel::GraphicalModel(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG, const impalib_type ALPHA)
+GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG, const impalib_type ALPHA)
                                 : modelInputs_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS)
                                 , outputs(N_DEPARTMENTS, N_TEAMS, N_PROJECTS), modelKnapsacks_(N_DEPARTMENTS, N_TEAMS, FILT_FLAG, ALPHA), projectIneqConstraint_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS)
                                 , modelEqConstraint_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS), modelOric_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS) {
@@ -80,7 +80,7 @@ GraphicalModel::GraphicalModel(const int N_DEPARTMENTS, const int N_TEAMS, const
         
 };
 
-void GraphicalModel::initialize(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pITEMS_WEIGHTS_PER_DEPARTMENT_PY,
+void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pITEMS_WEIGHTS_PER_DEPARTMENT_PY,
                     const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, 
                     const int *pMAX_STATE_PY){
 
@@ -90,7 +90,7 @@ void GraphicalModel::initialize(const impalib_type *pREWARD_TEAM_PY, impalib_typ
 }
 
 
-void GraphicalModel::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY){
+void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY){
         for (int iter = 0; iter <numIterations_; iter++){
 
                 for (int department_index = 0; department_index<numDepartments_; department_index++){

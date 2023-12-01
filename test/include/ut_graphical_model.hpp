@@ -50,7 +50,7 @@ void ut_iterate(string ut_name){
 
     int max_size_non_zero_weight = *max_element(pNON_ZERO_WEIGHT_INDICES_SIZES_PY , pNON_ZERO_WEIGHT_INDICES_SIZES_PY + N_DEPARTMENTS);
     
-    GraphicalModel model_graph(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, max_size_non_zero_weight, N_ITER, FILT_FLAG, ALPHA);
+    GraphicalModelKcMwm model_graph(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, max_size_non_zero_weight, N_ITER, FILT_FLAG, ALPHA);
 
     cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/reward_team_pure.npy");
     const impalib_type* pREWARD_TEAM_PY = input3.data<impalib_type>();
@@ -125,7 +125,7 @@ void ut_iterate_sample_graph(string ut_name){
 
     int max_size_non_zero_weight = *max_element(pNON_ZERO_WEIGHT_INDICES_SIZES_PY , pNON_ZERO_WEIGHT_INDICES_SIZES_PY + N_DEPARTMENTS);
     
-    GraphicalModel model_graph(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, max_size_non_zero_weight, N_ITER, FILT_FLAG, ALPHA);
+    GraphicalModelKcMwm model_graph(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, max_size_non_zero_weight, N_ITER, FILT_FLAG, ALPHA);
 
     cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/reward_team_pure.npy");
     const impalib_type* pREWARD_TEAM_PY = input3.data<impalib_type>();

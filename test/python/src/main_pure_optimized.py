@@ -34,7 +34,7 @@ if __name__ == '__main__':
     ALPHA = args.alpha
     THRESHOLD = args.threshold
     
-    ModelIMPA = GraphicalModel(NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD)
+    ModelIMPA = GraphicalModelKcMwm(NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD)
     
     for setfile in range(index_file, end_file):
         

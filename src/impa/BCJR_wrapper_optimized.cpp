@@ -20,7 +20,7 @@ extern "C" void BcjrWrapper(const int NUM_ITERATIONS, const int NUM_DEPARTMENTS,
                 const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int MAX_SIZE_NON_ZERO_WEIGHTS, impalib_type *pExtrinsic_output_team, impalib_type *pIntrinsic_out_mwm, \
                 const bool FILTERING_FLAG, const impalib_type ALPHA){ 
 
-GraphicalModel model_graph(NUM_DEPARTMENTS, NUM_TEAMS, NUM_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS, NUM_ITERATIONS, FILTERING_FLAG, ALPHA);
+GraphicalModelKcMwm model_graph(NUM_DEPARTMENTS, NUM_TEAMS, NUM_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS, NUM_ITERATIONS, FILTERING_FLAG, ALPHA);
 
 model_graph.initialize(pREWARD_TEAM_PY, pTransition_model_py, pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
                         pNON_ZERO_WEIGHT_INDICES_SIZES_PY, p_NON_ZERO_WEIGHT_INDICES_PY, pREWARD_PROJECT_PY, 

@@ -6,7 +6,7 @@
 
 from impalib import *
 
-class GraphicalModel:
+class GraphicalModelKcMwm:
     
     def __init__(self,NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD):
         

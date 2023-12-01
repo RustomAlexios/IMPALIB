@@ -79,7 +79,7 @@ def ut_iterate(ut_name, N_u, team_types, filtering_flag, alpha, N_ITER, ppFlag, 
         
     input_load.append(reward_team);
     input_load.append(reward_project.T);
-    ModelIMPA = model_graph.GraphicalModel(N_ITER, filtering_flag, ppFlag, alpha, THRESHOLD=threshold)  
+    ModelIMPA = model_graph.GraphicalModelKcMwm(N_ITER, filtering_flag, ppFlag, alpha, THRESHOLD=threshold)  
     ModelIMPA.initialize(input_load, test_flag = True)
     
     f_input6 = os.getcwd() + '/../ut_inputs/ut_GraphicalModel/ut_'+ ut_name+'/reward_team_pure.npy'
@@ -111,7 +111,7 @@ def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, thre
     with open(str(folder_inputs)+'/inputs_set'+str(setfile)+'.pkl', 'rb') as f:
         input_load = pkl.load(f)
 
-    ModelIMPA = model_graph.GraphicalModel(N_ITER, filtering_flag, ppFlag, alpha, THRESHOLD=threshold)  
+    ModelIMPA = model_graph.GraphicalModelKcMwm(N_ITER, filtering_flag, ppFlag, alpha, THRESHOLD=threshold)  
     ModelIMPA.initialize(input_load, test_flag = False)
     N_u = ModelIMPA.max_state
     N_DEPARTMENTS = len(N_u)
