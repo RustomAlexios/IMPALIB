@@ -35,7 +35,7 @@ void ut_input_output(string ut_name){
     copy ( reward_project_pure + N_TEAMS*project_index, reward_project_pure+N_TEAMS*(project_index+1), reward_project[project_index].begin() );
     }
 
-    OutputsImpa outputs(N_DEPARTMENT, N_TEAMS, N_PROJECTS);
+    OutputsKcMwm outputs(N_DEPARTMENT, N_TEAMS, N_PROJECTS);
 
     if (ut_name == "ExtrinsicOutputTeamUpdate"){
         

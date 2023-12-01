@@ -30,8 +30,8 @@ class GraphicalModelKcMwm{
                 OrInequalityConstraint modelOric_;
 
         public: 
-                OutputsImpa outputs;
-                InputsImpa modelInputs_;
+                OutputsKcMwm outputs;
+                InputsKcMwm modelInputs_;
                 void initialize(const impalib_type*, impalib_type*, const int*,
                         const int*, const int*, const impalib_type*, 
                         const int*);

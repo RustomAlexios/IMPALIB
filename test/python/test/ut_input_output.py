@@ -20,7 +20,7 @@ def ut_io(ut_name, n_departments, n_teams , n_projects):
     reward_project_pure = reward_project_pure.astype(np_impa_lib)
     np.save(f_reward_project_path, reward_project_pure.flatten())
     
-    outputs = input_output.OutputsImpa(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_project_pure)
+    outputs = input_output.OutputsKcMwm(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_project_pure)
     
     f_input1 = os.getcwd() + '/../ut_inputs/ut_InputOutput/ut_'+ ut_name+'/N_TEAMS_pure.npy'
     np.save(f_input1, N_TEAMS)

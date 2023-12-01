@@ -8,7 +8,7 @@
 
 #include "impalib/impalib.hpp"
 
-class InputsImpa{
+class InputsKcMwm{
     private:
         int numTeams_;
         int numDepartments_;
@@ -27,10 +27,10 @@ class InputsImpa{
                     const int*, const int*, const impalib_type*, 
                     const int*);
         
-        InputsImpa(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS);
+        InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS);
 };
 
-class OutputsImpa{
+class OutputsKcMwm{
     private:
         int numTeams_;
         int numDepartments_;
@@ -41,10 +41,10 @@ class OutputsImpa{
         vector<impalib_type> IntrinsicOutMwm;
         void intrinsic_out_mwm_update(vector<vector<impalib_type>>&, vector<vector<impalib_type>>&, vector<vector<impalib_type>>&);
         void extrinsic_output_team_update(vector<vector<impalib_type>>&, vector<impalib_type>&);
-        OutputsImpa(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS);
+        OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS);
 };
 
-InputsImpa::InputsImpa(const int N_DEPARTMENTS, const int N_TEAMS,const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS){
+InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS,const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS){
         
         numDepartments_ = N_DEPARTMENTS;
         numTeams_ = N_TEAMS;
@@ -66,7 +66,7 @@ InputsImpa::InputsImpa(const int N_DEPARTMENTS, const int N_TEAMS,const int N_PR
         }
 };
 
-void InputsImpa:: process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
+void InputsKcMwm:: process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
                     const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, 
                     const int *pMAX_STATE_PY){
 
@@ -88,7 +88,7 @@ void InputsImpa:: process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_ty
     
 }
 
-OutputsImpa::OutputsImpa(const int N_DEPARTMENTS, const int N_TEAMS,const int N_PROJECTS){
+OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS,const int N_PROJECTS){
         
         numDepartments_ = N_DEPARTMENTS;
         numTeams_ = N_TEAMS;
@@ -104,7 +104,7 @@ OutputsImpa::OutputsImpa(const int N_DEPARTMENTS, const int N_TEAMS,const int N_
 
 };
 
-void OutputsImpa::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2EqConstraintM, vector<vector<impalib_type>> &rProject2EqConstraintM, vector<vector<impalib_type>>& rRewardProject){
+void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2EqConstraintM, vector<vector<impalib_type>> &rProject2EqConstraintM, vector<vector<impalib_type>>& rRewardProject){
 
         for (int project_index = 0; project_index < rRewardProject.size(); project_index++){
             for (int team_index = 0; team_index < rRewardProject[project_index].size(); team_index++){
@@ -115,7 +115,7 @@ void OutputsImpa::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2E
     }
 
 
-void OutputsImpa::extrinsic_output_team_update( vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
+void OutputsKcMwm::extrinsic_output_team_update( vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
                                     vector<impalib_type> &rOric2TeamM){
 
         copy(rOric2TeamM.begin(), rOric2TeamM.end(), ExtrinsicOutputTeam.begin());

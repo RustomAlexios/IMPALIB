@@ -5,7 +5,7 @@
 #  https://opensource.org/licenses/MIT)
 
 from environmentModule import *
-class OutputsImpa:
+class OutputsKcMwm:
     def __init__(self, N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_project):
         self.num_departments = N_DEPARTMENTS
         self.num_teams = N_TEAMS

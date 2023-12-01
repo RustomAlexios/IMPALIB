@@ -100,7 +100,7 @@ class GraphicalModelKcMwm:
         self.project_ineq_constraint = InequalityConstraint(self.num_departments, self.num_teams, self.num_projects, self.unbalanced_flag)
         self.model_oric = OrInequalityConstraint(self.num_departments, self.num_teams, self.num_projects, self.unbalanced_flag, self.reward_project)
         self.model_eq_constraint = EqualityConstraint(self.num_departments, self.num_teams, self.num_projects, self.reward_team, self.reward_project)
-        self.outputs = OutputsImpa(self.num_departments, self.num_teams, self.num_projects, self.reward_project)
+        self.outputs = OutputsKcMwm(self.num_departments, self.num_teams, self.num_projects, self.reward_project)
     
     def prune_teams(self, test_flag = False):
     

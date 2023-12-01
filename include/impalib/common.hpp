@@ -17,6 +17,14 @@
 #include <algorithm>
 #include <numeric>
 #include <functional>
+
+#include <cmath>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <iterator>
+#include <iomanip> 
+
 using namespace std;
 
 #define IMPALIB_TYPE double
