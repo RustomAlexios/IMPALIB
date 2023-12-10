@@ -10,7 +10,7 @@ from environmentModule import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--nITER', type=int,default=400,help="Number of Iterations of IMPA")
-parser.add_argument('--filterFlag', type=bool, default=False, help="Activate Filtering or not")
+parser.add_argument('--filteringFlag', type=bool, default=False, help="Activate Filtering or not")
 parser.add_argument('--alpha', type=np_impa_lib, default=0.0, help="Filtering Rate [0,1]")
 parser.add_argument('--PPFlag', type=bool, default=True, help="Activate Post-Processing or not")
 parser.add_argument('--threshold', type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()  
     NUM_ITERATIONS = args.nITER
-    FILTERING_FLAG = args.filterFlag
+    FILTERING_FLAG = args.filteringFlag
     POST_PROCESS_FLAG = args.PPFlag
     ALPHA = args.alpha
     THRESHOLD = args.threshold

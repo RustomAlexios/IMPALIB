@@ -6,19 +6,6 @@
 
 #include "impalib/impalib.hpp"
 
-//demonstration of the use of the library in c++
-//
-//export LD_LIBRARY_PATH=../../build/cnpylib
-//g++ -o demo demo.cpp -L../../build/cnpylib -lcnpy -lz --std=c++11
-
-//to run wrapper code using sample datasets
-//location: "pythonWrapperOptimized/src"
-//python3 main_wrapper_optimized.py --nITER=400 --filterFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001
-
-//to run pure code using sample datasets
-//location: "pythonWrapperOptimized/test/python/src"
-//python3 main_pure_optimized.py --nITER=400 --filterFlag=True --alpha=0.9 --PPFlag=True --PPOption=2 --threshold=-0.0001
-
 int main(){
     const int N_PROJECTS = 2; //number of projects
     const bool FILT_FLAG = true; //whether filtering is activated or not

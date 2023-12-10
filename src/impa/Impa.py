@@ -8,7 +8,631 @@ from impa.environmentModule import *
 from impa.initializationModule import *
 from impa.cFunctionAPI import *
 
-class IMPA:
+class GraphicalModelTsp:
+    
+    def __init__(self,NUM_ITERATIONS, NUM_NODES, SYMMETRIC_FLAG, AUGMENTATION_FLAG, EXACT_SOLVER_FLAG, LKH_SOLVER_FLAG, SIM_ANNEALING_FLAG, RESET_FLAG, FILTERING_FLAG, ALPHA, THRESHOLD, RANDOM_TEST_FLAG, MAX_COUNT, POST_PROCESS_FLAG, K_OPT_FLAG, MAX_AUGM_COUNT):
+        
+        self.num_iterations = NUM_ITERATIONS
+        self.num_nodes = NUM_NODES
+        self.threshold = THRESHOLD
+        self.symmetric_flag = SYMMETRIC_FLAG
+        self.augmentation_flag = AUGMENTATION_FLAG
+        self.exact_solver_flag = EXACT_SOLVER_FLAG
+        self.lkh_solver_flag = LKH_SOLVER_FLAG
+        self.sim_annealing_flag = SIM_ANNEALING_FLAG
+        self.reset_flag = RESET_FLAG
+        self.filtering_flag = FILTERING_FLAG
+        self.alpha = ALPHA
+        self.random_test_flag = RANDOM_TEST_FLAG
+        self.max_count = MAX_COUNT
+        self.post_process_flag = POST_PROCESS_FLAG
+        self.k_opt_flag = K_OPT_FLAG
+        self.max_augm_count = MAX_AUGM_COUNT
+        
+    def initialize(self):
+        
+        self.results_composed = []
+        
+        self.num_augmentations = 0
+        self.num_added_constraints = 0
+        self.no_improvement_sol_count_exceeded_flag = False
+        self.no_consecutive_loops_count_exceeded_flag = False
+        self.sol_oscillation_count_exceeded_flag = False
+        
+        if (not self.random_test_flag):
+            self.num_nodes = self.input_load[0]
+            self.symmetric_flag = self.input_load[1]
+            
+        num_nodes = self.num_nodes
+        symmetric_flag = self.symmetric_flag
+        
+        print(f'num_nodes: {self.num_nodes}')
+        print(f'symmetric_flag: {self.symmetric_flag}')
+        
+        cost_matrix, edge_connections = self.create_cost_matrix(symmetric_flag)
+        self.tour_impa_flag = False
+        self.tour_impa = np.zeros(num_nodes+1, dtype = np.int32) #+1 to account for returning edge
+        self.cost_impa = np.zeros(1, dtype=np_impa_lib)
+        self.selected_edges = np.zeros(math.comb(self.num_nodes, 2), dtype = np.int32)
+        self.subtour_paths = np.zeros(self.num_nodes**2, dtype=np.int32)
+        self.open_paths = np.zeros(self.num_nodes**2, dtype=np.int32)
+        
+        if (not self.random_test_flag):
+            self.cost_matrix = self.input_load[2]
+            self.edge_connections = self.input_load[3]
+            cost_matrix = self.cost_matrix
+            edge_connections = self.edge_connections
+        
+        self.cost_matrix = cost_matrix
+        self.edge_connections = edge_connections
+        
+        num_edge_variables = num_nodes**2-num_nodes
+        
+        self.num_edge_variables = num_edge_variables
+        
+        self.intrinsic_out_edge_ec = np.zeros(num_edge_variables, dtype = np_impa_lib)
+        
+        cost_edge_variable = np.zeros(num_edge_variables, dtype = np_impa_lib)
+        
+        edge_ec_to_degree_constraint_m = np.zeros((num_edge_variables, num_nodes), dtype = np_impa_lib)
+        
+        for i in range(len(edge_connections)):
+            connection = edge_connections[i]
+            cost = cost_matrix[connection[0], connection[1]]
+            cost_edge_variable[i] = cost
+            edge_ec_to_degree_constraint_m[i][connection[0]] = cost
+            edge_ec_to_degree_constraint_m[i][connection[1]] = cost
+        
+        self.cost_edge_variable = cost_edge_variable
+        self.edge_degree_constraint_cost = edge_ec_to_degree_constraint_m
+        
+        self.edge_ec_to_degree_constraint_m = edge_ec_to_degree_constraint_m
+
+    def create_cost_matrix(self, symmetric_flag):
+        
+        n = self.num_nodes
+        upper_triangle = np.random.uniform(1, 1000, size=(n, n))
+        if (symmetric_flag):
+            matrix = np.triu(upper_triangle) + np.triu(upper_triangle, k=1).T
+            np.fill_diagonal(matrix, zero_value)
+        else:
+            matrix = upper_triangle.copy()
+            np.fill_diagonal(matrix, zero_value)   
+        edge_connections = np.transpose(np.nonzero(matrix))
+        return matrix, edge_connections
+    
+    def run_impa(self):
+        
+        edge_connection_flatten_p, cost_edge_variable_flatten_p, cost_matrix_flatten_p, edge_ec_to_degree_constraint_m_flatten_p, edge_degree_constraint_cost_flatten_p, extrinsic_output_edge_ec_p, \
+                    num_augmentations_p, tour_impa_flatten_p, cost_impa_p, selected_edges_p, selected_edges_size_p, no_improvement_sol_count_exceeded_flag_p, no_consecutive_loops_count_exceeded_flag_p, \
+                        sol_oscillation_count_exceeded_flag_p, subtour_paths_flatten_p, subtour_paths_size_flatten_p, \
+                            num_added_constraints_p = self.process_inputs_ctypes()
+
+        WrapperTsp(np.int32(self.num_iterations), np.int32(self.num_nodes), np.int32(self.num_edge_variables), self.augmentation_flag, self.reset_flag, np_impa_lib(self.alpha), self.filtering_flag, \
+            edge_connection_flatten_p, cost_edge_variable_flatten_p, cost_matrix_flatten_p, edge_ec_to_degree_constraint_m_flatten_p, edge_degree_constraint_cost_flatten_p, extrinsic_output_edge_ec_p, \
+                np_impa_lib(self.threshold), num_augmentations_p, tour_impa_flatten_p, cost_impa_p, no_improvement_sol_count_exceeded_flag_p, no_consecutive_loops_count_exceeded_flag_p, \
+                    selected_edges_p, selected_edges_size_p, sol_oscillation_count_exceeded_flag_p, subtour_paths_flatten_p, subtour_paths_size_flatten_p, \
+                        np.int32(self.max_count), num_added_constraints_p, np.int32(self.max_augm_count))
+        
+        self.process_outputs_ctypes(sol_oscillation_count_exceeded_flag_p, selected_edges_size_p, selected_edges_p, subtour_paths_size_flatten_p, subtour_paths_flatten_p, \
+                                no_improvement_sol_count_exceeded_flag_p, no_consecutive_loops_count_exceeded_flag_p, tour_impa_flatten_p, num_augmentations_p, \
+                                    cost_impa_p, extrinsic_output_edge_ec_p, num_added_constraints_p)
+        
+    def process_inputs_ctypes(self):
+
+        edge_connection_flatten = self.edge_connections.flatten().astype(np.int32)
+        edge_connection_flatten_p = edge_connection_flatten.ctypes.data_as(c_int_p)
+        cost_edge_variable_flatten = self.cost_edge_variable.flatten().astype(np_impa_lib)
+        cost_edge_variable_flatten_p = cost_edge_variable_flatten.ctypes.data_as(c_impa_lib_type_p)
+        cost_matrix_flatten = self.cost_matrix.flatten().astype(np_impa_lib)
+        cost_matrix_flatten_p = cost_matrix_flatten.ctypes.data_as(c_impa_lib_type_p)
+        edge_ec_to_degree_constraint_m_flatten = self.edge_ec_to_degree_constraint_m.flatten().astype(np_impa_lib)
+        edge_ec_to_degree_constraint_m_flatten_p = edge_ec_to_degree_constraint_m_flatten.ctypes.data_as(c_impa_lib_type_p)
+        edge_degree_constraint_cost_flatten = self.edge_degree_constraint_cost.flatten().astype(np_impa_lib)
+        edge_degree_constraint_cost_flatten_p = edge_degree_constraint_cost_flatten.ctypes.data_as(c_impa_lib_type_p)
+        extrinsic_output_edge_ec = np.zeros((self.num_edge_variables))
+        extrinsic_output_edge_ec = np.array(extrinsic_output_edge_ec).flatten().astype(np_impa_lib)
+        extrinsic_output_edge_ec_p = extrinsic_output_edge_ec.ctypes.data_as(c_impa_lib_type_p)
+        
+        num_augmentations_p = np.array(self.num_augmentations).ctypes.data_as(c_int_p)
+        num_added_constraints_p = np.array(self.num_added_constraints).ctypes.data_as(c_int_p)
+        tour_impa_flatten = self.tour_impa.flatten().astype(np.int32)
+        tour_impa_flatten_p = tour_impa_flatten.ctypes.data_as(c_int_p)
+        cost_impa_p = np.array(self.cost_impa).ctypes.data_as(c_impa_lib_type_p)
+        selected_edges_flatten = np.array(self.selected_edges).flatten().astype(np.int32)
+        selected_edges_p = selected_edges_flatten.ctypes.data_as(c_int_p)
+        selected_edges_size_p = np.array(0).ctypes.data_as(c_int_p)
+        
+        no_improvement_sol_count_exceeded_flag_p = np.array(self.no_improvement_sol_count_exceeded_flag).ctypes.data_as(c_bool_p)
+        no_consecutive_loops_count_exceeded_flag_p = np.array(self.no_consecutive_loops_count_exceeded_flag).ctypes.data_as(c_bool_p)
+        sol_oscillation_count_exceeded_flag_p = np.array(self.sol_oscillation_count_exceeded_flag).ctypes.data_as(c_bool_p)
+        
+        subtour_paths_flatten = self.subtour_paths.flatten().astype(np.int32)
+        subtour_paths_flatten_p = subtour_paths_flatten.ctypes.data_as(c_int_p)
+        subtour_paths_size_flatten = np.zeros(self.num_nodes**2).flatten().astype(np.int32)
+        subtour_paths_size_flatten_p = subtour_paths_size_flatten.ctypes.data_as(c_int_p)
+        
+        return edge_connection_flatten_p, cost_edge_variable_flatten_p, cost_matrix_flatten_p, edge_ec_to_degree_constraint_m_flatten_p, edge_degree_constraint_cost_flatten_p, extrinsic_output_edge_ec_p, \
+            num_augmentations_p, tour_impa_flatten_p, cost_impa_p, selected_edges_p, selected_edges_size_p, no_improvement_sol_count_exceeded_flag_p, no_consecutive_loops_count_exceeded_flag_p, \
+                sol_oscillation_count_exceeded_flag_p, subtour_paths_flatten_p, subtour_paths_size_flatten_p, num_added_constraints_p
+
+    def process_outputs_ctypes(self, sol_oscillation_count_exceeded_flag_p, selected_edges_size_p, selected_edges_p, subtour_paths_size_flatten_p, subtour_paths_flatten_p, \
+                                no_improvement_sol_count_exceeded_flag_p, no_consecutive_loops_count_exceeded_flag_p, tour_impa_flatten_p, num_augmentations_p, \
+                                    cost_impa_p, extrinsic_output_edge_ec_p, num_added_constraints_p):
+        
+        selected_edges_size = list(selected_edges_size_p.__dict__.values())[0]
+        selected_edges_flatten = list(selected_edges_p.__dict__.values())[0][:selected_edges_size]
+        self.selected_edges = [[selected_edges_flatten[i], selected_edges_flatten[i+1]] for i in range(0, len(selected_edges_flatten), 2)]
+        
+        subtour_paths_size = list(subtour_paths_size_flatten_p.__dict__.values())[0]  
+        subtour_paths_size = [x for x in subtour_paths_size if x != 0]
+        if (len(subtour_paths_size) != 0):
+            subtour_paths_flatten = list(subtour_paths_flatten_p.__dict__.values())[0][:sum(subtour_paths_size)]
+            self.subtour_paths = [list(islice(subtour_paths_flatten, sum(subtour_paths_size[:i]), sum(subtour_paths_size[:i+1]))) for i in range(len(subtour_paths_size))]
+        else:
+            self.subtour_paths = None
+        
+        self.sol_oscillation_count_exceeded_flag = list(sol_oscillation_count_exceeded_flag_p.__dict__.values())[0]
+        self.no_improvement_sol_count_exceeded_flag = list(no_improvement_sol_count_exceeded_flag_p.__dict__.values())[0]
+        self.no_consecutive_loops_count_exceeded_flag = list(no_consecutive_loops_count_exceeded_flag_p.__dict__.values())[0]
+        tour_impa = list(tour_impa_flatten_p.__dict__.values())[0]
+        if all(element == 0 for element in tour_impa):
+            self.tour_impa = None
+        else:
+            self.tour_impa = [x for x in tour_impa]
+        
+        self.num_augmentations = int(list(num_augmentations_p.__dict__.values())[0])
+        if (self.augmentation_flag):
+            self.num_added_constraints = int(list(num_added_constraints_p.__dict__.values())[0])
+        else:
+            self.num_added_constraints = 0
+            
+        self.cost_impa = list(cost_impa_p.__dict__.values())[0][0]
+        extrinsic_output_edge_ec = list(extrinsic_output_edge_ec_p.__dict__.values())[0]
+        intrinsic_out_edge_ec = extrinsic_output_edge_ec + self.cost_edge_variable
+        self.intrinsic_out_edge_ec = intrinsic_out_edge_ec
+        if (self.subtour_paths is not None):
+            self.subtour_paths = [sublist + [sublist[0]] for sublist in self.subtour_paths if sublist]
+        if (self.tour_impa is None and self.post_process_flag):
+            self.run_post_processing_improved()
+            self.pp_performed = True
+        else:
+            self.pp_performed = False
+    
+    def undirected_graph(self, selected_edges):
+        graph = {}
+        for connection in selected_edges:
+            if connection[0] in graph:
+                graph[connection[0]].append(connection[1])
+            else:
+                graph[connection[0]] = [connection[1]]
+        
+            if connection[1] in graph:
+                graph[connection[1]].append(connection[0])
+            else:
+                graph[connection[1]] = [connection[0]]
+        return graph
+    
+    def paths_cleaning(self, removed_edges, investigated_paths):
+        if (investigated_paths is None):
+            return None, None
+        removed_edges = [tuple(edge) for edge in removed_edges]
+        new_investigated_paths = []; removed_edge_flag_list = []
+        for path in investigated_paths:
+            removed_edge_flag = False
+            new_path = []; i = 0
+            while i < len(path) - 1:
+                if (path[i], path[i+1]) in removed_edges:
+                    removed_edge_flag = True
+                    if new_path:
+                        new_path.append(path[i])
+                        new_investigated_paths.append(new_path)
+                    new_path = []; i += 1 
+                else:
+                    new_path.append(path[i]); i += 1
+            if i == len(path) - 1:  # Add the last node if there's one left
+                new_path.append(path[-1])
+            if new_path:  # Add the last path if it's not empty
+                new_investigated_paths.append(new_path)
+            removed_edge_flag_list.append(removed_edge_flag)       
+        final_investigated_paths = [path for i, path in enumerate(new_investigated_paths) if not any(set(path).issubset(p) for p in new_investigated_paths[:i] + new_investigated_paths[i+1:])] 
+        return final_investigated_paths, removed_edge_flag_list
+    
+    def construct_graph(self, selected_edges):
+        graph = {}
+        for connection in selected_edges:
+            if connection[0] in graph:
+                graph[connection[0]][1].append(connection[1])
+            else:
+                graph[connection[0]] = ([], [connection[1]])
+        
+            if connection[1] in graph:
+                graph[connection[1]][0].append(connection[0])
+            else:
+                graph[connection[1]] = ([connection[0]],[])
+        return graph
+    
+    def run_post_processing_improved(self):
+        print('--------')
+        print('Post Processing Started:')
+        print('--------')
+        num_nodes = self.num_nodes
+        edge_connections = self.edge_connections
+        cost_edge_variable = self.cost_edge_variable
+        subtour_paths = self.subtour_paths
+        
+        if (subtour_paths is not None):
+            for i, subtour_path in enumerate(subtour_paths):
+                print(f"Subtour path of size {len(subtour_path)-1}: {subtour_path}")
+        print('--------')
+        self.selected_edges_pp = copy.deepcopy(self.selected_edges)
+        selected_edges_pp = self.selected_edges_pp[:]
+        degree_constraints_satisfied = False
+        
+        graph = self.construct_graph(selected_edges_pp)
+
+        degree_constraints_satisfied = True
+        keys = []
+        for node, (inward_edges_nodes, outward_edges_nodes) in graph.items():
+            if (len(inward_edges_nodes) > 1 or len(outward_edges_nodes) > 1):
+                keys.append(node)
+            if (len(inward_edges_nodes) != 1 or len(outward_edges_nodes) != 1):
+                degree_constraints_satisfied = False
+        
+        print(f"Degree Constraints Satisfied? {degree_constraints_satisfied}")            
+        removed_edges_violated_dc = []
+        if (len(keys) != 0):
+            print("Investigating Violated Degree Constraints with degree >1")
+            for key in keys:
+                inward_edges_nodes = graph[key][0]; outward_edges_nodes = graph[key][1]
+                print(f"Node: {key}, Inward Edges Nodes: {inward_edges_nodes}, Outward Edges Nodes: {outward_edges_nodes}")
+                for i,connections in enumerate(graph[key]):
+                    removed_edges_per_node= []#; indices_used = [];
+                    while (len(connections)-len(removed_edges_per_node) > 1): 
+                        indices_in_edge_connections = []
+                        for node in connections:
+                            if (i==0):
+                                investigated_edge = [node, key]
+                            else:
+                                investigated_edge = [key, node]
+                            if (investigated_edge not in removed_edges_violated_dc):# not in removed_edges_node):
+                                index_edge_connections = next((i for i, edge in enumerate(self.edge_connections) if np.array_equal(edge, investigated_edge)), None)
+                                indices_in_edge_connections.append(index_edge_connections)
+                        #python3 main_wrapper_tsp.py --testFile=36 --alpha=0.5 --nITER=200 --inputPath=inputs_random_1000 --outputPath=outputs_random_1000_maxAugmCount50 --saveFlag=True --augmFlag=True --maxAugmCount=50 --filteringFlag=True
+                        if (indices_in_edge_connections): #added since experienced a failure scenario where all outward edges where already removed
+                            flag_emptied_connection = False
+                            valid_indices = [index for index in indices_in_edge_connections]
+                            min_index = indices_in_edge_connections[np.argmin(np.abs(self.intrinsic_out_edge_ec[indices_in_edge_connections]))]
+                            removed_edge = list(self.edge_connections[min_index])
+                            removed_edge_cost = self.cost_edge_variable[min_index]
+                            if (removed_edge not in removed_edges_per_node):
+                                removed_edges_per_node.append(removed_edge)
+                            if (removed_edge not in removed_edges_violated_dc):
+                                print(f'Remove: {removed_edge} with cost: {removed_edge_cost}') #or {self.cost_matrix[removed_edge[0]][removed_edge[1]]}
+                                removed_edges_violated_dc.append(removed_edge)
+                                indices_in_edge_connections.remove(min_index)
+                            else:
+                                print(f'Edge {removed_edge} with cost: {removed_edge_cost} already considered')
+                        else:
+                            print(f'index_edge_connections empty. All edges of violation were already removed')
+                            break
+        else:
+            print("No Violated Degree Constraints with degree >1")        
+        
+        subtour_paths, removed_edge_flag_list = self.paths_cleaning(removed_edges_violated_dc, self.subtour_paths)
+        print(f'subtour_paths after removing removed_edges_violated_dc {removed_edges_violated_dc}: \n {subtour_paths}')
+        print('------')
+        
+        if self.subtour_paths is not None:
+            subtour_paths_disconnected_flag_list = removed_edge_flag_list[:]
+            removed_subtour_paths_edges = []  
+            for i, is_true in enumerate(subtour_paths_disconnected_flag_list):
+                if (is_true):
+                    print(f'subtour paths of index: {i}  was already disconnected')
+                else:
+                    print(f"Investigating connected subtour path of index: {i}")
+                    subtour_path = self.subtour_paths[i]
+                    pair_occurrences = self.find_indices_edges_from_tour(subtour_path)
+                    min_index = pair_occurrences[np.argmin(np.abs(self.intrinsic_out_edge_ec[pair_occurrences]))]
+                    removed_edge = list(self.edge_connections[min_index])
+                    removed_edge_cost = self.cost_edge_variable[min_index]
+                    print(f'Remove: {removed_edge} with cost: {removed_edge_cost}')
+                    removed_subtour_paths_edges.append(removed_edge)
+
+            subtour_paths, removed_edge_flag_list = self.paths_cleaning(removed_subtour_paths_edges, subtour_paths)
+            print(f'subtour_paths after removing removed_subtour_paths_edges {removed_subtour_paths_edges}: \n {subtour_paths}')        
+        
+            selected_edges_pp = [edge for edge in selected_edges_pp if edge not in removed_subtour_paths_edges]
+        
+        selected_edges_pp = [edge for edge in selected_edges_pp if edge not in removed_edges_violated_dc]
+        
+        print('------')
+        
+        graph = self.construct_graph(selected_edges_pp)
+        final_paths = self.get_paths(graph)
+        
+        degree_constraints_satisfied = True
+        for node, (inward_edges_nodes, outward_edges_nodes) in graph.items():
+            if (len(inward_edges_nodes) != 1 or len(outward_edges_nodes) != 1):
+                degree_constraints_satisfied = False
+
+        print("Degree Constraints Satisfied?", degree_constraints_satisfied)
+        
+        for i, path in enumerate(final_paths):   
+            print(f'path {i} of size {len(path)}: {path}')
+        
+        combined_final_paths = list(chain.from_iterable(final_paths))
+        missing_nodes = [num for num in range(num_nodes) if num not in combined_final_paths]
+        print(f'missing_nodes: {missing_nodes}')
+        unique_nodes, counts = np.unique(np.array(combined_final_paths), return_counts=True)
+        duplicate_nodes_counts = list(zip(unique_nodes[counts > 1], counts[counts > 1]))
+        if duplicate_nodes_counts:
+            for node, count in duplicate_nodes_counts:
+                print(f"Node {node} occurs {count} times.")
+        
+        if (len(final_paths)>1):
+            print('------')
+            print('Connecting Paths to form a tour')
+            lst = range(0,len(final_paths))
+            perms = permutations(lst)
+            results = [perm for perm in perms if perm[0] == 0]
+
+            possible_tours = []; cost_tours = []
+            
+            for i, result in enumerate(results):
+                print(f"Investigating connection {i} out of {len(results)} connections")
+                tour = []; count_used_paths = 0;
+                while count_used_paths <len(final_paths):
+                    tour.extend(final_paths[result[count_used_paths]])
+                    count_used_paths+=1
+                
+                if (len(missing_nodes)!=0):
+                    tour = self.add_missing_nodes(tour, missing_nodes)
+
+                pair_occurrences = self.find_indices_edges_from_tour(tour)
+                possible_tours.append(tour)
+                cost_tours.append(sum(self.cost_edge_variable[pair_occurrences]))
+            
+            index_best_tour = np.argmin(cost_tours)
+            tour_impa_pp = possible_tours[index_best_tour]
+            cost_impa_pp = cost_tours[index_best_tour]
+            min_cost = cost_impa_pp
+            best_tour = tour_impa_pp[:]
+            
+            if (self.k_opt_flag):
+                print(f'tour_impa_pp: {tour_impa_pp+ [possible_tours[index_best_tour][0]]}')
+                print(f'cost_impa_pp: {cost_impa_pp}')
+                best_tour, min_cost = self.perform_k_opt(best_tour, min_cost)
+            
+            tour_impa_pp = best_tour[:]
+            tour_impa_pp = tour_impa_pp + [tour_impa_pp[0]]
+            cost_impa_pp = min_cost
+            print(f'tour_impa_pp of size {len(tour_impa_pp)-1}: {tour_impa_pp}') 
+            print(f'cost_impa_pp: {cost_impa_pp}')
+        
+        else:
+            print('------')
+            print('Forming a tour from one path')
+            if (len(missing_nodes)!=0):
+                print("Adding Missing Nodes")
+                tour = self.add_missing_nodes(final_paths[0], missing_nodes)
+            else:
+                tour = final_paths[0]
+            
+            pair_occurrences = self.find_indices_edges_from_tour(tour)
+            cost_impa_pp = sum(self.cost_edge_variable[pair_occurrences])
+            tour_impa_pp = tour[:]
+
+            if (self.k_opt_flag):
+                print(f'tour_impa_pp: {tour_impa_pp + [tour_impa_pp[0]]}')
+                print(f'cost_impa_pp: {cost_impa_pp}')
+                best_tour, min_cost = self.perform_k_opt(tour_impa_pp, cost_impa_pp)
+            else:
+                best_tour = tour_impa_pp[:]
+                min_cost = cost_impa_pp
+            
+            tour_impa_pp = best_tour[:]
+            tour_impa_pp = tour_impa_pp + [tour_impa_pp[0]]
+            cost_impa_pp = min_cost
+            print(f'tour_impa_pp of size {len(tour_impa_pp)-1}: {tour_impa_pp}') 
+            print(f'cost_impa_pp: {cost_impa_pp}')
+        
+        self.cost_impa = cost_impa_pp
+        self.tour_impa = tour_impa_pp
+    
+    def perform_k_opt(self, best_tour, min_cost):
+        print('------')
+        print("Performing K-OPT")
+        for k in [3,2]:
+            print(f'{k}-opt')
+            candidate_paths = self.generate_k_opt_paths(best_tour, k)
+            candidate_path = candidate_paths[0]
+            for candidate_path in candidate_paths:
+                pair_occurrences = self.find_indices_edges_from_tour(candidate_path)
+                cost = sum(self.cost_edge_variable[element] for element in pair_occurrences)
+                if cost < min_cost:
+                    min_cost = cost
+                    best_tour = candidate_path[:]
+        return best_tour, min_cost
+    
+    def add_missing_nodes(self, tour, missing_nodes):
+        added_missing_nodes = []    
+        while (len(added_missing_nodes)!=len(missing_nodes)):
+            missing_combinations_left = [[node, tour[0]] for node in missing_nodes if node not in added_missing_nodes]
+            missing_combinations_right = [[tour[-1], node] for node in missing_nodes if node not in added_missing_nodes]
+            min_cost_left = np_impa_lib('inf'); min_cost_right = np_impa_lib('inf')
+            for combination in missing_combinations_left:
+                cost = self.cost_matrix[combination[0]][combination[1]]
+                if  cost < min_cost_left:
+                    min_cost_left = cost
+                    combination_left = combination
+            for combination in missing_combinations_right:
+                cost = self.cost_matrix[combination[0]][combination[1]]
+                if  cost < min_cost_right:
+                    min_cost_right = cost
+                    combination_right = combination
+            costs_left_right = [min_cost_left, min_cost_right]
+            added_cost = np.min(costs_left_right)
+            added_cost_index = np.argmin(costs_left_right)
+            if (added_cost_index==0): #left
+                added_missing_nodes.append(combination_left[0])
+                tour.insert(0, combination_left[0])
+            else:
+                added_missing_nodes.append(combination_right[1])
+                tour.append(combination_right[1])
+        return tour
+    
+    def find_indices_edges_from_tour(self, tour):
+        pairs = np.column_stack((tour, np.roll(tour, -1)))
+        edge_connections_arr = np.array(self.edge_connections)
+        matching_pairs = (edge_connections_arr[:, None, :] == pairs).all(axis=-1)
+        pair_occurrences = np.where(matching_pairs)[0]
+        return pair_occurrences
+    
+    def find_paths(self, graph, node, visited, path=[]):
+            
+            visited.add(node)
+            
+            self.visited_nodes.append(node)
+            
+            path = path + [node]
+            
+            if (len(graph[node][1])==0):
+                self.open_paths_dummy.append(path)
+                return path
+            
+            for neighbor in graph[node][1]:
+                if neighbor not in visited:
+                    new_path = self.find_paths(graph, neighbor, visited.copy(), path.copy())
+                    if (new_path):
+                        return new_path
+    
+    def get_paths(self, graph):
+        self.open_paths_dummy = []
+        path_lists = []
+        self.visited_nodes = []
+        for start_node in graph.keys():
+            if (start_node in self.visited_nodes):
+                continue
+            else:
+                path = self.find_paths(graph, start_node, set(), [])
+                if (path):
+                    path_lists.append(path)
+        final_paths = [path for i, path in enumerate(path_lists) if not any(set(path).issubset(p) for p in path_lists[:i] + path_lists[i+1:])]   
+        return final_paths
+
+    def generate_k_opt_paths(self, path, k):
+        n = len(path)
+        if k < 2 or k > n - 2:
+            raise ValueError("k must be between 2 and n-2 for a valid k-opt operation.")
+
+        swap_combinations = np.array(list(combinations(range(n), k)), dtype=np.int32)
+        new_paths = []
+
+        for swap_indices in swap_combinations:
+            new_path = np.array(path, dtype=np.int32)
+            swap_pairs = np.array(list(combinations(swap_indices, 2)), dtype=np.int32)
+            new_path[swap_pairs[:, 0]], new_path[swap_pairs[:, 1]] = new_path[swap_pairs[:, 1]], new_path[swap_pairs[:, 0]]
+            new_paths.append(new_path.tolist())
+
+        return new_paths
+
+    
+    def run_pre_analysis(self):
+        self.runtime_impa = time.time() - self.start_time
+        print(f'IMPA Time: {self.runtime_impa}')
+        print('--------')
+        
+        
+        if (self.exact_solver_flag):
+            self.solve_tsp_exact()
+        if (self.lkh_solver_flag):
+            start_time = time.time()
+            self.tour_lkh, self.cost_lkh = self.solve_tsp_lkh()
+            self.runtime_lkh = time.time() - start_time
+            print(f'LKH Time: {self.runtime_lkh}')
+        if (self.sim_annealing_flag):
+            self.solve_tsp_simulated_annealing()
+        if (self.save_flag):  
+            self.results_composed.append((self.reset_flag, self.filtering_flag, self.alpha, self.cost_matrix, self.tour_impa, self.cost_impa, \
+                self.tour_lkh, self.cost_lkh, self.pp_performed, self.num_augmentations, self.selected_edges, \
+                    self.sol_oscillation_count_exceeded_flag, self.no_improvement_sol_count_exceeded_flag, self.no_consecutive_loops_count_exceeded_flag, \
+                        self.intrinsic_out_edge_ec, self.runtime_impa, self.runtime_lkh, self.num_added_constraints))
+
+    def find_loops(self, graph, start, current, visited, path=[]):
+        
+        visited.add(current)
+        
+        self.visited_nodes_loop.append(current)
+        
+        path = path + [current]
+        
+        if (current==start):
+            visited.add(current)
+            return path
+        
+        if ((current not in graph)):
+            return None
+        
+        for node in graph[current]:
+            if node not in visited:
+                new_path = self.find_loops(graph, start, node, visited.copy(), path)
+                if (new_path):
+                    return new_path
+    
+    def get_loops(self, selected_edges, path_length):
+            graph = {}
+            for connection in selected_edges:
+                if connection[0] in graph:
+                    graph[connection[0]].append(connection[1])
+                else:
+                    graph[connection[0]] = [connection[1]]
+
+            self.graph = graph
+            self.visited_nodes_loop = []
+            for start_node, end_node in graph.items():
+                if (start_node in self.visited_nodes_loop):
+                    continue
+                else:
+                    for j in range(len(end_node)):
+                        closed_loop = self.find_loops(graph, start_node, end_node[j], set())
+                        if (closed_loop is not None and len(closed_loop)==path_length):
+                            return closed_loop
+                    
+    def solve_tsp_exact(self):
+        print('--------')
+        print('Exact Solver: ')
+        print('--------')
+        tour_exact, cost_exact = solve_tsp_brute_force(self.cost_matrix)
+        print('tour_exact: ', tour_exact)
+        print('cost_exact: ', cost_exact)
+        return tour_exact, cost_exact
+        
+    def solve_tsp_lkh(self):
+        print('--------')
+        print('LKH Solver: ')
+        print('--------')
+        cost_matrix_h = elkai.DistanceMatrix(self.cost_matrix)
+        tour_h = cost_matrix_h.solve_tsp()
+        cost_h = sum(self.cost_matrix[tour_h[i], tour_h[i+1]] for i in range(len(tour_h)-1))
+        print('tour_h: ', tour_h)
+        print('cost_h: ', cost_h)
+        return tour_h, cost_h
+        
+    def solve_tsp_simulated_annealing(self):
+        print('--------')
+        print('Simulated Annealing Solver:')
+        print('--------')
+        tour_h, cost_h = solve_tsp_simulated_annealing(self.cost_matrix)
+        print('tour_h: ', tour_h)
+        print('cost_h: {:.4f}'.format(cost_h))
+    
+    def save_outputs(self):
+        with open(f'{self.folder_outputs}/outputs_set{self.test_file}.pkl', 'wb') as f:
+            pkl.dump(self.results_composed, f)
+            
+            
+class ImpaKcMwm:
     
     def __init__(self,NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD, PP_OPTION):
         
@@ -290,7 +914,7 @@ class IMPA:
         transitional_model_p, max_state_p, reward_team_p, reward_project_flatten_p, teams_weights_per_department_flatten_p, extrinsic_output_team_p, intrisic_out_mwm_p, \
                 non_zero_weight_indices_p, non_zero_weight_indices_sizes_p, max_size_nonzero_weights = self.process_inputs_ctypes()
 
-        BcjrWrapper(np.int32(self.num_iterations), np.int32(self.num_departments), np.int32(self.num_teams), np.int32(self.num_projects), transitional_model_p, max_state_p, reward_team_p, \
+        WrapperKcMwm(np.int32(self.num_iterations), np.int32(self.num_departments), np.int32(self.num_teams), np.int32(self.num_projects), transitional_model_p, max_state_p, reward_team_p, \
             reward_project_flatten_p, teams_weights_per_department_flatten_p, non_zero_weight_indices_p, non_zero_weight_indices_sizes_p, np.int32(max_size_nonzero_weights), extrinsic_output_team_p, intrisic_out_mwm_p, \
                 self.filtering_flag, np_impa_lib(self.alpha))
         

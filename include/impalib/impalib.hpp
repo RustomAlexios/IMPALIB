@@ -14,4 +14,6 @@
 #include "impalib/update_equality_constraint.hpp"
 #include "impalib/update_or_inequality_constraint.hpp"
 #include "impalib/project_inequality_constraint.hpp"
+#include "impalib/subtour_elimination_constraint.hpp"
+#include "impalib/update_degree_constraint.hpp"
 #include "impalib/graphical_model.hpp"

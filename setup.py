@@ -1,3 +1,9 @@
+# Copyright 2023, Alexios Rustom.
+# https://github.com/RustomAlexios/IMPALIB
+# Distributed under the MIT License.
+# (See accompanying LICENSE file or at
+#  https://opensource.org/licenses/MIT)
+
 from skbuild import setup
 
 
@@ -11,5 +17,5 @@ setup(
     packages=['impa'],
     python_requires=">=3.7",
     install_requires=["bitstring", "tqdm"],
-    scripts=["src/impa/main_wrapper_optimized.py"]
+    scripts=["src/impa/main_kc_mwm.py"]
 )

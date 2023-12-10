@@ -125,3 +125,102 @@ void OutputsKcMwm::extrinsic_output_team_update( vector<vector<impalib_type>> &r
                                     ExtrinsicOutputTeam.begin(), ExtrinsicOutputTeam.begin(), std::plus<impalib_type>());
         }
 }
+
+class InputsTsp{
+    private:
+        int numNodes_;
+        int numEdgeVariables_;
+        int numNodesPerEdge_;
+    public: 
+        vector<vector<int>> EdgeConnections;
+        vector<impalib_type> CostEdgeVariable;
+        vector<vector<impalib_type>> CostMatrix;
+        vector<vector<impalib_type>> EdgeDegreeConstraintCost;
+        vector<vector<impalib_type>> EdgeEc2DegreeConstraintM;
+        
+        void process_inputs(const int*, const impalib_type*, const impalib_type*, impalib_type*, const impalib_type*);
+        
+        InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES);
+};
+
+
+InputsTsp::InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES){
+        
+        numNodes_ = NUM_NODES;
+        numEdgeVariables_ = NUM_EDGE_VARIABLES;
+        numNodesPerEdge_ = 2;
+
+};
+
+class OutputsTsp{
+    private:
+        int numNodes_;
+        int numEdgeVariables_;
+    public:
+        vector<impalib_type> ExtrinsicOutputEdgeEc;
+        vector<impalib_type> IntrinsicOutputEdgeEc;
+        void extrinsic_output_edge_ec_relaxed_graph_update(vector<vector<impalib_type>>&);
+        void extrinsic_output_edge_ec_augmented_graph_update(vector<vector<impalib_type>>&, vector<vector<impalib_type>>&);
+        void intrinsic_output_edge_ec_update(vector<impalib_type>&);
+        OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES);
+};
+
+OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES){
+        
+        numNodes_ = NUM_NODES;
+        numEdgeVariables_ = NUM_EDGE_VARIABLES;
+
+        ExtrinsicOutputEdgeEc.reserve(numEdgeVariables_);
+        ExtrinsicOutputEdgeEc.resize(numEdgeVariables_);
+        IntrinsicOutputEdgeEc.reserve(numEdgeVariables_);
+        IntrinsicOutputEdgeEc.resize(numEdgeVariables_);
+        fill(ExtrinsicOutputEdgeEc.begin(), ExtrinsicOutputEdgeEc.begin()+numEdgeVariables_, zero_value);
+        fill(IntrinsicOutputEdgeEc.begin(), IntrinsicOutputEdgeEc.begin()+numEdgeVariables_, zero_value);
+
+};
+
+
+void InputsTsp:: process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, impalib_type *pEdge_ec_to_degree_constraint_m_py, \
+                                    const impalib_type* pEDGE_DEGREE_CONSTRAINT_COST_PY){
+
+    copy(pCOST_EDGE_VARIABLE_PY, pCOST_EDGE_VARIABLE_PY + numEdgeVariables_,back_inserter(CostEdgeVariable));
+    
+    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++){
+        EdgeConnections.push_back(vector<int>(numNodesPerEdge_,0));
+        copy ( pEDGE_CONNECTIONS_PY + numNodesPerEdge_*edge_variable_index, pEDGE_CONNECTIONS_PY+numNodesPerEdge_*(edge_variable_index+1), EdgeConnections[edge_variable_index].begin() );
+        EdgeEc2DegreeConstraintM.push_back(vector<impalib_type>(numNodes_,zero_value));
+        copy ( pEdge_ec_to_degree_constraint_m_py + numNodes_*edge_variable_index, pEdge_ec_to_degree_constraint_m_py+numNodes_*(edge_variable_index+1), EdgeEc2DegreeConstraintM[edge_variable_index].begin() );
+        EdgeDegreeConstraintCost.push_back(vector<impalib_type>(numNodes_,zero_value));
+        copy ( pEDGE_DEGREE_CONSTRAINT_COST_PY + numNodes_*edge_variable_index, pEDGE_DEGREE_CONSTRAINT_COST_PY+numNodes_*(edge_variable_index+1), EdgeDegreeConstraintCost[edge_variable_index].begin() );
+    }
+
+    for (int node_index = 0; node_index < numNodes_; node_index++){
+        CostMatrix.push_back(vector<impalib_type>(numNodes_,zero_value));
+        copy ( pCOST_MATRIX_PY + numNodes_*node_index, pCOST_MATRIX_PY+numNodes_*(node_index+1), CostMatrix[node_index].begin() );
+    }
+}
+
+void OutputsTsp::extrinsic_output_edge_ec_relaxed_graph_update(vector<vector<impalib_type>>& rDegreeConstraint2EqConstraintM){
+    
+        for (int edge_variable_index = 0; edge_variable_index < rDegreeConstraint2EqConstraintM.size(); edge_variable_index++){
+            ExtrinsicOutputEdgeEc[edge_variable_index] = accumulate(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(), rDegreeConstraint2EqConstraintM[edge_variable_index].end(), zero_value);
+        }
+
+}
+
+void OutputsTsp::extrinsic_output_edge_ec_augmented_graph_update(vector<vector<impalib_type>>& rDegreeConstraint2EqConstraintM, vector<vector<impalib_type>>& rSubtourConstraints2EdgeEcM){
+    
+        for (int edge_variable_index = 0; edge_variable_index < rDegreeConstraint2EqConstraintM.size(); edge_variable_index++){
+            ExtrinsicOutputEdgeEc[edge_variable_index] = accumulate(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(), rDegreeConstraint2EqConstraintM[edge_variable_index].end(), zero_value);
+        }
+
+        for (int subtour_constraint_index = 0; subtour_constraint_index<rSubtourConstraints2EdgeEcM.size(); subtour_constraint_index++){
+            transform(rSubtourConstraints2EdgeEcM[subtour_constraint_index].begin(), rSubtourConstraints2EdgeEcM[subtour_constraint_index].end(), 
+                                    ExtrinsicOutputEdgeEc.begin(), ExtrinsicOutputEdgeEc.begin(), plus<impalib_type>());  
+        }
+}
+
+void OutputsTsp::intrinsic_output_edge_ec_update(vector<impalib_type>& rCostEdgeVariable){
+    
+    transform(ExtrinsicOutputEdgeEc.begin(), ExtrinsicOutputEdgeEc.end(), rCostEdgeVariable.begin(), IntrinsicOutputEdgeEc.begin(), plus<impalib_type>());
+}

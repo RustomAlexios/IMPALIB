@@ -7,11 +7,12 @@
 import ctypes
 from impa.environmentModule import *
 
-#c_lib = ctypes.CDLL("../build/shared_library/libCfunc.so")
+
 c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
+#c_lib_kc_mwm = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
 c_int_p = ctypes.POINTER(ctypes.c_int)
 c_double_p = ctypes.POINTER(ctypes.c_double)
-#c_bool_p = ctypes.POINTER(ctypes.c_bool)
+c_bool_p = ctypes.POINTER(ctypes.c_bool)
 c_float_p = ctypes.POINTER(ctypes.c_float)
 
 c_impa_lib_type_p = c_double_p #c_float_p
@@ -21,7 +22,13 @@ c_impa_lib_type = ctypes.c_double #ctypes_cfloat
 #np_impa_lib = np.double
 #np_impa_lib = np.float32
 
-BcjrWrapper = c_lib.BcjrWrapper
+WrapperTsp = c_lib.WrapperTsp
 
-BcjrWrapper.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, c_impa_lib_type_p, c_int_p, c_impa_lib_type_p, \
+WrapperTsp.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_bool, c_impa_lib_type, ctypes.c_bool, \
+                    c_int_p, c_impa_lib_type_p, c_impa_lib_type_p, c_impa_lib_type_p, c_impa_lib_type_p, c_impa_lib_type_p, c_impa_lib_type, c_int_p, c_int_p, c_impa_lib_type_p, \
+                        c_bool_p, c_bool_p, c_int_p, c_int_p, c_bool_p, c_int_p, c_int_p, ctypes.c_int, c_int_p, ctypes.c_int]
+
+WrapperKcMwm = c_lib.WrapperKcMwm
+
+WrapperKcMwm.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, c_impa_lib_type_p, c_int_p, c_impa_lib_type_p, \
     c_impa_lib_type_p, c_int_p, c_int_p, c_int_p, ctypes.c_int, c_impa_lib_type_p, c_impa_lib_type_p, ctypes.c_bool, c_impa_lib_type]

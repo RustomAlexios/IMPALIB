@@ -9,10 +9,10 @@
 #include "impalib_unit_tests.hpp"
 #include "ut_utils.hpp"
 
-void ut_iterate(string);
-void ut_iterate_sample_graph(string);
+void ut_iterate_kc_mwm(string);
+void ut_iterate_sample_graph_kc_mwm(string);
 
-void ut_iterate(string ut_name){
+void ut_iterate_kc_mwm(string ut_name){
 
     const char *n_projects_bash=getenv("N_PROJECTS");
     if(n_projects_bash == NULL)
@@ -91,7 +91,7 @@ void ut_iterate(string ut_name){
     else {cout << "Error! File cannot be opened!" << endl;}
 }
 
-void ut_iterate_sample_graph(string ut_name){
+void ut_iterate_sample_graph_kc_mwm(string ut_name){
 
     cnpy::NpyArray input_projects = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/N_PROJECTS_pure.npy");
     int* n_projects_pure = input_projects.data<int>();
@@ -164,4 +164,133 @@ void ut_iterate_sample_graph(string ut_name){
             file_output2.write((char*)(&model_graph.outputs.IntrinsicOutMwm[i]), sizeof(model_graph.outputs.IntrinsicOutMwm[i]));}
             file_output2.close();}
     else {cout << "Error! File cannot be opened!" << endl;}
+}
+
+void ut_model_graph_tsp(string);
+
+void ut_model_graph_tsp(string ut_name){
+
+    const char *n_nodes_bash=getenv("N_NODES");
+    if(n_nodes_bash == NULL)
+    {cout << "n_nodes_bash not available\n";}
+
+    const char *n_iterations_bash=getenv("N_ITER");
+    if(n_iterations_bash == NULL)
+    {cout << "n_iterations_bash not available\n";}
+
+    const char *filt_flag_bash=getenv("FILT_FLAG");
+    if(filt_flag_bash == NULL)
+    {cout << "filt_flag_bash not available\n";}
+
+    const char *sym_flag_bash=getenv("SYM_FLAG");
+    if(filt_flag_bash == NULL)
+    {cout << "sym_flag_bash not available\n";}
+    
+    const int N_NODES = atoi(n_nodes_bash);  
+    const int N_ITER = atoi(n_iterations_bash);
+    const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;
+    const bool FILT_FLAG(filt_flag_bash);
+    const bool SYM_FLAG(sym_flag_bash);
+
+    const bool RESET_FLAG = false;
+    const int MAX_COUNT = 50;
+
+
+    cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/alpha.npy");
+    impalib_type* alpha_pure = input_alpha.data<impalib_type>();
+    const impalib_type ALPHA = *alpha_pure;
+    
+    cnpy::NpyArray input_threshold = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/threshold.npy");
+    impalib_type* threshold_pure = input_threshold.data<impalib_type>();
+    const impalib_type THRESHOLD = *threshold_pure;
+
+    cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/edge_connections_pure.npy");
+    int* edge_connections_pure = input1.data<int>();
+
+    cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/cost_edge_variable_pure.npy");
+    const impalib_type* cost_edge_variable_pure = input2.data<impalib_type>();
+
+    cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/cost_matrix_pure.npy");
+    const impalib_type* cost_matrix_pure = input3.data<impalib_type>();
+
+    cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/edge_ec_to_degree_constraint_m_pure.npy");
+    impalib_type* edge_ec_to_degree_constraint_m_pure = input4.data<impalib_type>();
+
+    cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/ut_GraphicalModel/ut_"+ ut_name+"/edge_degree_constraint_cost_pure.npy");
+    const impalib_type* edge_degree_constraint_cost_pure = input5.data<impalib_type>();
+
+
+    if (ut_name == "IterateRelaxedGraph"){
+
+        cout<<"-------"<<endl;
+        cout<<"C++"<<endl;
+
+        const bool AUGMENTATION_FLAG = false;
+
+        GraphicalModelTsp model_graph(N_ITER, N_NODES, N_EDGE_VARIABLES, AUGMENTATION_FLAG, RESET_FLAG, FILT_FLAG, ALPHA, THRESHOLD, MAX_COUNT);
+
+        model_graph.initialize(edge_connections_pure, cost_edge_variable_pure, cost_matrix_pure, edge_ec_to_degree_constraint_m_pure, edge_degree_constraint_cost_pure);
+
+        model_graph.iterate_relaxed_graph();
+
+        fstream file_output("../ut_results/ut_GraphicalModel/ut_"+ ut_name+"/intrinsic_out_edge_ec_wrapper", ios::out | ios::binary | ios:: trunc);
+            if (file_output.is_open()) {
+                for (int i=0; i<N_EDGE_VARIABLES; i++){
+                    file_output.write((char*)(&model_graph.outputs.IntrinsicOutputEdgeEc[i]), sizeof(model_graph.outputs.IntrinsicOutputEdgeEc[i]));}
+                    file_output.close();}
+            else {cout << "Error! File cannot be opened!" << endl;}
+
+    }
+
+    else if(ut_name == "IterateAugmentedGraph"){
+
+        cout<<"-------"<<endl;
+        cout<<"C++"<<endl;
+
+        const bool AUGMENTATION_FLAG = true;
+
+        const int MAX_AUGM_COUNT = 50;
+
+        GraphicalModelTsp model_graph(N_ITER, N_NODES, N_EDGE_VARIABLES, AUGMENTATION_FLAG, RESET_FLAG, FILT_FLAG, ALPHA, THRESHOLD, MAX_COUNT);
+
+        model_graph.initialize(edge_connections_pure, cost_edge_variable_pure, cost_matrix_pure, edge_ec_to_degree_constraint_m_pure, edge_degree_constraint_cost_pure);
+
+        model_graph.iterate_relaxed_graph();
+
+    if (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG){
+        if (model_graph.delta_S_indices_list.size() >0){
+                vector<vector<impalib_type>> temp(model_graph.delta_S_indices_list.size(), vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
+                model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
+                model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
+        }
+    }
+    
+        while (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG && !model_graph.tourImpaFlag){
+
+            model_graph.iterate_augmented_graph();
+
+            if (model_graph.numAugmentations_==MAX_AUGM_COUNT){
+                cout<<"MAX_AUGM_COUNT reached"<<endl;
+                break;
+            }
+
+            if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.delta_S_indices_list.size()){
+                size_t numLists2Add = model_graph.delta_S_indices_list.size() - model_graph.subtourConstraints2EdgeEcM.size();
+                vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
+                model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
+                model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
+            }
+        }
+
+
+        fstream file_output("../ut_results/ut_GraphicalModel/ut_"+ ut_name+"/intrinsic_out_edge_ec_wrapper", ios::out | ios::binary | ios:: trunc);
+            if (file_output.is_open()) {
+                for (int i=0; i<N_EDGE_VARIABLES; i++){
+                    file_output.write((char*)(&model_graph.outputs.IntrinsicOutputEdgeEc[i]), sizeof(model_graph.outputs.IntrinsicOutputEdgeEc[i]));}
+                    file_output.close();}
+            else {cout << "Error! File cannot be opened!" << endl;}
+
+
+    }
+
 }

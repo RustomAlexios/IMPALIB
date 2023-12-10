@@ -1,1 +1,1 @@
-from impa.IMPA import *
+from impa.Impa import *

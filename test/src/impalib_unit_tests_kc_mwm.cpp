@@ -20,11 +20,11 @@ int main(){
         ut_oric(test_name);
     }
     if (test_name == "ExtrinsicOutputTeamUpdate" || test_name == "IntrinsicOutMwmUpdate"){
-        ut_input_output(test_name);
+        ut_input_output_kc_mwm(test_name);
     }
 
     if (test_name == "TeamEc2OricUpdate" || test_name == "ProjectEqConst2OricUpdate"){
-        ut_eq_constraint(test_name);
+        ut_eq_constraint_kc_mwm(test_name);
     }
 
     if (test_name == "ProjectInequalityConstraintUpdate"){
@@ -48,11 +48,11 @@ int main(){
     }
 
     if (test_name == "Iterate"){
-        ut_iterate(test_name);
+        ut_iterate_kc_mwm(test_name);
     }
 
     if (test_name == "IterateSampleGraph"){
-        ut_iterate_sample_graph(test_name);
+        ut_iterate_sample_graph_kc_mwm(test_name);
     }
 
 

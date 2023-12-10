@@ -8,9 +8,9 @@
 
 #include "impalib_unit_tests.hpp"
 
-void ut_input_output(string);
+void ut_input_output_kc_mwm(string);
 
-void ut_input_output(string ut_name){
+void ut_input_output_kc_mwm(string ut_name){
 
     const char *n_departments_bash=getenv("N_DEPARTMENTS");
     if(n_departments_bash == NULL)
@@ -94,4 +94,67 @@ void ut_input_output(string ut_name){
     }
 
 }
+
+void ut_input_output_tsp(string);
+
+void ut_input_output_tsp(string ut_name){
+
+    const char *n_nodes_bash=getenv("N_NODES");
+    if(n_nodes_bash == NULL)
+    {cout << "n_nodes_bash not available\n";}
+
+    const char *n_subtours_bash=getenv("N_SUBTOURS");
+    if(n_subtours_bash == NULL)
+    {cout << "n_subtours_bash not available\n";}
+
+    const int N_NODES = atoi(n_nodes_bash);  
+    const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;
+    const int N_SUBTOURS = atoi(n_subtours_bash);
+
+    cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ut_InputOutput/ut_"+ ut_name+"/degree_constraint_to_eq_constraint_m_pure.npy");
+    impalib_type* degree_constraint_to_eq_constraint_m_pure = input1.data<impalib_type>();
+
+    vector<vector<impalib_type>> degree_constraint_to_eq_constraint_m(N_EDGE_VARIABLES, vector<impalib_type>(N_NODES,zero_value));
+
+    for (int edge_variable_index=0; edge_variable_index<N_EDGE_VARIABLES; edge_variable_index++){
+    copy (degree_constraint_to_eq_constraint_m_pure + N_NODES*edge_variable_index, degree_constraint_to_eq_constraint_m_pure+N_NODES*(edge_variable_index+1), degree_constraint_to_eq_constraint_m[edge_variable_index].begin() );
+    }
+
+    OutputsTsp outputs(N_NODES, N_EDGE_VARIABLES);
+
+    if (ut_name == "ExtrinsicOutputEdgeEcRelaxedGraphUpdate"){
+        
+        outputs.extrinsic_output_edge_ec_relaxed_graph_update(degree_constraint_to_eq_constraint_m);
+        
+        fstream file_output("../ut_results/ut_InputOutput/ut_"+ ut_name+"/extrinsic_output_edge_ec_relaxed_graph_wrapper", ios::out | ios::binary | ios:: trunc);
+                if (file_output.is_open()) {
+                    for (int i=0; i<N_EDGE_VARIABLES; i++){
+                        file_output.write((char*)(&outputs.ExtrinsicOutputEdgeEc[i]), sizeof(outputs.ExtrinsicOutputEdgeEc[i]));}
+                        file_output.close();}
+                else {cout << "Error! File cannot be opened!" << endl;}
+    
+    }
+
+    if (ut_name == "ExtrinsicOutputEdgeEcAugmentedGraphUpdate"){
+        
+        cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_InputOutput/ut_"+ ut_name+"/subtour_constraints_to_edge_ec_m_pure.npy");
+        impalib_type* subtour_constraints_to_edge_ec_m_pure = input2.data<impalib_type>();
+        vector<vector<impalib_type>> subtour_constraints_to_edge_ec_m(N_SUBTOURS, vector<impalib_type>(N_EDGE_VARIABLES,zero_value));
+
+        for (int subtour_index=0; subtour_index<N_SUBTOURS; subtour_index++){
+        copy ( subtour_constraints_to_edge_ec_m_pure + N_EDGE_VARIABLES*subtour_index, subtour_constraints_to_edge_ec_m_pure+N_EDGE_VARIABLES*(subtour_index+1), subtour_constraints_to_edge_ec_m[subtour_index].begin() );
+        }
+
+        outputs.extrinsic_output_edge_ec_augmented_graph_update(degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m);
+
+        fstream file_output("../ut_results/ut_InputOutput/ut_"+ ut_name+"/extrinsic_output_edge_ec_augmented_graph_wrapper", ios::out | ios::binary | ios:: trunc);
+            if (file_output.is_open()) {
+                for (int i=0; i<N_EDGE_VARIABLES; i++){
+                        file_output.write((char*)(&outputs.ExtrinsicOutputEdgeEc[i]), sizeof(outputs.ExtrinsicOutputEdgeEc[i]));}
+                        file_output.close();}
+                else {cout << "Error! File cannot be opened!" << endl;}
+    }
+
+}
+
 
