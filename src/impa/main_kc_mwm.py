@@ -9,20 +9,37 @@ from impa.environmentModule import *
 from impa.Impa import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--nITER', type=int,default=400,help="Number of Iterations of IMPA")
-parser.add_argument('--filteringFlag', type=bool, default=False, help="Activate Filtering or not")
-parser.add_argument('--alpha', type=np_impa_lib, default=0.0, help="Filtering Rate [0,1]")
-parser.add_argument('--PPFlag', type=bool, default=True, help="Activate Post-Processing or not")
-parser.add_argument('--threshold', type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
-parser.add_argument('--PPOption', type=int, default=1, help="Post-processing technique (1-departments, 2-teams)")
-parser.add_argument('--path', metavar='path', default = 'impa', type=str, help='path to directory')
+parser.add_argument(
+    "--nITER", type=int, default=400, help="Number of Iterations of IMPA"
+)
+parser.add_argument(
+    "--filteringFlag", type=bool, default=False, help="Activate Filtering or not"
+)
+parser.add_argument(
+    "--alpha", type=np_impa_lib, default=0.0, help="Filtering Rate [0,1]"
+)
+parser.add_argument(
+    "--PPFlag", type=bool, default=True, help="Activate Post-Processing or not"
+)
+parser.add_argument(
+    "--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision"
+)
+parser.add_argument(
+    "--PPOption",
+    type=int,
+    default=1,
+    help="Post-processing technique (1-departments, 2-teams)",
+)
+parser.add_argument(
+    "--path", metavar="path", default="impa", type=str, help="path to directory"
+)
 
-if __name__ == '__main__':
-    print('MAIN_WRAPPER_OPTIMIZED')
+if __name__ == "__main__":
+    print("MAIN_WRAPPER_OPTIMIZED")
     index_file = 0
-    end_file = index_file+1
-    
-    args = parser.parse_args()  
+    end_file = index_file + 1
+
+    args = parser.parse_args()
     NUM_ITERATIONS = args.nITER
     FILTERING_FLAG = args.filteringFlag
     POST_PROCESS_FLAG = args.PPFlag
@@ -30,33 +47,35 @@ if __name__ == '__main__':
     THRESHOLD = args.threshold
     PP_OPTION = args.PPOption
     output_path = args.path
-    
-    #if not(os.path.exists(f'../impa/{output_path}')):
+
+    # if not(os.path.exists(f'../impa/{output_path}')):
     #    os.makedirs(f'../impa/{output_path}')
-    
-    ModelKcMwm = ImpaKcMwm(NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD, PP_OPTION)
-    
+
+    ModelKcMwm = ImpaKcMwm(
+        NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD, PP_OPTION
+    )
+
     targs = 500
-    #folder_inputs = '../data/targ_vary/inputs_targs_'+str(targs)
-    #folder_inputs = '../data/inputs_random_params_1000'
-    folder_inputs = '../../data/inputs_1000'
-    
+    # folder_inputs = '../data/targ_vary/inputs_targs_'+str(targs)
+    # folder_inputs = '../data/inputs_random_params_1000'
+    folder_inputs = "../../data/inputs_1000"
+
     for setfile in range(index_file, end_file):
-        print('SetFile: ', setfile)
-        with open(str(folder_inputs)+'/inputs_set'+str(setfile)+'.pkl', 'rb') as f:
+        print("SetFile: ", setfile)
+        with open(
+            str(folder_inputs) + "/inputs_set" + str(setfile) + ".pkl", "rb"
+        ) as f:
             input_load = pkl.load(f)
-        
+
         ModelKcMwm.initialize(input_load)
         start_time = time.time()
         ModelKcMwm.iterate()
         runtime = time.time() - start_time
-        
+
         ModelKcMwm.pre_analysis()
-        
+
         ModelKcMwm.post_analysis()
-        #print(ModelKcMwm.intrinsic_output)
-        print(f'Time: {runtime}')
-        #with open(f'../impa/{output_path}/outputs_set{setfile}.pkl', 'wb') as f:
+        # print(ModelKcMwm.intrinsic_output)
+        print(f"Time: {runtime}")
+        # with open(f'../impa/{output_path}/outputs_set{setfile}.pkl', 'wb') as f:
         #    pkl.dump((ModelKcMwm.results_composed, runtime), f)
-        
-        
