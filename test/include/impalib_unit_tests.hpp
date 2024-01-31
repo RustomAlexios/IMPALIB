@@ -10,7 +10,7 @@
 #include "impalib/impalib.hpp"
 #include "../external/cnpy/cnpy.h"
 
-#include "ut_graphical_model.hpp"
+//#include "ut_graphical_model.hpp"
 #include "ut_input_output.hpp"
 #include "ut_knapsack.hpp"
 #include "ut_project_inequality_constraint.hpp"

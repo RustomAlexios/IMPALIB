@@ -4,31 +4,17 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from impa.environmentModule import *
-from impa.Impa import *
+from impa.environmentModule import time, argparse, np_impa_lib, os, pkl
+from impa.Impa import GraphicalModelTsp
 
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--nITER", type=int, default=400, help="Number of Iterations of IMPA"
-)
-parser.add_argument(
-    "--nNodes", type=int, default=10, help="Number of nodes in the graphical model"
-)
-parser.add_argument(
-    "--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision"
-)
-parser.add_argument(
-    "--symFlag", type=bool, default=False, help="Symmetric or asymmetric TSP"
-)
-parser.add_argument(
-    "--augmFlag", type=bool, default=False, help="Augmentative MPA or not"
-)
-parser.add_argument(
-    "--exactSolFlag", type=bool, default=False, help="Run exact solver or not"
-)
-parser.add_argument(
-    "--lkhSolFlag", type=bool, default=True, help="Run LKH-heuristic solver or not"
-)
+parser.add_argument("--nITER", type=int, default=400, help="Number of Iterations of IMPA")
+parser.add_argument("--nNodes", type=int, default=10, help="Number of nodes in the graphical model")
+parser.add_argument("--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
+parser.add_argument("--symFlag", type=bool, default=False, help="Symmetric or asymmetric TSP")
+parser.add_argument("--augmFlag", type=bool, default=False, help="Augmentative MPA or not")
+parser.add_argument("--exactSolFlag", type=bool, default=False, help="Run exact solver or not")
+parser.add_argument("--lkhSolFlag", type=bool, default=True, help="Run LKH-heuristic solver or not")
 parser.add_argument(
     "--simAnnSolFlag",
     type=bool,
@@ -41,12 +27,8 @@ parser.add_argument(
     default=False,
     help="Number of Sampled combinations per size for augmentation",
 )
-parser.add_argument(
-    "--filteringFlag", type=bool, default=False, help="Activate Filtering or not"
-)
-parser.add_argument(
-    "--alpha", type=np_impa_lib, default=0.7, help="Filtering Rate [0,1]"
-)
+parser.add_argument("--filteringFlag", type=bool, default=False, help="Activate Filtering or not")
+parser.add_argument("--alpha", type=np_impa_lib, default=0.7, help="Filtering Rate [0,1]")
 parser.add_argument("--testFile", type=int, default=9000, help="Test File Index")
 parser.add_argument("--saveFlag", type=bool, default=False, help="Save Outputs or not")
 parser.add_argument(
@@ -69,16 +51,10 @@ parser.add_argument(
     type=str,
     help="path to output directory",
 )
-parser.add_argument(
-    "--maxCount", type=int, default=10, help="Max count of consecutive failures"
-)
-parser.add_argument(
-    "--PPFlag", type=bool, default=True, help="Activate Post-Processing or not"
-)
+parser.add_argument("--maxCount", type=int, default=10, help="Max count of consecutive failures")
+parser.add_argument("--PPFlag", type=bool, default=True, help="Activate Post-Processing or not")
 parser.add_argument("--KOPTFlag", type=bool, default=False, help="Perform k-opt")
-parser.add_argument(
-    "--maxAugmCount", type=int, default=200, help="Maximum augmentation count"
-)
+parser.add_argument("--maxAugmCount", type=int, default=200, help="Maximum augmentation count")
 
 if __name__ == "__main__":
     print("MAIN_WRAPPER_TSP")
@@ -127,9 +103,7 @@ if __name__ == "__main__":
     )
     folder_inputs = "../../data/" + input_path
     if FILTERING_FLAG:
-        ModelIMPA.folder_outputs = (
-            "../../data/" + output_path + f"_alpha{formatted_alpha}"
-        )
+        ModelIMPA.folder_outputs = "../../data/" + output_path + f"_alpha{formatted_alpha}"
     else:
         ModelIMPA.folder_outputs = "../../data/" + output_path
 
@@ -155,9 +129,7 @@ if __name__ == "__main__":
     ModelIMPA.input_load = []
     if not RANDOM_TEST_FLAG:
         ModelIMPA.test_file = test_file
-        with open(
-            str(folder_inputs) + "/inputs_set" + str(test_file) + ".pkl", "rb"
-        ) as f:
+        with open(str(folder_inputs) + "/inputs_set" + str(test_file) + ".pkl", "rb") as f:
             ModelIMPA.input_load = pkl.load(f)
 
     ModelIMPA.initialize()

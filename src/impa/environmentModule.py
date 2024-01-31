@@ -9,50 +9,33 @@ from cmath import inf
 
 # import bitstring
 import argparse
-
+import time
 import numpy as np
 import math
 import itertools
-from itertools import combinations, permutations, chain, product
-
-np.set_printoptions(linewidth=np.inf)
-
-import time
-
-# np.random.seed(17)
-from tqdm import tqdm
-
-from multiprocessing import Process, Manager
-import multiprocessing as mp
-
-from multiprocessing.sharedctypes import Value, Array
-from ctypes import Structure, c_double
-
 import pickle as pkl
 import pdb
-# import pandas as pd
-
-np.set_printoptions(threshold=1)
-np.set_printoptions(threshold=np.inf)
 import statistics
-from statistics import mean
 import os
 import shutil
 import re
-
-
+import elkai
+import copy
+import random
+from itertools import combinations, permutations, chain, product
+from python_tsp.exact import solve_tsp_dynamic_programming, solve_tsp_brute_force
+from python_tsp.heuristics import solve_tsp_simulated_annealing
+from itertools import islice
+from tqdm import tqdm
+from ctypes import Structure, c_double
+from statistics import mean
 from collections import defaultdict
 
+np.set_printoptions(linewidth=np.inf)
+np.set_printoptions(threshold=1)
+np.set_printoptions(threshold=np.inf)
 np.set_printoptions(suppress=True)
-
-from python_tsp.exact import solve_tsp_dynamic_programming, solve_tsp_brute_force
-import elkai
-from python_tsp.heuristics import solve_tsp_simulated_annealing
-import random
-from itertools import islice
-import copy
-
 # np_impa_lib = np.float32
 np_impa_lib = np.float64
-
 zero_value = np_impa_lib(0)
+# np.random.seed(17)

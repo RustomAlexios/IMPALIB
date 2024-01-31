@@ -5,7 +5,7 @@
 #  https://opensource.org/licenses/MIT)
 
 import ctypes
-from impa.environmentModule import *
+from impa.environmentModule import os
 
 
 c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")

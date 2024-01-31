@@ -4,7 +4,7 @@
 // (See accompanying LICENSE file or at
 //  https://opensource.org/licenses/MIT)
 
-#include "impalib_unit_tests.hpp"
+#include "../include/impalib_unit_tests.hpp"
 
 int main(){
 

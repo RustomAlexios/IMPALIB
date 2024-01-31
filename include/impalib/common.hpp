@@ -9,34 +9,32 @@
 #include <limits>
 #include <string>
 //#include <bits/stdc++.h>
-#include <typeinfo>
-#include <chrono>
-#include <iostream>
-#include <vector>
-#include<fstream>
 #include <algorithm>
-#include <numeric>
+#include <chrono>
+#include <fstream>
 #include <functional>
+#include <iostream>
+#include <numeric>
+#include <typeinfo>
+#include <vector>
 
+#include <array>
 #include <cmath>
+#include <iomanip>
+#include <iterator>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include <iterator>
-#include <iomanip> 
 
 using namespace std;
 
 #define IMPALIB_TYPE double
 
-
-
 #ifdef IMPALIB_TYPE
-    typedef IMPALIB_TYPE impalib_type;
+typedef IMPALIB_TYPE impalib_type;
 #else
-    typedef float impalib_type;
+typedef float impalib_type;
 #endif
 
-impalib_type zero_value = 0.0;
-impalib_type value_inf = std::numeric_limits<impalib_type>::infinity();
-
+const impalib_type zero_value = 0.0;
+const impalib_type value_inf  = std::numeric_limits<impalib_type>::infinity();

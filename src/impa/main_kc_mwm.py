@@ -5,34 +5,22 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from impa.environmentModule import *
-from impa.Impa import *
+from impa.environmentModule import argparse, np_impa_lib, pkl, time
+from impa.Impa import ImpaKcMwm
 
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--nITER", type=int, default=400, help="Number of Iterations of IMPA"
-)
-parser.add_argument(
-    "--filteringFlag", type=bool, default=False, help="Activate Filtering or not"
-)
-parser.add_argument(
-    "--alpha", type=np_impa_lib, default=0.0, help="Filtering Rate [0,1]"
-)
-parser.add_argument(
-    "--PPFlag", type=bool, default=True, help="Activate Post-Processing or not"
-)
-parser.add_argument(
-    "--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision"
-)
+parser.add_argument("--nITER", type=int, default=400, help="Number of Iterations of IMPA")
+parser.add_argument("--filteringFlag", type=bool, default=False, help="Activate Filtering or not")
+parser.add_argument("--alpha", type=np_impa_lib, default=0.0, help="Filtering Rate [0,1]")
+parser.add_argument("--PPFlag", type=bool, default=True, help="Activate Post-Processing or not")
+parser.add_argument("--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
 parser.add_argument(
     "--PPOption",
     type=int,
     default=1,
     help="Post-processing technique (1-departments, 2-teams)",
 )
-parser.add_argument(
-    "--path", metavar="path", default="impa", type=str, help="path to directory"
-)
+parser.add_argument("--path", metavar="path", default="impa", type=str, help="path to directory")
 
 if __name__ == "__main__":
     print("MAIN_WRAPPER_OPTIMIZED")
@@ -51,9 +39,7 @@ if __name__ == "__main__":
     # if not(os.path.exists(f'../impa/{output_path}')):
     #    os.makedirs(f'../impa/{output_path}')
 
-    ModelKcMwm = ImpaKcMwm(
-        NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD, PP_OPTION
-    )
+    ModelKcMwm = ImpaKcMwm(NUM_ITERATIONS, FILTERING_FLAG, POST_PROCESS_FLAG, ALPHA, THRESHOLD, PP_OPTION)
 
     targs = 500
     # folder_inputs = '../data/targ_vary/inputs_targs_'+str(targs)
@@ -62,9 +48,7 @@ if __name__ == "__main__":
 
     for setfile in range(index_file, end_file):
         print("SetFile: ", setfile)
-        with open(
-            str(folder_inputs) + "/inputs_set" + str(setfile) + ".pkl", "rb"
-        ) as f:
+        with open(str(folder_inputs) + "/inputs_set" + str(setfile) + ".pkl", "rb") as f:
             input_load = pkl.load(f)
 
         ModelKcMwm.initialize(input_load)

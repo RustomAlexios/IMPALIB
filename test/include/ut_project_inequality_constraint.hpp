@@ -14,7 +14,8 @@ void ut_project_ineq_constraint(string ut_name){
     if(n_departments_bash == NULL)
     {cout << "n_departments_bash not available\n";}
     
-    cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ut_projectIneqConstraint/ut_"+ ut_name+"/N_TEAMS_pure.npy");
+    //cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ut_projectIneqConstraint/N_TEAMS_pure.npy");
+    cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/N_TEAMS_pure.npy");
     int* n_teams_pure = input1.data<int>();
     const int N_TEAMS = *n_teams_pure;
     
@@ -29,7 +30,8 @@ void ut_project_ineq_constraint(string ut_name){
 
     if (ut_name == "ProjectInequalityConstraintUpdate"){
 
-            cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_projectIneqConstraint/ut_"+ ut_name+"/eq_constraint_to_project_m_pure.npy");
+            //cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_projectIneqConstraint/eq_constraint_to_project_m_pure.npy");
+            cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/eq_constraint_to_project_m_pure.npy");
             impalib_type* eq_constraint_to_project_m_pure = input2.data<impalib_type>();
             vector<vector<impalib_type>> eq_constraint_to_project_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
 
@@ -41,7 +43,8 @@ void ut_project_ineq_constraint(string ut_name){
 
             projectIneqConstraint.project_inequality_constraint_update(eq_constraint_to_project_m, project_to_eq_constraint_m);
 
-            fstream file_output("../ut_results/ut_projectIneqConstraint/ut_"+ ut_name+"/project_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
+            //fstream file_output("../ut_results/ut_projectIneqConstraint/project_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
+            fstream file_output("../ut_results/project_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_PROJECTS; i++){
                 for (int j=0; j<N_TEAMS; j++){

@@ -4,9 +4,40 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from impa.environmentModule import *
-from impa.initializationModule import *
-from impa.cFunctionAPI import *
+from impa.environmentModule import (
+    np,
+    math,
+    np_impa_lib,
+    zero_value,
+    deepcopy,
+    combinations,
+    itertools,
+    elkai,
+    solve_tsp_brute_force,
+    solve_tsp_simulated_annealing,
+    islice,
+    copy,
+    time,
+    permutations,
+    pkl,
+    chain,
+)
+from impa.initializationModule import (
+    fighters_count,
+    weasels_count,
+    F_u,
+    W_u,
+    distance_metric,
+    distance_metric_rendezvouz,
+    K_1,
+)
+from impa.cFunctionAPI import (
+    c_int_p,
+    c_impa_lib_type_p,
+    c_bool_p,
+    WrapperTsp,
+    WrapperKcMwm,
+)
 
 
 class GraphicalModelTsp:
@@ -67,9 +98,7 @@ class GraphicalModelTsp:
 
         cost_matrix, edge_connections = self.create_cost_matrix(symmetric_flag)
         self.tour_impa_flag = False
-        self.tour_impa = np.zeros(
-            num_nodes + 1, dtype=np.int32
-        )  # +1 to account for returning edge
+        self.tour_impa = np.zeros(num_nodes + 1, dtype=np.int32)  # +1 to account for returning edge
         self.cost_impa = np.zeros(1, dtype=np_impa_lib)
         self.selected_edges = np.zeros(math.comb(self.num_nodes, 2), dtype=np.int32)
         self.subtour_paths = np.zeros(self.num_nodes**2, dtype=np.int32)
@@ -92,9 +121,7 @@ class GraphicalModelTsp:
 
         cost_edge_variable = np.zeros(num_edge_variables, dtype=np_impa_lib)
 
-        edge_ec_to_degree_constraint_m = np.zeros(
-            (num_edge_variables, num_nodes), dtype=np_impa_lib
-        )
+        edge_ec_to_degree_constraint_m = np.zeros((num_edge_variables, num_nodes), dtype=np_impa_lib)
 
         for i in range(len(edge_connections)):
             connection = edge_connections[i]
@@ -189,65 +216,43 @@ class GraphicalModelTsp:
     def process_inputs_ctypes(self):
         edge_connection_flatten = self.edge_connections.flatten().astype(np.int32)
         edge_connection_flatten_p = edge_connection_flatten.ctypes.data_as(c_int_p)
-        cost_edge_variable_flatten = self.cost_edge_variable.flatten().astype(
-            np_impa_lib
-        )
-        cost_edge_variable_flatten_p = cost_edge_variable_flatten.ctypes.data_as(
-            c_impa_lib_type_p
-        )
+        cost_edge_variable_flatten = self.cost_edge_variable.flatten().astype(np_impa_lib)
+        cost_edge_variable_flatten_p = cost_edge_variable_flatten.ctypes.data_as(c_impa_lib_type_p)
         cost_matrix_flatten = self.cost_matrix.flatten().astype(np_impa_lib)
         cost_matrix_flatten_p = cost_matrix_flatten.ctypes.data_as(c_impa_lib_type_p)
-        edge_ec_to_degree_constraint_m_flatten = (
-            self.edge_ec_to_degree_constraint_m.flatten().astype(np_impa_lib)
-        )
-        edge_ec_to_degree_constraint_m_flatten_p = (
-            edge_ec_to_degree_constraint_m_flatten.ctypes.data_as(c_impa_lib_type_p)
-        )
-        edge_degree_constraint_cost_flatten = (
-            self.edge_degree_constraint_cost.flatten().astype(np_impa_lib)
-        )
-        edge_degree_constraint_cost_flatten_p = (
-            edge_degree_constraint_cost_flatten.ctypes.data_as(c_impa_lib_type_p)
-        )
-        extrinsic_output_edge_ec = np.zeros((self.num_edge_variables))
-        extrinsic_output_edge_ec = (
-            np.array(extrinsic_output_edge_ec).flatten().astype(np_impa_lib)
-        )
-        extrinsic_output_edge_ec_p = extrinsic_output_edge_ec.ctypes.data_as(
+        edge_ec_to_degree_constraint_m_flatten = self.edge_ec_to_degree_constraint_m.flatten().astype(np_impa_lib)
+        edge_ec_to_degree_constraint_m_flatten_p = edge_ec_to_degree_constraint_m_flatten.ctypes.data_as(
             c_impa_lib_type_p
         )
+        edge_degree_constraint_cost_flatten = self.edge_degree_constraint_cost.flatten().astype(np_impa_lib)
+        edge_degree_constraint_cost_flatten_p = edge_degree_constraint_cost_flatten.ctypes.data_as(c_impa_lib_type_p)
+        extrinsic_output_edge_ec = np.zeros((self.num_edge_variables))
+        extrinsic_output_edge_ec = np.array(extrinsic_output_edge_ec).flatten().astype(np_impa_lib)
+        extrinsic_output_edge_ec_p = extrinsic_output_edge_ec.ctypes.data_as(c_impa_lib_type_p)
 
         num_augmentations_p = np.array(self.num_augmentations).ctypes.data_as(c_int_p)
-        num_added_constraints_p = np.array(self.num_added_constraints).ctypes.data_as(
-            c_int_p
-        )
+        num_added_constraints_p = np.array(self.num_added_constraints).ctypes.data_as(c_int_p)
         tour_impa_flatten = self.tour_impa.flatten().astype(np.int32)
         tour_impa_flatten_p = tour_impa_flatten.ctypes.data_as(c_int_p)
         cost_impa_p = np.array(self.cost_impa).ctypes.data_as(c_impa_lib_type_p)
-        selected_edges_flatten = (
-            np.array(self.selected_edges).flatten().astype(np.int32)
-        )
+        selected_edges_flatten = np.array(self.selected_edges).flatten().astype(np.int32)
         selected_edges_p = selected_edges_flatten.ctypes.data_as(c_int_p)
         selected_edges_size_p = np.array(0).ctypes.data_as(c_int_p)
 
-        no_improvement_sol_count_exceeded_flag_p = np.array(
-            self.no_improvement_sol_count_exceeded_flag
-        ).ctypes.data_as(c_bool_p)
+        no_improvement_sol_count_exceeded_flag_p = np.array(self.no_improvement_sol_count_exceeded_flag).ctypes.data_as(
+            c_bool_p
+        )
         no_consecutive_loops_count_exceeded_flag_p = np.array(
             self.no_consecutive_loops_count_exceeded_flag
         ).ctypes.data_as(c_bool_p)
-        sol_oscillation_count_exceeded_flag_p = np.array(
-            self.sol_oscillation_count_exceeded_flag
-        ).ctypes.data_as(c_bool_p)
+        sol_oscillation_count_exceeded_flag_p = np.array(self.sol_oscillation_count_exceeded_flag).ctypes.data_as(
+            c_bool_p
+        )
 
         subtour_paths_flatten = self.subtour_paths.flatten().astype(np.int32)
         subtour_paths_flatten_p = subtour_paths_flatten.ctypes.data_as(c_int_p)
-        subtour_paths_size_flatten = (
-            np.zeros(self.num_nodes**2).flatten().astype(np.int32)
-        )
-        subtour_paths_size_flatten_p = subtour_paths_size_flatten.ctypes.data_as(
-            c_int_p
-        )
+        subtour_paths_size_flatten = np.zeros(self.num_nodes**2).flatten().astype(np.int32)
+        subtour_paths_size_flatten_p = subtour_paths_size_flatten.ctypes.data_as(c_int_p)
 
         return (
             edge_connection_flatten_p,
@@ -285,20 +290,15 @@ class GraphicalModelTsp:
         num_added_constraints_p,
     ):
         selected_edges_size = list(selected_edges_size_p.__dict__.values())[0]
-        selected_edges_flatten = list(selected_edges_p.__dict__.values())[0][
-            :selected_edges_size
-        ]
+        selected_edges_flatten = list(selected_edges_p.__dict__.values())[0][:selected_edges_size]
         self.selected_edges = [
-            [selected_edges_flatten[i], selected_edges_flatten[i + 1]]
-            for i in range(0, len(selected_edges_flatten), 2)
+            [selected_edges_flatten[i], selected_edges_flatten[i + 1]] for i in range(0, len(selected_edges_flatten), 2)
         ]
 
         subtour_paths_size = list(subtour_paths_size_flatten_p.__dict__.values())[0]
         subtour_paths_size = [x for x in subtour_paths_size if x != 0]
         if len(subtour_paths_size) != 0:
-            subtour_paths_flatten = list(subtour_paths_flatten_p.__dict__.values())[0][
-                : sum(subtour_paths_size)
-            ]
+            subtour_paths_flatten = list(subtour_paths_flatten_p.__dict__.values())[0][: sum(subtour_paths_size)]
             self.subtour_paths = [
                 list(
                     islice(
@@ -312,12 +312,10 @@ class GraphicalModelTsp:
         else:
             self.subtour_paths = None
 
-        self.sol_oscillation_count_exceeded_flag = list(
-            sol_oscillation_count_exceeded_flag_p.__dict__.values()
-        )[0]
-        self.no_improvement_sol_count_exceeded_flag = list(
-            no_improvement_sol_count_exceeded_flag_p.__dict__.values()
-        )[0]
+        self.sol_oscillation_count_exceeded_flag = list(sol_oscillation_count_exceeded_flag_p.__dict__.values())[0]
+        self.no_improvement_sol_count_exceeded_flag = list(no_improvement_sol_count_exceeded_flag_p.__dict__.values())[
+            0
+        ]
         self.no_consecutive_loops_count_exceeded_flag = list(
             no_consecutive_loops_count_exceeded_flag_p.__dict__.values()
         )[0]
@@ -329,9 +327,7 @@ class GraphicalModelTsp:
 
         self.num_augmentations = int(list(num_augmentations_p.__dict__.values())[0])
         if self.augmentation_flag:
-            self.num_added_constraints = int(
-                list(num_added_constraints_p.__dict__.values())[0]
-            )
+            self.num_added_constraints = int(list(num_added_constraints_p.__dict__.values())[0])
         else:
             self.num_added_constraints = 0
 
@@ -340,9 +336,7 @@ class GraphicalModelTsp:
         intrinsic_out_edge_ec = extrinsic_output_edge_ec + self.cost_edge_variable
         self.intrinsic_out_edge_ec = intrinsic_out_edge_ec
         if self.subtour_paths is not None:
-            self.subtour_paths = [
-                sublist + [sublist[0]] for sublist in self.subtour_paths if sublist
-            ]
+            self.subtour_paths = [sublist + [sublist[0]] for sublist in self.subtour_paths if sublist]
         if self.tour_impa is None and self.post_process_flag:
             self.run_post_processing_improved()
             self.pp_performed = True
@@ -392,10 +386,7 @@ class GraphicalModelTsp:
         final_investigated_paths = [
             path
             for i, path in enumerate(new_investigated_paths)
-            if not any(
-                set(path).issubset(p)
-                for p in new_investigated_paths[:i] + new_investigated_paths[i + 1 :]
-            )
+            if not any(set(path).issubset(p) for p in new_investigated_paths[:i] + new_investigated_paths[i + 1 :])
         ]
         return final_investigated_paths, removed_edge_flag_list
 
@@ -418,8 +409,8 @@ class GraphicalModelTsp:
         print("Post Processing Started:")
         print("--------")
         num_nodes = self.num_nodes
-        edge_connections = self.edge_connections
-        cost_edge_variable = self.cost_edge_variable
+        # edge_connections = self.edge_connections
+        # cost_edge_variable = self.cost_edge_variable
         subtour_paths = self.subtour_paths
 
         if subtour_paths is not None:
@@ -459,9 +450,7 @@ class GraphicalModelTsp:
                                 investigated_edge = [node, key]
                             else:
                                 investigated_edge = [key, node]
-                            if (
-                                investigated_edge not in removed_edges_violated_dc
-                            ):  # not in removed_edges_node):
+                            if investigated_edge not in removed_edges_violated_dc:  # not in removed_edges_node):
                                 index_edge_connections = next(
                                     (
                                         i
@@ -470,23 +459,17 @@ class GraphicalModelTsp:
                                     ),
                                     None,
                                 )
-                                indices_in_edge_connections.append(
-                                    index_edge_connections
-                                )
+                                indices_in_edge_connections.append(index_edge_connections)
                         # python3 main_wrapper_tsp.py --testFile=36 --alpha=0.5 --nITER=200 --inputPath=inputs_random_1000 --outputPath=outputs_random_1000_maxAugmCount50 --saveFlag=True --augmFlag=True --maxAugmCount=50 --filteringFlag=True
-                        if indices_in_edge_connections:  # added since experienced a failure scenario where all outward edges where already removed
-                            flag_emptied_connection = False
-                            valid_indices = [
-                                index for index in indices_in_edge_connections
-                            ]
+                        if (
+                            indices_in_edge_connections
+                        ):  # added since experienced a failure scenario where all outward edges where already removed
+                            # flag_emptied_connection = False
+                            # valid_indices = [
+                            #    index for index in indices_in_edge_connections
+                            # ]
                             min_index = indices_in_edge_connections[
-                                np.argmin(
-                                    np.abs(
-                                        self.intrinsic_out_edge_ec[
-                                            indices_in_edge_connections
-                                        ]
-                                    )
-                                )
+                                np.argmin(np.abs(self.intrinsic_out_edge_ec[indices_in_edge_connections]))
                             ]
                             removed_edge = list(self.edge_connections[min_index])
                             removed_edge_cost = self.cost_edge_variable[min_index]
@@ -499,23 +482,15 @@ class GraphicalModelTsp:
                                 removed_edges_violated_dc.append(removed_edge)
                                 indices_in_edge_connections.remove(min_index)
                             else:
-                                print(
-                                    f"Edge {removed_edge} with cost: {removed_edge_cost} already considered"
-                                )
+                                print(f"Edge {removed_edge} with cost: {removed_edge_cost} already considered")
                         else:
-                            print(
-                                f"index_edge_connections empty. All edges of violation were already removed"
-                            )
+                            print("index_edge_connections empty. All edges of violation were already removed")
                             break
         else:
             print("No Violated Degree Constraints with degree >1")
 
-        subtour_paths, removed_edge_flag_list = self.paths_cleaning(
-            removed_edges_violated_dc, self.subtour_paths
-        )
-        print(
-            f"subtour_paths after removing removed_edges_violated_dc {removed_edges_violated_dc}: \n {subtour_paths}"
-        )
+        subtour_paths, removed_edge_flag_list = self.paths_cleaning(removed_edges_violated_dc, self.subtour_paths)
+        print(f"subtour_paths after removing removed_edges_violated_dc {removed_edges_violated_dc}: \n {subtour_paths}")
         print("------")
 
         if self.subtour_paths is not None:
@@ -528,30 +503,20 @@ class GraphicalModelTsp:
                     print(f"Investigating connected subtour path of index: {i}")
                     subtour_path = self.subtour_paths[i]
                     pair_occurrences = self.find_indices_edges_from_tour(subtour_path)
-                    min_index = pair_occurrences[
-                        np.argmin(np.abs(self.intrinsic_out_edge_ec[pair_occurrences]))
-                    ]
+                    min_index = pair_occurrences[np.argmin(np.abs(self.intrinsic_out_edge_ec[pair_occurrences]))]
                     removed_edge = list(self.edge_connections[min_index])
                     removed_edge_cost = self.cost_edge_variable[min_index]
                     print(f"Remove: {removed_edge} with cost: {removed_edge_cost}")
                     removed_subtour_paths_edges.append(removed_edge)
 
-            subtour_paths, removed_edge_flag_list = self.paths_cleaning(
-                removed_subtour_paths_edges, subtour_paths
-            )
+            subtour_paths, removed_edge_flag_list = self.paths_cleaning(removed_subtour_paths_edges, subtour_paths)
             print(
                 f"subtour_paths after removing removed_subtour_paths_edges {removed_subtour_paths_edges}: \n {subtour_paths}"
             )
 
-            selected_edges_pp = [
-                edge
-                for edge in selected_edges_pp
-                if edge not in removed_subtour_paths_edges
-            ]
+            selected_edges_pp = [edge for edge in selected_edges_pp if edge not in removed_subtour_paths_edges]
 
-        selected_edges_pp = [
-            edge for edge in selected_edges_pp if edge not in removed_edges_violated_dc
-        ]
+        selected_edges_pp = [edge for edge in selected_edges_pp if edge not in removed_edges_violated_dc]
 
         print("------")
 
@@ -569,13 +534,9 @@ class GraphicalModelTsp:
             print(f"path {i} of size {len(path)}: {path}")
 
         combined_final_paths = list(chain.from_iterable(final_paths))
-        missing_nodes = [
-            num for num in range(num_nodes) if num not in combined_final_paths
-        ]
+        missing_nodes = [num for num in range(num_nodes) if num not in combined_final_paths]
         print(f"missing_nodes: {missing_nodes}")
-        unique_nodes, counts = np.unique(
-            np.array(combined_final_paths), return_counts=True
-        )
+        unique_nodes, counts = np.unique(np.array(combined_final_paths), return_counts=True)
         duplicate_nodes_counts = list(zip(unique_nodes[counts > 1], counts[counts > 1]))
         if duplicate_nodes_counts:
             for node, count in duplicate_nodes_counts:
@@ -613,9 +574,7 @@ class GraphicalModelTsp:
             best_tour = tour_impa_pp[:]
 
             if self.k_opt_flag:
-                print(
-                    f"tour_impa_pp: {tour_impa_pp+ [possible_tours[index_best_tour][0]]}"
-                )
+                print(f"tour_impa_pp: {tour_impa_pp+ [possible_tours[index_best_tour][0]]}")
                 print(f"cost_impa_pp: {cost_impa_pp}")
                 best_tour, min_cost = self.perform_k_opt(best_tour, min_cost)
 
@@ -664,9 +623,7 @@ class GraphicalModelTsp:
             candidate_path = candidate_paths[0]
             for candidate_path in candidate_paths:
                 pair_occurrences = self.find_indices_edges_from_tour(candidate_path)
-                cost = sum(
-                    self.cost_edge_variable[element] for element in pair_occurrences
-                )
+                cost = sum(self.cost_edge_variable[element] for element in pair_occurrences)
                 if cost < min_cost:
                     min_cost = cost
                     best_tour = candidate_path[:]
@@ -675,16 +632,8 @@ class GraphicalModelTsp:
     def add_missing_nodes(self, tour, missing_nodes):
         added_missing_nodes = []
         while len(added_missing_nodes) != len(missing_nodes):
-            missing_combinations_left = [
-                [node, tour[0]]
-                for node in missing_nodes
-                if node not in added_missing_nodes
-            ]
-            missing_combinations_right = [
-                [tour[-1], node]
-                for node in missing_nodes
-                if node not in added_missing_nodes
-            ]
+            missing_combinations_left = [[node, tour[0]] for node in missing_nodes if node not in added_missing_nodes]
+            missing_combinations_right = [[tour[-1], node] for node in missing_nodes if node not in added_missing_nodes]
             min_cost_left = np_impa_lib("inf")
             min_cost_right = np_impa_lib("inf")
             for combination in missing_combinations_left:
@@ -698,7 +647,7 @@ class GraphicalModelTsp:
                     min_cost_right = cost
                     combination_right = combination
             costs_left_right = [min_cost_left, min_cost_right]
-            added_cost = np.min(costs_left_right)
+            # added_cost = np.min(costs_left_right)
             added_cost_index = np.argmin(costs_left_right)
             if added_cost_index == 0:  # left
                 added_missing_nodes.append(combination_left[0])
@@ -746,9 +695,7 @@ class GraphicalModelTsp:
         final_paths = [
             path
             for i, path in enumerate(path_lists)
-            if not any(
-                set(path).issubset(p) for p in path_lists[:i] + path_lists[i + 1 :]
-            )
+            if not any(set(path).issubset(p) for p in path_lists[:i] + path_lists[i + 1 :])
         ]
         return final_paths
 
@@ -863,9 +810,7 @@ class GraphicalModelTsp:
         print("--------")
         cost_matrix_h = elkai.DistanceMatrix(self.cost_matrix)
         tour_h = cost_matrix_h.solve_tsp()
-        cost_h = sum(
-            self.cost_matrix[tour_h[i], tour_h[i + 1]] for i in range(len(tour_h) - 1)
-        )
+        cost_h = sum(self.cost_matrix[tour_h[i], tour_h[i + 1]] for i in range(len(tour_h) - 1))
         print("tour_h: ", tour_h)
         print("cost_h: ", cost_h)
         return tour_h, cost_h
@@ -923,22 +868,20 @@ class ImpaKcMwm:
 
         if self.post_process_flag:
             print("post_processing_Flag Enabled")
-            if (
-                self.post_process_option == 1
-            ):  # brute force post-processing on departments
+            if self.post_process_option == 1:  # brute force post-processing on departments
                 print("Brute Force Post-Processing on Departments")
             elif self.post_process_option == 2:  # brute force post-processing on teams
                 print("Brute Force Post-Processing on Teams")
         self.max_state = max_state
         self.num_departments = self.max_state.size
 
-        l_target = np.random.uniform(0, 1, num_projects)
-        k_target = np.random.randint(
-            min(fighters_count), max(fighters_count) + 1, num_projects
-        )
-        s_target = np.random.randint(
-            min(weasels_count), max(weasels_count) + 1, num_projects
-        )
+        # l_target = np.random.uniform(0, 1, num_projects)
+        # k_target = np.random.randint(
+        #    min(fighters_count), max(fighters_count) + 1, num_projects
+        # )
+        # s_target = np.random.randint(
+        #    min(weasels_count), max(weasels_count) + 1, num_projects
+        # )
 
         self.prune_teams()
 
@@ -976,10 +919,10 @@ class ImpaKcMwm:
 
         assert (
             self.intrinsic_out_mwm.shape[0] == self.reward_project.shape[0]
-        ), f"Row Shape mismatch between MWM and Rewards"
+        ), "Row Shape mismatch between MWM and Rewards"
         assert (
             self.intrinsic_out_mwm.shape[1] == self.reward_project.shape[1]
-        ), f"Column Shape mismatch between MWM and Rewards"
+        ), "Column Shape mismatch between MWM and Rewards"
 
     def prune_teams(self):
         units = range(1, len(self.max_state) + 1)
@@ -991,12 +934,8 @@ class ImpaKcMwm:
 
         for i in range(0, len(combinations_units_pre_pruning)):
             combination = combinations_units_pre_pruning[i]
-            r_1 = math.exp(-F_u[combination[0] - 1]) * math.exp(
-                -W_u[combination[1] - 1]
-            )
-            r_2 = math.exp(-F_u[combination[1] - 1]) * math.exp(
-                -W_u[combination[0] - 1]
-            )
+            r_1 = math.exp(-F_u[combination[0] - 1]) * math.exp(-W_u[combination[1] - 1])
+            r_2 = math.exp(-F_u[combination[1] - 1]) * math.exp(-W_u[combination[0] - 1])
 
             if (
                 r_1 > r_2
@@ -1021,9 +960,7 @@ class ImpaKcMwm:
             ):
                 list_pruning.append(combination[::-1])
 
-        self.available_combinations = [
-            x for x in permutations_units if x not in list_pruning
-        ]
+        self.available_combinations = [x for x in permutations_units if x not in list_pruning]
 
     def team_reward_generation(self):
         teams_weights_per_department = []
@@ -1031,7 +968,7 @@ class ImpaKcMwm:
         reward_team = []
         total_team_array = []
 
-        for l in range(0, len(self.max_state)):
+        for state_index in range(0, len(self.max_state)):
             teams_weights_per_department.append([])
             teams_types_per_department.append([])
 
@@ -1049,16 +986,12 @@ class ImpaKcMwm:
                 if type == 1:
                     if u == v:
                         team_size = max_state[u - 1]
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1]
-                        )
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
                             [fighters_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         remaining_departments = np.setdiff1d(indices_departments, v)
                         reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1
                     else:
@@ -1066,70 +999,39 @@ class ImpaKcMwm:
                 elif type == 2:
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 2)
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1] + weasels_count[type - 1]
-                        )
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
-                            [
-                                fighters_count[type - 1] + weasels_count[type - 1]
-                                for i in range(0, team_size - 1)
-                            ]
+                            [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         remaining_departments = np.setdiff1d(indices_departments, v)
-                        reward = (
-                            distance_metric[v - 1][u - 1]
-                            + F_u[u - 1]
-                            - K_1
-                            + W_u[v - 1]
-                        )
+                        reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
                     else:
                         team_size = min(max_state[u - 1], max_state[v - 1])
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1]
-                        )
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
                             [fighters_count[type - 1] for i in range(0, team_size - 1)]
                         )
-                        teams_weights_per_department[v - 1].append(
-                            weasels_count[type - 1]
-                        )
+                        teams_weights_per_department[v - 1].append(weasels_count[type - 1])
                         teams_weights_per_department[v - 1].extend(
                             [weasels_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         teams_types_per_department[v - 1].append(type)
-                        teams_types_per_department[v - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
-                        remaining_departments = np.setdiff1d(
-                            indices_departments, [u, v]
-                        )
-                        reward = (
-                            distance_metric[v - 1][u - 1]
-                            + F_u[u - 1]
-                            - K_1
-                            + W_u[v - 1]
-                        )
+                        teams_types_per_department[v - 1].extend([type for i in range(0, team_size - 1)])
+                        remaining_departments = np.setdiff1d(indices_departments, [u, v])
+                        reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
                 elif type == 3:
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 2)
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1]
-                        )
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
                             [fighters_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         remaining_departments = np.setdiff1d(indices_departments, v)
                         reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1
                     else:
@@ -1137,128 +1039,66 @@ class ImpaKcMwm:
                 elif type == 4:
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 3)
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1] + weasels_count[type - 1]
-                        )
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
-                            [
-                                fighters_count[type - 1] + weasels_count[type - 1]
-                                for i in range(0, team_size - 1)
-                            ]
+                            [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         remaining_departments = np.setdiff1d(indices_departments, v)
-                        reward = (
-                            distance_metric[v - 1][u - 1]
-                            + F_u[u - 1]
-                            - K_1
-                            + W_u[v - 1]
-                        )
+                        reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
                     else:
-                        team_size = math.floor(
-                            min(max_state[u - 1] / 2, max_state[v - 1])
-                        )
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1]
-                        )
+                        team_size = math.floor(min(max_state[u - 1] / 2, max_state[v - 1]))
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
                             [fighters_count[type - 1] for i in range(0, team_size - 1)]
                         )
-                        teams_weights_per_department[v - 1].append(
-                            weasels_count[type - 1]
-                        )
+                        teams_weights_per_department[v - 1].append(weasels_count[type - 1])
                         teams_weights_per_department[v - 1].extend(
                             [weasels_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         teams_types_per_department[v - 1].append(type)
-                        teams_types_per_department[v - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
-                        remaining_departments = np.setdiff1d(
-                            indices_departments, [u, v]
-                        )
-                        reward = (
-                            distance_metric[v - 1][u - 1]
-                            + F_u[u - 1]
-                            - K_1
-                            + W_u[v - 1]
-                        )
+                        teams_types_per_department[v - 1].extend([type for i in range(0, team_size - 1)])
+                        remaining_departments = np.setdiff1d(indices_departments, [u, v])
+                        reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
                 elif type == 5:
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 4)
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1] + weasels_count[type - 1]
-                        )
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
-                            [
-                                fighters_count[type - 1] + weasels_count[type - 1]
-                                for i in range(0, team_size - 1)
-                            ]
+                            [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         remaining_departments = np.setdiff1d(indices_departments, v)
-                        reward = (
-                            distance_metric[v - 1][u - 1]
-                            + F_u[u - 1]
-                            - K_1
-                            + W_u[v - 1]
-                        )
+                        reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
                     else:
-                        team_size = math.floor(
-                            min(max_state[u - 1] / 2, max_state[v - 1] / 2)
-                        )
-                        teams_weights_per_department[u - 1].append(
-                            fighters_count[type - 1]
-                        )
+                        team_size = math.floor(min(max_state[u - 1] / 2, max_state[v - 1] / 2))
+                        teams_weights_per_department[u - 1].append(fighters_count[type - 1])
                         teams_weights_per_department[u - 1].extend(
                             [fighters_count[type - 1] for i in range(0, team_size - 1)]
                         )
-                        teams_weights_per_department[v - 1].append(
-                            weasels_count[type - 1]
-                        )
+                        teams_weights_per_department[v - 1].append(weasels_count[type - 1])
                         teams_weights_per_department[v - 1].extend(
                             [weasels_count[type - 1] for i in range(0, team_size - 1)]
                         )
                         teams_types_per_department[u - 1].append(type)
-                        teams_types_per_department[u - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                        teams_types_per_department[u - 1].extend([type for i in range(0, team_size - 1)])
                         teams_types_per_department[v - 1].append(type)
-                        teams_types_per_department[v - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
-                        remaining_departments = np.setdiff1d(
-                            indices_departments, [u, v]
-                        )
-                        reward = (
-                            distance_metric[v - 1][u - 1]
-                            + F_u[u - 1]
-                            - K_1
-                            + W_u[v - 1]
-                        )
+                        teams_types_per_department[v - 1].extend([type for i in range(0, team_size - 1)])
+                        remaining_departments = np.setdiff1d(indices_departments, [u, v])
+                        reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
 
                 if team_size != 0:
                     reward_team.append(reward)
                     reward_team.extend([reward for i in range(0, team_size - 1)])
-                    for l in remaining_departments:
-                        teams_weights_per_department[l - 1].append(0)
-                        teams_weights_per_department[l - 1].extend(
-                            [0 for i in range(0, team_size - 1)]
-                        )
-                        teams_types_per_department[l - 1].append(type)
-                        teams_types_per_department[l - 1].extend(
-                            [type for i in range(0, team_size - 1)]
-                        )
+                    for departmemt_index in remaining_departments:
+                        teams_weights_per_department[departmemt_index - 1].append(0)
+                        teams_weights_per_department[departmemt_index - 1].extend([0 for i in range(0, team_size - 1)])
+                        teams_types_per_department[departmemt_index - 1].append(type)
+                        teams_types_per_department[departmemt_index - 1].extend([type for i in range(0, team_size - 1)])
                 team_array.append(team_size)
 
             sum_teams.append(sum(team_array))
@@ -1291,9 +1131,7 @@ class ImpaKcMwm:
         num_teams = self.num_teams
         num_projects = self.num_projects
 
-        message_team_to_department = np.zeros(
-            (num_departments, num_teams), dtype=np_impa_lib
-        )
+        message_team_to_department = np.zeros((num_departments, num_teams), dtype=np_impa_lib)
 
         intrinsic_out_mwm = np.zeros((num_projects, num_teams), dtype=np_impa_lib)
 
@@ -1305,11 +1143,7 @@ class ImpaKcMwm:
         non_zero_weight_indices = []
 
         for department_index in range(0, num_departments):
-            indices = [
-                i
-                for i, e in enumerate(teams_weights_per_department[department_index])
-                if e != 0
-            ]
+            indices = [i for i, e in enumerate(teams_weights_per_department[department_index]) if e != 0]
             non_zero_weight_indices = non_zero_weight_indices + [indices]
 
         extrinsic_output_team = np.zeros((num_teams))
@@ -1320,25 +1154,15 @@ class ImpaKcMwm:
         reward_team = reward_team.flatten().astype(np_impa_lib)
         reward_team_p = reward_team.ctypes.data_as(c_impa_lib_type_p)
         reward_project_flatten = reward_project.flatten().astype(np_impa_lib)
-        reward_project_flatten_p = reward_project_flatten.ctypes.data_as(
-            c_impa_lib_type_p
-        )
-        teams_weights_per_department_flatten = (
-            np.array(teams_weights_per_department).flatten().astype(np.int32)
-        )
-        teams_weights_per_department_flatten_p = (
-            teams_weights_per_department_flatten.ctypes.data_as(c_int_p)
-        )
-        extrinsic_output_team = (
-            np.array(extrinsic_output_team).flatten().astype(np_impa_lib)
-        )
-        extrinsic_output_team_p = extrinsic_output_team.ctypes.data_as(
-            c_impa_lib_type_p
-        )
+        reward_project_flatten_p = reward_project_flatten.ctypes.data_as(c_impa_lib_type_p)
+        teams_weights_per_department_flatten = np.array(teams_weights_per_department).flatten().astype(np.int32)
+        teams_weights_per_department_flatten_p = teams_weights_per_department_flatten.ctypes.data_as(c_int_p)
+        extrinsic_output_team = np.array(extrinsic_output_team).flatten().astype(np_impa_lib)
+        extrinsic_output_team_p = extrinsic_output_team.ctypes.data_as(c_impa_lib_type_p)
         intrinsic_out_mwm = np.array(intrinsic_out_mwm).flatten().astype(np_impa_lib)
         intrisic_out_mwm_p = intrinsic_out_mwm.ctypes.data_as(c_impa_lib_type_p)
 
-        non_zero_weight_indices_sizes = [len(l) for l in non_zero_weight_indices]
+        non_zero_weight_indices_sizes = [len(indices) for indices in non_zero_weight_indices]
 
         max_size_nonzero_weights = max(non_zero_weight_indices_sizes)
         non_zero_weight_indices_arr = np.zeros(
@@ -1349,16 +1173,10 @@ class ImpaKcMwm:
             for j in range(len(non_zero_weight_indices[i])):
                 non_zero_weight_indices_arr[i, j] = non_zero_weight_indices[i][j]
 
-        non_zero_weight_indices = (
-            np.array(non_zero_weight_indices_arr).flatten().astype(np.int32)
-        )
+        non_zero_weight_indices = np.array(non_zero_weight_indices_arr).flatten().astype(np.int32)
         non_zero_weight_indices_p = non_zero_weight_indices.ctypes.data_as(c_int_p)
-        non_zero_weight_indices_sizes = (
-            np.array(non_zero_weight_indices_sizes).flatten().astype(np.int32)
-        )
-        non_zero_weight_indices_sizes_p = non_zero_weight_indices_sizes.ctypes.data_as(
-            c_int_p
-        )
+        non_zero_weight_indices_sizes = np.array(non_zero_weight_indices_sizes).flatten().astype(np.int32)
+        non_zero_weight_indices_sizes_p = non_zero_weight_indices_sizes.ctypes.data_as(c_int_p)
 
         return (
             transitional_model_p,
@@ -1458,13 +1276,9 @@ class ImpaKcMwm:
         idx = 0
         idy = 0
         P_interm = deepcopy(P)
-        idy = np.argwhere(
-            np.all(P_interm[..., :] == 0, axis=0)
-        )  # find which columns there are zeros
+        idy = np.argwhere(np.all(P_interm[..., :] == 0, axis=0))  # find which columns there are zeros
         P_interm = np.delete(P_interm, idy, axis=1)
-        idx = np.argwhere(
-            np.all(P_interm[:, ...] == 0, axis=1)
-        )  # find which rows there are zeross
+        idx = np.argwhere(np.all(P_interm[:, ...] == 0, axis=1))  # find which rows there are zeross
         P_interm = np.delete(P_interm, idx, axis=0)
         return P_interm
 
@@ -1517,9 +1331,7 @@ class ImpaKcMwm:
                     team_departments.append(j)
                     department_weights[j].append(weight)
                     team_departments_weights[j] = team_departments_weights[j] + weight
-            location_package = next(
-                x[0] for x in enumerate(last_index) if x[1] >= index
-            )
+            location_package = next(x[0] for x in enumerate(last_index) if x[1] >= index)
             team_locations.append(location_package)
             print(
                 "Package ",
@@ -1584,9 +1396,7 @@ class ImpaKcMwm:
                 reused_teams.append(team_index)
                 index_used = visited_teams.index(team_index)
                 used_combination = visited_combinations[index_used]
-                combination_reused_team.append(
-                    [(project_index, team_index), used_combination]
-                )
+                combination_reused_team.append([(project_index, team_index), used_combination])
                 ic_violated_flag = True
             total_weight = total_weight + reward_project[project_index, team_index]
 
@@ -1618,9 +1428,7 @@ class ImpaKcMwm:
         if post_process_flag:
             if self.post_process_option == 1:  # brute force post-processing on bins
                 self.apply_post_processing_departments_brute()
-            elif (
-                self.post_process_option == 2
-            ):  # brute force post-processing on packages
+            elif self.post_process_option == 2:  # brute force post-processing on packages
                 self.apply_post_processing_teams_brute()
                 # exit()
         else:
@@ -1652,13 +1460,8 @@ class ImpaKcMwm:
                 min_intrinsic = 1000000000
                 for j in range(0, len(combination_reused_team[i])):
                     combination = combination_reused_team[i][j]
-                    if (
-                        intrinsic_out_mwm[combination[0], combination[1]]
-                        < min_intrinsic
-                    ):
-                        min_intrinsic = intrinsic_out_mwm[
-                            combination[0], combination[1]
-                        ]
+                    if intrinsic_out_mwm[combination[0], combination[1]] < min_intrinsic:
+                        min_intrinsic = intrinsic_out_mwm[combination[0], combination[1]]
                         post_processing_ic_combination[i] = combination
                     print(
                         "Cost of ",
@@ -1680,15 +1483,11 @@ class ImpaKcMwm:
             print("POST-PROCESSING STARTED")
             print("-------")
             while any(intermediate_team_department_weights > max_state):
-                post_processing_departments = np.where(
-                    intermediate_team_department_weights > max_state
-                )[0]
+                post_processing_departments = np.where(intermediate_team_department_weights > max_state)[0]
                 print("Post-processing Departments: ", post_processing_departments)
                 print("-------")
                 if len(post_processing_departments):
-                    intrinsic_output_selected = intrinsic_output[
-                        intermediate_selected_teams_indices
-                    ]
+                    intrinsic_output_selected = intrinsic_output[intermediate_selected_teams_indices]
                     processing_department_index = post_processing_departments[0]
                     print("Post-processing department: ", processing_department_index)
                     packages_processing_department_index = [
@@ -1698,11 +1497,7 @@ class ImpaKcMwm:
                             processing_department_index
                             in np.array(
                                 available_combinations[
-                                    team_locations[
-                                        np.where(
-                                            intermediate_selected_teams_indices == i
-                                        )[0][0]
-                                    ]
+                                    team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
                                 ]
                             )
                             - 1
@@ -1726,13 +1521,9 @@ class ImpaKcMwm:
                     ]
                     print("reward[removed_team]: ", reward_team[removed_team])
                     removed_team_location = team_locations[
-                        np.where(intermediate_selected_teams_indices == removed_team)[
-                            0
-                        ][0]
+                        np.where(intermediate_selected_teams_indices == removed_team)[0][0]
                     ]
-                    removed_team_combination = (
-                        np.array(available_combinations[removed_team_location]) - 1
-                    )
+                    removed_team_combination = np.array(available_combinations[removed_team_location]) - 1
                     removed_team_type = teams_types[removed_team]
                     print(
                         "Removing Team ",
@@ -1749,34 +1540,18 @@ class ImpaKcMwm:
                     u = removed_team_combination[0]
                     v = removed_team_combination[1]
                     if removed_team_type == 1:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 1
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 1
                     elif removed_team_type == 2:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 1
-                        )
-                        intermediate_team_department_weights[v] = (
-                            intermediate_team_department_weights[v] - 1
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 1
+                        intermediate_team_department_weights[v] = intermediate_team_department_weights[v] - 1
                     elif removed_team_type == 3:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 2
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 2
                     elif removed_team_type == 4:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 2
-                        )
-                        intermediate_team_department_weights[v] = (
-                            intermediate_team_department_weights[v] - 1
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 2
+                        intermediate_team_department_weights[v] = intermediate_team_department_weights[v] - 1
                     elif removed_team_type == 5:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 2
-                        )
-                        intermediate_team_department_weights[v] = (
-                            intermediate_team_department_weights[v] - 2
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 2
+                        intermediate_team_department_weights[v] = intermediate_team_department_weights[v] - 2
 
             print("-------")
             print("POST-PROCESSING ENDED")
@@ -1808,13 +1583,8 @@ class ImpaKcMwm:
                 min_intrinsic = 1000000000
                 for j in range(0, len(combination_reused_team[i])):
                     combination = combination_reused_team[i][j]
-                    if (
-                        intrinsic_out_mwm[combination[0], combination[1]]
-                        < min_intrinsic
-                    ):
-                        min_intrinsic = intrinsic_out_mwm[
-                            combination[0], combination[1]
-                        ]
+                    if intrinsic_out_mwm[combination[0], combination[1]] < min_intrinsic:
+                        min_intrinsic = intrinsic_out_mwm[combination[0], combination[1]]
                         post_processing_ic_combination[i] = combination
                     print(
                         "Cost of ",
@@ -1836,16 +1606,12 @@ class ImpaKcMwm:
             print("POST-PROCESSING STARTED")
             print("-------")
             while any(intermediate_team_department_weights > max_state):
-                post_processing_departments = np.where(
-                    intermediate_team_department_weights > max_state
-                )[0]
+                post_processing_departments = np.where(intermediate_team_department_weights > max_state)[0]
                 print("Post-processing Departments: ", post_processing_departments)
                 print("-------")
                 list_teams_processing_department_indices_combinations = []
                 if len(post_processing_departments):
-                    intrinsic_output_selected = intrinsic_output[
-                        intermediate_selected_teams_indices
-                    ]
+                    intrinsic_output_selected = intrinsic_output[intermediate_selected_teams_indices]
                     for department in post_processing_departments:
                         teams_processing_department_indices_combinations = [
                             [
@@ -1853,12 +1619,7 @@ class ImpaKcMwm:
                                 (
                                     np.array(
                                         available_combinations[
-                                            team_locations[
-                                                np.where(
-                                                    intermediate_selected_teams_indices
-                                                    == i
-                                                )[0][0]
-                                            ]
+                                            team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
                                         ]
                                     )
                                     - 1
@@ -1870,31 +1631,18 @@ class ImpaKcMwm:
                                     department
                                     in np.array(
                                         available_combinations[
-                                            team_locations[
-                                                np.where(
-                                                    intermediate_selected_teams_indices
-                                                    == i
-                                                )[0][0]
-                                            ]
+                                            team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
                                         ]
                                     )
                                     - 1
                                 )
                                 and available_combinations[
-                                    team_locations[
-                                        np.where(
-                                            intermediate_selected_teams_indices == i
-                                        )[0][0]
-                                    ]
+                                    team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
                                 ][0]
                                 - 1
                                 in post_processing_departments
                                 and available_combinations[
-                                    team_locations[
-                                        np.where(
-                                            intermediate_selected_teams_indices == i
-                                        )[0][0]
-                                    ]
+                                    team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
                                 ][1]
                                 - 1
                                 in post_processing_departments
@@ -1908,12 +1656,7 @@ class ImpaKcMwm:
                                     (
                                         np.array(
                                             available_combinations[
-                                                team_locations[
-                                                    np.where(
-                                                        intermediate_selected_teams_indices
-                                                        == i
-                                                    )[0][0]
-                                                ]
+                                                team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
                                             ]
                                         )
                                         - 1
@@ -1924,12 +1667,7 @@ class ImpaKcMwm:
                                     department
                                     in np.array(
                                         available_combinations[
-                                            team_locations[
-                                                np.where(
-                                                    intermediate_selected_teams_indices
-                                                    == i
-                                                )[0][0]
-                                            ]
+                                            team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
                                         ]
                                     )
                                     - 1
@@ -1940,51 +1678,32 @@ class ImpaKcMwm:
                         list_teams_processing_department_indices_combinations.extend(
                             y
                             for y in teams_processing_department_indices_combinations
-                            if y
-                            not in list_teams_processing_department_indices_combinations
+                            if y not in list_teams_processing_department_indices_combinations
                         )
                     print(
                         "\nlist_packages_processing_bin_indices_combinations:\n ",
                         list_teams_processing_department_indices_combinations,
                     )
-                    team_indices_processing = [
-                        i[0]
-                        for i in list_teams_processing_department_indices_combinations
-                    ]
+                    team_indices_processing = [i[0] for i in list_teams_processing_department_indices_combinations]
                     print("team_indices_processing: ", team_indices_processing)
-                    team_combinations_processing = [
-                        i[1]
-                        for i in list_teams_processing_department_indices_combinations
-                    ]
-                    print(
-                        "team_combinations_processing: ", team_combinations_processing
-                    )
-                    flag_combinations = [
-                        0 if i[0] == i[1] else 1 for i in team_combinations_processing
-                    ]
+                    team_combinations_processing = [i[1] for i in list_teams_processing_department_indices_combinations]
+                    print("team_combinations_processing: ", team_combinations_processing)
+                    flag_combinations = [0 if i[0] == i[1] else 1 for i in team_combinations_processing]
                     print("flag_combinations: ", flag_combinations)
                     if np.all(np.array(flag_combinations) == 0):
-                        index_processing_combinations = np.where(
-                            np.array(flag_combinations, dtype=np.int) == 0
-                        )[0]
+                        index_processing_combinations = np.where(np.array(flag_combinations, dtype=np.int) == 0)[0]
                         # print('index_processing_combinations: ', index_processing_combinations)
                     else:
-                        index_processing_combinations = np.where(
-                            np.array(flag_combinations, dtype=np.int) != 0
-                        )[0]
+                        index_processing_combinations = np.where(np.array(flag_combinations, dtype=np.int) != 0)[0]
                     print(
                         "Set of teams to remove from: ",
-                        np.array(team_indices_processing)[
-                            index_processing_combinations
-                        ],
+                        np.array(team_indices_processing)[index_processing_combinations],
                     )
                     print(
                         "intrinsic_output_selected :",
                         intrinsic_output_selected[
                             intermediate_selected_teams_indices.searchsorted(
-                                np.array(team_indices_processing)[
-                                    index_processing_combinations
-                                ]
+                                np.array(team_indices_processing)[index_processing_combinations]
                             )
                         ],
                     )
@@ -1994,9 +1713,7 @@ class ImpaKcMwm:
                             == max(
                                 intrinsic_output_selected[
                                     intermediate_selected_teams_indices.searchsorted(
-                                        np.array(team_indices_processing)[
-                                            index_processing_combinations
-                                        ]
+                                        np.array(team_indices_processing)[index_processing_combinations]
                                     )
                                 ]
                             )
@@ -2005,13 +1722,9 @@ class ImpaKcMwm:
                     print("removed_team:", removed_team)
                     # print('reward[removed_team]: ', reward_team[removed_team])
                     removed_team_location = team_locations[
-                        np.where(intermediate_selected_teams_indices == removed_team)[
-                            0
-                        ][0]
+                        np.where(intermediate_selected_teams_indices == removed_team)[0][0]
                     ]
-                    removed_team_combination = (
-                        np.array(available_combinations[removed_team_location]) - 1
-                    )
+                    removed_team_combination = np.array(available_combinations[removed_team_location]) - 1
                     removed_team_type = teams_types[removed_team]
                     print(
                         "Removing Package ",
@@ -2028,34 +1741,18 @@ class ImpaKcMwm:
                     u = removed_team_combination[0]
                     v = removed_team_combination[1]
                     if removed_team_type == 1:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 1
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 1
                     elif removed_team_type == 2:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 1
-                        )
-                        intermediate_team_department_weights[v] = (
-                            intermediate_team_department_weights[v] - 1
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 1
+                        intermediate_team_department_weights[v] = intermediate_team_department_weights[v] - 1
                     elif removed_team_type == 3:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 2
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 2
                     elif removed_team_type == 4:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 2
-                        )
-                        intermediate_team_department_weights[v] = (
-                            intermediate_team_department_weights[v] - 1
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 2
+                        intermediate_team_department_weights[v] = intermediate_team_department_weights[v] - 1
                     elif removed_team_type == 5:
-                        intermediate_team_department_weights[u] = (
-                            intermediate_team_department_weights[u] - 2
-                        )
-                        intermediate_team_department_weights[v] = (
-                            intermediate_team_department_weights[v] - 2
-                        )
+                        intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 2
+                        intermediate_team_department_weights[v] = intermediate_team_department_weights[v] - 2
             print("-------")
             print("POST-PROCESSING ENDED")
             print("-------")
@@ -2083,9 +1780,7 @@ class ImpaKcMwm:
         project_matched_flag = False
         post_processing_capacity_exceeded_flag = False
 
-        post_processing_team_departments_weights = np.zeros(
-            (num_departments), dtype=int
-        )
+        post_processing_team_departments_weights = np.zeros((num_departments), dtype=int)
         team_type = []
         total_value = 0
         project_array = []
@@ -2094,10 +1789,7 @@ class ImpaKcMwm:
             index = intermediate_selected_teams_indices[i]
             if index in reused_teams and post_process_flag:
                 project_index = np.where(
-                    matching_array[0]
-                    == [i[0] for i in post_processing_ic_combination if i[1] == index][
-                        0
-                    ]
+                    matching_array[0] == [i[0] for i in post_processing_ic_combination if i[1] == index][0]
                 )[0]
             else:
                 project_index = np.where(matching_array[1] == index)[0]
@@ -2107,9 +1799,7 @@ class ImpaKcMwm:
             for j in range(0, num_departments):
                 weight = teams_weights_per_department[j][index]
                 if weight != 0:
-                    post_processing_team_departments_weights[j] = (
-                        post_processing_team_departments_weights[j] + weight
-                    )
+                    post_processing_team_departments_weights[j] = post_processing_team_departments_weights[j] + weight
             location_package = team_locations[i]
             print(
                 "Team ",
@@ -2182,15 +1872,10 @@ class ImpaKcMwm:
         for i in range(0, len(matching_array[1])):
             team_index = matching_array[1][i]
             if team_index in reused_teams and post_process_flag:
-                project_index = [
-                    i[0] for i in post_processing_ic_combination if i[1] == team_index
-                ][0]
+                project_index = [i[0] for i in post_processing_ic_combination if i[1] == team_index][0]
             else:
                 project_index = matching_array[0][i]
-            if (
-                team_index in intermediate_selected_teams_indices
-                and team_index not in total_weight_used_teams
-            ):
+            if team_index in intermediate_selected_teams_indices and team_index not in total_weight_used_teams:
                 total_weight = total_weight + reward_project[project_index, team_index]
                 total_weight_used_teams.append(team_index)
 

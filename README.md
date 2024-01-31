@@ -347,6 +347,7 @@ This will be fixed in a future version.
   - Run: ``
          ./unit_test_kc_mwm.sh or ./unit_test_tsp.sh
          ``
+- In order to perform unit-testing of a certain function using the bash script files "unit_test_kc_mwm.sh" or "unit_test_tsp.sh", the function's name is included in the variable "unit_tests". Next, we loop over all unit tests where in each case we create "ut_inputs" and "ut_results" folders to store the inputs and output files, respectively. For each unit test function, multiple sub-tests could be performed depending on the value of the "total_sub_tests" variable. To perfom unit testing, a python function "impalib_unit_tests.py" is called to generate the input/output files of the python code for the function under investigation. "impalib_unit_tests_kc_mwm" executable will take the generated input files and produce the output files of the C++ code. Finally, "ut_methods_utils.py" will run to check whether the python and C++ generated outputs agree or not. After all sub-tests are carried out, the content of "ut_inputs" and "ut_results" folders is deleted. The process continues until all functions are examined.
 
 ### **License**
 

@@ -42,15 +42,17 @@ class GraphicalModelKcMwm{
 GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG, const impalib_type ALPHA)
                                 : modelInputs_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS)
                                 , outputs(N_DEPARTMENTS, N_TEAMS, N_PROJECTS), modelKnapsacks_(N_DEPARTMENTS, N_TEAMS, FILT_FLAG, ALPHA), projectIneqConstraint_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS)
-                                , modelEqConstraint_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS), modelOric_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS) {
+                                , modelEqConstraint_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS), modelOric_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS), \
+                                numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS), maxSizeNonZeroWeights_(MAX_SIZE_NON_ZERO_WEIGHTS), numIterations_(N_ITERATIONS), \
+                                filteringFlag_(FILT_FLAG), alpha_(ALPHA){
 
-        numProjects_ = N_PROJECTS;
-        numTeams_ = N_TEAMS;
-        numDepartments_ = N_DEPARTMENTS;
-        maxSizeNonZeroWeights_ = MAX_SIZE_NON_ZERO_WEIGHTS;
-        numIterations_ = N_ITERATIONS;
-        filteringFlag_ = FILT_FLAG;
-        alpha_ = ALPHA;
+        //numProjects_ = N_PROJECTS;
+        //numTeams_ = N_TEAMS;
+        //numDepartments_ = N_DEPARTMENTS;
+        //maxSizeNonZeroWeights_ = MAX_SIZE_NON_ZERO_WEIGHTS;
+        //numIterations_ = N_ITERATIONS;
+        //filteringFlag_ = FILT_FLAG;
+        //alpha_ = ALPHA;
 
         oric2PackageM_.resize(numTeams_);
         team2OricM_.resize(numTeams_);
@@ -159,8 +161,8 @@ class GraphicalModelTsp{
                 vector<vector<int>> selected_edges_old_old_;
                 int maxCount_;
         public:
-                bool tourImpaFlag;
-                bool subtourConstraintsSatisfiedFlag;
+                bool tourImpaFlag = false;
+                bool subtourConstraintsSatisfiedFlag = false;
                 vector<vector<int>> delta_S_indices_list;
                 vector<vector<int>> selectedEdges_;
                 int numAugmentations_;
@@ -198,23 +200,25 @@ GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NOD
                                 modelEqConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
                                 modelSubtourEliminationConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
                                 modelInputs_(NUM_NODES, NUM_EDGE_VARIABLES),
-                                outputs(NUM_NODES, NUM_EDGE_VARIABLES)
+                                outputs(NUM_NODES, NUM_EDGE_VARIABLES), numIterations_(NUM_ITERATIONS), filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), \
+                                numNodes_(NUM_NODES), augmentationFlag_(AUGMENTATION_FLAG), resetFlag_(RESET_FLAG), numEdgeVariables_(NUM_EDGE_VARIABLES), threshold_(THRESHOLD), \
+                                maxCount_(MAX_COUNT)
         {
-        numIterations_ = NUM_ITERATIONS;
-        filteringFlag_ = FILTERING_FLAG;
-        alpha_ = ALPHA;
-        numNodes_ = NUM_NODES;
-        augmentationFlag_ = AUGMENTATION_FLAG;
-        resetFlag_ = RESET_FLAG;
-        numEdgeVariables_ = NUM_EDGE_VARIABLES;
-        threshold_ = THRESHOLD;
-        maxCount_ = MAX_COUNT;
+        //numIterations_ = NUM_ITERATIONS;
+        //filteringFlag_ = FILTERING_FLAG;
+        //alpha_ = ALPHA;
+        //numNodes_ = NUM_NODES;
+        //augmentationFlag_ = AUGMENTATION_FLAG;
+        //resetFlag_ = RESET_FLAG;
+        //numEdgeVariables_ = NUM_EDGE_VARIABLES;
+        //threshold_ = THRESHOLD;
+        //maxCount_ = MAX_COUNT;
 
         DegreeConstraint2EqConstraintDummyM_.reserve(numEdgeVariables_);
         DegreeConstraint2EqConstraintM_.reserve(numEdgeVariables_);
 
-        tourImpaFlag = false;
-        subtourConstraintsSatisfiedFlag = false;
+        //tourImpaFlag = false;
+        //subtourConstraintsSatisfiedFlag = false;
 
         for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++){
                 DegreeConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numNodes_,zero_value));
@@ -274,13 +278,13 @@ void GraphicalModelTsp::iterate_augmented_graph(){
                 }
         }
 
-        cout << "-----------------------" << endl;
-        cout << "iterate_augmented_graph" << endl;
-        cout << "-----------------------" << endl;
+        cout << "-----------------------" << '\n';
+        cout << "iterate_augmented_graph" << '\n';
+        cout << "-----------------------" << '\n';
 
         numAugmentations_+=1;
-        cout<<"Augmentation count: "<<numAugmentations_<<endl;
-        cout<<"delta_S_indices_list.size(): "<<delta_S_indices_list.size()<<endl;
+        cout<<"Augmentation count: "<<numAugmentations_<<'\n';
+        cout<<"delta_S_indices_list.size(): "<<delta_S_indices_list.size()<<'\n';
 
         modelSubtourEliminationConstraint_.subtourConstraints2EdgeEcOld_.reserve(delta_S_indices_list.size());
 
@@ -313,7 +317,7 @@ void GraphicalModelTsp::iterate_augmented_graph(){
         }
 
         if (flag_nan){
-                cout << "NaN detected" << endl;
+                cout << "NaN detected" << '\n';
                 exit(0);
         }
 
@@ -326,10 +330,10 @@ void GraphicalModelTsp::iterate_augmented_graph(){
         if (!selected_edges_old_.empty()){
                 bool areEqual = (selected_edges == selected_edges_old_);
                 if (areEqual){
-                        cout << "Exited: No Improvement of IMPA Solution" << endl; 
+                        cout << "Exited: No Improvement of IMPA Solution" << '\n'; 
                         noImprovSolCount_+=1;
                         if (noImprovSolCount_ > maxCount_){
-                        cout << "Exited: noImprovSolCount_ Exceeded maximum allowable number " << maxCount_<<endl;
+                        cout << "Exited: noImprovSolCount_ Exceeded maximum allowable number " << maxCount_<<'\n';
                         noImprovSolCountExcFlag_ = true;
                 }
                 }
@@ -343,10 +347,10 @@ void GraphicalModelTsp::iterate_augmented_graph(){
         if (!selected_edges_old_old_.empty()){
                 bool oscillation_flag = ((selected_edges == selected_edges_old_old_) && (selected_edges_old_old_ != selected_edges_old_));
                 if (oscillation_flag){
-                        cout << "Exited: Solution is oscillating" << endl; 
+                        cout << "Exited: Solution is oscillating" << '\n'; 
                         solOscCount_+=1;
                         if (solOscCount_ > maxCount_){
-                        cout << "Exited: solOscCount_ Exceeded maximum allowable number " << maxCount_<<endl;
+                        cout << "Exited: solOscCount_ Exceeded maximum allowable number " << maxCount_<<'\n';
                         solOscCountExcFlag_ = true;
                 }
                 }
@@ -406,8 +410,8 @@ void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSelectedEdg
                 cout << ", ";
         }
         }
-        cout << "]" << endl;
-        //cout << "Number of activated nodes: " << uniqueNodes.size()  << endl;
+        cout << "]" << '\n';
+        //cout << "Number of activated nodes: " << uniqueNodes.size()  << '\n';
 
         impalib_type cost_impa = zero_value;
         for(size_t i = 0; i < hard_decision.size(); ++i) {
@@ -416,7 +420,7 @@ void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSelectedEdg
                 }
         }
 
-        cout<<"C++ cost_impa: "<<cost_impa<<endl;
+        cout<<"C++ cost_impa: "<<cost_impa<<'\n';
         costImpa_ = cost_impa;
 }
 
@@ -430,10 +434,10 @@ void GraphicalModelTsp:: subtour_elimination_constraints_analysis(unordered_map<
         
         
         if (loops_list.empty()){
-                cout << "Exited: Cannot find tours using get_closed_loops()" << endl;
+                cout << "Exited: Cannot find tours using get_closed_loops()" << '\n';
                 noConsClosedLoopsCount_+=1;
                 if (noConsClosedLoopsCount_ > maxCount_){
-                        cout << "Exited: noConsClosedLoopsCount_ Exceeded maximum allowable number: " << maxCount_<<endl;
+                        cout << "Exited: noConsClosedLoopsCount_ Exceeded maximum allowable number: " << maxCount_<<'\n';
                         noConsClosedLoopsCountExcFlag_ = true;
                 }
         }
@@ -442,7 +446,7 @@ void GraphicalModelTsp:: subtour_elimination_constraints_analysis(unordered_map<
                 subtourConstraintsSatisfiedFlag = true;
                 tourImpa_ = loops_list[0];
                 tourImpa_.push_back(loops_list[0][0]);
-                cout << "Tour found" << endl;
+                cout << "Tour found" << '\n';
                 
         cout << "tour_impa: [";
         for (size_t i = 0; i < tourImpa_.size(); ++i) {
@@ -451,13 +455,13 @@ void GraphicalModelTsp:: subtour_elimination_constraints_analysis(unordered_map<
                 cout << ", ";
                 }
         }
-        cout << "]" << endl;
+        cout << "]" << '\n';
         }
 
         else{
                 noConsClosedLoopsCount_=0;
                 for (const auto& loop : loops_list) {
-                        closedPathsSize_.push_back(loop.size());
+                        closedPathsSize_.push_back(static_cast<int>(loop.size()));
                         cout << "Subtour of size " << loop.size() << " detected @: ";
                         cout << "[";
                         for (size_t i = 0; i < loop.size(); ++i) {
@@ -466,13 +470,13 @@ void GraphicalModelTsp:: subtour_elimination_constraints_analysis(unordered_map<
                                         cout << ", ";
                                 }
                         }
-                        cout << "]" << endl;
+                        cout << "]" << '\n';
 
                         vector<int> delta_S_indices;
                         for (size_t i = 0; i < modelInputs_.EdgeConnections.size(); ++i) {
                                 const auto& connection = modelInputs_.EdgeConnections[i];
                                 if (find(loop.begin(), loop.end(), connection[0]) != loop.end() && find(loop.begin(), loop.end(), connection[1]) == loop.end()) {
-                                        delta_S_indices.push_back(i);    
+                                        delta_S_indices.push_back(static_cast<int>(i));    
                                 }
                         }
 
@@ -529,7 +533,7 @@ vector<vector<int>> GraphicalModelTsp:: get_closed_loops(unordered_map<int, vect
         vector<int> list_indices_to_remove;
         vector<vector<int>> new_loops_list;
 
-        for (size_t i=0; i<loops_list.size(); i++){
+        for (int i=0; i<static_cast<int>(loops_list.size()); i++){
                 const auto& list_1 = loops_list[i];
                 if (list_1.empty()){
                         list_indices_to_remove.push_back(i);
@@ -540,7 +544,7 @@ vector<vector<int>> GraphicalModelTsp:: get_closed_loops(unordered_map<int, vect
                 }
                 vector<int> double_list_1 = list_1;
                 double_list_1.insert(double_list_1.end(), list_1.begin(), list_1.end());
-                for (size_t j=i+1; j<loops_list.size(); j++){
+                for (int j=i+1; j<static_cast<int>(loops_list.size()); j++){
                         const auto& list_2 = loops_list[j];
                         
                         if (list_2.empty()){
@@ -569,8 +573,8 @@ vector<vector<int>> GraphicalModelTsp:: get_closed_loops(unordered_map<int, vect
 
 bool GraphicalModelTsp::isSubsequence(const vector<int>& seq, const vector<int>& subseq, int j) {
 
-        for (size_t i = 0; i < seq.size() - subseq.size(); ++i) {
-                if (equal(seq.begin() + i, seq.begin() + i + subseq.size(), subseq.begin())) {
+        for (int i = 0; i < static_cast<int>(seq.size() - subseq.size()); ++i) {
+                if (equal(seq.begin() + i, seq.begin() + i + static_cast<int>(subseq.size()), subseq.begin())) {
                         return true;
                 }
         }
