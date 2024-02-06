@@ -69,36 +69,7 @@ int main()
 
     if (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG)
     {
-        if (model_graph.delta_S_indices_list.size() > 0)
-        {
-            vector<vector<impalib_type>> temp(model_graph.delta_S_indices_list.size(),
-                                              vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
-            model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(),
-                                                          temp.end());
-            model_graph.subtourConstraints2EdgeEcDummyM = model_graph.subtourConstraints2EdgeEcM;
-        }
-    }
+        model_graph.perform_augmentation(MAX_AUGM_COUNT);
 
-    while (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG && !model_graph.tourImpaFlag)
-    {
-
-        // Investigation of MAX_FAILURE_COUNT should be here and is shown in the full code
-        model_graph.iterate_augmented_graph();
-
-        if (model_graph.numAugmentations_ == MAX_AUGM_COUNT)
-        {
-            cout << "MAX_AUGM_COUNT reached" << '\n';
-            break;
-        }
-
-        if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.delta_S_indices_list.size())
-        {
-            size_t numLists2Add =
-                model_graph.delta_S_indices_list.size() - model_graph.subtourConstraints2EdgeEcM.size();
-            vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
-            model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(),
-                                                          temp.end());
-            model_graph.subtourConstraints2EdgeEcDummyM = model_graph.subtourConstraints2EdgeEcM;
-        }
     }
 }

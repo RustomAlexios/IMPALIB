@@ -53,87 +53,10 @@ extern "C" void WrapperTsp(const int NUM_ITERATIONS, const int NUM_NODES, const 
 
     if (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG)
     {
-        if (model_graph.delta_S_indices_list.size() > 0)
-        {
-            vector<vector<impalib_type>> temp(model_graph.delta_S_indices_list.size(),
-                                              vector<impalib_type>(NUM_EDGE_VARIABLES, zero_value));
-            model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(),
-                                                          temp.end());
-            model_graph.subtourConstraints2EdgeEcDummyM = model_graph.subtourConstraints2EdgeEcM;
-        }
+        model_graph.perform_augmentation(MAX_AUGM_COUNT);
+
     }
 
-    while (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG && !model_graph.tourImpaFlag)
-    {
-
-        if (model_graph.noConsClosedLoopsCountExcFlag_ || model_graph.noImprovSolCountExcFlag_
-            || model_graph.solOscCountExcFlag_)
-        {
-            cout << "model_graph.noConsClosedLoopsCountExcFlag_: " << model_graph.noConsClosedLoopsCountExcFlag_
-                 << '\n';
-            cout << "model_graph.noImprovSolCountExcFlag_: " << model_graph.noImprovSolCountExcFlag_ << '\n';
-            cout << "model_graph.solOscCountExcFlag_: " << model_graph.solOscCountExcFlag_ << '\n';
-            break;
-        }
-        if (model_graph.costImpa_ == zero_value)
-        {
-            cout << "Cost is zero" << '\n';
-            cout << "Possibly Nan" << '\n';
-            exit(0);
-        }
-        model_graph.iterate_augmented_graph();
-
-        if (model_graph.numAugmentations_ == MAX_AUGM_COUNT)
-        {
-            cout << "MAX_AUGM_COUNT reached" << '\n';
-            break;
-        }
-
-        if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.delta_S_indices_list.size())
-        {
-            size_t numLists2Add =
-                model_graph.delta_S_indices_list.size() - model_graph.subtourConstraints2EdgeEcM.size();
-            vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(NUM_EDGE_VARIABLES, zero_value));
-            model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(),
-                                                          temp.end());
-            model_graph.subtourConstraints2EdgeEcDummyM = model_graph.subtourConstraints2EdgeEcM;
-        }
-    }
-
-    copy(model_graph.outputs.ExtrinsicOutputEdgeEc.begin(),
-         model_graph.outputs.ExtrinsicOutputEdgeEc.begin() + NUM_EDGE_VARIABLES, pExtrinsic_output_edge_ec);
-    *pNum_augmentations     = model_graph.numAugmentations_;
-    *pNum_added_constraints = static_cast<int>(model_graph.subtourConstraints2EdgeEcM.size());
-    copy(model_graph.tourImpa_.begin(), model_graph.tourImpa_.begin() + static_cast<int>(model_graph.tourImpa_.size()),
-         pTour_impa);
-    *pCost_impa                    = model_graph.costImpa_;
-    *pNo_improv_sol_count_exc_flag = model_graph.noImprovSolCountExcFlag_;
-    *pNo_cons_loops_count_exc_flag = model_graph.noConsClosedLoopsCountExcFlag_;
-    *pSol_osc_count_exc_flag       = model_graph.solOscCountExcFlag_;
-
-    vector<int> flattened_selected_edges =
-        accumulate(model_graph.selectedEdges_.begin(), model_graph.selectedEdges_.end(), vector<int>{},
-                   [](vector<int> &acc, const vector<int> &inner)
-                   {
-                       acc.insert(acc.end(), inner.begin(), inner.end());
-                       return acc;
-                   });
-
-    copy(flattened_selected_edges.begin(),
-         flattened_selected_edges.begin() + static_cast<int>(flattened_selected_edges.size()), pSelected_edges);
-    *pSelected_edges_size = static_cast<int>(flattened_selected_edges.size());
-
-    vector<int> flattened_closed_paths =
-        accumulate(model_graph.subtourPaths_.begin(), model_graph.subtourPaths_.end(), vector<int>{},
-                   [](vector<int> &acc, const vector<int> &inner)
-                   {
-                       acc.insert(acc.end(), inner.begin(), inner.end());
-                       return acc;
-                   });
-
-    copy(flattened_closed_paths.begin(),
-         flattened_closed_paths.begin() + static_cast<int>(flattened_closed_paths.size()), pSubtour_paths);
-    copy(model_graph.closedPathsSize_.begin(),
-         model_graph.closedPathsSize_.begin() + static_cast<int>(model_graph.closedPathsSize_.size()),
-         pSubtour_paths_size);
+    model_graph.process_ouputs(pExtrinsic_output_edge_ec, pNum_augmentations, pNum_added_constraints, pTour_impa, pCost_impa, pNo_improv_sol_count_exc_flag, \
+                              pNo_cons_loops_count_exc_flag, pSol_osc_count_exc_flag, pSelected_edges, pSelected_edges_size, pSubtour_paths, pSubtour_paths_size);
 }

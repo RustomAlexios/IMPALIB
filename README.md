@@ -165,120 +165,112 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 
 - Demo code of Application $2$:
 
-    ```cpp
-    // Copyright 2023, Alexios Rustom.
-    // https://github.com/RustomAlexios/IMPALIB
-    // Distributed under the MIT License.
-    // (See accompanying LICENSE file or at
-    //  https://opensource.org/licenses/MIT)
+  ```cpp
+  // Copyright 2023, Alexios Rustom.
+  // https://github.com/RustomAlexios/IMPALIB
+  // Distributed under the MIT License.
+  // (See accompanying LICENSE file or at
+  //  https://opensource.org/licenses/MIT)
 
-    #include "impalib/impalib.hpp"
+  #include "impalib/impalib.hpp"
 
-    int main(){
-        const int N_NODES = 5; //number of nodes
-        const bool FILT_FLAG = true; //whether filtering is activated or not
-        const int N_ITER = 200; //number of iterations of IMPA
-        const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;; //number of edge variables
-        const impalib_type ALPHA = 0.5; //filtering parameter
-        const bool SYM_FLAG = true; //symmetric flag
-        const bool RESET_FLAG = false; //reset flag
-        const impalib_type THRESHOLD = -0.0001; //threshold parameter
-        const bool AUGM_FLAG = true; //augmentation flag
-        const int MAX_AUGM_COUNT = 50; //maximum augmentation count
-        const int MAX_FAILURE_COUNT = 50; //maximum count for failure
+  int main(){
+      const int N_NODES = 5; //number of nodes
+      const bool FILT_FLAG = true; //whether filtering is activated or not
+      const int N_ITER = 200; //number of iterations of IMPA
+      const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;; //number of edge variables
+      const impalib_type ALPHA = 0.5; //filtering parameter
+      const bool SYM_FLAG = true; //symmetric flag
+      const bool RESET_FLAG = false; //reset flag
+      const impalib_type THRESHOLD = -0.0001; //threshold parameter
+      const bool AUGM_FLAG = true; //augmentation flag
+      const int MAX_AUGM_COUNT = 50; //maximum augmentation count
+      const int MAX_FAILURE_COUNT = 50; //maximum count for failure
 
-        //connections between nodes for each edge variable
-        int edge_connections[N_EDGE_VARIABLES][2] = {{0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 0}, {1, 2}, {1, 3}, {1, 4}, {2, 0}, {2, 1}, {2, 3}, {2, 4}, {3, 0}, {3, 1}, {3, 2}, {3, 4}, {4, 0}, {4, 1}, {4, 2},{4, 3}};
+      //connections between nodes for each edge variable
+      int edge_connections[N_EDGE_VARIABLES][2] = {{0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 0}, {1, 2}, {1, 3}, {1, 4}, {2, 0}, {2, 1}, {2, 3}, {2, 4}, {3, 0}, {3, 1}, {3, 2}, {3, 4}, {4, 0}, {4, 1}, {4, 2},{4, 3}};
 
-        //cost matrix of the tsp problem
-        impalib_type cost_matrix[N_NODES][N_NODES] = {{  0.0, 151.75578773,  56.18610887, 718.31915651, 293.02503715},
-                                                    {151.75578773,   0.0,         568.4231286,   83.25740946, 545.45357536},
-                                                    { 56.18610887, 568.4231286,    0.0,         445.55107005, 888.09445172},
-                                                    {718.31915651,  83.25740946, 445.55107005,   0.0,         719.05730714},
-                                                    {293.02503715, 545.45357536, 888.09445172, 719.05730714,   0.0}};
+      //cost matrix of the tsp problem
+      impalib_type cost_matrix[N_NODES][N_NODES] = {{  0.0, 151.75578773,  56.18610887, 718.31915651, 293.02503715},
+                                                  {151.75578773,   0.0,         568.4231286,   83.25740946, 545.45357536},
+                                                  { 56.18610887, 568.4231286,    0.0,         445.55107005, 888.09445172},
+                                                  {718.31915651,  83.25740946, 445.55107005,   0.0,         719.05730714},
+                                                  {293.02503715, 545.45357536, 888.09445172, 719.05730714,   0.0}};
 
-        //cost_edge_variable constructed from edge_connections and cost_matrix
-        impalib_type cost_edge_variable[N_EDGE_VARIABLES] = {151.75578773,  56.18610887, 718.31915651, 293.02503715, 151.75578773,
-                                                            568.4231286,   83.25740946, 545.45357536,  56.18610887, 568.4231286,
-                                                            445.55107005, 888.09445172, 718.31915651,  83.25740946, 445.55107005,
-                                                            719.05730714, 293.02503715, 545.45357536, 888.09445172, 719.05730714};
+      //cost_edge_variable constructed from edge_connections and cost_matrix
+      impalib_type cost_edge_variable[N_EDGE_VARIABLES] = {151.75578773,  56.18610887, 718.31915651, 293.02503715, 151.75578773,
+                                                          568.4231286,   83.25740946, 545.45357536,  56.18610887, 568.4231286,
+                                                          445.55107005, 888.09445172, 718.31915651,  83.25740946, 445.55107005,
+                                                          719.05730714, 293.02503715, 545.45357536, 888.09445172, 719.05730714};
 
-        //edge_degree_constraint_cost constructed from edge_connections and cost_matrix
-        impalib_type edge_degree_constraint_cost[N_EDGE_VARIABLES][N_NODES] = {{151.75578773, 151.75578773,   0.0,          0.0,          0.0        },
-                                                                            { 56.18610887,   0.0,          56.18610887,  0.0,          0.0        },
-                                                                            {718.31915651,   0.0,           0.0,         718.31915651, 0.0        },
-                                                                            {293.02503715,   0.0,           0.0,          0.0,        293.02503715},
-                                                                            {151.75578773, 151.75578773,   0.0,          0.0,          0.0        },
-                                                                            {  0.0,        568.4231286,   568.4231286,   0.0,          0.0        },
-                                                                            {  0.0,         83.25740946,   0.0,         83.25740946,  0.0        },
-                                                                            {  0.0,        545.45357536,   0.0,          0.0,        545.45357536},
-                                                                            { 56.18610887,   0.0,          56.18610887,  0.0,          0.0        },
-                                                                            {  0.0,        568.4231286,   568.4231286,   0.0,          0.0        },
-                                                                            {  0.0,          0.0,         445.55107005, 445.55107005,  0.0        },
-                                                                            {  0.0,          0.0,         888.09445172,   0.0,        888.09445172},
-                                                                            {718.31915651,   0.0,           0.0,         718.31915651, 0.0        },
-                                                                            {  0.0,         83.25740946,   0.0,         83.25740946,  0.0        },
-                                                                            {  0.0,          0.0,         445.55107005, 445.55107005,  0.0        },
-                                                                            {  0.0,          0.0,           0.0,         719.05730714, 719.05730714},
-                                                                            {293.02503715,   0.0,           0.0,          0.0,        293.02503715},
-                                                                            {  0.0,        545.45357536,   0.0,          0.0,        545.45357536},
-                                                                            {  0.0,          0.0,         888.09445172,   0.0,        888.09445172},
-                                                                            {  0.0,          0.0,           0.0,         719.05730714, 719.05730714}};
-    
-        const int *pEDGE_CONNECTIONS_PY = (const int *)edge_connections;
-        const impalib_type *pCOST_MATRIX_PY = (const impalib_type*) cost_matrix;
-        const impalib_type *pCOST_EDGE_VARIABLE_PY = cost_edge_variable;
-        impalib_type *pEdge_ec_to_degree_constraint_m_py = (impalib_type*)edge_degree_constraint_cost;
-        const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY = (const impalib_type*)edge_degree_constraint_cost;
+      //edge_degree_constraint_cost constructed from edge_connections and cost_matrix
+      impalib_type edge_degree_constraint_cost[N_EDGE_VARIABLES][N_NODES] = {{151.75578773, 151.75578773,   0.0,          0.0,          0.0        },
+                                                                          { 56.18610887,   0.0,          56.18610887,  0.0,          0.0        },
+                                                                          {718.31915651,   0.0,           0.0,         718.31915651, 0.0        },
+                                                                          {293.02503715,   0.0,           0.0,          0.0,        293.02503715},
+                                                                          {151.75578773, 151.75578773,   0.0,          0.0,          0.0        },
+                                                                          {  0.0,        568.4231286,   568.4231286,   0.0,          0.0        },
+                                                                          {  0.0,         83.25740946,   0.0,         83.25740946,  0.0        },
+                                                                          {  0.0,        545.45357536,   0.0,          0.0,        545.45357536},
+                                                                          { 56.18610887,   0.0,          56.18610887,  0.0,          0.0        },
+                                                                          {  0.0,        568.4231286,   568.4231286,   0.0,          0.0        },
+                                                                          {  0.0,          0.0,         445.55107005, 445.55107005,  0.0        },
+                                                                          {  0.0,          0.0,         888.09445172,   0.0,        888.09445172},
+                                                                          {718.31915651,   0.0,           0.0,         718.31915651, 0.0        },
+                                                                          {  0.0,         83.25740946,   0.0,         83.25740946,  0.0        },
+                                                                          {  0.0,          0.0,         445.55107005, 445.55107005,  0.0        },
+                                                                          {  0.0,          0.0,           0.0,         719.05730714, 719.05730714},
+                                                                          {293.02503715,   0.0,           0.0,          0.0,        293.02503715},
+                                                                          {  0.0,        545.45357536,   0.0,          0.0,        545.45357536},
+                                                                          {  0.0,          0.0,         888.09445172,   0.0,        888.09445172},
+                                                                          {  0.0,          0.0,           0.0,         719.05730714, 719.05730714}};
 
-        GraphicalModelTsp model_graph(N_ITER, N_NODES, N_EDGE_VARIABLES, AUGM_FLAG, RESET_FLAG, FILT_FLAG, ALPHA, THRESHOLD, MAX_FAILURE_COUNT);
+      const int *pEDGE_CONNECTIONS_PY = (const int *)edge_connections;
+      const impalib_type *pCOST_MATRIX_PY = (const impalib_type*) cost_matrix;
+      const impalib_type *pCOST_EDGE_VARIABLE_PY = cost_edge_variable;
+      impalib_type *pEdge_ec_to_degree_constraint_m_py = (impalib_type*)edge_degree_constraint_cost;
+      const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY = (const impalib_type*)edge_degree_constraint_cost;
 
-        model_graph.initialize(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
+      GraphicalModelTsp model_graph(N_ITER, N_NODES, N_EDGE_VARIABLES, AUGM_FLAG, RESET_FLAG, FILT_FLAG, ALPHA, THRESHOLD, MAX_FAILURE_COUNT);
 
-        model_graph.iterate_relaxed_graph();
+      model_graph.initialize(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
 
-        if (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG){
-            if (model_graph.delta_S_indices_list.size() >0){
-                    vector<vector<impalib_type>> temp(model_graph.delta_S_indices_list.size(), vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
-                    model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
-                    model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
-            }
-        }
-    
-        while (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG && !model_graph.tourImpaFlag){
+      model_graph.iterate_relaxed_graph();
 
-            //Investigation of MAX_FAILURE_COUNT should be here and is shown in the full code
-            model_graph.iterate_augmented_graph();
+      if (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG){
+          if (model_graph.delta_S_indices_list.size() >0){
+                  vector<vector<impalib_type>> temp(model_graph.delta_S_indices_list.size(), vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
+                  model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
+                  model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
+          }
+      }
 
-            if (model_graph.numAugmentations_==MAX_AUGM_COUNT){
-                cout<<"MAX_AUGM_COUNT reached"<<endl;
-                break;
-            }
+      while (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG && !model_graph.tourImpaFlag){
 
-            if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.delta_S_indices_list.size()){
-                size_t numLists2Add = model_graph.delta_S_indices_list.size() - model_graph.subtourConstraints2EdgeEcM.size();
-                vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
-                model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
-                model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
-            }
-        }
-    }
-    ```
+          //Investigation of MAX_FAILURE_COUNT should be here and is shown in the full code
+          model_graph.iterate_augmented_graph();
 
+          if (model_graph.numAugmentations_==MAX_AUGM_COUNT){
+              cout<<"MAX_AUGM_COUNT reached"<<endl;
+              break;
+          }
+
+          if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.delta_S_indices_list.size()){
+              size_t numLists2Add = model_graph.delta_S_indices_list.size() - model_graph.subtourConstraints2EdgeEcM.size();
+              vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
+              model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
+              model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
+          }
+      }
+  }
+  ```
 - To run any of the above codes:
+
   - navigate to: ``IMPALIB/examples/KcMwm`` or ``IMPALIB/examples/Tsp``
-  - Run: ``
-        cmake -B build 
-        ``
-  - Run: ``
-        cmake --build build 
-        ``
-  - Run: ``
-        cd build
-        ``
-  - Run: ``
-         ./demo 
-         ``
+  - Run: ``cmake -B build ``
+  - Run: ``cmake --build build ``
+  - Run: ``cd build``
+  - Run: ``./demo ``
 
 ##### **2. Pure Python code**
 
@@ -334,20 +326,10 @@ This will be fixed in a future version.
 - A C++ $11$ -compatible compiler
 - Python $3.9.7$
 - To perform unit testing: randomized simulations using a pure python code and a python wrapper around a C++ code are carried out for both applications. A checking routine on the stored numpy files is executed to compare results. An external library called [cnpy](https://github.com/rogersce/cnpy) is used to save and load numpy arrays in C++
-- To perform unit testing of Application $1$ or $2$, navigate to the root directory:
-  - Run: ``
-        cmake -B build 
-        ``
-  - Run: ``
-        cmake --build build 
-        ``
-  - Run: ``
-        cd build/test/src
-        ``
-  - Run: ``
-         ./unit_test_kc_mwm.sh or ./unit_test_tsp.sh
-         ``
-- In order to perform unit-testing of a certain function using the bash script files "unit_test_kc_mwm.sh" or "unit_test_tsp.sh", the function's name is included in the variable "unit_tests". Next, we loop over all unit tests where in each case we create "ut_inputs" and "ut_results" folders to store the inputs and output files, respectively. For each unit test function, multiple sub-tests could be performed depending on the value of the "total_sub_tests" variable. To perfom unit testing, a python function "impalib_unit_tests.py" is called to generate the input/output files of the python code for the function under investigation. "impalib_unit_tests_kc_mwm" executable will take the generated input files and produce the output files of the C++ code. Finally, "ut_methods_utils.py" will run to check whether the python and C++ generated outputs agree or not. After all sub-tests are carried out, the content of "ut_inputs" and "ut_results" folders is deleted. The process continues until all functions are examined.
+
+### **Unit Testing**
+
+- Refer to this README file for [Unit Testing](test/README.md) framework.
 
 ### **License**
 
