@@ -6,9 +6,13 @@
 
 - In order to perform unit-testing of a certain function $F$ with a function name $N$ in a class $C$ using the bash script files "unit_test_kc_mwm.sh" or "unit_test_tsp.sh", do the following:
 
-  - Include the function's name $N$ in the variable "unit_tests" in "unit_test_kc_mwm.sh" or "unit_test_tsp.sh" files.
+  - Step $1$: 
+    
+    - Include the function's name $N$ in the variable "unit_tests" in "unit_test_kc_mwm.sh" or "unit_test_tsp.sh" files.
 
-  - Navigate to "python_kc_mwm/test/" or "python_tsp/test/" and add the python unit test for function $F$ in class $C$:
+  - Step $2$: 
+    
+    - Navigate to "python_kc_mwm/test/" or "python_tsp/test/" and add the python unit test for function $F$ in class $C$:
 
     - If class $C$ file exists, open "ut_class.py". If class $C$ file does not exist, create a new file "ut_class.py", and make sure to import this class in "impalib_unit_tests.py".
 
@@ -20,17 +24,21 @@
 
     - Note that "impalib_unit_tests.py" file takes some inputs to process the python unit testing. These are user specific inputs (number of nodes in TSP, etc.)
 
-  - Navigate to "test/include/":
+  - Step $3$: 
+    
+    - Navigate to "test/include/":
 
     - If class $C$ file exists, open "ut_class.hpp". If class $C$ file does not exist, create a new file "ut_class.hpp", and make sure to add "#include "impalib/ut_class.hpp" in "impalib_unit_tests.hpp".
 
     - Add a unit test function "ut_function()" in "ut_class.hpp". Note that "ut_function()" takes specific arguments, and will generate C++ output files.
 
-  - Next, navigate to "test/src/impalib_unit_tests_kc_mwm.cpp" or "test/src/impalib_unit_tests_tsp.cpp" and call the function unit test "ut_function()".
+    - Next, navigate to "test/src/impalib_unit_tests_kc_mwm.cpp" or "test/src/impalib_unit_tests_tsp.cpp" and call the function unit test "ut_function()".
 
     - Example: Function $F$ "degree_constraint_to_edge_ec_update()" with function name $N$ "DegreeConstraint2EdgeEcUpdate" is already implemented for class $C$ with file "ut_update_degree_constraint.hpp". Notice that $F$ is called in "impalib_unit_tests_tsp.cpp" based on its function name. The unit test of $F$ in "ut_update_degree_constraint.hpp" will read the input files from "test/ut_inputs/" and generate the output files in "test/ut_results/". Note that some general variables are exported in "unit_test_kc_mwm.sh" or "unit_test_tsp.sh", and these will be read in the unit test functions. These inputs are common across various unit tests.
 
-  - "python3 ut_methods_utils.py" takes the function, and is called to read the outputs files of the Python and C++ codes, and check agreement or not.
+  - Step $4$:
+    - "python3 ut_methods_utils.py" takes the function, and is called to read the outputs files of the Python and C++ codes, and check agreement or not.
+
     - Example: Based on the above examples, "ut_methods_utils.py" will read the Python and C++ output files for function name $N$ "DegreeConstraint2EdgeEcUpdate", and check whether there is agreement or not.
 
 - To perform unit testing of Application $1$ or $2$, navigate to the root directory:
