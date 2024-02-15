@@ -183,15 +183,9 @@ class GraphicalModel:
 
             self.model_degree_constraint.process_filtering(iter)
 
-            self.edge_ec_to_degree_constraint_m = (
-                self.model_eq_constraint.edge_ec_to_degree_constraint_relaxed_graph_update(
-                    self.model_degree_constraint.degree_constraint_to_eq_constraint_m
-                )
-            )
+            self.edge_ec_to_degree_constraint_m = self.model_eq_constraint.edge_ec_to_degree_constraint_relaxed_graph_update(self.model_degree_constraint.degree_constraint_to_eq_constraint_m)
 
-        extrinsic_output_edge_ec = self.outputs.extrinsic_output_edge_ec_relaxed_graph_update(
-            self.model_degree_constraint.degree_constraint_to_eq_constraint_m
-        )
+        extrinsic_output_edge_ec = self.outputs.extrinsic_output_edge_ec_relaxed_graph_update(self.model_degree_constraint.degree_constraint_to_eq_constraint_m)
         intrinsic_out_edge_ec = extrinsic_output_edge_ec + self.cost_edge_variable
         self.intrinsic_out_edge_ec = intrinsic_out_edge_ec
 
@@ -203,17 +197,13 @@ class GraphicalModel:
         self.subtour_elimination_constraints_analysis()
 
         if (not self.subtour_constraints_satisfied_flag) and self.augmentation_flag:
-            self.subtour_constraints_to_edge_ec_m = [
-                [zero_value] * self.num_edge_variables for _ in range(len(self.delta_S_indices_list))
-            ]
+            self.subtour_constraints_to_edge_ec_m = [[zero_value] * self.num_edge_variables for _ in range(len(self.delta_S_indices_list))]
 
         while (not self.subtour_constraints_satisfied_flag) and self.augmentation_flag and not self.tour_impa_flag:
             self.selected_edges_old = deepcopy(self.selected_edges)
             self.iterate_augmented_graph()
             self.hard_decision_analysis()
-            if self.selected_edges.shape == self.selected_edges_old.shape and {
-                frozenset(sub) for sub in self.selected_edges
-            } == {frozenset(sub) for sub in self.selected_edges_old}:
+            if self.selected_edges.shape == self.selected_edges_old.shape and {frozenset(sub) for sub in self.selected_edges} == {frozenset(sub) for sub in self.selected_edges_old}:
                 print("Exited: No improvement in IMPA solution")
                 if np.any(np.isnan(self.edge_ec_to_degree_constraint_m)):
                     print("Exited: No improvement in IMPA solution")
@@ -222,12 +212,7 @@ class GraphicalModel:
 
             self.subtour_elimination_constraints_analysis()
             if len(self.subtour_constraints_to_edge_ec_m) != len(self.delta_S_indices_list):
-                self.subtour_constraints_to_edge_ec_m.extend(
-                    [
-                        [0] * self.num_edge_variables
-                        for _ in range(len(self.delta_S_indices_list) - len(self.subtour_constraints_to_edge_ec_m))
-                    ]
-                )
+                self.subtour_constraints_to_edge_ec_m.extend([[0] * self.num_edge_variables for _ in range(len(self.delta_S_indices_list) - len(self.subtour_constraints_to_edge_ec_m))])
 
         if self.augmentation_flag:
             print(f"tour_impa: {self.tour_impa}")
@@ -293,20 +278,16 @@ class GraphicalModel:
                 self.cost_edge_variable,
             )
 
-            self.subtour_constraints_to_edge_ec_m_dummy = (
-                self.model_subtour_constraint.subtour_constraints_to_edge_ec_update(
-                    self.edge_ec_to_subtour_constraints_m,
-                    self.delta_S_indices_list,
-                )
+            self.subtour_constraints_to_edge_ec_m_dummy = self.model_subtour_constraint.subtour_constraints_to_edge_ec_update(
+                self.edge_ec_to_subtour_constraints_m,
+                self.delta_S_indices_list,
             )
 
             self.subtour_constraints_to_edge_ec_m = self.model_subtour_constraint.process_filtering(iter)
 
-            self.edge_ec_to_degree_constraint_m = (
-                self.model_eq_constraint.edge_ec_to_degree_constraint_augmented_graph_update(
-                    self.model_degree_constraint.degree_constraint_to_eq_constraint_m,
-                    self.subtour_constraints_to_edge_ec_m,
-                )
+            self.edge_ec_to_degree_constraint_m = self.model_eq_constraint.edge_ec_to_degree_constraint_augmented_graph_update(
+                self.model_degree_constraint.degree_constraint_to_eq_constraint_m,
+                self.subtour_constraints_to_edge_ec_m,
             )
 
         extrinsic_output_edge_ec = self.outputs.extrinsic_output_edge_ec_augmented_graph_update(
@@ -426,15 +407,11 @@ class GraphicalModel:
                     l,
                     other_element,
                 ) in enumerate(open_paths_dummy[:index] + open_paths_dummy[index + 1 :]):
-                    if len(other_element) > size and element in [
-                        other_element[i : i + size] for i in range(len(other_element) - size + 1)
-                    ]:
+                    if len(other_element) > size and element in [other_element[i : i + size] for i in range(len(other_element) - size + 1)]:
                         paths_indices_to_remove.append(index)
                         break
 
-            self.open_paths = [
-                element for i, element in enumerate(open_paths_dummy) if i not in paths_indices_to_remove
-            ]
+            self.open_paths = [element for i, element in enumerate(open_paths_dummy) if i not in paths_indices_to_remove]
 
             print("--------")
             print(f"Number of nodes: {self.num_nodes}")
@@ -473,9 +450,7 @@ class GraphicalModel:
                         sublist[0],
                     ]
                 )
-                indices = [
-                    self.edge_connections.tolist().index(pair) for pair in pairs if pair in self.edge_connections
-                ]
+                indices = [self.edge_connections.tolist().index(pair) for pair in pairs if pair in self.edge_connections]
                 if np.sum(self.hard_decision[indices]) <= len(sublist) - 1:
                     print("Exited: DETECTION OF SUBTOURS IS WRONG")
                 delta_S_indices = [

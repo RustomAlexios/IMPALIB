@@ -15,14 +15,10 @@ from environmentModule import np, os, np_impa_lib
 def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
     N_DEPARTMENTS = N_u.size
     available_combinations = prune_teams(N_u)
-    teams_weights_per_department, teams_types_per_department = team_reward_generation(
-        available_combinations, N_u, team_types
-    )
+    teams_weights_per_department, teams_types_per_department = team_reward_generation(available_combinations, N_u, team_types)
     teams_types = teams_types_per_department[0]
 
-    teams_weights_per_department = np.array(
-        teams_weights_per_department, dtype=np.int32
-    )  # added to make it array with type int32
+    teams_weights_per_department = np.array(teams_weights_per_department, dtype=np.int32)  # added to make it array with type int32
 
     N_TEAMS = len(teams_types)
 
@@ -33,23 +29,17 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
 
     non_zero_weight_indices_sizes = [len(indices) for indices in non_zero_weight_indices]  # input to C++
     max_size_nonzero_weights = max(non_zero_weight_indices_sizes)
-    non_zero_weight_indices_arr = np.zeros(
-        (N_DEPARTMENTS, max_size_nonzero_weights), dtype=np.int32
-    )  # input to C++ # added np.int32
+    non_zero_weight_indices_arr = np.zeros((N_DEPARTMENTS, max_size_nonzero_weights), dtype=np.int32)  # input to C++ # added np.int32
 
-    #f_input_alpha = os.getcwd() + "/../ut_inputs/ut_Knapsack/alpha.npy"
     f_input_alpha = os.getcwd() + "/../ut_inputs/alpha.npy"
     np.save(f_input_alpha, alpha)
 
-    #f_input1 = os.getcwd() + "/../ut_inputs/ut_Knapsack/N_TEAMS_pure.npy"
     f_input1 = os.getcwd() + "/../ut_inputs/N_TEAMS_pure.npy"
     np.save(f_input1, N_TEAMS)
 
-    #f_input2 = os.getcwd() + "/../ut_inputs/ut_Knapsack/non_zero_weight_indices_sizes_pure.npy"
     f_input2 = os.getcwd() + "/../ut_inputs/non_zero_weight_indices_sizes_pure.npy"
     np.save(f_input2, np.array(non_zero_weight_indices_sizes, dtype=np.int32).flatten())
 
-    #f_input3 = os.getcwd() + "/../ut_inputs/ut_Knapsack/teams_weights_per_department_pure"
     f_input3 = os.getcwd() + "/../ut_inputs/teams_weights_per_department_pure"
     np.save(f_input3, teams_weights_per_department.flatten())
 
@@ -57,7 +47,6 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
         for j in range(len(non_zero_weight_indices[i])):
             non_zero_weight_indices_arr[i, j] = non_zero_weight_indices[i][j]
 
-    #f_input4 = os.getcwd() + "/../ut_inputs/ut_Knapsack/non_zero_weight_indices_arr_pure.npy"
     f_input4 = os.getcwd() + "/../ut_inputs/non_zero_weight_indices_arr_pure.npy"
     np.save(f_input4, non_zero_weight_indices_arr.flatten())
 
@@ -70,7 +59,6 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
             if teams_weights_per_department[i][j] != 0:
                 team_to_knapsack_m[i][j] = reward_team[j]
 
-    #f_input5 = os.getcwd() + "/../ut_inputs/ut_Knapsack/team_to_knapsack_m_pure.npy"
     f_input5 = os.getcwd() + "/../ut_inputs/team_to_knapsack_m_pure.npy"
     np.save(f_input5, team_to_knapsack_m.flatten())
 
@@ -84,7 +72,6 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
                 teams_weights_per_department[department_index],
             )
             f_pure_path = (
-                #os.getcwd() + "/../ut_results/ut_Knapsack/forward_pure" + str(department_index)
                 os.getcwd() + "/../ut_results/forward_pure" + str(department_index)
             )
             output_file_python_pure = open(f_pure_path, "wb")
@@ -102,7 +89,6 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
                 teams_weights_per_department[department_index],
             )
             f_pure_path = (
-                #os.getcwd() + "/../ut_results/ut_Knapsack/backward_pure" + str(department_index)
                 os.getcwd() + "/../ut_results/backward_pure" + str(department_index)
             )
             output_file_python_pure = open(f_pure_path, "wb")
@@ -117,21 +103,15 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
 def ut_extrinsic_output_department(ut_name, N_u, team_types, filtering_flag, alpha):
     N_DEPARTMENTS = N_u.size
     available_combinations = prune_teams(N_u)
-    teams_weights_per_department, teams_types_per_department = team_reward_generation(
-        available_combinations, N_u, team_types
-    )
+    teams_weights_per_department, teams_types_per_department = team_reward_generation(available_combinations, N_u, team_types)
     teams_types = teams_types_per_department[0]
 
-    teams_weights_per_department = np.array(
-        teams_weights_per_department, dtype=np.int32
-    )  # added to make it array with type int32
+    teams_weights_per_department = np.array(teams_weights_per_department, dtype=np.int32)  # added to make it array with type int32
 
-    #f_input_alpha = os.getcwd() + "/../ut_inputs/ut_Knapsack/alpha.npy"
     f_input_alpha = os.getcwd() + "/../ut_inputs/alpha.npy"
     np.save(f_input_alpha, alpha)
 
     N_TEAMS = len(teams_types)
-    #f_input1 = os.getcwd() + "/../ut_inputs/ut_Knapsack/N_TEAMS_pure.npy"
     f_input1 = os.getcwd() + "/../ut_inputs/N_TEAMS_pure.npy"
     np.save(f_input1, N_TEAMS)
 
@@ -158,19 +138,9 @@ def ut_extrinsic_output_department(ut_name, N_u, team_types, filtering_flag, alp
         stage_backward_messages = np.random.uniform(low=-300, high=300, size=(N_TEAMS + 1, N_u[department_index] + 1))
         stage_backward_messages = stage_backward_messages.astype(np_impa_lib)
 
-        f_input_fv = (
-            os.getcwd()
-            + "/../ut_inputs/stage_forward_messages"
-            + str(department_index)
-            + ".npy"
-        )
+        f_input_fv = os.getcwd() + "/../ut_inputs/stage_forward_messages" + str(department_index) + ".npy"
         np.save(f_input_fv, stage_forward_messages.flatten())
-        f_input_bv = (
-            os.getcwd()
-            + "/../ut_inputs/stage_backward_messages"
-            + str(department_index)
-            + ".npy"
-        )
+        f_input_bv = os.getcwd() + "/../ut_inputs/stage_backward_messages" + str(department_index) + ".npy"
         np.save(f_input_bv, stage_backward_messages.flatten())
 
         model_knapsacks.stage_forward_messages = stage_forward_messages
@@ -195,14 +165,10 @@ def ut_extrinsic_output_department(ut_name, N_u, team_types, filtering_flag, alp
 def ut_team_to_knapsack_update(ut_name, N_u, team_types, filtering_flag, alpha):
     N_DEPARTMENTS = N_u.size
     available_combinations = prune_teams(N_u)
-    teams_weights_per_department, teams_types_per_department = team_reward_generation(
-        available_combinations, N_u, team_types
-    )
+    teams_weights_per_department, teams_types_per_department = team_reward_generation(available_combinations, N_u, team_types)
     teams_types = teams_types_per_department[0]
 
-    teams_weights_per_department = np.array(
-        teams_weights_per_department, dtype=np.int32
-    )  # added to make it array with type int32
+    teams_weights_per_department = np.array(teams_weights_per_department, dtype=np.int32)  # added to make it array with type int32
 
     N_TEAMS = len(teams_types)
 
@@ -216,9 +182,7 @@ def ut_team_to_knapsack_update(ut_name, N_u, team_types, filtering_flag, alpha):
 
     non_zero_weight_indices_sizes = [len(indices) for indices in non_zero_weight_indices]  # input to C++
     max_size_nonzero_weights = max(non_zero_weight_indices_sizes)
-    non_zero_weight_indices_arr = np.zeros(
-        (N_DEPARTMENTS, max_size_nonzero_weights), dtype=np.int32
-    )  # input to C++ # added np.int32
+    non_zero_weight_indices_arr = np.zeros((N_DEPARTMENTS, max_size_nonzero_weights), dtype=np.int32)  # input to C++ # added np.int32
 
     f_input1 = os.getcwd() + "/../ut_inputs/N_TEAMS_pure.npy"
     np.save(f_input1, N_TEAMS)
@@ -270,9 +234,7 @@ def ut_team_to_knapsack_update(ut_name, N_u, team_types, filtering_flag, alpha):
 def ut_process_extrinsic_output_department(ut_name, N_u, team_types, filtering_flag, alpha, N_ITER):
     N_DEPARTMENTS = N_u.size
     available_combinations = prune_teams(N_u)
-    teams_weights_per_department, teams_types_per_department = team_reward_generation(
-        available_combinations, N_u, team_types
-    )
+    teams_weights_per_department, teams_types_per_department = team_reward_generation(available_combinations, N_u, team_types)
     teams_types = teams_types_per_department[0]
 
     N_TEAMS = len(teams_types)

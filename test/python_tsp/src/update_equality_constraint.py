@@ -33,9 +33,7 @@ class EqualityConstraint:
         degree_constraint_to_eq_constraint_m,
     ):
         flipped_degree_constraint_to_eq_constraint_m = self.flip_matrix(degree_constraint_to_eq_constraint_m)
-        self.edge_ec_to_degree_constraint_m = (
-            flipped_degree_constraint_to_eq_constraint_m + self.edge_degree_constraint_cost
-        )
+        self.edge_ec_to_degree_constraint_m = flipped_degree_constraint_to_eq_constraint_m + self.edge_degree_constraint_cost
         return self.edge_ec_to_degree_constraint_m
 
     def edge_ec_to_subtour_constraints_update(
@@ -75,9 +73,7 @@ class EqualityConstraint:
                     axis=1,
                 )
                 subtour_cost_edge_variable = np.zeros(self.num_edge_variables)
-                subtour_cost_edge_variable[delta_S_indices_list[index_subtour_constraint]] = cost_edge_variable[
-                    delta_S_indices_list[index_subtour_constraint]
-                ]
+                subtour_cost_edge_variable[delta_S_indices_list[index_subtour_constraint]] = cost_edge_variable[delta_S_indices_list[index_subtour_constraint]]
                 sum_subtours = np.zeros(self.num_edge_variables)
                 sum_subtours[delta_S_indices_list[index_subtour_constraint]] = np.sum(
                     np.array(subtour_constraints_to_edge_ec_m).T[
@@ -86,9 +82,7 @@ class EqualityConstraint:
                     ],
                     axis=1,
                 )[delta_S_indices_list[index_subtour_constraint]]
-                self.edge_ec_to_subtour_constraints_m.append(
-                    (sum_degree_constraint_to_eq_constraint_m + sum_subtours + subtour_cost_edge_variable).tolist()
-                )
+                self.edge_ec_to_subtour_constraints_m.append((sum_degree_constraint_to_eq_constraint_m + sum_subtours + subtour_cost_edge_variable).tolist())
                 # self.edge_ec_to_subtour_constraints_m.append((sum_degree_constraint_to_eq_constraint_m + np.sum(np.array(subtour_constraints_to_edge_ec_m).T[:, remaining_subtour_constraints_indices], axis=1) + subtour_cost_edge_variable).tolist())
                 # self.edge_ec_to_subtour_constraints_m.append((np.sum(degree_constraint_to_eq_constraint_m, axis=1) + np.sum(np.array(subtour_constraints_to_edge_ec_m).T[:, remaining_subtour_constraints_indices], axis=1) + cost_edge_variable).tolist())
         return self.edge_ec_to_subtour_constraints_m
@@ -103,23 +97,13 @@ class EqualityConstraint:
             axis=1,
         )
         flipped_degree_constraint_to_eq_constraint_m = self.flip_matrix(degree_constraint_to_eq_constraint_m)
-        reshaped_combined_subtour_constraints_to_edge_ec_m = np.zeros(
-            flipped_degree_constraint_to_eq_constraint_m.shape
-        )
+        reshaped_combined_subtour_constraints_to_edge_ec_m = np.zeros(flipped_degree_constraint_to_eq_constraint_m.shape)
         edge_connections = self.edge_connections
         for i in range(len(edge_connections)):
             connection = edge_connections[i]
-            reshaped_combined_subtour_constraints_to_edge_ec_m[i][
-                connection[0]
-            ] = combined_subtour_constraints_to_edge_ec_m[i]
-            reshaped_combined_subtour_constraints_to_edge_ec_m[i][
-                connection[1]
-            ] = combined_subtour_constraints_to_edge_ec_m[i]
-        self.edge_ec_to_degree_constraint_m = (
-            reshaped_combined_subtour_constraints_to_edge_ec_m
-            + flipped_degree_constraint_to_eq_constraint_m
-            + self.edge_degree_constraint_cost
-        )
+            reshaped_combined_subtour_constraints_to_edge_ec_m[i][connection[0]] = combined_subtour_constraints_to_edge_ec_m[i]
+            reshaped_combined_subtour_constraints_to_edge_ec_m[i][connection[1]] = combined_subtour_constraints_to_edge_ec_m[i]
+        self.edge_ec_to_degree_constraint_m = reshaped_combined_subtour_constraints_to_edge_ec_m + flipped_degree_constraint_to_eq_constraint_m + self.edge_degree_constraint_cost
         return self.edge_ec_to_degree_constraint_m
 
     def flip_matrix(self, matrix):

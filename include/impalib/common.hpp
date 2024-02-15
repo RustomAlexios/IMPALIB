@@ -28,6 +28,7 @@
 
 using namespace std;
 
+// specify type of variables (double or float)
 #define IMPALIB_TYPE double
 
 #ifdef IMPALIB_TYPE

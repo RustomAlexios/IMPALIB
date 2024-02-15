@@ -8,9 +8,9 @@
 
 #include "impalib_unit_tests.hpp"
 
-void ut_degree_constraint(string);
+void ut_degree_constraint(string&);
 
-void ut_degree_constraint(string ut_name){
+void ut_degree_constraint(string& ut_name){
 
     const char *n_nodes_bash=getenv("N_NODES");
     if(n_nodes_bash == NULL)
@@ -24,12 +24,10 @@ void ut_degree_constraint(string ut_name){
     const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;
     const bool FILT_FLAG(filt_flag_bash);
 
-    //cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/ut_DegreeConstraint/alpha.npy");
     cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/alpha.npy");
     impalib_type* alpha_pure = input_alpha.data<impalib_type>();
     const impalib_type ALPHA = *alpha_pure;
     
-    //cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ut_DegreeConstraint/edge_ec_to_degree_constraint_m_pure.npy");
     cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/edge_ec_to_degree_constraint_m_pure.npy");
     impalib_type* edge_ec_to_degree_constraint_m_pure = input1.data<impalib_type>();
 
@@ -39,8 +37,6 @@ void ut_degree_constraint(string ut_name){
     copy (edge_ec_to_degree_constraint_m_pure + N_NODES*edge_variable_index, edge_ec_to_degree_constraint_m_pure+N_NODES*(edge_variable_index+1), edge_ec_to_degree_constraint_m[edge_variable_index].begin() );
     }
 
-    
-    //cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_DegreeConstraint/edge_connections_pure.npy");
     cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/edge_connections_pure.npy");
     int* edge_connections_pure = input2.data<int>();
 
@@ -60,16 +56,13 @@ void ut_degree_constraint(string ut_name){
 
         modelDegreeConstraint.degree_constraint_to_edge_ec_update(edge_ec_to_degree_constraint_m, edge_connections, degree_constraint_to_eq_constraint_m);
         
-        //fstream file_output("../ut_results/ut_DegreeConstraint/degree_constraint_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
         fstream file_output("../ut_results/degree_constraint_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_EDGE_VARIABLES; i++){
                 for (int j=0; j<N_NODES; j++){
                     file_output.write((char*)(&degree_constraint_to_eq_constraint_m[i][j]), sizeof(degree_constraint_to_eq_constraint_m[i][j]));}}
                     file_output.close();}
-            else {cout << "Error! File cannot be opened!" << endl;}
-    
-    
+            else {cout << "Error! File cannot be opened!" << "\n";}
     }
 
 }

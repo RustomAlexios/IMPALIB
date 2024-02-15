@@ -91,12 +91,8 @@ class GraphicalModelKcMwm:
         else:
             self.unbalanced_flag = False
 
-        assert (
-            self.intrinsic_out_mwm.shape[0] == self.reward_project.shape[0]
-        ), "Row Shape mismatch between MWM and Rewards"
-        assert (
-            self.intrinsic_out_mwm.shape[1] == self.reward_project.shape[1]
-        ), "Column Shape mismatch between MWM and Rewards"
+        assert self.intrinsic_out_mwm.shape[0] == self.reward_project.shape[0], "Row Shape mismatch between MWM and Rewards"
+        assert self.intrinsic_out_mwm.shape[1] == self.reward_project.shape[1], "Column Shape mismatch between MWM and Rewards"
 
         all_projects = np.array(range(0, num_projects))
         self.all_projects = all_projects
@@ -161,25 +157,17 @@ class GraphicalModelKcMwm:
 
                 if (
                     r_1 > r_2
-                    and distance_metric[combination[1] - 1][combination[0] - 1]
-                    == distance_metric[combination[0] - 1][combination[1] - 1]
-                    and distance_metric_rendezvouz[combination[1] - 1][combination[0] - 1]
-                    == distance_metric_rendezvouz[combination[0] - 1][combination[1] - 1]
+                    and distance_metric[combination[1] - 1][combination[0] - 1] == distance_metric[combination[0] - 1][combination[1] - 1]
+                    and distance_metric_rendezvouz[combination[1] - 1][combination[0] - 1] == distance_metric_rendezvouz[combination[0] - 1][combination[1] - 1]
                 ):
                     list_pruning.append(combination[::-1])
                 elif (
                     r_2 > r_1
-                    and distance_metric[combination[1] - 1][combination[0] - 1]
-                    == distance_metric[combination[0] - 1][combination[1] - 1]
-                    and distance_metric_rendezvouz[combination[1] - 1][combination[0] - 1]
-                    == distance_metric_rendezvouz[combination[0] - 1][combination[1] - 1]
+                    and distance_metric[combination[1] - 1][combination[0] - 1] == distance_metric[combination[0] - 1][combination[1] - 1]
+                    and distance_metric_rendezvouz[combination[1] - 1][combination[0] - 1] == distance_metric_rendezvouz[combination[0] - 1][combination[1] - 1]
                 ):
                     list_pruning.append(combination)
-                elif (
-                    r_2 == r_1
-                    and distance_metric_rendezvouz[combination[1] - 1][combination[0] - 1]
-                    == distance_metric_rendezvouz[combination[0] - 1][combination[1] - 1]
-                ):
+                elif r_2 == r_1 and distance_metric_rendezvouz[combination[1] - 1][combination[0] - 1] == distance_metric_rendezvouz[combination[0] - 1][combination[1] - 1]:
                     list_pruning.append(combination[::-1])
 
         self.available_combinations = [x for x in permutations_units if x not in list_pruning]
@@ -210,9 +198,7 @@ class GraphicalModelKcMwm:
                         team_size = max_state[u - 1]
                         (
                             teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -227,12 +213,8 @@ class GraphicalModelKcMwm:
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 2)
                         (
-                            teams_weights_per_department[u - 1].append(
-                                fighters_count[type - 1] + weasels_count[type - 1]
-                            ),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1]),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -245,15 +227,11 @@ class GraphicalModelKcMwm:
                         team_size = min(max_state[u - 1], max_state[v - 1])
                         (
                             teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_weights_per_department[v - 1].append(weasels_count[type - 1]),
-                            teams_weights_per_department[v - 1].extend(
-                                [weasels_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[v - 1].extend([weasels_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -271,9 +249,7 @@ class GraphicalModelKcMwm:
                         team_size = math.floor(max_state[u - 1] / 2)
                         (
                             teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -288,12 +264,8 @@ class GraphicalModelKcMwm:
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 3)
                         (
-                            teams_weights_per_department[u - 1].append(
-                                fighters_count[type - 1] + weasels_count[type - 1]
-                            ),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1]),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -306,15 +278,11 @@ class GraphicalModelKcMwm:
                         team_size = math.floor(min(max_state[u - 1] / 2, max_state[v - 1]))
                         (
                             teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_weights_per_department[v - 1].append(weasels_count[type - 1]),
-                            teams_weights_per_department[v - 1].extend(
-                                [weasels_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[v - 1].extend([weasels_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -331,12 +299,8 @@ class GraphicalModelKcMwm:
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 4)
                         (
-                            teams_weights_per_department[u - 1].append(
-                                fighters_count[type - 1] + weasels_count[type - 1]
-                            ),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1]),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -349,15 +313,11 @@ class GraphicalModelKcMwm:
                         team_size = math.floor(min(max_state[u - 1] / 2, max_state[v - 1] / 2))
                         (
                             teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                            teams_weights_per_department[u - 1].extend(
-                                [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_weights_per_department[v - 1].append(weasels_count[type - 1]),
-                            teams_weights_per_department[v - 1].extend(
-                                [weasels_count[type - 1] for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[v - 1].extend([weasels_count[type - 1] for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[u - 1].append(type),
@@ -378,15 +338,11 @@ class GraphicalModelKcMwm:
                     for department_id in remaining_departments:
                         (
                             teams_weights_per_department[department_id - 1].append(0),
-                            teams_weights_per_department[department_id - 1].extend(
-                                [0 for i in range(0, team_size - 1)]
-                            ),
+                            teams_weights_per_department[department_id - 1].extend([0 for i in range(0, team_size - 1)]),
                         )
                         (
                             teams_types_per_department[department_id - 1].append(type),
-                            teams_types_per_department[department_id - 1].extend(
-                                [type for i in range(0, team_size - 1)]
-                            ),
+                            teams_types_per_department[department_id - 1].extend([type for i in range(0, team_size - 1)]),
                         )
                 team_array.append(team_size)
 
@@ -429,36 +385,24 @@ class GraphicalModelKcMwm:
 
             self.model_knapsacks.process_extrinsic_output_department(iter)
 
-            self.team_to_oric_m = self.model_eq_constraint.team_ec_to_oric_update(
-                self.model_knapsacks.extrinsic_output_department
-            )
+            self.team_to_oric_m = self.model_eq_constraint.team_ec_to_oric_update(self.model_knapsacks.extrinsic_output_department)
 
             (
                 self.oric_to_eq_constraint_m,
                 self.eq_constraint_to_project_m,
             ) = self.model_oric.oric_to_project_ec_update(self.eq_constraint_to_oric_m, self.team_to_oric_m)
 
-            self.project_to_eq_constraint_m = self.project_ineq_constraint.project_inequality_constraint_update(
-                self.eq_constraint_to_project_m
-            )
+            self.project_to_eq_constraint_m = self.project_ineq_constraint.project_inequality_constraint_update(self.eq_constraint_to_project_m)
 
-            self.eq_constraint_to_oric_m = self.model_eq_constraint.project_eq_const_to_oric_update(
-                self.project_to_eq_constraint_m
-            )
+            self.eq_constraint_to_oric_m = self.model_eq_constraint.project_eq_const_to_oric_update(self.project_to_eq_constraint_m)
 
             self.oric_to_team_m = self.model_oric.oric_to_team_update(self.eq_constraint_to_oric_m)
 
-            self.intrinsic_out_mwm = self.outputs.intrinsic_out_mwm_update(
-                self.oric_to_eq_constraint_m, self.project_to_eq_constraint_m
-            )
+            self.intrinsic_out_mwm = self.outputs.intrinsic_out_mwm_update(self.oric_to_eq_constraint_m, self.project_to_eq_constraint_m)
 
-            self.team_to_knapsack_m = self.model_knapsacks.team_to_department_update(
-                self.teams_weights_per_department, self.oric_to_team_m
-            )
+            self.team_to_knapsack_m = self.model_knapsacks.team_to_department_update(self.teams_weights_per_department, self.oric_to_team_m)
 
-            self.extrinsic_output_team = self.outputs.extrinsic_output_team_update(
-                self.model_knapsacks.extrinsic_output_department, self.oric_to_team_m
-            )
+            self.extrinsic_output_team = self.outputs.extrinsic_output_team_update(self.model_knapsacks.extrinsic_output_department, self.oric_to_team_m)
 
         self.intrinsic_output = self.extrinsic_output_team + self.reward_team
 
@@ -719,34 +663,17 @@ class GraphicalModelKcMwm:
                     packages_processing_bin_index = [
                         i
                         for i in intermediate_selected_teams_indices
-                        if (
-                            processing_department_index
-                            in np.array(
-                                available_combinations[
-                                    team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]
-                                ]
-                            )
-                            - 1
-                        )
+                        if (processing_department_index in np.array(available_combinations[team_locations[np.where(intermediate_selected_teams_indices == i)[0][0]]]) - 1)
                     ]
                     print(
                         "max(reward_team[packages_processing_bin_index]: ",
                         max(reward_team[packages_processing_bin_index]),
                     )
                     removed_team = intermediate_selected_teams_indices[
-                        np.where(
-                            intrinsic_output_selected
-                            == max(
-                                intrinsic_output_selected[
-                                    intermediate_selected_teams_indices.searchsorted(packages_processing_bin_index)
-                                ]
-                            )
-                        )[0][0]
+                        np.where(intrinsic_output_selected == max(intrinsic_output_selected[intermediate_selected_teams_indices.searchsorted(packages_processing_bin_index)]))[0][0]
                     ]
                     print("reward[removed_team]: ", reward_team[removed_team])
-                    removed_team_location = team_locations[
-                        np.where(intermediate_selected_teams_indices == removed_team)[0][0]
-                    ]
+                    removed_team_location = team_locations[np.where(intermediate_selected_teams_indices == removed_team)[0][0]]
                     removed_team_combination = np.array(available_combinations[removed_team_location]) - 1
                     removed_team_type = teams_types[removed_team]
                     print(
@@ -757,9 +684,7 @@ class GraphicalModelKcMwm:
                         " from bins ",
                         removed_team_combination,
                     )
-                    intermediate_selected_teams_indices = np.setdiff1d(
-                        intermediate_selected_teams_indices, removed_team
-                    )
+                    intermediate_selected_teams_indices = np.setdiff1d(intermediate_selected_teams_indices, removed_team)
                     team_locations.remove(removed_team_location)
                     u = removed_team_combination[0]
                     v = removed_team_combination[1]
@@ -811,9 +736,7 @@ class GraphicalModelKcMwm:
         for i in range(0, len(intermediate_selected_teams_indices)):
             index = intermediate_selected_teams_indices[i]
             if index in reused_teams and post_process_flag:
-                project_index = np.where(
-                    matching_array[0] == [i[0] for i in post_processing_ic_combination if i[1] == index][0]
-                )[0]
+                project_index = np.where(matching_array[0] == [i[0] for i in post_processing_ic_combination if i[1] == index][0])[0]
             else:
                 project_index = np.where(matching_array[1] == index)[0]
             project_array.append(project_index)

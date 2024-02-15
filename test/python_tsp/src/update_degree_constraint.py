@@ -79,10 +79,7 @@ class DegreeConstraint:
             degree_constraint_to_eq_constraint_m = (1 - alpha) * self.degree_constraint_to_eq_constraint_m_dummy
             self.degree_constraint_to_eq_constraint_m_old = deepcopy(degree_constraint_to_eq_constraint_m)
         elif iter > 0 and filtering_flag and alpha != 0:
-            degree_constraint_to_eq_constraint_m = (
-                alpha * self.degree_constraint_to_eq_constraint_m_old
-                + (1 - alpha) * self.degree_constraint_to_eq_constraint_m_dummy
-            )
+            degree_constraint_to_eq_constraint_m = alpha * self.degree_constraint_to_eq_constraint_m_old + (1 - alpha) * self.degree_constraint_to_eq_constraint_m_dummy
             self.degree_constraint_to_eq_constraint_m_old = deepcopy(degree_constraint_to_eq_constraint_m)
         elif not filtering_flag:
             degree_constraint_to_eq_constraint_m = deepcopy(self.degree_constraint_to_eq_constraint_m_dummy)

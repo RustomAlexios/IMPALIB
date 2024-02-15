@@ -27,15 +27,11 @@ def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, r
         ut_failed = False
 
     if ut_failed:
-        print(
-            f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}"
-        )
+        print(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}")
         # print('y_p: ', y_pure)
         # print('y_w: ', y_wrapper)
     else:
-        print(
-            f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}"
-        )
+        print(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}")
         # print('y_p: ', y_pure)
         # print('y_w: ', y_wrapper)
 
@@ -43,17 +39,9 @@ def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, r
 def check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=1e-05, atol=1e-08):
     regex = re.compile(r"\d+")
     if ut_name == "KnapsackForward":
-        file_names = [
-            file_name
-            for file_name in os.listdir("../ut_results")
-            if file_name.startswith("forward_pure")
-        ]
+        file_names = [file_name for file_name in os.listdir("../ut_results") if file_name.startswith("forward_pure")]
     elif ut_name == "KnapsackBackward":
-        file_names = [
-            file_name
-            for file_name in os.listdir("../ut_results")
-            if file_name.startswith("backward_pure")
-        ]
+        file_names = [file_name for file_name in os.listdir("../ut_results") if file_name.startswith("backward_pure")]
 
     file_numbers = []
     for i in range(0, len(file_names)):
@@ -78,9 +66,7 @@ def check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=
         y_wrapper = deepcopy(y_wrapper.flatten())
         error = abs(y_pure[y_pure != np_impa_lib(inf)] - y_wrapper[y_wrapper != np_impa_lib(inf)])
         max_absolute_error.append(np.nanmax(error[error != np_impa_lib(inf)]))
-        max_relative_error.append(
-            np.nanmax(error[error != np_impa_lib(inf)]) / abs(np.max(y_pure[y_pure != np_impa_lib(inf)]) + 1e-30)
-        )
+        max_relative_error.append(np.nanmax(error[error != np_impa_lib(inf)]) / abs(np.max(y_pure[y_pure != np_impa_lib(inf)]) + 1e-30))
         assert y_pure.shape == y_wrapper.shape, f"Shape mismatch: Python {y_pure.shape} and C++ {y_wrapper.shape}"
         if any(max_absolute_error) > atol or any(max_relative_error) > rtol:
             flag_failed = True
@@ -91,13 +77,9 @@ def check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=
         #    flag_failed = False
 
     if any(ut_failed):
-        print(
-            f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}"
-        )
+        print(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}")
     else:
-        print(
-            f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}"
-        )
+        print(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}")
 
 
 def prune_teams(N_u):
@@ -147,9 +129,7 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = N_u[u - 1]
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),
@@ -163,9 +143,7 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = math.floor(N_u[u - 1] / 2)
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),
@@ -176,15 +154,11 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = min(N_u[u - 1], N_u[v - 1])
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_weights_per_department[v - 1].append(weasels_count[type - 1]),
-                        teams_weights_per_department[v - 1].extend(
-                            [weasels_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[v - 1].extend([weasels_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),
@@ -200,9 +174,7 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = math.floor(N_u[u - 1] / 2)
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),
@@ -216,9 +188,7 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = math.floor(N_u[u - 1] / 3)
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),
@@ -229,15 +199,11 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = math.floor(min(N_u[u - 1] / 2, N_u[v - 1]))
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_weights_per_department[v - 1].append(weasels_count[type - 1]),
-                        teams_weights_per_department[v - 1].extend(
-                            [weasels_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[v - 1].extend([weasels_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),
@@ -253,9 +219,7 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = math.floor(N_u[u - 1] / 4)
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] + weasels_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),
@@ -266,15 +230,11 @@ def team_reward_generation(available_combinations, N_u, team_types):
                     team_size = math.floor(min(N_u[u - 1] / 2, N_u[v - 1] / 2))
                     (
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1]),
-                        teams_weights_per_department[u - 1].extend(
-                            [fighters_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[u - 1].extend([fighters_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_weights_per_department[v - 1].append(weasels_count[type - 1]),
-                        teams_weights_per_department[v - 1].extend(
-                            [weasels_count[type - 1] for i in range(0, team_size - 1)]
-                        ),
+                        teams_weights_per_department[v - 1].extend([weasels_count[type - 1] for i in range(0, team_size - 1)]),
                     )
                     (
                         teams_types_per_department[u - 1].append(type),

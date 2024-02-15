@@ -6,9 +6,9 @@
 
 #pragma once
 
-void ut_eq_constraint_kc_mwm(string);
+void ut_eq_constraint_kc_mwm(string&);
 
-void ut_eq_constraint_kc_mwm(string ut_name){
+void ut_eq_constraint_kc_mwm(string& ut_name){
 
     const char *n_departments_bash=getenv("N_DEPARTMENTS");
     if(n_departments_bash == NULL)
@@ -18,7 +18,6 @@ void ut_eq_constraint_kc_mwm(string ut_name){
     if(n_projects_bash == NULL)
     {cout << "n_projects_bash not available\n";}
     
-    //cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ut_EqConstraint/N_TEAMS_pure.npy");
     cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/N_TEAMS_pure.npy");
     int* n_teams_pure = input1.data<int>();
     const int N_TEAMS = *n_teams_pure;
@@ -28,7 +27,6 @@ void ut_eq_constraint_kc_mwm(string ut_name){
 
     EqualityConstraintKcMwm modelEqConstraint(N_DEPARTMENTS, N_TEAMS, N_PROJECTS);
 
-    //cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_EqConstraint/reward_project_pure.npy");
     cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/reward_project_pure.npy");
     impalib_type* reward_project_pure = input2.data<impalib_type>();
     vector<vector<impalib_type>> reward_project(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
@@ -37,7 +35,6 @@ void ut_eq_constraint_kc_mwm(string ut_name){
         copy ( reward_project_pure + N_TEAMS*project_index, reward_project_pure + N_TEAMS*(project_index+1), reward_project[project_index].begin() );
     }
 
-    //cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/ut_EqConstraint/reward_team_pure.npy");
     cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/reward_team_pure.npy");
     impalib_type* reward_team_pure = input3.data<impalib_type>();
     vector<impalib_type> reward_team(N_TEAMS, zero_value);
@@ -47,7 +44,6 @@ void ut_eq_constraint_kc_mwm(string ut_name){
 
         vector<impalib_type> team_to_oric_m(N_TEAMS, zero_value);
 
-        //cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/ut_EqConstraint/extrinsic_output_department_pure.npy");
         cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/extrinsic_output_department_pure.npy");
         impalib_type* extrinsic_output_department_pure = input4.data<impalib_type>();
         vector<vector<impalib_type>> extrinsic_output_department(N_DEPARTMENTS, vector<impalib_type>(N_TEAMS, zero_value));
@@ -58,13 +54,12 @@ void ut_eq_constraint_kc_mwm(string ut_name){
 
             modelEqConstraint.team_eq_constraint_to_oric_update(extrinsic_output_department, team_to_oric_m, reward_team);
 
-            //fstream file_output("../ut_results/ut_EqConstraint/team_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
             fstream file_output("../ut_results/team_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
                     for (int i=0; i<N_TEAMS; i++){
                         file_output.write((char*)(&team_to_oric_m[i]), sizeof(team_to_oric_m[i]));}
                         file_output.close();}
-                else {cout << "Error! File cannot be opened!" << endl;}
+                else {cout << "Error! File cannot be opened!" << "\n";}
     
     }
 
@@ -72,7 +67,6 @@ void ut_eq_constraint_kc_mwm(string ut_name){
         
         vector<vector<impalib_type>> eq_constraint_to_oric_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
         
-        //cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/ut_EqConstraint/project_to_eq_constraint_m_pure.npy");
         cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/project_to_eq_constraint_m_pure.npy");
         impalib_type* project_to_eq_constraint_m_pure = input5.data<impalib_type>();
         vector<vector<impalib_type>> project_to_eq_constraint_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
@@ -83,22 +77,21 @@ void ut_eq_constraint_kc_mwm(string ut_name){
     
     modelEqConstraint.project_eq_constraint_to_oric_update(project_to_eq_constraint_m, eq_constraint_to_oric_m, reward_project);
 
-    //fstream file_output("../ut_results/ut_EqConstraint/eq_constraint_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
     fstream file_output("../ut_results/eq_constraint_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
         if (file_output.is_open()) {
             for (int i=0; i<N_PROJECTS; i++){
                 for (int j=0; j<N_TEAMS; j++){
                     file_output.write((char*)(&eq_constraint_to_oric_m[i][j]), sizeof(eq_constraint_to_oric_m[i][j]));}}
                     file_output.close();}
-            else {cout << "Error! File cannot be opened!" << endl;}
+            else {cout << "Error! File cannot be opened!" << "\n";}
 
     }
 
 }
 
-void ut_equality_constraint_tsp(string);
+void ut_equality_constraint_tsp(string&);
 
-void ut_equality_constraint_tsp(string ut_name){
+void ut_equality_constraint_tsp(string& ut_name){
 
     const char *n_nodes_bash=getenv("N_NODES");
     if(n_nodes_bash == NULL)
@@ -117,15 +110,12 @@ void ut_equality_constraint_tsp(string ut_name){
     const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;
     const bool FILT_FLAG(filt_flag_bash);
 
-
-    //cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/alpha.npy");
     cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/alpha.npy");
     impalib_type* alpha_pure = input_alpha.data<impalib_type>();
     const impalib_type ALPHA = *alpha_pure;
     
     EqualityConstraintTsp modelEqualityConstraint(N_NODES, N_EDGE_VARIABLES, FILT_FLAG, ALPHA);
 
-    //cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/edge_connections_pure.npy");
     cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/edge_connections_pure.npy");
     int* edge_connections_pure = input1.data<int>();
 
@@ -137,7 +127,6 @@ void ut_equality_constraint_tsp(string ut_name){
     copy (edge_connections_pure + num_connections*edge_variable_index, edge_connections_pure+num_connections*(edge_variable_index+1), edge_connections[edge_variable_index].begin() );
     }
 
-    //cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/edge_degree_constraint_cost_pure.npy");
     cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/edge_degree_constraint_cost_pure.npy");
     impalib_type* edge_degree_constraint_cost_pure = input2.data<impalib_type>();
 
@@ -147,7 +136,6 @@ void ut_equality_constraint_tsp(string ut_name){
     copy (edge_degree_constraint_cost_pure + N_NODES*edge_variable_index, edge_degree_constraint_cost_pure+N_NODES*(edge_variable_index+1), edge_degree_constraint_cost[edge_variable_index].begin() );
     }
 
-    //cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/degree_constraint_to_eq_constraint_m_pure.npy");
     cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/degree_constraint_to_eq_constraint_m_pure.npy");
     impalib_type* degree_constraint_to_eq_constraint_m_pure = input3.data<impalib_type>();
 
@@ -163,23 +151,20 @@ void ut_equality_constraint_tsp(string ut_name){
 
         modelEqualityConstraint.edge_ec_to_degree_constraint_relaxed_graph_update(edge_connections, edge_degree_constraint_cost, degree_constraint_to_eq_constraint_m, edge_ec_to_degree_constraint_m);
         
-        //fstream file_output("../ut_results/ut_EqualityConstraint/edge_ec_to_degree_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
         fstream file_output("../ut_results/edge_ec_to_degree_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_EDGE_VARIABLES; i++){
                 for (int j=0; j<N_NODES; j++){
                     file_output.write((char*)(&edge_ec_to_degree_constraint_m[i][j]), sizeof(edge_ec_to_degree_constraint_m[i][j]));}}
                     file_output.close();}
-            else {cout << "Error! File cannot be opened!" << endl;}
+            else {cout << "Error! File cannot be opened!" << "\n";}
     }
 
     else if (ut_name == "EdgeEc2SubtourConstraintsUpdate"){
 
-        //cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/delta_S_indices_list_sizes_pure.npy");
         cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/delta_S_indices_list_sizes_pure.npy");
         const int* delta_S_indices_list_sizes_pure = input4.data<int>();
 
-        //cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/delta_S_indices_list_pure.npy");
         cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/delta_S_indices_list_pure.npy");
         const int* delta_S_indices_list_pure = input5.data<int>();
 
@@ -193,13 +178,11 @@ void ut_equality_constraint_tsp(string ut_name){
             idx += size;
         }
         
-        //cnpy::NpyArray input6 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/cost_edge_variable_pure.npy");
         cnpy::NpyArray input6 = cnpy::npy_load("../ut_inputs/cost_edge_variable_pure.npy");
         
         impalib_type* cost_edge_variable_pure = input6.data<impalib_type>();
         vector<impalib_type> cost_edge_variable(cost_edge_variable_pure, cost_edge_variable_pure + N_EDGE_VARIABLES);
         
-        //cnpy::NpyArray input7 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/subtour_constraints_to_edge_ec_m_pure.npy");
         cnpy::NpyArray input7 = cnpy::npy_load("../ut_inputs/subtour_constraints_to_edge_ec_m_pure.npy");
         impalib_type* subtour_constraints_to_edge_ec_m_pure = input7.data<impalib_type>();
 
@@ -213,21 +196,18 @@ void ut_equality_constraint_tsp(string ut_name){
 
         edge_ec_to_subtour_constraints_m = modelEqualityConstraint.edge_ec_to_subtour_constraints_update(delta_S_indices_list, cost_edge_variable, degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m, edge_connections);
         
-
-        //fstream file_output("../ut_results/ut_EqualityConstraint/edge_ec_to_subtour_constraints_m_wrapper", ios::out | ios::binary | ios:: trunc);
         fstream file_output("../ut_results/edge_ec_to_subtour_constraints_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_SUBTOURS; i++){
                 for (int j=0; j<N_EDGE_VARIABLES; j++){
                     file_output.write((char*)(&edge_ec_to_subtour_constraints_m[i][j]), sizeof(edge_ec_to_subtour_constraints_m[i][j]));}}
                     file_output.close();}
-            else {cout << "Error! File cannot be opened!" << endl;}
+            else {cout << "Error! File cannot be opened!" << "\n";}
         
     }
 
     else if (ut_name == "EdgeEc2DegreeConstraintAugmentedGraphUpdate"){
 
-        //cnpy::NpyArray input8 = cnpy::npy_load("../ut_inputs/ut_EqualityConstraint/subtour_constraints_to_edge_ec_m_pure.npy");
         cnpy::NpyArray input8 = cnpy::npy_load("../ut_inputs/subtour_constraints_to_edge_ec_m_pure.npy");
         impalib_type* subtour_constraints_to_edge_ec_m_pure = input8.data<impalib_type>();
 
@@ -241,14 +221,13 @@ void ut_equality_constraint_tsp(string ut_name){
 
         modelEqualityConstraint.edge_ec_to_degree_constraint_augmented_graph_update(degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m, edge_connections, edge_degree_constraint_cost, edge_ec_to_degree_constraint_m);
         
-        //fstream file_output("../ut_results/ut_EqualityConstraint/edge_ec_to_degree_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
         fstream file_output("../ut_results/edge_ec_to_degree_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_EDGE_VARIABLES; i++){
                 for (int j=0; j<N_NODES; j++){
                     file_output.write((char*)(&edge_ec_to_degree_constraint_m[i][j]), sizeof(edge_ec_to_degree_constraint_m[i][j]));}}
                     file_output.close();}
-            else {cout << "Error! File cannot be opened!" << endl;}
+            else {cout << "Error! File cannot be opened!" << "\n";}
     
     }
 }

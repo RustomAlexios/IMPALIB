@@ -8,11 +8,13 @@
 
 #include "impalib_unit_tests.hpp"
 
-vector<int> take_int(string str) {
+vector<int> take_int(string&);
+
+vector<int> take_int(string& str) {
     stringstream ss(str);
     vector<int> result;
-    char ch;
-    int tmp;
+    char ch = '\0';
+    int tmp = 0;
     while(ss >> tmp) {
         result.push_back(tmp);
         ss >> ch;

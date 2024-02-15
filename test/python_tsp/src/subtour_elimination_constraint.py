@@ -46,9 +46,7 @@ class SubtourEliminationConstraint:
         for index_subtour_constraint in range(len(delta_S_indices_list)):
             delta_S_indices = delta_S_indices_list[index_subtour_constraint]
             for index_edge_variable in range(len(delta_S_indices)):
-                remaining_connections = (
-                    delta_S_indices[:index_edge_variable] + delta_S_indices[index_edge_variable + 1 :]
-                )
+                remaining_connections = delta_S_indices[:index_edge_variable] + delta_S_indices[index_edge_variable + 1 :]
                 subtour_constraints_to_edge_ec_m[
                     delta_S_indices[index_edge_variable],
                     index_subtour_constraint,
@@ -76,10 +74,7 @@ class SubtourEliminationConstraint:
             subtour_constraints_to_edge_ec_m = (1 - alpha) * self.subtour_constraints_to_edge_ec_m_dummy
             self.subtour_constraints_to_edge_ec_m_old = deepcopy(subtour_constraints_to_edge_ec_m)
         elif iter > 0 and filtering_flag and alpha != 0:
-            subtour_constraints_to_edge_ec_m = (
-                alpha * self.subtour_constraints_to_edge_ec_m_old
-                + (1 - alpha) * self.subtour_constraints_to_edge_ec_m_dummy
-            )
+            subtour_constraints_to_edge_ec_m = alpha * self.subtour_constraints_to_edge_ec_m_old + (1 - alpha) * self.subtour_constraints_to_edge_ec_m_dummy
             self.subtour_constraints_to_edge_ec_m_old = deepcopy(subtour_constraints_to_edge_ec_m)
         elif not filtering_flag:
             subtour_constraints_to_edge_ec_m = deepcopy(self.subtour_constraints_to_edge_ec_m_dummy)

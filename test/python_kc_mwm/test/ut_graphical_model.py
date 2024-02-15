@@ -27,9 +27,7 @@ def ut_iterate(
     np.random.seed(17)
     N_DEPARTMENTS = len(N_u)
     available_combinations = prune_teams(N_u)
-    teams_weights_per_department, teams_types_per_department = team_reward_generation(
-        available_combinations, N_u, team_types
-    )
+    teams_weights_per_department, teams_types_per_department = team_reward_generation(available_combinations, N_u, team_types)
     teams_types = teams_types_per_department[0]
 
     N_TEAMS = len(teams_types)
@@ -43,24 +41,18 @@ def ut_iterate(
     max_size_nonzero_weights = max(non_zero_weight_indices_sizes)
     non_zero_weight_indices_arr = np.zeros((N_DEPARTMENTS, max_size_nonzero_weights), dtype=np.int32)
 
-    #f_input_alpha = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/alpha.npy"
     f_input_alpha = os.getcwd() + "/../ut_inputs/alpha.npy"
     np.save(f_input_alpha, alpha)
 
-    #f_input1 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/N_TEAMS_pure.npy"
     f_input1 = os.getcwd() + "/../ut_inputs/N_TEAMS_pure.npy"
     np.save(f_input1, N_TEAMS)
 
-    #f_input2 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/non_zero_weight_indices_sizes_pure.npy"
     f_input2 = os.getcwd() + "/../ut_inputs/non_zero_weight_indices_sizes_pure.npy"
     np.save(f_input2, np.array(non_zero_weight_indices_sizes, dtype=np.int32).flatten())
 
     for department_index in range(0, N_DEPARTMENTS):
-        teams_weights_per_department[department_index] = [
-            np.int32(x) for x in teams_weights_per_department[department_index]
-        ]  # input to C++
+        teams_weights_per_department[department_index] = [np.int32(x) for x in teams_weights_per_department[department_index]]  # input to C++
 
-    #f_input3 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/teams_weights_per_department_pure"
     f_input3 = os.getcwd() + "/../ut_inputs/teams_weights_per_department_pure"
     np.save(f_input3, np.array(teams_weights_per_department, dtype=np.int32).flatten())
 
@@ -72,7 +64,6 @@ def ut_iterate(
 
     # print('non_zero_weight_indices_arr: ', non_zero_weight_indices_arr.flatten())
 
-    #f_input4 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/non_zero_weight_indices_arr_pure.npy"
     f_input4 = os.getcwd() + "/../ut_inputs/non_zero_weight_indices_arr_pure.npy"
     np.save(f_input4, non_zero_weight_indices_arr.flatten())
     reward_team = np.random.uniform(-300, 0, N_TEAMS)
@@ -91,7 +82,6 @@ def ut_iterate(
 
     # print('team_to_knapsack_m: \n', team_to_knapsack_m)
 
-    #f_input5 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/team_to_knapsack_m_pure.npy"
     f_input5 = os.getcwd() + "/../ut_inputs/team_to_knapsack_m_pure.npy"
     np.save(f_input5, team_to_knapsack_m.flatten())
     input_load = []
@@ -104,20 +94,16 @@ def ut_iterate(
     ModelIMPA = model_graph.GraphicalModelKcMwm(N_ITER, filtering_flag, ppFlag, alpha, THRESHOLD=threshold)
     ModelIMPA.initialize(input_load, test_flag=True)
 
-    #f_input6 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/reward_team_pure.npy"
     f_input6 = os.getcwd() + "/../ut_inputs/reward_team_pure.npy"
     np.save(f_input6, reward_team.flatten())
-    #f_input7 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/reward_project_pure.npy"
     f_input7 = os.getcwd() + "/../ut_inputs/reward_project_pure.npy"
     np.save(f_input7, reward_project.flatten())
 
-    #f_input8 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/max_state_py.npy"
     f_input8 = os.getcwd() + "/../ut_inputs/max_state_py.npy"
     np.save(f_input8, N_u)
 
     ModelIMPA.iterate()
 
-    #f_output_path1 = os.getcwd() + "/../ut_results/ut_GraphicalModel/extrinsic_output_team_pure"
     f_output_path1 = os.getcwd() + "/../ut_results/extrinsic_output_team_pure"
     output_file_python1 = open(f_output_path1, "wb")
     np.save(
@@ -127,7 +113,6 @@ def ut_iterate(
     )
     output_file_python1.close()
 
-    #f_output_path2 = os.getcwd() + "/../ut_results/ut_GraphicalModel/intrinsic_out_mwm_pure"
     f_output_path2 = os.getcwd() + "/../ut_results/intrinsic_out_mwm_pure"
     output_file_python2 = open(f_output_path2, "wb")
     np.save(output_file_python2, ModelIMPA.intrinsic_out_mwm.flatten(), allow_pickle=True)
@@ -160,32 +145,24 @@ def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, thre
     max_size_nonzero_weights = max(non_zero_weight_indices_sizes)
     non_zero_weight_indices_arr = np.zeros((N_DEPARTMENTS, max_size_nonzero_weights), dtype=np.int32)
 
-    #f_input_projects = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/N_PROJECTS_pure.npy"
     f_input_projects = os.getcwd() + "/../ut_inputs/N_PROJECTS_pure.npy"
     np.save(f_input_projects, ModelIMPA.num_projects)
 
-    #f_input_departments = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/N_DEPARTMENTS_pure.npy"
     f_input_departments = os.getcwd() + "/../ut_inputs/N_DEPARTMENTS_pure.npy"
     np.save(f_input_departments, N_DEPARTMENTS)
 
-    #f_input_alpha = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/alpha.npy"
     f_input_alpha = os.getcwd() + "/../ut_inputs/alpha.npy"
     np.save(f_input_alpha, alpha)
 
-    #f_input1 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/N_TEAMS_pure.npy"
     f_input1 = os.getcwd() + "/../ut_inputs/N_TEAMS_pure.npy"
     np.save(f_input1, N_TEAMS)
 
-    #f_input2 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/non_zero_weight_indices_sizes_pure.npy"
     f_input2 = os.getcwd() + "/../ut_inputs/non_zero_weight_indices_sizes_pure.npy"
     np.save(f_input2, np.array(non_zero_weight_indices_sizes, dtype=np.int32).flatten())
 
     for department_index in range(0, N_DEPARTMENTS):
-        teams_weights_per_department[department_index] = [
-            np.int32(x) for x in teams_weights_per_department[department_index]
-        ]  # input to C++
+        teams_weights_per_department[department_index] = [np.int32(x) for x in teams_weights_per_department[department_index]]  # input to C++
 
-    #f_input3 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/teams_weights_per_department_pure"
     f_input3 = os.getcwd() + "/../ut_inputs/teams_weights_per_department_pure"
     np.save(f_input3, np.array(teams_weights_per_department, dtype=np.int32).flatten())
 
@@ -193,7 +170,6 @@ def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, thre
         for j in range(len(non_zero_weight_indices[i])):
             non_zero_weight_indices_arr[i, j] = non_zero_weight_indices[i][j]
 
-    #f_input4 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/non_zero_weight_indices_arr_pure.npy"
     f_input4 = os.getcwd() + "/../ut_inputs/non_zero_weight_indices_arr_pure.npy"
     np.save(f_input4, non_zero_weight_indices_arr.flatten())
 
@@ -202,26 +178,21 @@ def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, thre
 
     team_to_knapsack_m = ModelIMPA.team_to_knapsack_m
 
-    #f_input5 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/team_to_knapsack_m_pure.npy"
     f_input5 = os.getcwd() + "/../ut_inputs/team_to_knapsack_m_pure.npy"
     np.save(f_input5, team_to_knapsack_m.flatten())
 
-    #f_input6 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/reward_team_pure.npy"
     f_input6 = os.getcwd() + "/../ut_inputs/reward_team_pure.npy"
     np.save(f_input6, reward_team.flatten())
 
-    #f_input7 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/reward_project_pure.npy"
     f_input7 = os.getcwd() + "/../ut_inputs/reward_project_pure.npy"
     np.save(f_input7, reward_project.flatten())
 
     N_u = N_u.astype("int32")
-    #f_input8 = os.getcwd() + "/../ut_inputs/ut_GraphicalModel/max_state_py.npy"
     f_input8 = os.getcwd() + "/../ut_inputs/max_state_py.npy"
     np.save(f_input8, N_u)
 
     ModelIMPA.iterate()
 
-    #f_output_path1 = os.getcwd() + "/../ut_results/ut_GraphicalModel/extrinsic_output_team_pure"
     f_output_path1 = os.getcwd() + "/../ut_results/extrinsic_output_team_pure"
     output_file_python1 = open(f_output_path1, "wb")
     np.save(
@@ -231,7 +202,6 @@ def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, thre
     )
     output_file_python1.close()
 
-    #f_output_path2 = os.getcwd() + "/../ut_results/ut_GraphicalModel/intrinsic_out_mwm_pure"
     f_output_path2 = os.getcwd() + "/../ut_results/intrinsic_out_mwm_pure"
     output_file_python2 = open(f_output_path2, "wb")
     np.save(output_file_python2, ModelIMPA.intrinsic_out_mwm.flatten(), allow_pickle=True)

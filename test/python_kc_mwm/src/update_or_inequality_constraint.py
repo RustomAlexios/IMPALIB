@@ -26,9 +26,7 @@ class OrInequalityConstraint:
         eq_constraint_to_project_m = np.zeros((num_projects, num_teams), dtype=np_impa_lib)
 
         for project_index in range(0, num_projects):
-            oric_to_eq_constraint_m[project_index, :] = self.oric_activation(
-                project_index, eq_constraint_to_oric_m, team_to_oric_m
-            )
+            oric_to_eq_constraint_m[project_index, :] = self.oric_activation(project_index, eq_constraint_to_oric_m, team_to_oric_m)
 
         eq_constraint_to_project_m = oric_to_eq_constraint_m + self.reward_project
         self.oric_to_eq_constraint_m = oric_to_eq_constraint_m

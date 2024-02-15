@@ -130,7 +130,6 @@ if __name__ == "__main__":
         file_array_pure = open(f_path_pure, "rb")
         y_pure = np.load(file_array_pure)
         y_wrapper = np.fromfile(f_path_wrapper, dtype=np_impa_lib)
-        # y_wrapper = np.fromfile(f_path_wrapper, dtype=np.int32); #for integer y_wrapper
         check_agreement(
             sub_test_num,
             total_sub_tests,

@@ -29,9 +29,7 @@ def ut_eq_consraint(ut_name, n_departments, n_teams, n_projects):
     f_reward_team_path = os.getcwd() + "/../ut_inputs/reward_team_pure.npy"
     np.save(f_reward_team_path, reward_team_pure.flatten())
 
-    model_eq_constraint = eq_constraint.EqualityConstraintKcMwm(
-        N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_team_pure, reward_project_pure
-    )
+    model_eq_constraint = eq_constraint.EqualityConstraintKcMwm(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_team_pure, reward_project_pure)
 
     if ut_name == "TeamEc2OricUpdate":
         extrinsic_output_department_pure = np.random.uniform(-300, 300, size=(N_DEPARTMENTS, N_TEAMS))
@@ -46,17 +44,13 @@ def ut_eq_consraint(ut_name, n_departments, n_teams, n_projects):
         output_file_python_pure.close()
 
     elif ut_name == "ProjectEqConst2OricUpdate":
-        f_input_path = (
-            os.getcwd() + "/../ut_inputs/project_to_eq_constraint_m_pure.npy"
-        )
+        f_input_path = os.getcwd() + "/../ut_inputs/project_to_eq_constraint_m_pure.npy"
         project_to_eq_constraint_m_pure = np.random.uniform(-300, 300, size=(N_PROJECTS, N_TEAMS))
         project_to_eq_constraint_m_pure = project_to_eq_constraint_m_pure.astype(np_impa_lib)
         np.save(f_input_path, project_to_eq_constraint_m_pure.flatten())
 
         f_output_path = os.getcwd() + "/../ut_results/eq_constraint_to_oric_m_pure"
-        eq_constraint_to_oric_m_pure = model_eq_constraint.project_eq_const_to_oric_update(
-            project_to_eq_constraint_m_pure
-        )
+        eq_constraint_to_oric_m_pure = model_eq_constraint.project_eq_const_to_oric_update(project_to_eq_constraint_m_pure)
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, eq_constraint_to_oric_m_pure, allow_pickle=True)
         output_file_python_pure.close()
