@@ -62,23 +62,18 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<
                                                                   vector<vector<impalib_type>> &rEqConstraint2ProjectM,
                                                                   vector<vector<impalib_type>> &rRewardProject)
 {
-    // Initialize forward and backward messages
     vector<vector<impalib_type>> stage_forward_messages_ORIC_project(numProjects_ + 1,
                                                                      vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> stage_backward_messages_ORIC_project(
         numProjects_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
 
-    // Iterate over each team
     for (int team_index = 0; team_index < numTeams_; team_index++)
     {
 
-        // Initialize forward and backward messages
         vector<impalib_type> initial_forward_messages(maxStateIc_ + 1, zero_value),
             initial_backward_messages(maxStateIc_ + 1, zero_value);
-        
-        // Set initial forward messages
-        fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
 
+        fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
         stage_forward_messages_ORIC_project[0] = initial_forward_messages;
         
         // Calculate forward messages
@@ -104,18 +99,13 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<
             stage_backward_messages_ORIC_project[stage][1] = stage_backward_messages_ORIC_project[stage + 1][1];
         }
 
-        // Update messages from ORIC to project equality constraints and from project equality constraints to project inequality constraints
         for (int project_index = 0; project_index < numProjects_; project_index++)
         {
             impalib_type minimumValue                      = zero_value;
-            // Calculate the minimum value between forward and backward messages
             minimumValue                                   = min(stage_forward_messages_ORIC_project[project_index][1],
                                                                  stage_backward_messages_ORIC_project[project_index + 1][0]);
-            // Calculate the minimum value between previous minimum and zero
             minimumValue                                   = min(minimumValue, zero_value);
-            // Update messages from ORIC to project equality constraints
             rOric2EqConstraintM[project_index][team_index] = mTeam2ORIC[team_index] - minimumValue;
-            // Update messages from project equality constraints to project inequality constraints
             rEqConstraint2ProjectM[project_index][team_index] =
                 rOric2EqConstraintM[project_index][team_index] + rRewardProject[project_index][team_index];
         }
@@ -133,13 +123,10 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<
 void OrInequalityConstraint::oric_to_team_update(vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                  vector<impalib_type>         &rOric2TeamM)
 {
-    // Iterate over each team
     for (int team_index = 0; team_index < rOric2TeamM.size(); team_index++)
     {
-        // Initialize minimum value
         impalib_type minValue = 1000000;
 
-        // Find the minimum value among messages from project equality constraints to ORIC for this team
         for (int project_index = 0; project_index < rEqConstraint2OricM.size(); project_index++)
         {
             if (rEqConstraint2OricM[project_index][team_index] < minValue)
@@ -147,7 +134,6 @@ void OrInequalityConstraint::oric_to_team_update(vector<vector<impalib_type>> &r
                 minValue = rEqConstraint2OricM[project_index][team_index];
             }
         }
-        // Update message from ORIC to team with the minimum value
         rOric2TeamM[team_index] = minValue;
     }
 }

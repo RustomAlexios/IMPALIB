@@ -71,7 +71,6 @@ InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), numProjects_(N_PROJECTS),
       maxSizeNonzeroWeights_(MAX_SIZE_NON_ZERO_WEIGHTS)
 {
-    // Reserve memory for vectors based on provided sizes
     TeamsWeightsPerDepartment.reserve(numDepartments_);
     NonZeroWeightIndices.reserve(numDepartments_);
     RewardProject.reserve(numProjects_);
@@ -113,26 +112,21 @@ void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_ty
     // Copy reward values for each team and maximum states per department
     copy(pREWARD_TEAM_PY, pREWARD_TEAM_PY + numTeams_, back_inserter(RewardTeam));
     copy(pMAX_STATE_PY, pMAX_STATE_PY + numDepartments_, back_inserter(MaxState));
-    
-    // Iterate over each department
+
     for (int department_index = 0; department_index < numDepartments_; department_index++)
     {   
         // Populate NonZeroWeightIndices for the department
         NonZeroWeightIndices.push_back(vector<int>(pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index], 0));
-        // Copy transition model values for the department
         copy(pTransition_model_py + numTeams_ * department_index,
              pTransition_model_py + numTeams_ * (department_index + 1), Team2KnapsackM[department_index].begin());
-        // Copy teams weights per department
         copy(pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * department_index,
              pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * (department_index + 1),
              TeamsWeightsPerDepartment[department_index].begin());
-        // Copy NonZeroWeightIndices for the department
         copy(p_NON_ZERO_WEIGHT_INDICES_PY + maxSizeNonzeroWeights_ * department_index,
              p_NON_ZERO_WEIGHT_INDICES_PY + pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index]
                  + maxSizeNonzeroWeights_ * department_index,
              NonZeroWeightIndices[department_index].begin());
     }
-    // Iterate over each project
     for (int project_index = 0; project_index < numProjects_; project_index++)
     {
         // Copy reward values for each project-team combination
@@ -156,13 +150,10 @@ void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_ty
 OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), numProjects_(N_PROJECTS)
 {
-
-    // Reserve memory for extrinsic output per team and initialize with zero values
     ExtrinsicOutputTeam.reserve(numTeams_);
     ExtrinsicOutputTeam.resize(numTeams_);
     fill(ExtrinsicOutputTeam.begin(), ExtrinsicOutputTeam.begin() + numTeams_, zero_value);
 
-    // Reserve memory for intrinsic output per project-team combination and initialize with zero values
     IntrinsicOutMwm.reserve(numProjects_ * numTeams_);
     IntrinsicOutMwm.resize(numProjects_ * numTeams_);
     fill(IntrinsicOutMwm.begin(), IntrinsicOutMwm.begin() + numProjects_ * numTeams_, zero_value);
@@ -181,10 +172,8 @@ void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2
                                             vector<vector<impalib_type>> &rProject2EqConstraintM,
                                             vector<vector<impalib_type>> &rRewardProject)
 {
-    // Iterate over projects
     for (int project_index = 0; project_index < rRewardProject.size(); project_index++)
     {
-        // Iterate over teams
         for (int team_index = 0; team_index < rRewardProject[project_index].size(); team_index++)
         {
             // Calculate the intrinsic output for the project-team combination
@@ -206,11 +195,8 @@ void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2
 void OutputsKcMwm::extrinsic_output_team_update(vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
                                                 vector<impalib_type>         &rOric2TeamM)
 {
-
-    // Copy the values from rOric2TeamM to ExtrinsicOutputTeam
     copy(rOric2TeamM.begin(), rOric2TeamM.end(), ExtrinsicOutputTeam.begin());
 
-    // Iterate over departments
     for (int department_index = 0; department_index < rExtrinsicOutputDepartment.size(); department_index++)
     {
         // Calculate rExtrinsicOutputDepartment by adding rOric2TeamM
@@ -358,11 +344,9 @@ void OutputsTsp::extrinsic_output_edge_ec_relaxed_graph_update(
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
 
-    // Iterate over each edge variable index
     for (int edge_variable_index = 0; edge_variable_index < rDegreeConstraint2EqConstraintM.size();
          edge_variable_index++)
     {
-         // Calculate extrinsic output for the edge equality constraints
         ExtrinsicOutputEdgeEc[edge_variable_index] =
             accumulate(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(),
                        rDegreeConstraint2EqConstraintM[edge_variable_index].end(), zero_value);

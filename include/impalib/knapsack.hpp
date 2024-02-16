@@ -56,10 +56,8 @@ Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_F
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), filteringFlag_(FILT_FLAG), alpha_(ALPHA)
 {
 
-    // Reserve memory for extrinsic output department
-    extrinsicOutputDepartmentOld_.reserve(numDepartments_);
-
     // Initialize extrinsic output department
+    extrinsicOutputDepartmentOld_.reserve(numDepartments_);
     for (int department_index = 0; department_index < numDepartments_; department_index++)
     {
         extrinsicOutputDepartmentOld_.push_back(vector<impalib_type>(numTeams_, zero_value));
@@ -84,7 +82,6 @@ void Knapsack::forward(int department_index, vector<vector<impalib_type>> &rStag
                        const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, vector<vector<int>> &rTeamsWeightsPerDepartment,
                        vector<vector<impalib_type>> &rTeam2KnapsackM)
 {
-    // Initialize iterator
     vector<int>::iterator upper;
 
     // Initialize initial forward messages
@@ -103,11 +100,9 @@ void Knapsack::forward(int department_index, vector<vector<impalib_type>> &rStag
         }
     }
 
-    // Iterate over non-zero weight indices
     for (int l = 0; l < pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index]; l++)
     {
         int t = rNonZeroWeightIndices[department_index][l];
-        // Iterate over states
         for (int a = 0; a <= max_state_department; a++)
         {
             if (a - rTeamsWeightsPerDepartment[department_index][t] >= 0
@@ -175,7 +170,6 @@ void Knapsack::backward(int department_index, vector<vector<impalib_type>> &rSta
                         vector<vector<impalib_type>> &rTeam2KnapsackM)
 {
 
-    // Initialize iterator
     vector<int>::iterator upper;
 
     // Initialize initial backward messages
@@ -194,12 +188,9 @@ void Knapsack::backward(int department_index, vector<vector<impalib_type>> &rSta
         }
     }
 
-    // Iterate over non-zero weight indices in reverse order
     for (int l = pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index] - 1; l >= 0; l--)
     {
         int t = rNonZeroWeightIndices[department_index][l];
-
-        // Iterate over states
         for (int a = 0; a <= max_state_department; a++)
         {
             if ((t > 0 && a + rTeamsWeightsPerDepartment[department_index][t] <= max_state_department)
@@ -272,7 +263,6 @@ void Knapsack::extrinsic_output_department_lhs(vector<vector<int>>          &rTe
     // Initialize metric paths
     vector<impalib_type> metric_path_solid, metric_path_dash;
 
-    // Iterate over teams in the department
     for (int team_index = 0; team_index < rTeamsWeightsPerDepartment[department_index].size(); team_index++)
     {
         metric_path_dash.clear();
@@ -336,7 +326,6 @@ void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWei
                                        vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
                                        vector<impalib_type>         &mORIC2Team)
 {
-    // Iterate over departments
     for (int department_index = 0; department_index < rExtrinsicOutputDepartment.size(); department_index++)
     {
         // Create a list of remaining departments
@@ -347,7 +336,6 @@ void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWei
         vector<int> unique_edge_department(rNonZeroWeightIndices[department_index]);
         remaining_departments.erase(remaining_departments.begin() + department_index);
 
-        // Iterate over remaining departments
         for (auto t : remaining_departments)
         {
             // Calculate intersection of non-zero weight indices between the current department and other departments
@@ -395,14 +383,12 @@ void Knapsack::process_extrinsic_output_department(int department_index, int ite
                                                    vector<vector<impalib_type>> &rExtrinsicOutputDepartment)
 {
 
-    // Check if filtering and alpha value are enabled
     if ((filteringFlag_) and (alpha_ != zero_value))
     {
 
         vector<impalib_type> intermediate_dummy(rExtrinsicOutputDepartmentDummy[department_index]),
             intermediate_old(extrinsicOutputDepartmentOld_[department_index]), intermediate_extrinsic;
-        
-        // Define weights
+
         impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
 
         // Calculate weighted extrinsic outputs
@@ -411,7 +397,6 @@ void Knapsack::process_extrinsic_output_department(int department_index, int ite
         transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(),
                   [w_1](impalib_type &c) { return c * w_1; });
 
-        // Update extrinsic output department based on the iteration
         if (iter == 0)
         {
             copy(intermediate_dummy.begin(), intermediate_dummy.end(),
@@ -419,7 +404,6 @@ void Knapsack::process_extrinsic_output_department(int department_index, int ite
         }
         else
         {
-            // Update extrinsic output department for the next iteration
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(),
                       std::back_inserter(intermediate_extrinsic), std::plus<impalib_type>());
             copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(),
@@ -432,7 +416,6 @@ void Knapsack::process_extrinsic_output_department(int department_index, int ite
 
     else
     {
-        // Copy extrinsic output department directly
         copy(rExtrinsicOutputDepartmentDummy[department_index].begin(),
              rExtrinsicOutputDepartmentDummy[department_index].end(),
              rExtrinsicOutputDepartment[department_index].begin());
