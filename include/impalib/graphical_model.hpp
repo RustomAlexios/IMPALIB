@@ -98,7 +98,7 @@ GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TE
     eqConstraint2ProjectM_.reserve(numProjects_);
     project2EqConstraintM_.reserve(numProjects_);
 
-    for (int project_index = 0; project_index < numProjects_; project_index++) {
+    for (int i = 0; i < numProjects_; i++) {
         eqConstraint2OricM_.push_back(vector<impalib_type>(numTeams_, zero_value));
         oric2EqConstraintM_.push_back(vector<impalib_type>(numTeams_, zero_value));
         eqConstraint2ProjectM_.push_back(vector<impalib_type>(numTeams_, zero_value));
@@ -111,7 +111,7 @@ GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TE
 
     /// initializes and populates nested vectors for mapping relationships
     /// between departments and teams
-    for (int department_index = 0; department_index < numDepartments_; department_index++) {
+    for (int i = 0; i < numDepartments_; i++) {
         extrinsicOutputDepartment_.push_back(vector<impalib_type>(numTeams_, zero_value));
         extrinsicOutputDepartmentDummy_.push_back(vector<impalib_type>(numTeams_, zero_value));
     }
@@ -152,22 +152,22 @@ void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, impali
  */
 
 void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) {
-    for (int iter = 0; iter < numIterations_; iter++) {
-        for (int department_index = 0; department_index < numDepartments_; department_index++) {
-            int max_state_department = modelInputs_.MaxState[department_index];
+    for (int i = 0; i < numIterations_; i++) {
+        for (int j = 0; j < numDepartments_; j++) {
+            int max_state_department = modelInputs_.MaxState[j];
 
             // Initialize forward and backward message vectors
             vector<vector<impalib_type>> stage_forward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
             vector<vector<impalib_type>> stage_backward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
 
-            modelKnapsacks_.forward(department_index, stage_forward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+            modelKnapsacks_.forward(j, stage_forward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                     modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
-            modelKnapsacks_.backward(department_index, stage_backward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+            modelKnapsacks_.backward(j, stage_backward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                      modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
 
-            modelKnapsacks_.extrinsic_output_department_lhs(modelInputs_.TeamsWeightsPerDepartment, stage_forward_messages, modelInputs_.Team2KnapsackM, department_index, stage_backward_messages,
+            modelKnapsacks_.extrinsic_output_department_lhs(modelInputs_.TeamsWeightsPerDepartment, stage_forward_messages, modelInputs_.Team2KnapsackM, j, stage_backward_messages,
                                                             max_state_department, extrinsicOutputDepartmentDummy_);
-            modelKnapsacks_.process_extrinsic_output_department(department_index, iter, extrinsicOutputDepartmentDummy_, extrinsicOutputDepartment_);
+            modelKnapsacks_.process_extrinsic_output_department(j, i, extrinsicOutputDepartmentDummy_, extrinsicOutputDepartment_);
         }
 
         modelEqConstraint_.team_eq_constraint_to_oric_update(extrinsicOutputDepartment_, team2OricM_, modelInputs_.RewardTeam);
@@ -297,7 +297,7 @@ GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NOD
     DegreeConstraint2EqConstraintM_.reserve(numEdgeVariables_);
 
     // Populate degree constraint to equality constraint messages
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++) {
+    for (int i = 0; i < numEdgeVariables_; i++) {
         DegreeConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numNodes_, zero_value));
         DegreeConstraint2EqConstraintM_.push_back(vector<impalib_type>(numNodes_, zero_value));
     }
@@ -346,9 +346,9 @@ void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impali
  *
  */
 void GraphicalModelTsp::iterate_relaxed_graph() {
-    for (int iter = 0; iter < numIterations_; iter++) {
+    for (int i = 0; i < numIterations_; i++) {
         modelDegreeConstraint_.degree_constraint_to_edge_ec_update(modelInputs_.EdgeEc2DegreeConstraintM, modelInputs_.EdgeConnections, DegreeConstraint2EqConstraintDummyM_);
-        modelDegreeConstraint_.process_filtering(iter, DegreeConstraint2EqConstraintDummyM_, DegreeConstraint2EqConstraintM_);
+        modelDegreeConstraint_.process_filtering(i, DegreeConstraint2EqConstraintDummyM_, DegreeConstraint2EqConstraintM_);
         modelEqConstraint_.edge_ec_to_degree_constraint_relaxed_graph_update(modelInputs_.EdgeConnections, modelInputs_.EdgeDegreeConstraintCost, DegreeConstraint2EqConstraintM_,
                                                                              modelInputs_.EdgeEc2DegreeConstraintM);
     }
@@ -501,18 +501,18 @@ void GraphicalModelTsp::iterate_augmented_graph() {
     modelSubtourEliminationConstraint_.subtourConstraints2EdgeEcOld_.reserve(delta_S_indices_list.size());
 
     // Initialize old subtour constraints
-    for (int index_subtour_constraint = 0; index_subtour_constraint < delta_S_indices_list.size(); index_subtour_constraint++) {
+    for (int i = 0; i < delta_S_indices_list.size(); i++) {
         modelSubtourEliminationConstraint_.subtourConstraints2EdgeEcOld_.push_back(vector<impalib_type>(numEdgeVariables_, zero_value));
     }
 
-    for (int iter = 0; iter < numIterations_; iter++) {
+    for (int i = 0; i < numIterations_; i++) {
         modelDegreeConstraint_.degree_constraint_to_edge_ec_update(modelInputs_.EdgeEc2DegreeConstraintM, modelInputs_.EdgeConnections, DegreeConstraint2EqConstraintDummyM_);
-        modelDegreeConstraint_.process_filtering(iter, DegreeConstraint2EqConstraintDummyM_, DegreeConstraint2EqConstraintM_);
+        modelDegreeConstraint_.process_filtering(i, DegreeConstraint2EqConstraintDummyM_, DegreeConstraint2EqConstraintM_);
 
         edgeEc2SubtourConstraintsM_ = modelEqConstraint_.edge_ec_to_subtour_constraints_update(delta_S_indices_list, modelInputs_.CostEdgeVariable, DegreeConstraint2EqConstraintM_,
                                                                                                subtourConstraints2EdgeEcM_, modelInputs_.EdgeConnections);
         modelSubtourEliminationConstraint_.subtour_constraints_to_edge_ec_update(edgeEc2SubtourConstraintsM_, delta_S_indices_list, subtourConstraints2EdgeEcDummyM_);
-        modelSubtourEliminationConstraint_.process_filtering(iter, subtourConstraints2EdgeEcDummyM_, subtourConstraints2EdgeEcM_, delta_S_indices_list);
+        modelSubtourEliminationConstraint_.process_filtering(i, subtourConstraints2EdgeEcDummyM_, subtourConstraints2EdgeEcM_, delta_S_indices_list);
         modelEqConstraint_.edge_ec_to_degree_constraint_augmented_graph_update(DegreeConstraint2EqConstraintM_, subtourConstraints2EdgeEcM_, modelInputs_.EdgeConnections,
                                                                                modelInputs_.EdgeDegreeConstraintCost, modelInputs_.EdgeEc2DegreeConstraintM);
     }
@@ -594,9 +594,9 @@ void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSelectedEdg
     transform(outputs.IntrinsicOutputEdgeEc.begin(), outputs.IntrinsicOutputEdgeEc.end(), hard_decision.begin(), [&](impalib_type value) { return value > threshold_ ? zero_value : 1; });
 
     // Select edges based on hard decision
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++) {
-        if (hard_decision[edge_variable_index] == 1) {
-            rSelectedEdges.push_back(modelInputs_.EdgeConnections[edge_variable_index]);
+    for (int i = 0; i < numEdgeVariables_; i++) {
+        if (hard_decision[i] == 1) {
+            rSelectedEdges.push_back(modelInputs_.EdgeConnections[i]);
         }
     }
 

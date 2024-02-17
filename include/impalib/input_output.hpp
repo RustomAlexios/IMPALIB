@@ -77,14 +77,14 @@ InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N
     Team2KnapsackM.reserve(numDepartments_);
 
     // Initialize Team2KnapsackM and TeamsWeightsPerDepartment vectors
-    for (int department_index = 0; department_index < numDepartments_; department_index++)
+    for (int i = 0; i < numDepartments_; i++)
     {
         Team2KnapsackM.push_back(vector<impalib_type>(numTeams_, zero_value));
         TeamsWeightsPerDepartment.push_back(vector<int>(numTeams_, 0));
     }
 
     // Initialize RewardProject vector
-    for (int project_index = 0; project_index < numProjects_; project_index++)
+    for (int i = 0; i < numProjects_; i++)
     {
         RewardProject.push_back(vector<impalib_type>(numTeams_, zero_value));
     }
@@ -113,25 +113,25 @@ void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_ty
     copy(pREWARD_TEAM_PY, pREWARD_TEAM_PY + numTeams_, back_inserter(RewardTeam));
     copy(pMAX_STATE_PY, pMAX_STATE_PY + numDepartments_, back_inserter(MaxState));
 
-    for (int department_index = 0; department_index < numDepartments_; department_index++)
+    for (int i = 0; i < numDepartments_; i++)
     {   
         // Populate NonZeroWeightIndices for the department
-        NonZeroWeightIndices.push_back(vector<int>(pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index], 0));
-        copy(pTransition_model_py + numTeams_ * department_index,
-             pTransition_model_py + numTeams_ * (department_index + 1), Team2KnapsackM[department_index].begin());
-        copy(pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * department_index,
-             pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * (department_index + 1),
-             TeamsWeightsPerDepartment[department_index].begin());
-        copy(p_NON_ZERO_WEIGHT_INDICES_PY + maxSizeNonzeroWeights_ * department_index,
-             p_NON_ZERO_WEIGHT_INDICES_PY + pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index]
-                 + maxSizeNonzeroWeights_ * department_index,
-             NonZeroWeightIndices[department_index].begin());
+        NonZeroWeightIndices.push_back(vector<int>(pNON_ZERO_WEIGHT_INDICES_SIZES_PY[i], 0));
+        copy(pTransition_model_py + numTeams_ * i,
+             pTransition_model_py + numTeams_ * (i + 1), Team2KnapsackM[i].begin());
+        copy(pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * i,
+             pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * (i + 1),
+             TeamsWeightsPerDepartment[i].begin());
+        copy(p_NON_ZERO_WEIGHT_INDICES_PY + maxSizeNonzeroWeights_ * i,
+             p_NON_ZERO_WEIGHT_INDICES_PY + pNON_ZERO_WEIGHT_INDICES_SIZES_PY[i]
+                 + maxSizeNonzeroWeights_ * i,
+             NonZeroWeightIndices[i].begin());
     }
-    for (int project_index = 0; project_index < numProjects_; project_index++)
+    for (int i = 0; i < numProjects_; i++)
     {
         // Copy reward values for each project-team combination
-        copy(pREWARD_PROJECT_PY + numTeams_ * project_index, pREWARD_PROJECT_PY + numTeams_ * (project_index + 1),
-             RewardProject[project_index].begin());
+        copy(pREWARD_PROJECT_PY + numTeams_ * i, pREWARD_PROJECT_PY + numTeams_ * (i + 1),
+             RewardProject[i].begin());
     }
 }
 
@@ -172,14 +172,14 @@ void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2
                                             vector<vector<impalib_type>> &rProject2EqConstraintM,
                                             vector<vector<impalib_type>> &rRewardProject)
 {
-    for (int project_index = 0; project_index < rRewardProject.size(); project_index++)
+    for (int i = 0; i < rRewardProject.size(); i++)  // over projects
     {
-        for (int team_index = 0; team_index < rRewardProject[project_index].size(); team_index++)
+        for (int j = 0; j < rRewardProject[i].size(); j++)  // over teams
         {
             // Calculate the intrinsic output for the project-team combination
-            IntrinsicOutMwm[project_index + team_index + project_index * (numTeams_ - 1)] =
-                rOric2EqConstraintM[project_index][team_index] + rProject2EqConstraintM[project_index][team_index]
-                + rRewardProject[project_index][team_index];
+            IntrinsicOutMwm[i + j + i * (numTeams_ - 1)] =
+                rOric2EqConstraintM[i][j] + rProject2EqConstraintM[i][j]
+                + rRewardProject[i][j];
         }
     }
 }
@@ -197,11 +197,11 @@ void OutputsKcMwm::extrinsic_output_team_update(vector<vector<impalib_type>> &rE
 {
     copy(rOric2TeamM.begin(), rOric2TeamM.end(), ExtrinsicOutputTeam.begin());
 
-    for (int department_index = 0; department_index < rExtrinsicOutputDepartment.size(); department_index++)
+    for (int i = 0; i < rExtrinsicOutputDepartment.size(); i++)
     {
         // Calculate rExtrinsicOutputDepartment by adding rOric2TeamM
-        transform(rExtrinsicOutputDepartment[department_index].begin(),
-                  rExtrinsicOutputDepartment[department_index].end(), ExtrinsicOutputTeam.begin(),
+        transform(rExtrinsicOutputDepartment[i].begin(),
+                  rExtrinsicOutputDepartment[i].end(), ExtrinsicOutputTeam.begin(),
                   ExtrinsicOutputTeam.begin(), std::plus<impalib_type>());
     }
 }
@@ -305,31 +305,31 @@ void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_ty
     copy(pCOST_EDGE_VARIABLE_PY, pCOST_EDGE_VARIABLE_PY + numEdgeVariables_, back_inserter(CostEdgeVariable));
 
     // Process input variables
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
+    for (int i = 0; i < numEdgeVariables_; i++)
     {
         // Copy edge connections
         EdgeConnections.push_back(vector<int>(numNodesPerEdge_, 0));
-        copy(pEDGE_CONNECTIONS_PY + numNodesPerEdge_ * edge_variable_index,
-             pEDGE_CONNECTIONS_PY + numNodesPerEdge_ * (edge_variable_index + 1),
-             EdgeConnections[edge_variable_index].begin());
+        copy(pEDGE_CONNECTIONS_PY + numNodesPerEdge_ * i,
+             pEDGE_CONNECTIONS_PY + numNodesPerEdge_ * (i + 1),
+             EdgeConnections[i].begin());
         // Copy edge ec to degree constraint messages
         EdgeEc2DegreeConstraintM.push_back(vector<impalib_type>(numNodes_, zero_value));
-        copy(pEdge_ec_to_degree_constraint_m_py + numNodes_ * edge_variable_index,
-             pEdge_ec_to_degree_constraint_m_py + numNodes_ * (edge_variable_index + 1),
-             EdgeEc2DegreeConstraintM[edge_variable_index].begin());
+        copy(pEdge_ec_to_degree_constraint_m_py + numNodes_ * i,
+             pEdge_ec_to_degree_constraint_m_py + numNodes_ * (i + 1),
+             EdgeEc2DegreeConstraintM[i].begin());
         // Copy edge degree constraint cost
         EdgeDegreeConstraintCost.push_back(vector<impalib_type>(numNodes_, zero_value));
-        copy(pEDGE_DEGREE_CONSTRAINT_COST_PY + numNodes_ * edge_variable_index,
-             pEDGE_DEGREE_CONSTRAINT_COST_PY + numNodes_ * (edge_variable_index + 1),
-             EdgeDegreeConstraintCost[edge_variable_index].begin());
+        copy(pEDGE_DEGREE_CONSTRAINT_COST_PY + numNodes_ * i,
+             pEDGE_DEGREE_CONSTRAINT_COST_PY + numNodes_ * (i + 1),
+             EdgeDegreeConstraintCost[i].begin());
     }
 
     // Process cost matrix
-    for (int node_index = 0; node_index < numNodes_; node_index++)
+    for (int i = 0; i < numNodes_; i++)
     {
         CostMatrix.push_back(vector<impalib_type>(numNodes_, zero_value));
-        copy(pCOST_MATRIX_PY + numNodes_ * node_index, pCOST_MATRIX_PY + numNodes_ * (node_index + 1),
-             CostMatrix[node_index].begin());
+        copy(pCOST_MATRIX_PY + numNodes_ * i, pCOST_MATRIX_PY + numNodes_ * (i + 1),
+             CostMatrix[i].begin());
     }
 }
 
@@ -344,12 +344,11 @@ void OutputsTsp::extrinsic_output_edge_ec_relaxed_graph_update(
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
 
-    for (int edge_variable_index = 0; edge_variable_index < rDegreeConstraint2EqConstraintM.size();
-         edge_variable_index++)
+    for (int i = 0; i < rDegreeConstraint2EqConstraintM.size(); i++)
     {
-        ExtrinsicOutputEdgeEc[edge_variable_index] =
-            accumulate(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(),
-                       rDegreeConstraint2EqConstraintM[edge_variable_index].end(), zero_value);
+        ExtrinsicOutputEdgeEc[i] =
+            accumulate(rDegreeConstraint2EqConstraintM[i].begin(),
+                       rDegreeConstraint2EqConstraintM[i].end(), zero_value);
     }
 }
 
@@ -367,20 +366,18 @@ void OutputsTsp::extrinsic_output_edge_ec_augmented_graph_update(
 {
 
     // Update extrinsic output for edge equality constraints based on messages from degree constraints to equality constraints
-    for (int edge_variable_index = 0; edge_variable_index < rDegreeConstraint2EqConstraintM.size();
-         edge_variable_index++)
+    for (int i = 0; i < rDegreeConstraint2EqConstraintM.size(); i++)
     {
-        ExtrinsicOutputEdgeEc[edge_variable_index] =
-            accumulate(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(),
-                       rDegreeConstraint2EqConstraintM[edge_variable_index].end(), zero_value);
+        ExtrinsicOutputEdgeEc[i] =
+            accumulate(rDegreeConstraint2EqConstraintM[i].begin(),
+                       rDegreeConstraint2EqConstraintM[i].end(), zero_value);
     }
 
     // Update extrinsic output for edge equality constraints based on messages from subtour elimination constraints
-    for (int subtour_constraint_index = 0; subtour_constraint_index < rSubtourConstraints2EdgeEcM.size();
-         subtour_constraint_index++)
+    for (int i = 0; i < rSubtourConstraints2EdgeEcM.size(); i++)
     {
-        transform(rSubtourConstraints2EdgeEcM[subtour_constraint_index].begin(),
-                  rSubtourConstraints2EdgeEcM[subtour_constraint_index].end(), ExtrinsicOutputEdgeEc.begin(),
+        transform(rSubtourConstraints2EdgeEcM[i].begin(),
+                  rSubtourConstraints2EdgeEcM[i].end(), ExtrinsicOutputEdgeEc.begin(),
                   ExtrinsicOutputEdgeEc.begin(), plus<impalib_type>());
     }
 }

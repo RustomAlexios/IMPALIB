@@ -56,10 +56,10 @@ void EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(
 {
     vector<impalib_type> intermediate_team_to_oric_m(numTeams_, 0);
 
-    for (int department_index = 0; department_index < rExtrinsicOutputDepartment.size(); department_index++)
+    for (int i = 0; i < rExtrinsicOutputDepartment.size(); i++)
     {
-        transform(rExtrinsicOutputDepartment[department_index].begin(),
-                  rExtrinsicOutputDepartment[department_index].end(), intermediate_team_to_oric_m.begin(),
+        transform(rExtrinsicOutputDepartment[i].begin(),
+                  rExtrinsicOutputDepartment[i].end(), intermediate_team_to_oric_m.begin(),
                   intermediate_team_to_oric_m.begin(), std::plus<impalib_type>());
     }
     transform(intermediate_team_to_oric_m.begin(), intermediate_team_to_oric_m.end(), rewardTeam.begin(),
@@ -78,10 +78,10 @@ void EqualityConstraintKcMwm::project_eq_constraint_to_oric_update(vector<vector
                                                                    vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                                    vector<vector<impalib_type>> &rewardProject)
 {
-    for (int project_index = 0; project_index < rProject2EqConstraintM.size(); project_index++)
+    for (int i = 0; i < rProject2EqConstraintM.size(); i++)
     {
-        transform(rProject2EqConstraintM[project_index].begin(), rProject2EqConstraintM[project_index].end(),
-                  rewardProject[project_index].begin(), rEqConstraint2OricM[project_index].begin(),
+        transform(rProject2EqConstraintM[i].begin(), rProject2EqConstraintM[i].end(),
+                  rewardProject[i].begin(), rEqConstraint2OricM[i].begin(),
                   std::plus<impalib_type>());
     }
 }
@@ -153,12 +153,12 @@ void EqualityConstraintTsp::edge_ec_to_degree_constraint_relaxed_graph_update(
     vector<vector<impalib_type>> flipped_degree_constraint_to_eq_constraint_m = rDegreeConstraint2EqConstraintM;
     flip_matrix(rDegreeConstraint2EqConstraintM, rEdgeConnections, flipped_degree_constraint_to_eq_constraint_m);
 
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
+    for (int i = 0; i < numEdgeVariables_; i++)
     {
-        transform(flipped_degree_constraint_to_eq_constraint_m[edge_variable_index].begin(),
-                  flipped_degree_constraint_to_eq_constraint_m[edge_variable_index].end(),
-                  rEdgeDegreeConstraintCost[edge_variable_index].begin(),
-                  rEdgeEc2DegreeConstraintM[edge_variable_index].begin(), plus<impalib_type>());
+        transform(flipped_degree_constraint_to_eq_constraint_m[i].begin(),
+                  flipped_degree_constraint_to_eq_constraint_m[i].end(),
+                  rEdgeDegreeConstraintCost[i].begin(),
+                  rEdgeEc2DegreeConstraintM[i].begin(), plus<impalib_type>());
     }
 }
 
@@ -188,11 +188,11 @@ vector<vector<impalib_type>> EqualityConstraintTsp::edge_ec_to_subtour_constrain
         vector<impalib_type> edge_ec_to_subtour_constraints_m(numEdgeVariables_, zero_value);
 
         vector<impalib_type> combined_degree_constraint_to_eq_constraint_m(numEdgeVariables_, zero_value);
-        for (size_t index_edge_variable = 0; index_edge_variable < numEdgeVariables_; ++index_edge_variable)
+        for (size_t i = 0; i < numEdgeVariables_; ++i)
         {
-            combined_degree_constraint_to_eq_constraint_m[index_edge_variable] =
-                rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][0]]
-                + rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][1]];
+            combined_degree_constraint_to_eq_constraint_m[i] =
+                rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][0]]
+                + rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][1]];
         }
 
         for (size_t i = 0; i < rDeltaSIndicesList[0].size(); i++)
@@ -215,26 +215,25 @@ vector<vector<impalib_type>> EqualityConstraintTsp::edge_ec_to_subtour_constrain
         }
 
         vector<impalib_type> combined_degree_constraint_to_eq_constraint_m(numEdgeVariables_, zero_value);
-        for (size_t index_edge_variable = 0; index_edge_variable < numEdgeVariables_; ++index_edge_variable)
+        for (size_t i = 0; i < numEdgeVariables_; ++i)
         {
-            combined_degree_constraint_to_eq_constraint_m[index_edge_variable] =
-                rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][0]]
-                + rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][1]];
+            combined_degree_constraint_to_eq_constraint_m[i] =
+                rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][0]]
+                + rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][1]];
         }
 
-        for (size_t index_subtour_constraint = 0; index_subtour_constraint < rDeltaSIndicesList.size();
-             index_subtour_constraint++)
+        for (size_t i = 0; i < rDeltaSIndicesList.size(); i++)
         {
             vector<impalib_type> edge_ec_to_subtour_constraints_m(numEdgeVariables_, zero_value);
 
-            for (size_t i = 0; i < rDeltaSIndicesList[index_subtour_constraint].size(); i++)
+            for (size_t j = 0; j < rDeltaSIndicesList[i].size(); j++)
             {
-                edge_ec_to_subtour_constraints_m[rDeltaSIndicesList[index_subtour_constraint][i]] =
-                    combined_subtour_constraints_to_edge_ec_m[rDeltaSIndicesList[index_subtour_constraint][i]]
-                    + combined_degree_constraint_to_eq_constraint_m[rDeltaSIndicesList[index_subtour_constraint][i]]
-                    + rCostEdgeVaribale[rDeltaSIndicesList[index_subtour_constraint][i]]
-                    - rSubtourConstraints2EdgeEcM[index_subtour_constraint]
-                                                 [rDeltaSIndicesList[index_subtour_constraint][i]];
+                edge_ec_to_subtour_constraints_m[rDeltaSIndicesList[i][j]] =
+                    combined_subtour_constraints_to_edge_ec_m[rDeltaSIndicesList[i][j]]
+                    + combined_degree_constraint_to_eq_constraint_m[rDeltaSIndicesList[i][j]]
+                    + rCostEdgeVaribale[rDeltaSIndicesList[i][j]]
+                    - rSubtourConstraints2EdgeEcM[i]
+                                                 [rDeltaSIndicesList[i][j]];
             }
             edge_ec_to_subtour_constraints_list.push_back(edge_ec_to_subtour_constraints_m);
         }

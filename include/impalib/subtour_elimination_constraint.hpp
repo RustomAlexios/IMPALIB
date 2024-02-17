@@ -68,43 +68,42 @@ void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
     vector<impalib_type> stage_forward_messages(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> stage_backward_messages(numEdgeVariables_ + 1, zero_value);
 
-    for (size_t index_subtour_constraint = 0; index_subtour_constraint < rDeltaSIndicesList.size();
-         index_subtour_constraint++)
+    for (size_t i = 0; i < rDeltaSIndicesList.size(); i++)
     {
         // Initialize and calculate forward messages
-        stage_forward_messages[rDeltaSIndicesList[index_subtour_constraint][0]] = initial_forward_message_;
-        for (int stage = 1; stage < rDeltaSIndicesList[index_subtour_constraint].size(); stage++)
+        stage_forward_messages[rDeltaSIndicesList[i][0]] = initial_forward_message_;
+        for (int stage = 1; stage < rDeltaSIndicesList[i].size(); stage++)
         {
-            stage_forward_messages[rDeltaSIndicesList[index_subtour_constraint][stage]] =
-                min(stage_forward_messages[rDeltaSIndicesList[index_subtour_constraint][stage - 1]],
-                    rEdgeEc2SubtourConstraintsM[index_subtour_constraint]
-                                               [rDeltaSIndicesList[index_subtour_constraint][stage - 1]]);
+            stage_forward_messages[rDeltaSIndicesList[i][stage]] =
+                min(stage_forward_messages[rDeltaSIndicesList[i][stage - 1]],
+                    rEdgeEc2SubtourConstraintsM[i]
+                                               [rDeltaSIndicesList[i][stage - 1]]);
         }
 
         // Initialize and calculate backward messages
-        stage_backward_messages[rDeltaSIndicesList[index_subtour_constraint]
-                                                  [rDeltaSIndicesList[index_subtour_constraint].size() - 1]
+        stage_backward_messages[rDeltaSIndicesList[i]
+                                                  [rDeltaSIndicesList[i].size() - 1]
                                 + 1] = initial_backward_message_;
 
-        for (size_t stage = rDeltaSIndicesList[index_subtour_constraint].size() - 1; stage >= 1; stage--)
+        for (size_t stage = rDeltaSIndicesList[i].size() - 1; stage >= 1; stage--)
         {
-            stage_backward_messages[rDeltaSIndicesList[index_subtour_constraint][stage - 1] + 1] =
-                min(stage_backward_messages[rDeltaSIndicesList[index_subtour_constraint][stage] + 1],
-                    rEdgeEc2SubtourConstraintsM[index_subtour_constraint]
-                                               [rDeltaSIndicesList[index_subtour_constraint][stage]]);
+            stage_backward_messages[rDeltaSIndicesList[i][stage - 1] + 1] =
+                min(stage_backward_messages[rDeltaSIndicesList[i][stage] + 1],
+                    rEdgeEc2SubtourConstraintsM[i]
+                                               [rDeltaSIndicesList[i][stage]]);
         }
 
         // Update subtour constraints to edge EC messages
-        for (int index_edge_variable = 0; index_edge_variable < rDeltaSIndicesList[index_subtour_constraint].size();
+        for (int index_edge_variable = 0; index_edge_variable < rDeltaSIndicesList[i].size();
              index_edge_variable++)
         {
             impalib_type minimumValue = zero_value;
             minimumValue =
-                min(stage_forward_messages[rDeltaSIndicesList[index_subtour_constraint][index_edge_variable]],
-                    stage_backward_messages[rDeltaSIndicesList[index_subtour_constraint][index_edge_variable] + 1]);
+                min(stage_forward_messages[rDeltaSIndicesList[i][index_edge_variable]],
+                    stage_backward_messages[rDeltaSIndicesList[i][index_edge_variable] + 1]);
             minimumValue = min(-minimumValue, zero_value);
-            rSubtourConstraints2EdgeEcM[index_subtour_constraint]
-                                       [rDeltaSIndicesList[index_subtour_constraint][index_edge_variable]] =
+            rSubtourConstraints2EdgeEcM[i]
+                                       [rDeltaSIndicesList[i][index_edge_variable]] =
                                            minimumValue;
         }
     }
@@ -126,14 +125,13 @@ void SubtourEliminationConstraint::process_filtering(int                        
                                                      vector<vector<int>>          &rDeltaSIndicesList)
 {
 
-    for (int index_subtour_constraint = 0; index_subtour_constraint < rDeltaSIndicesList.size();
-         index_subtour_constraint++)
+    for (int i = 0; i < rDeltaSIndicesList.size(); i++)
     {
 
         if ((filteringFlag_) and (alpha_ != zero_value))
         {
-            vector<impalib_type> intermediate_dummy(rSubtourConstraints2EdgeEcDummyM[index_subtour_constraint]),
-                intermediate_old(subtourConstraints2EdgeEcOld_[index_subtour_constraint]), intermediate_extrinsic;
+            vector<impalib_type> intermediate_dummy(rSubtourConstraints2EdgeEcDummyM[i]),
+                intermediate_old(subtourConstraints2EdgeEcOld_[i]), intermediate_extrinsic;
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(),
@@ -144,26 +142,26 @@ void SubtourEliminationConstraint::process_filtering(int                        
             if (iter == 0)
             {
                 copy(intermediate_dummy.begin(), intermediate_dummy.end(),
-                     rSubtourConstraints2EdgeEcM[index_subtour_constraint].begin());
+                     rSubtourConstraints2EdgeEcM[i].begin());
             }
             else
             {
                 transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(),
                           back_inserter(intermediate_extrinsic), plus<impalib_type>());
                 copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(),
-                     rSubtourConstraints2EdgeEcM[index_subtour_constraint].begin());
+                     rSubtourConstraints2EdgeEcM[i].begin());
             }
 
-            copy(rSubtourConstraints2EdgeEcM[index_subtour_constraint].begin(),
-                 rSubtourConstraints2EdgeEcM[index_subtour_constraint].end(),
-                 subtourConstraints2EdgeEcOld_[index_subtour_constraint].begin());
+            copy(rSubtourConstraints2EdgeEcM[i].begin(),
+                 rSubtourConstraints2EdgeEcM[i].end(),
+                 subtourConstraints2EdgeEcOld_[i].begin());
         }
 
         else
         {
-            copy(rSubtourConstraints2EdgeEcDummyM[index_subtour_constraint].begin(),
-                 rSubtourConstraints2EdgeEcDummyM[index_subtour_constraint].end(),
-                 rSubtourConstraints2EdgeEcM[index_subtour_constraint].begin());
+            copy(rSubtourConstraints2EdgeEcDummyM[i].begin(),
+                 rSubtourConstraints2EdgeEcDummyM[i].end(),
+                 rSubtourConstraints2EdgeEcM[i].begin());
         }
     }
 }

@@ -67,7 +67,7 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<
     vector<vector<impalib_type>> stage_backward_messages_ORIC_project(
         numProjects_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
 
-    for (int team_index = 0; team_index < numTeams_; team_index++)
+    for (int i = 0; i < numTeams_; i++)
     {
 
         vector<impalib_type> initial_forward_messages(maxStateIc_ + 1, zero_value),
@@ -77,37 +77,37 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<
         stage_forward_messages_ORIC_project[0] = initial_forward_messages;
         
         // Calculate forward messages
-        for (int stage = 0; stage < numProjects_; stage++)
+        for (int s = 0; s < numProjects_; s++)
         {
-            stage_forward_messages_ORIC_project[stage + 1][0] = stage_forward_messages_ORIC_project[stage][0];
-            stage_forward_messages_ORIC_project[stage + 1][1] =
-                min(stage_forward_messages_ORIC_project[stage][1], stage_forward_messages_ORIC_project[stage][0]
-                                                                       + rEqConstraint2OricM[stage][team_index]
-                                                                       + mTeam2ORIC[team_index]);
+            stage_forward_messages_ORIC_project[s + 1][0] = stage_forward_messages_ORIC_project[s][0];
+            stage_forward_messages_ORIC_project[s + 1][1] =
+                min(stage_forward_messages_ORIC_project[s][1], stage_forward_messages_ORIC_project[s][0]
+                                                                       + rEqConstraint2OricM[s][i]
+                                                                       + mTeam2ORIC[i]);
         }
 
         // Set initial backward messages
         stage_backward_messages_ORIC_project[numProjects_] = initial_backward_messages;
 
         // Calculate backward messages
-        for (int stage = numProjects_ - 1; stage >= 0; stage--)
+        for (int s = numProjects_ - 1; s >= 0; s--)
         {
-            stage_backward_messages_ORIC_project[stage][0] =
-                min(stage_backward_messages_ORIC_project[stage + 1][0],
-                    stage_backward_messages_ORIC_project[stage + 1][1] + rEqConstraint2OricM[stage][team_index]
-                        + mTeam2ORIC[team_index]);
-            stage_backward_messages_ORIC_project[stage][1] = stage_backward_messages_ORIC_project[stage + 1][1];
+            stage_backward_messages_ORIC_project[s][0] =
+                min(stage_backward_messages_ORIC_project[s + 1][0],
+                    stage_backward_messages_ORIC_project[s + 1][1] + rEqConstraint2OricM[s][i]
+                        + mTeam2ORIC[i]);
+            stage_backward_messages_ORIC_project[s][1] = stage_backward_messages_ORIC_project[s + 1][1];
         }
 
-        for (int project_index = 0; project_index < numProjects_; project_index++)
+        for (int j = 0; j < numProjects_; j++)
         {
             impalib_type minimumValue                      = zero_value;
-            minimumValue                                   = min(stage_forward_messages_ORIC_project[project_index][1],
-                                                                 stage_backward_messages_ORIC_project[project_index + 1][0]);
+            minimumValue                                   = min(stage_forward_messages_ORIC_project[j][1],
+                                                                 stage_backward_messages_ORIC_project[j + 1][0]);
             minimumValue                                   = min(minimumValue, zero_value);
-            rOric2EqConstraintM[project_index][team_index] = mTeam2ORIC[team_index] - minimumValue;
-            rEqConstraint2ProjectM[project_index][team_index] =
-                rOric2EqConstraintM[project_index][team_index] + rRewardProject[project_index][team_index];
+            rOric2EqConstraintM[j][i] = mTeam2ORIC[i] - minimumValue;
+            rEqConstraint2ProjectM[j][i] =
+                rOric2EqConstraintM[j][i] + rRewardProject[j][i];
         }
     }
 }
@@ -123,17 +123,17 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<
 void OrInequalityConstraint::oric_to_team_update(vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                  vector<impalib_type>         &rOric2TeamM)
 {
-    for (int team_index = 0; team_index < rOric2TeamM.size(); team_index++)
+    for (int i = 0; i < rOric2TeamM.size(); i++)
     {
         impalib_type minValue = 1000000;
 
-        for (int project_index = 0; project_index < rEqConstraint2OricM.size(); project_index++)
+        for (int j = 0; j < rEqConstraint2OricM.size(); j++)
         {
-            if (rEqConstraint2OricM[project_index][team_index] < minValue)
+            if (rEqConstraint2OricM[j][i] < minValue)
             {
-                minValue = rEqConstraint2OricM[project_index][team_index];
+                minValue = rEqConstraint2OricM[j][i];
             }
         }
-        rOric2TeamM[team_index] = minValue;
+        rOric2TeamM[i] = minValue;
     }
 }
