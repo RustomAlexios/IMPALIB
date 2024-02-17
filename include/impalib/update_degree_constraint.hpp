@@ -48,15 +48,9 @@ public:
 
 DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
                                    const impalib_type ALPHA)
-    : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES)
+    : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES),
+      degreeConstraint2EqConstraintOld(numEdgeVariables_, vector<impalib_type>(numNodes_, 0))
 {
-
-    degreeConstraint2EqConstraintOld.reserve(numEdgeVariables_);
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
-    {
-        degreeConstraint2EqConstraintOld.push_back(vector<impalib_type>(numNodes_, zero_value));
-    }
-
     // Set initial forward and backward messages to infinity
     initial_forward_message_  = value_inf;
     initial_backward_message_ = value_inf;

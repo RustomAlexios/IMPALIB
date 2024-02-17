@@ -53,15 +53,9 @@ public:
  */
 
 Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA)
-    : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), filteringFlag_(FILT_FLAG), alpha_(ALPHA)
+    : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), filteringFlag_(FILT_FLAG), alpha_(ALPHA),
+      extrinsicOutputDepartmentOld_(numDepartments_, vector<impalib_type>(numTeams_, 0))
 {
-
-    // Initialize extrinsic output department
-    extrinsicOutputDepartmentOld_.reserve(numDepartments_);
-    for (int i = 0; i < numDepartments_; i++)
-    {
-        extrinsicOutputDepartmentOld_.push_back(vector<impalib_type>(numTeams_, zero_value));
-    }
 };
 
 /**
