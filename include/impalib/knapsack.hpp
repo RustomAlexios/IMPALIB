@@ -58,7 +58,7 @@ Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_F
 
     // Initialize extrinsic output department
     extrinsicOutputDepartmentOld_.reserve(numDepartments_);
-    for (int department_index = 0; department_index < numDepartments_; department_index++)
+    for (int i = 0; i < numDepartments_; i++)
     {
         extrinsicOutputDepartmentOld_.push_back(vector<impalib_type>(numTeams_, zero_value));
     }
@@ -263,49 +263,49 @@ void Knapsack::extrinsic_output_department_lhs(vector<vector<int>>          &rTe
     // Initialize metric paths
     vector<impalib_type> metric_path_solid, metric_path_dash;
 
-    for (int team_index = 0; team_index < rTeamsWeightsPerDepartment[department_index].size(); team_index++)
+    for (int i = 0; i < rTeamsWeightsPerDepartment[department_index].size(); i++)
     {
         metric_path_dash.clear();
         metric_path_solid.clear();
 
         // Check if the team has non-zero weight with the department
-        if (rTeamsWeightsPerDepartment[department_index][team_index] != 0)
+        if (rTeamsWeightsPerDepartment[department_index][i] != 0)
         {
             // Calculate metric paths for solid (activated) and dashed (deactivated) states
-            if (team_index == 0)
+            if (i == 0)
             {
                 metric_path_solid.push_back(
-                    rStageForwardMessages[team_index][team_index]
-                    + rStageBackwardMessages[team_index + 1][rTeamsWeightsPerDepartment[department_index][team_index]]
-                    + rTeam2KnapsackM[department_index][team_index]);
-                metric_path_dash.push_back(rStageForwardMessages[team_index][team_index]
-                                           + rStageBackwardMessages[team_index + 1][0]);
+                    rStageForwardMessages[i][i]
+                    + rStageBackwardMessages[i + 1][rTeamsWeightsPerDepartment[department_index][i]]
+                    + rTeam2KnapsackM[department_index][i]);
+                metric_path_dash.push_back(rStageForwardMessages[i][i]
+                                           + rStageBackwardMessages[i + 1][0]);
             }
             else
             {
-                for (int i = 0; i <= max_state_department; i++)
+                for (int j = 0; j <= max_state_department; j++)
                 {
-                    if (i + rTeamsWeightsPerDepartment[department_index][team_index] <= max_state_department)
+                    if (j + rTeamsWeightsPerDepartment[department_index][i] <= max_state_department)
                     {
                         metric_path_solid.push_back(
-                            rStageForwardMessages[team_index][i]
-                            + rStageBackwardMessages[team_index + 1]
-                                                    [i + rTeamsWeightsPerDepartment[department_index][team_index]]
-                            + rTeam2KnapsackM[department_index][team_index]);
+                            rStageForwardMessages[i][j]
+                            + rStageBackwardMessages[i + 1]
+                                                    [j + rTeamsWeightsPerDepartment[department_index][i]]
+                            + rTeam2KnapsackM[department_index][i]);
                     }
-                    metric_path_dash.push_back(rStageForwardMessages[team_index][i]
-                                               + rStageBackwardMessages[team_index + 1][i]);
+                    metric_path_dash.push_back(rStageForwardMessages[i][j]
+                                               + rStageBackwardMessages[i + 1][j]);
                 }
             }
             // Calculate extrinsic output for the department
-            rExtrinsicOutputDepartment[department_index][team_index] =
+            rExtrinsicOutputDepartment[department_index][i] =
                 *min_element(metric_path_solid.begin(), metric_path_solid.end())
                 - *min_element(metric_path_dash.begin(), metric_path_dash.end())
-                - rTeam2KnapsackM[department_index][team_index];
+                - rTeam2KnapsackM[department_index][i];
         }
         else
         {
-            rExtrinsicOutputDepartment[department_index][team_index] = zero_value;
+            rExtrinsicOutputDepartment[department_index][i] = zero_value;
         }
     }
 }
@@ -326,23 +326,23 @@ void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWei
                                        vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
                                        vector<impalib_type>         &mORIC2Team)
 {
-    for (int department_index = 0; department_index < rExtrinsicOutputDepartment.size(); department_index++)
+    for (int i = 0; i < rExtrinsicOutputDepartment.size(); i++)
     {
         // Create a list of remaining departments
         vector<int> remaining_departments(numDepartments_);
         iota(remaining_departments.begin(), remaining_departments.end(), 0);
 
         // Get unique edge indices for the current department
-        vector<int> unique_edge_department(rNonZeroWeightIndices[department_index]);
-        remaining_departments.erase(remaining_departments.begin() + department_index);
+        vector<int> unique_edge_department(rNonZeroWeightIndices[i]);
+        remaining_departments.erase(remaining_departments.begin() + i);
 
         for (auto t : remaining_departments)
         {
             // Calculate intersection of non-zero weight indices between the current department and other departments
             vector<int>           intersection(numTeams_);
             vector<int>::iterator it;
-            it = set_intersection(rNonZeroWeightIndices[department_index].begin(),
-                                  rNonZeroWeightIndices[department_index].end(), rNonZeroWeightIndices[t].begin(),
+            it = set_intersection(rNonZeroWeightIndices[i].begin(),
+                                  rNonZeroWeightIndices[i].end(), rNonZeroWeightIndices[t].begin(),
                                   rNonZeroWeightIndices[t].end(), intersection.begin());
             intersection.resize(it - intersection.begin());
 
@@ -350,7 +350,7 @@ void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWei
             for (auto l : intersection)
             {
 
-                rTeam2KnapsackM[department_index][l] =
+                rTeam2KnapsackM[i][l] =
                     rRewardTeam[l] + rExtrinsicOutputDepartment[t][l] + mORIC2Team[l];
                 
                 // Remove the edge index from the unique list
@@ -363,7 +363,7 @@ void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWei
         // Update team to knapsack constraint messages for remaining unique edge department indices
         for (auto u : unique_edge_department)
         {
-            rTeam2KnapsackM[department_index][u] = rRewardTeam[u] + mORIC2Team[u];
+            rTeam2KnapsackM[i][u] = rRewardTeam[u] + mORIC2Team[u];
         }
     }
 }

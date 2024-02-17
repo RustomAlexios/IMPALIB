@@ -78,50 +78,50 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
     vector<impalib_type> stage_forward_messages(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> stage_backward_messages(numEdgeVariables_ + 1, zero_value);
 
-    for (int node_index = 0; node_index < numNodes_; node_index++)
+    for (int i = 0; i < numNodes_; i++)
     {
         vector<int> connections_first, connections_second;
 
         // Populate connections_first and connections_second with edge indices
-        for (int i = 0; i < rEdgeConnections.size(); i++)
+        for (int j = 0; j < rEdgeConnections.size(); j++)
         {
-            if (node_index == rEdgeConnections[i][0])
+            if (i == rEdgeConnections[j][0])
             {
-                connections_first.push_back(i);
+                connections_first.push_back(j);
             }
-            else if (node_index == rEdgeConnections[i][1])
+            else if (i == rEdgeConnections[j][1])
             {
-                connections_second.push_back(i);
+                connections_second.push_back(j);
             }
         }
 
         // Calculate forward messages for connections_first
         stage_forward_messages[connections_first[0]] = initial_forward_message_;
 
-        for (int stage = 1; stage < connections_first.size(); stage++)
+        for (int s = 1; s < connections_first.size(); s++)
         {
 
-            stage_forward_messages[connections_first[stage]] =
-                min(stage_forward_messages[connections_first[stage - 1]],
-                    rEdgeEc2DegreeConstraintM[connections_first[stage - 1]][node_index]);
+            stage_forward_messages[connections_first[s]] =
+                min(stage_forward_messages[connections_first[s - 1]],
+                    rEdgeEc2DegreeConstraintM[connections_first[s - 1]][i]);
         }
 
         // Calculate backward messages for connections_first
         stage_backward_messages[connections_first[connections_first.size() - 1] + 1] = initial_backward_message_;
 
-        for (size_t stage = connections_first.size() - 1; stage >= 1; stage--)
+        for (size_t s = connections_first.size() - 1; s >= 1; s--)
         {
-            stage_backward_messages[connections_first[stage - 1] + 1] =
-                min(stage_backward_messages[connections_first[stage] + 1],
-                    rEdgeEc2DegreeConstraintM[connections_first[stage]][node_index]);
+            stage_backward_messages[connections_first[s - 1] + 1] =
+                min(stage_backward_messages[connections_first[s] + 1],
+                    rEdgeEc2DegreeConstraintM[connections_first[s]][i]);
         }
 
-        for (int index_edge_variable = 0; index_edge_variable < connections_first.size(); index_edge_variable++)
+        for (int j = 0; j < connections_first.size(); j++)
         {
             impalib_type minimumValue = zero_value;
-            minimumValue              = min(stage_forward_messages[connections_first[index_edge_variable]],
-                                            stage_backward_messages[connections_first[index_edge_variable] + 1]);
-            rDegreeConstraint2EqConstraintDummyM[connections_first[index_edge_variable]][node_index] = -minimumValue;
+            minimumValue              = min(stage_forward_messages[connections_first[j]],
+                                            stage_backward_messages[connections_first[j] + 1]);
+            rDegreeConstraint2EqConstraintDummyM[connections_first[j]][i] = -minimumValue;
         }
 
         fill(stage_forward_messages.begin(), stage_forward_messages.end(), zero_value);
@@ -130,30 +130,30 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
         // Calculate forward messages
         stage_forward_messages[connections_second[0]] = initial_forward_message_;
 
-        for (int stage = 1; stage < connections_second.size(); stage++)
+        for (int s = 1; s < connections_second.size(); s++)
         {
 
-            stage_forward_messages[connections_second[stage]] =
-                min(stage_forward_messages[connections_second[stage - 1]],
-                    rEdgeEc2DegreeConstraintM[connections_second[stage - 1]][node_index]);
+            stage_forward_messages[connections_second[s]] =
+                min(stage_forward_messages[connections_second[s - 1]],
+                    rEdgeEc2DegreeConstraintM[connections_second[s - 1]][i]);
         }
 
         // Calculate backward messages
         stage_backward_messages[connections_second[connections_second.size() - 1] + 1] = initial_backward_message_;
 
-        for (size_t stage = connections_second.size() - 1; stage >= 1; stage--)
+        for (size_t s = connections_second.size() - 1; s >= 1; s--)
         {
-            stage_backward_messages[connections_second[stage - 1] + 1] =
-                min(stage_backward_messages[connections_second[stage] + 1],
-                    rEdgeEc2DegreeConstraintM[connections_second[stage]][node_index]);
+            stage_backward_messages[connections_second[s - 1] + 1] =
+                min(stage_backward_messages[connections_second[s] + 1],
+                    rEdgeEc2DegreeConstraintM[connections_second[s]][i]);
         }
 
-        for (int index_edge_variable = 0; index_edge_variable < connections_second.size(); index_edge_variable++)
+        for (int j = 0; j < connections_second.size(); j++)
         {
             impalib_type minimumValue = zero_value;
-            minimumValue              = min(stage_forward_messages[connections_second[index_edge_variable]],
-                                            stage_backward_messages[connections_second[index_edge_variable] + 1]);
-            rDegreeConstraint2EqConstraintDummyM[connections_second[index_edge_variable]][node_index] = -minimumValue;
+            minimumValue              = min(stage_forward_messages[connections_second[j]],
+                                            stage_backward_messages[connections_second[j] + 1]);
+            rDegreeConstraint2EqConstraintDummyM[connections_second[j]][i] = -minimumValue;
         }
     }
 }
@@ -170,13 +170,13 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
 void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
                                          vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
+    for (int i = 0; i < numEdgeVariables_; i++)
     {
         if ((filteringFlag_) and (alpha_ != zero_value))
         {
             // Calculate weighted values for current and old messages
-            vector<impalib_type> intermediate_dummy(rDegreeConstraint2EqConstraintDummyM[edge_variable_index]),
-                intermediate_old(degreeConstraint2EqConstraintOld[edge_variable_index]), intermediate_extrinsic;
+            vector<impalib_type> intermediate_dummy(rDegreeConstraint2EqConstraintDummyM[i]),
+                intermediate_old(degreeConstraint2EqConstraintOld[i]), intermediate_extrinsic;
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(),
@@ -187,25 +187,25 @@ void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> 
             if (iter == 0)
             {
                 copy(intermediate_dummy.begin(), intermediate_dummy.end(),
-                     rDegreeConstraint2EqConstraintM[edge_variable_index].begin());
+                     rDegreeConstraint2EqConstraintM[i].begin());
             }
             else
             {
                 transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(),
                           back_inserter(intermediate_extrinsic), plus<impalib_type>());
                 copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(),
-                     rDegreeConstraint2EqConstraintM[edge_variable_index].begin());
+                     rDegreeConstraint2EqConstraintM[i].begin());
             }
-            copy(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(),
-                 rDegreeConstraint2EqConstraintM[edge_variable_index].end(),
-                 degreeConstraint2EqConstraintOld[edge_variable_index].begin());
+            copy(rDegreeConstraint2EqConstraintM[i].begin(),
+                 rDegreeConstraint2EqConstraintM[i].end(),
+                 degreeConstraint2EqConstraintOld[i].begin());
         }
 
         else
         {
-            copy(rDegreeConstraint2EqConstraintDummyM[edge_variable_index].begin(),
-                 rDegreeConstraint2EqConstraintDummyM[edge_variable_index].end(),
-                 rDegreeConstraint2EqConstraintM[edge_variable_index].begin());
+            copy(rDegreeConstraint2EqConstraintDummyM[i].begin(),
+                 rDegreeConstraint2EqConstraintDummyM[i].end(),
+                 rDegreeConstraint2EqConstraintM[i].begin());
         }
     }
 }

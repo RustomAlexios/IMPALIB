@@ -54,7 +54,7 @@ void InequalityConstraint::project_inequality_constraint_update(vector<vector<im
     vector<vector<impalib_type>> stage_backward_messages_project_EC(numTeams_ + 1,
                                                                     vector<impalib_type>(maxStateIc_ + 1, zero_value));
 
-    for (int project_index = 0; project_index < rProject2EqConstraintM.size(); project_index++)
+    for (int i = 0; i < rProject2EqConstraintM.size(); i++)
     {
         // Initialize forward messages
         vector<impalib_type> initial_forward_messages(maxStateIc_ + 1, zero_value),
@@ -63,31 +63,31 @@ void InequalityConstraint::project_inequality_constraint_update(vector<vector<im
 
         stage_forward_messages_project_EC[0] = initial_forward_messages;
         
-        for (int stage = 0; stage < numTeams_; stage++)
+        for (int s = 0; s < numTeams_; s++)
         {
-            stage_forward_messages_project_EC[stage + 1][0] = stage_forward_messages_project_EC[stage][0];
-            stage_forward_messages_project_EC[stage + 1][1] =
-                min(stage_forward_messages_project_EC[stage][1],
-                    stage_forward_messages_project_EC[stage][0] + rEqConstraint2ProjectM[project_index][stage]);
+            stage_forward_messages_project_EC[s + 1][0] = stage_forward_messages_project_EC[s][0];
+            stage_forward_messages_project_EC[s + 1][1] =
+                min(stage_forward_messages_project_EC[s][1],
+                    stage_forward_messages_project_EC[s][0] + rEqConstraint2ProjectM[i][s]);
         }
 
         stage_backward_messages_project_EC[numTeams_] = initial_backward_messages;
 
-        for (int stage = numTeams_ - 1; stage >= 0; stage--)
+        for (int s = numTeams_ - 1; s >= 0; s--)
         {
-            stage_backward_messages_project_EC[stage][0] =
-                min(stage_backward_messages_project_EC[stage + 1][0],
-                    stage_backward_messages_project_EC[stage + 1][1] + rEqConstraint2ProjectM[project_index][stage]);
-            stage_backward_messages_project_EC[stage][1] = stage_backward_messages_project_EC[stage + 1][1];
+            stage_backward_messages_project_EC[s][0] =
+                min(stage_backward_messages_project_EC[s + 1][0],
+                    stage_backward_messages_project_EC[s + 1][1] + rEqConstraint2ProjectM[i][s]);
+            stage_backward_messages_project_EC[s][1] = stage_backward_messages_project_EC[s + 1][1];
         }
 
         // Update project to equality constraint messages
-        for (int team_index = 0; team_index < numTeams_; team_index++)
+        for (int j = 0; j < numTeams_; j++)
         {
             impalib_type minimumValue                         = zero_value;
-            minimumValue                                      = min(stage_forward_messages_project_EC[team_index][1],
-                                                                    stage_backward_messages_project_EC[team_index + 1][0]);
-            rProject2EqConstraintM[project_index][team_index] = -min(minimumValue, zero_value);
+            minimumValue                                      = min(stage_forward_messages_project_EC[j][1],
+                                                                    stage_backward_messages_project_EC[j + 1][0]);
+            rProject2EqConstraintM[i][j] = -min(minimumValue, zero_value);
         }
     }
 }
