@@ -21,10 +21,10 @@ private:
     vector<vector<impalib_type>> extrinsicOutputDepartmentOld_; ///< messages from departments to teams equality constraint before filtering
 
 public:
-    void forward(int, vector<vector<impalib_type>> &, int, vector<vector<int>> &, const int *, vector<vector<int>> &,
+    void forward(int, vector<vector<impalib_type>> &, int, vector<int> &, const int *, vector<int> &,
                  vector<vector<impalib_type>> &); ///< forward pass of forward-backward algorithm
 
-    void backward(int, vector<vector<impalib_type>> &, int, vector<vector<int>> &, const int *, vector<vector<int>> &,
+    void backward(int, vector<vector<impalib_type>> &, int, vector<int> &, const int *, vector<int> &,
                   vector<vector<impalib_type>> &); ///< backward pass of forward-backward algorithm
 
     void extrinsic_output_department_lhs(vector<vector<int>> &, vector<vector<impalib_type>> &,
@@ -72,8 +72,8 @@ Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_F
  */
 
 void Knapsack::forward(int department_index, vector<vector<impalib_type>> &rStageForwardMessages,
-                       int max_state_department, vector<vector<int>> &rNonZeroWeightIndices,
-                       const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, vector<vector<int>> &rTeamsWeightsPerDepartment,
+                       int max_state_department, vector<int> &rNonZeroWeightIndices,
+                       const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, vector<int> &rTeamWeights,
                        vector<vector<impalib_type>> &rTeam2KnapsackM)
 {
     vector<int>::iterator upper;
@@ -86,9 +86,9 @@ void Knapsack::forward(int department_index, vector<vector<impalib_type>> &rStag
     rStageForwardMessages[0] = initial_forward_messages;
 
     // If the first non-zero weight index is not zero, assign initial messages to subsequent stages
-    if (rNonZeroWeightIndices[department_index][0] != 0)
+    if (rNonZeroWeightIndices[0] != 0)
     {
-        for (int j = 0; j < rNonZeroWeightIndices[department_index][0]; j++)
+        for (int j = 0; j < rNonZeroWeightIndices[0]; j++)
         {
             rStageForwardMessages[j + 1] = initial_forward_messages;
         }
@@ -96,16 +96,16 @@ void Knapsack::forward(int department_index, vector<vector<impalib_type>> &rStag
 
     for (int l = 0; l < pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index]; l++)
     {
-        int t = rNonZeroWeightIndices[department_index][l];
+        int t = rNonZeroWeightIndices[l];
         for (int a = 0; a <= max_state_department; a++)
         {
-            if (a - rTeamsWeightsPerDepartment[department_index][t] >= 0
-                && (!(t == 0 && a != rTeamsWeightsPerDepartment[department_index][t])))
+            if (a - rTeamWeights[t] >= 0
+                && (!(t == 0 && a != rTeamWeights[t])))
             {
                 // Update forward messages
                 rStageForwardMessages[t + 1][a] =
                     min(initial_forward_messages[a],
-                        initial_forward_messages[a - rTeamsWeightsPerDepartment[department_index][t]]
+                        initial_forward_messages[a - rTeamWeights[t]]
                             + rTeam2KnapsackM[department_index][t]);
             }
             else
@@ -118,24 +118,24 @@ void Knapsack::forward(int department_index, vector<vector<impalib_type>> &rStag
         initial_forward_messages = rStageForwardMessages[t + 1];
 
         // Handle the case when non-zero weight indices are not equal to the number of teams
-        if (rNonZeroWeightIndices[department_index].size() != numTeams_)
+        if (rNonZeroWeightIndices.size() != numTeams_)
         {
-            if (!binary_search(rNonZeroWeightIndices[department_index].begin(),
-                               rNonZeroWeightIndices[department_index].end(), t + 1))
+            if (!binary_search(rNonZeroWeightIndices.begin(),
+                               rNonZeroWeightIndices.end(), t + 1))
             {
-                if (t + 1 >= rNonZeroWeightIndices[department_index].back() && t + 1 < numTeams_)
+                if (t + 1 >= rNonZeroWeightIndices.back() && t + 1 < numTeams_)
                 {
                     for (int j = t + 1; j < numTeams_; j++)
                     {
                         rStageForwardMessages[j + 1] = initial_forward_messages;
                     }
                 }
-                else if (t + 1 < rNonZeroWeightIndices[department_index].back())
+                else if (t + 1 < rNonZeroWeightIndices.back())
                 {
-                    upper             = upper_bound(rNonZeroWeightIndices[department_index].begin(),
-                                                    rNonZeroWeightIndices[department_index].end(), t);
-                    size_t next_index = upper - rNonZeroWeightIndices[department_index].begin();
-                    for (int j = t + 1; j < rNonZeroWeightIndices[department_index][next_index]; j++)
+                    upper             = upper_bound(rNonZeroWeightIndices.begin(),
+                                                    rNonZeroWeightIndices.end(), t);
+                    size_t next_index = upper - rNonZeroWeightIndices.begin();
+                    for (int j = t + 1; j < rNonZeroWeightIndices[next_index]; j++)
                     {
                         rStageForwardMessages[j + 1] = initial_forward_messages;
                     }
@@ -159,8 +159,8 @@ void Knapsack::forward(int department_index, vector<vector<impalib_type>> &rStag
  */
 
 void Knapsack::backward(int department_index, vector<vector<impalib_type>> &rStageBackwardMessages,
-                        int max_state_department, vector<vector<int>> &rNonZeroWeightIndices,
-                        const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, vector<vector<int>> &rTeamsWeightsPerDepartment,
+                        int max_state_department, vector<int> &rNonZeroWeightIndices,
+                        const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, vector<int> &rTeamsWeightsPerDepartment,
                         vector<vector<impalib_type>> &rTeam2KnapsackM)
 {
 
@@ -173,10 +173,10 @@ void Knapsack::backward(int department_index, vector<vector<impalib_type>> &rSta
     rStageBackwardMessages[numTeams_] = initial_backward_messages;
 
     // If the last non-zero weight index is not numTeams_ - 1, assign initial messages to previous stages
-    if (rNonZeroWeightIndices[department_index][pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index] - 1]
+    if (rNonZeroWeightIndices[pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index] - 1]
         != numTeams_ - 1)
     {
-        for (int j = numTeams_ - 1; j > rNonZeroWeightIndices[department_index][0]; j--)
+        for (int j = numTeams_ - 1; j > rNonZeroWeightIndices[0]; j--)
         {
             rStageBackwardMessages[j] = initial_backward_messages;
         }
@@ -184,16 +184,16 @@ void Knapsack::backward(int department_index, vector<vector<impalib_type>> &rSta
 
     for (int l = pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index] - 1; l >= 0; l--)
     {
-        int t = rNonZeroWeightIndices[department_index][l];
+        int t = rNonZeroWeightIndices[l];
         for (int a = 0; a <= max_state_department; a++)
         {
-            if ((t > 0 && a + rTeamsWeightsPerDepartment[department_index][t] <= max_state_department)
+            if ((t > 0 && a + rTeamsWeightsPerDepartment[t] <= max_state_department)
                 || (a == 0 && t == 0))
             {
                 // Update backward messages
                 rStageBackwardMessages[t][a] =
                     min(initial_backward_messages[a],
-                        initial_backward_messages[a + rTeamsWeightsPerDepartment[department_index][t]]
+                        initial_backward_messages[a + rTeamsWeightsPerDepartment[t]]
                             + rTeam2KnapsackM[department_index][t]);
             }
             else
@@ -208,22 +208,22 @@ void Knapsack::backward(int department_index, vector<vector<impalib_type>> &rSta
         // Handle the case when non-zero weight indices are not equal to the number of teams
         if (pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index] - 1 != numTeams_)
         {
-            if (!binary_search(rNonZeroWeightIndices[department_index].begin(),
-                               rNonZeroWeightIndices[department_index].end(), t - 1))
+            if (!binary_search(rNonZeroWeightIndices.begin(),
+                               rNonZeroWeightIndices.end(), t - 1))
             {
-                if ((t - 1 <= rNonZeroWeightIndices[department_index][0]) && t - 1 >= 0)
+                if ((t - 1 <= rNonZeroWeightIndices[0]) && t - 1 >= 0)
                 {
                     for (int j = t - 1; j >= 0; j--)
                     {
                         rStageBackwardMessages[j] = initial_backward_messages;
                     }
                 }
-                else if (t - 1 > rNonZeroWeightIndices[department_index][0])
+                else if (t - 1 > rNonZeroWeightIndices[0])
                 {
-                    upper             = upper_bound(rNonZeroWeightIndices[department_index].begin(),
-                                                    rNonZeroWeightIndices[department_index].end(), t - 1);
-                    size_t next_index = upper - rNonZeroWeightIndices[department_index].begin();
-                    for (int j = t - 1; j > rNonZeroWeightIndices[department_index][next_index - 1]; j--)
+                    upper             = upper_bound(rNonZeroWeightIndices.begin(),
+                                                    rNonZeroWeightIndices.end(), t - 1);
+                    size_t next_index = upper - rNonZeroWeightIndices.begin();
+                    for (int j = t - 1; j > rNonZeroWeightIndices[next_index - 1]; j--)
                     {
                         rStageBackwardMessages[j] = initial_backward_messages;
                     }

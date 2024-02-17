@@ -135,15 +135,17 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
     for (int i = 0; i < numIterations_; i++) {
         for (int j = 0; j < numDepartments_; j++) {
             int max_state_department = modelInputs_.MaxState[j];
+            auto& idx_nonzero_dept = modelInputs_.NonZeroWeightIndices[j];
+            auto& team_weights = modelInputs_.TeamsWeightsPerDepartment[j];
 
             // Initialize forward and backward message vectors
             vector<vector<impalib_type>> stage_forward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
             vector<vector<impalib_type>> stage_backward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
 
-            modelKnapsacks_.forward(j, stage_forward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
-                                    modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
-            modelKnapsacks_.backward(j, stage_backward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
-                                     modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
+            modelKnapsacks_.forward(j, stage_forward_messages, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+                                    team_weights, modelInputs_.Team2KnapsackM);
+            modelKnapsacks_.backward(j, stage_backward_messages, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+                                     team_weights, modelInputs_.Team2KnapsackM);
 
             modelKnapsacks_.extrinsic_output_department_lhs(modelInputs_.TeamsWeightsPerDepartment, stage_forward_messages, modelInputs_.Team2KnapsackM, j, stage_backward_messages,
                                                             max_state_department, extrinsicOutputDepartmentDummy_);
