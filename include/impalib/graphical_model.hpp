@@ -176,10 +176,10 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
         modelEqConstraint_.project_eq_constraint_to_oric_update(project2EqConstraintM_, eqConstraint2OricM_, modelInputs_.RewardProject);
 
         modelOric_.oric_to_team_update(eqConstraint2OricM_, oric2PackageM_);
-        outputs.intrinsic_out_mwm_update(oric2EqConstraintM_, project2EqConstraintM_, modelInputs_.RewardProject);
+        outputs.update_intrinsic(oric2EqConstraintM_, project2EqConstraintM_, modelInputs_.RewardProject);
         modelKnapsacks_.team_to_knapsack_update(modelInputs_.NonZeroWeightIndices, modelInputs_.Team2KnapsackM, modelInputs_.RewardTeam, extrinsicOutputDepartment_, oric2PackageM_);
     }
-    outputs.extrinsic_output_team_update(extrinsicOutputDepartment_, oric2PackageM_);
+    outputs.update_extrinsic(extrinsicOutputDepartment_, oric2PackageM_);
 }
 
 /**
@@ -352,8 +352,8 @@ void GraphicalModelTsp::iterate_relaxed_graph() {
         modelEqConstraint_.edge_ec_to_degree_constraint_relaxed_graph_update(modelInputs_.EdgeConnections, modelInputs_.EdgeDegreeConstraintCost, DegreeConstraint2EqConstraintM_,
                                                                              modelInputs_.EdgeEc2DegreeConstraintM);
     }
-    outputs.extrinsic_output_edge_ec_relaxed_graph_update(DegreeConstraint2EqConstraintM_);
-    outputs.intrinsic_output_edge_ec_update(modelInputs_.CostEdgeVariable);
+    outputs.update_extrinsic_relaxed(DegreeConstraint2EqConstraintM_);
+    outputs.update_intrinsic(modelInputs_.CostEdgeVariable);
 
     // Perform hard decision analysis to select edges
     vector<vector<int>> selected_edges;
@@ -532,8 +532,8 @@ void GraphicalModelTsp::iterate_augmented_graph() {
         exit(0);
     }
 
-    outputs.extrinsic_output_edge_ec_augmented_graph_update(DegreeConstraint2EqConstraintM_, subtourConstraints2EdgeEcM_);
-    outputs.intrinsic_output_edge_ec_update(modelInputs_.CostEdgeVariable);
+    outputs.update_extrinsic_augmented(DegreeConstraint2EqConstraintM_, subtourConstraints2EdgeEcM_);
+    outputs.update_intrinsic(modelInputs_.CostEdgeVariable);
 
     selectedEdges_.clear();
     vector<vector<int>> selected_edges;
