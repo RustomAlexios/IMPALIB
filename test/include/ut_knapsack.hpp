@@ -75,10 +75,12 @@ void ut_forward_backward(string& ut_name){
     for (int department_index = 0; department_index<N_DEPARTMENTS; department_index++){
         int max_state_department = Nu[department_index];
         if (ut_name == "KnapsackForward"){
+            auto& idx_nonzero_dept = non_zero_weight_indices[department_index];
+            auto& team_weights = teams_weights_per_department[department_index];
             vector<vector<impalib_type>> stage_forward_messages(N_TEAMS+1, vector<impalib_type>(max_state_department+1,zero_value));
             modelKnapsacks.forward(department_index, stage_forward_messages, max_state_department,
-            non_zero_weight_indices, non_zero_weight_indices_sizes_pure,
-            teams_weights_per_department, team_to_knapsack_m);
+            idx_nonzero_dept, non_zero_weight_indices_sizes_pure,
+            team_weights, team_to_knapsack_m);
             fstream file_output("../ut_results/forward_wrapper"+ std::to_string(department_index), ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_TEAMS+1; i++){
