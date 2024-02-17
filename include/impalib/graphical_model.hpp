@@ -85,36 +85,16 @@ GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TE
       maxSizeNonZeroWeights_(MAX_SIZE_NON_ZERO_WEIGHTS),
       numIterations_(N_ITERATIONS),
       filteringFlag_(FILT_FLAG),
-      alpha_(ALPHA) {
-    /// initializes and prepares data structures for mapping relationships
-    /// between teams, projects, and constraints
-    oric2PackageM_.resize(numTeams_);
-    team2OricM_.resize(numTeams_);
-    fill(oric2PackageM_.begin(), oric2PackageM_.begin() + numTeams_, zero_value);
-    fill(team2OricM_.begin(), team2OricM_.begin() + numTeams_, zero_value);
-
-    eqConstraint2OricM_.reserve(numProjects_);
-    oric2EqConstraintM_.reserve(numProjects_);
-    eqConstraint2ProjectM_.reserve(numProjects_);
-    project2EqConstraintM_.reserve(numProjects_);
-
-    for (int i = 0; i < numProjects_; i++) {
-        eqConstraint2OricM_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        oric2EqConstraintM_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        eqConstraint2ProjectM_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        project2EqConstraintM_.push_back(vector<impalib_type>(numTeams_, zero_value));
-    }
-
-    /// initializes and prepares data structures for messages from departments
-    extrinsicOutputDepartment_.reserve(numDepartments_);
-    extrinsicOutputDepartmentDummy_.reserve(numDepartments_);
-
-    /// initializes and populates nested vectors for mapping relationships
-    /// between departments and teams
-    for (int i = 0; i < numDepartments_; i++) {
-        extrinsicOutputDepartment_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        extrinsicOutputDepartmentDummy_.push_back(vector<impalib_type>(numTeams_, zero_value));
-    }
+      alpha_(ALPHA),
+      oric2PackageM_(numTeams_, 0),
+      team2OricM_(numTeams_, 0),
+      eqConstraint2OricM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
+      oric2EqConstraintM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
+      eqConstraint2ProjectM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
+      project2EqConstraintM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
+      extrinsicOutputDepartmentDummy_(numDepartments_, vector<impalib_type>(numTeams_, 0)),
+      extrinsicOutputDepartment_(numDepartments_, vector<impalib_type>(numTeams_, 0))
+{
 };
 
 /**
@@ -217,17 +197,17 @@ class GraphicalModelTsp {
     vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &); ///< function for finding loops
     InputsTsp modelInputs_; ///< Graphical Model Input object
     vector<vector<int>> selectedEdges_; ///< activated edges of IMPA
-    int numAugmentations_; ///< number of performed augmentations in IMPA
-    int noConsClosedLoopsCount_; ///< count for failure case (no consecutive loop detection and no tour)
-    int solOscCount_; ///< count for failure case (oscillation in the solution)
-    bool noConsClosedLoopsCountExcFlag_; ///< flag for failure case (no consecutive loop detection and no tour)
-    int noImprovSolCount_; ///< count for failure case (no solution improvement)
-    bool noImprovSolCountExcFlag_; ///< flag for failure case (no solution improvement)
-    bool solOscCountExcFlag_; ///< flag for failure case (oscillation in the solution)
+    int numAugmentations_ = 0; ///< number of performed augmentations in IMPA
+    int noConsClosedLoopsCount_ = 0; ///< count for failure case (no consecutive loop detection and no tour)
+    int solOscCount_ = 0; ///< count for failure case (oscillation in the solution)
+    bool noConsClosedLoopsCountExcFlag_ = false; ///< flag for failure case (no consecutive loop detection and no tour)
+    int noImprovSolCount_ = 0; ///< count for failure case (no solution improvement)
+    bool noImprovSolCountExcFlag_ = false; ///< flag for failure case (no solution improvement)
+    bool solOscCountExcFlag_ = false; ///< flag for failure case (oscillation in the solution)
     vector<int> tourImpa_; ///< list of nodes of tour (if detected)
     vector<vector<int>> subtourPaths_; ///< list of detected subtours (if detected)
     vector<int> closedPathsSize_; ///< list of sizes of loops
-    impalib_type costImpa_; ///< cost of IMPA solution
+    impalib_type costImpa_ = zero_value; ///< cost of IMPA solution
     vector<vector<impalib_type>> subtourConstraints2EdgeEcM_; ///< messages from subtour constraints to edge equality constraint
 
    public:
@@ -292,25 +272,10 @@ GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NOD
       resetFlag_(RESET_FLAG),
       numEdgeVariables_(NUM_EDGE_VARIABLES),
       threshold_(THRESHOLD),
-      maxCount_(MAX_COUNT) {
-    DegreeConstraint2EqConstraintDummyM_.reserve(numEdgeVariables_);
-    DegreeConstraint2EqConstraintM_.reserve(numEdgeVariables_);
-
-    // Populate degree constraint to equality constraint messages
-    for (int i = 0; i < numEdgeVariables_; i++) {
-        DegreeConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numNodes_, zero_value));
-        DegreeConstraint2EqConstraintM_.push_back(vector<impalib_type>(numNodes_, zero_value));
-    }
-
-    numAugmentations_ = 0;
-    costImpa_ = zero_value;
-    noConsClosedLoopsCount_ = 0;
-    noImprovSolCount_ = 0;
-    solOscCount_ = 0;
-
-    noConsClosedLoopsCountExcFlag_ = false;
-    noImprovSolCountExcFlag_ = false;
-    solOscCountExcFlag_ = false;
+      maxCount_(MAX_COUNT),
+      DegreeConstraint2EqConstraintDummyM_(numEdgeVariables_, vector<impalib_type>(numNodes_, 0)),
+      DegreeConstraint2EqConstraintM_(numEdgeVariables_, vector<impalib_type>(numNodes_, 0))
+{
 };
 
 /**
