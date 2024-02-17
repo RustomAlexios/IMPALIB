@@ -52,8 +52,7 @@ void ut_input_output_kc_mwm(string& ut_name){
         vector<impalib_type> oric_to_team_m(N_TEAMS,zero_value);
         copy(oric_to_team_m_pure, oric_to_team_m_pure + N_TEAMS, oric_to_team_m.begin());
 
-        
-        outputs.extrinsic_output_team_update(extrinsic_output_department, oric_to_team_m);
+        outputs.update_extrinsic(extrinsic_output_department, oric_to_team_m);
 
         fstream file_output("../ut_results/extrinsic_output_team_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
@@ -82,7 +81,7 @@ void ut_input_output_kc_mwm(string& ut_name){
         copy ( project_to_eq_constraint_m_pure + N_TEAMS*project_index, project_to_eq_constraint_m_pure+N_TEAMS*(project_index+1), project_to_eq_constraint_m[project_index].begin() );
         }
 
-        outputs.intrinsic_out_mwm_update(oric_to_eq_constraint_m, project_to_eq_constraint_m, reward_project);
+        outputs.update_intrinsic(oric_to_eq_constraint_m, project_to_eq_constraint_m, reward_project);
 
         fstream file_output("../ut_results/intrinsic_out_mwm_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
@@ -123,8 +122,7 @@ void ut_input_output_tsp(string& ut_name){
     OutputsTsp outputs(N_NODES, N_EDGE_VARIABLES);
 
     if (ut_name == "ExtrinsicOutputEdgeEcRelaxedGraphUpdate"){
-        
-        outputs.extrinsic_output_edge_ec_relaxed_graph_update(degree_constraint_to_eq_constraint_m);
+        outputs.update_extrinsic_relaxed(degree_constraint_to_eq_constraint_m);
         
         fstream file_output("../ut_results/extrinsic_output_edge_ec_relaxed_graph_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
@@ -145,7 +143,7 @@ void ut_input_output_tsp(string& ut_name){
         copy ( subtour_constraints_to_edge_ec_m_pure + N_EDGE_VARIABLES*subtour_index, subtour_constraints_to_edge_ec_m_pure+N_EDGE_VARIABLES*(subtour_index+1), subtour_constraints_to_edge_ec_m[subtour_index].begin() );
         }
 
-        outputs.extrinsic_output_edge_ec_augmented_graph_update(degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m);
+        outputs.update_extrinsic_augmented(degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m);
 
         fstream file_output("../ut_results/extrinsic_output_edge_ec_augmented_graph_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {

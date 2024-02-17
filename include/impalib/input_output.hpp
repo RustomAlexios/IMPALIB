@@ -46,9 +46,9 @@ private:
 public:
     vector<impalib_type> ExtrinsicOutputTeam; ///< extrinsic output of team equality constraints
     vector<impalib_type> IntrinsicOutMwm; ///< intrinsic outputs of project equality constraint 
-    void                 intrinsic_out_mwm_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                                                  vector<vector<impalib_type>> &); ///< calculate intrinsic outputs of project equality constraints
-    void                 extrinsic_output_team_update(vector<vector<impalib_type>> &, vector<impalib_type> &); ///< calculate extrinsic output of team equality constraints
+    void update_intrinsic(vector<vector<impalib_type>> &rOric2EqConstraintM, vector<vector<impalib_type>> &rProject2EqConstraintM,
+                                                  vector<vector<impalib_type>> &rRewardProject); ///< calculate intrinsic outputs of project equality constraints
+    void update_extrinsic(vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rOric2TeamM); ///< calculate extrinsic output of team equality constraints
     OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS); ///< constructor
 };
 
@@ -168,7 +168,7 @@ OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int
  * 
  */
 
-void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2EqConstraintM,
+void OutputsKcMwm::update_intrinsic(vector<vector<impalib_type>> &rOric2EqConstraintM,
                                             vector<vector<impalib_type>> &rProject2EqConstraintM,
                                             vector<vector<impalib_type>> &rRewardProject)
 {
@@ -192,7 +192,7 @@ void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2
  * 
  */
 
-void OutputsKcMwm::extrinsic_output_team_update(vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
+void OutputsKcMwm::update_extrinsic(vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
                                                 vector<impalib_type>         &rOric2TeamM)
 {
     copy(rOric2TeamM.begin(), rOric2TeamM.end(), ExtrinsicOutputTeam.begin());
@@ -254,10 +254,10 @@ private:
 public:
     vector<impalib_type> ExtrinsicOutputEdgeEc; ///< extrinsic output of edge equality constraint
     vector<impalib_type> IntrinsicOutputEdgeEc; ///< intrinsic output of edge equality constraint
-    void                 extrinsic_output_edge_ec_relaxed_graph_update(vector<vector<impalib_type>> &); ///< calculate extrinsic output of edge equality constraint for a relaxed TSP
-    void                 extrinsic_output_edge_ec_augmented_graph_update(vector<vector<impalib_type>> &,
-                                                                         vector<vector<impalib_type>> &); ///< calculate extrinsic output of edge equality constraint for augmented TSP
-    void                 intrinsic_output_edge_ec_update(vector<impalib_type> &); ///< calculate intrinsic output of edge equality constraint for augmented TSP
+    void update_extrinsic_relaxed(vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM); ///< calculate extrinsic output of edge equality constraint for a relaxed TSP
+    void update_extrinsic_augmented(vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
+                                                                         vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM); ///< calculate extrinsic output of edge equality constraint for augmented TSP
+    void update_intrinsic(vector<impalib_type> &rCostEdgeVariable); ///< calculate intrinsic output of edge equality constraint for augmented TSP
     OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES); ///< constructor
 };
 
@@ -340,7 +340,7 @@ void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_ty
  * 
  */
 
-void OutputsTsp::extrinsic_output_edge_ec_relaxed_graph_update(
+void OutputsTsp::update_extrinsic_relaxed(
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
 
@@ -360,7 +360,7 @@ void OutputsTsp::extrinsic_output_edge_ec_relaxed_graph_update(
  * 
  */
 
-void OutputsTsp::extrinsic_output_edge_ec_augmented_graph_update(
+void OutputsTsp::update_extrinsic_augmented(
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
     vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM)
 {
@@ -389,7 +389,7 @@ void OutputsTsp::extrinsic_output_edge_ec_augmented_graph_update(
  * 
  */
 
-void OutputsTsp::intrinsic_output_edge_ec_update(vector<impalib_type> &rCostEdgeVariable)
+void OutputsTsp::update_intrinsic(vector<impalib_type> &rCostEdgeVariable)
 {
 
     // Calculate intrinsic output for edge equality constraints by adding extrinsic output for edge equality constraints to cost edge variable
