@@ -22,7 +22,6 @@ class GraphicalModelKcMwm {
     int numIterations_; ///< number of iterations of IMPA
     bool filteringFlag_; ///< filtering flag of knapsack constraints
     impalib_type alpha_; ///< filtering parameter
-    vector<vector<impalib_type>> extrinsicOutputDepartmentDummy_; ///< messages from departments to teams before filtering
     vector<vector<impalib_type>> extrinsicOutputDepartment_; ///< messages from departments to teams after filtering
     vector<impalib_type> oric2PackageM_; ///< messages from ORIC to packages
     vector<vector<impalib_type>> eqConstraint2OricM_; ///< messages from team equality constraint to ORIC
@@ -92,7 +91,6 @@ GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TE
       oric2EqConstraintM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
       eqConstraint2ProjectM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
       project2EqConstraintM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
-      extrinsicOutputDepartmentDummy_(numDepartments_, vector<impalib_type>(numTeams_, 0)),
       extrinsicOutputDepartment_(numDepartments_, vector<impalib_type>(numTeams_, 0))
 {
 };
@@ -147,9 +145,9 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
             modelKnapsacks_.backward(j, stage_backward_messages, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                      team_weights, modelInputs_.Team2KnapsackM);
 
-            modelKnapsacks_.extrinsic_output_department_lhs(modelInputs_.TeamsWeightsPerDepartment, stage_forward_messages, modelInputs_.Team2KnapsackM, j, stage_backward_messages,
-                                                            max_state_department, extrinsicOutputDepartmentDummy_);
-            modelKnapsacks_.process_extrinsic_output_department(j, i, extrinsicOutputDepartmentDummy_, extrinsicOutputDepartment_);
+            auto extrinsic_out = modelKnapsacks_.extrinsic_output_department_lhs(team_weights, stage_forward_messages, modelInputs_.Team2KnapsackM, j, stage_backward_messages,
+                                                            max_state_department);
+            modelKnapsacks_.process_extrinsic_output_department(j, i, extrinsic_out, extrinsicOutputDepartment_);
         }
 
         modelEqConstraint_.team_eq_constraint_to_oric_update(extrinsicOutputDepartment_, team2OricM_, modelInputs_.RewardTeam);
