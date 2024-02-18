@@ -165,10 +165,11 @@ void ut_extrinsic_output_department(string& ut_name){
             copy ( stage_backward_messages_pure + (max_state_department+1)*i, stage_backward_messages_pure + (max_state_department+1)*(i+1), stage_backward_messages[i].begin() );
         }
 
-        modelKnapsacks.extrinsic_output_department_lhs(teams_weights_per_department,
+        auto extrinsic_out = modelKnapsacks.extrinsic_output_department_lhs(teams_weights_per_department[department_index],
                             stage_forward_messages, team_to_knapsack_m,
                             department_index, stage_backward_messages,
-                            max_state_department, extrinsicOutputDepartment);
+                            max_state_department);
+        extrinsicOutputDepartment[department_index] = extrinsic_out;
     }
         
         fstream file_output("../ut_results/extrinsic_output_department_wrapper", ios::out | ios::binary | ios:: trunc);
@@ -301,7 +302,7 @@ void ut_process_extrinsic_output_department(string& ut_name){
         for (int department_index=0; department_index<N_DEPARTMENTS; department_index++){
             modelKnapsacks.process_extrinsic_output_department(department_index,
                                     iter, 
-                                    extrinsic_output_department_dummy, extrinsic_output_department);
+                                    extrinsic_output_department_dummy[department_index], extrinsic_output_department);
         }
     }
 

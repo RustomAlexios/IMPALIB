@@ -23,12 +23,12 @@ private:
     impalib_type                 initial_backward_message_ = value_inf; ///< initial backward message of forward-backward algorithm
 
 public:
-    void degree_constraint_to_edge_ec_update(vector<vector<impalib_type>> &, vector<vector<int>> &,
+    void degree_constraint_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
                                              vector<vector<impalib_type>> &); ///< calculate messages from degree constraint to edge equality constraint
-    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< process filtering on messages from degree constraint to edge equality constraint
+    void process_filtering(int, const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< process filtering on messages from degree constraint to edge equality constraint
 
-    DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
-                     const impalib_type ALPHA); ///< constructor
+    DegreeConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
+                     impalib_type ALPHA); ///< constructor
 };
 
 /**
@@ -61,7 +61,7 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
  */
 
 void DegreeConstraint::degree_constraint_to_edge_ec_update(
-    vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM, vector<vector<int>> &rEdgeConnections,
+    const vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM, const vector<vector<int>> &rEdgeConnections,
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM)
 {
     vector<impalib_type> stage_forward_messages(numEdgeVariables_ + 1, zero_value);
@@ -156,7 +156,7 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
  * 
  */
 
-void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
+void DegreeConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
                                          vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
     for (int i = 0; i < numEdgeVariables_; i++)

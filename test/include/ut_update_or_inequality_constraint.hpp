@@ -43,9 +43,7 @@ void ut_oric(string& ut_name){
     }
 
     if (ut_name == "Oric2TeamUpdate"){
-        vector<impalib_type> oric_to_team_m(N_TEAMS, zero_value);
-
-        modelOric.oric_to_team_update(eq_constraint_to_oric_m, oric_to_team_m);
+        auto oric_to_team_m = modelOric.oric_to_team_update(eq_constraint_to_oric_m);
 
         fstream file_output1("../ut_results/oric_to_team_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output1.is_open()) {

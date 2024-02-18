@@ -27,10 +27,10 @@ public:
     vector<int>                  MaxState; ///< vector of capacities of departments
     vector<vector<int>>          NonZeroWeightIndices; ///< indices of non-zero weights per each department
 
-    void process_inputs(const impalib_type *, impalib_type *, const int *, const int *, const int *,
+    void process_inputs(const impalib_type *, const impalib_type *, const int *, const int *, const int *,
                         const impalib_type *, const int *); ///< process input of graphical model
 
-    InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS); ///< constructor
+    InputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS, int MAX_SIZE_NON_ZERO_WEIGHTS); ///< constructor
 };
 
 /**
@@ -46,10 +46,10 @@ private:
 public:
     vector<impalib_type> ExtrinsicOutputTeam; ///< extrinsic output of team equality constraints
     vector<impalib_type> IntrinsicOutMwm; ///< intrinsic outputs of project equality constraint 
-    void update_intrinsic(vector<vector<impalib_type>> &rOric2EqConstraintM, vector<vector<impalib_type>> &rProject2EqConstraintM,
-                                                  vector<vector<impalib_type>> &rRewardProject); ///< calculate intrinsic outputs of project equality constraints
-    void update_extrinsic(vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rOric2TeamM); ///< calculate extrinsic output of team equality constraints
-    OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS); ///< constructor
+    void update_intrinsic(const vector<vector<impalib_type>> &rOric2EqConstraintM, const vector<vector<impalib_type>> &rProject2EqConstraintM,
+                                                  const vector<vector<impalib_type>> &rRewardProject); ///< calculate intrinsic outputs of project equality constraints
+    void update_extrinsic(const vector<vector<impalib_type>> &rExtrinsicOutputDepartment, const vector<impalib_type> &rOric2TeamM); ///< calculate extrinsic output of team equality constraints
+    OutputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS); ///< constructor
 };
 
 /**
@@ -103,7 +103,7 @@ InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N
  * 
  */
 
-void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py,
+void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, const impalib_type *pTransition_model_py,
                                  const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
                                  const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY,
                                  const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY)
@@ -162,9 +162,9 @@ OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int
  * 
  */
 
-void OutputsKcMwm::update_intrinsic(vector<vector<impalib_type>> &rOric2EqConstraintM,
-                                            vector<vector<impalib_type>> &rProject2EqConstraintM,
-                                            vector<vector<impalib_type>> &rRewardProject)
+void OutputsKcMwm::update_intrinsic(const vector<vector<impalib_type>> &rOric2EqConstraintM,
+                                    const vector<vector<impalib_type>> &rProject2EqConstraintM,
+                                    const vector<vector<impalib_type>> &rRewardProject)
 {
     for (int i = 0; i < rRewardProject.size(); i++)  // over projects
     {
@@ -186,14 +186,13 @@ void OutputsKcMwm::update_intrinsic(vector<vector<impalib_type>> &rOric2EqConstr
  * 
  */
 
-void OutputsKcMwm::update_extrinsic(vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
-                                                vector<impalib_type>         &rOric2TeamM)
+void OutputsKcMwm::update_extrinsic(const vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
+                                                const vector<impalib_type>         &rOric2TeamM)
 {
-    copy(rOric2TeamM.begin(), rOric2TeamM.end(), ExtrinsicOutputTeam.begin());
+    ExtrinsicOutputTeam = rOric2TeamM;
 
     for (int i = 0; i < rExtrinsicOutputDepartment.size(); i++)
     {
-        // Calculate rExtrinsicOutputDepartment by adding rOric2TeamM
         transform(rExtrinsicOutputDepartment[i].begin(),
                   rExtrinsicOutputDepartment[i].end(), ExtrinsicOutputTeam.begin(),
                   ExtrinsicOutputTeam.begin(), std::plus<impalib_type>());
@@ -217,7 +216,7 @@ public:
     vector<vector<impalib_type>> EdgeDegreeConstraintCost; ///< cost matrix represented as num_edges x num_nodes to facilitate message updates
     vector<vector<impalib_type>> EdgeEc2DegreeConstraintM; ///< messages from edge equality constraint to degree constraint
 
-    void process_inputs(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *); ///< process inputs of TSP graphical model
+    void process_inputs(const int *, const impalib_type *, const impalib_type *, const impalib_type *, const impalib_type *); ///< process inputs of TSP graphical model
 
     InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES); ///< constructor
 };
@@ -291,7 +290,7 @@ OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES)
  */
 
 void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY,
-                               const impalib_type *pCOST_MATRIX_PY, impalib_type *pEdge_ec_to_degree_constraint_m_py,
+                               const impalib_type *pCOST_MATRIX_PY, const impalib_type *pEdge_ec_to_degree_constraint_m_py,
                                const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY)
 {
 
