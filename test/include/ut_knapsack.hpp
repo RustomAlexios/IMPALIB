@@ -77,8 +77,7 @@ void ut_forward_backward(string& ut_name){
         auto& idx_nonzero_dept = non_zero_weight_indices[department_index];
         auto& team_weights = teams_weights_per_department[department_index];
         if (ut_name == "KnapsackForward"){
-            vector<vector<impalib_type>> stage_forward_messages(N_TEAMS+1, vector<impalib_type>(max_state_department+1,zero_value));
-            modelKnapsacks.forward(department_index, stage_forward_messages, max_state_department,
+            auto stage_forward_messages = modelKnapsacks.forward(department_index, max_state_department,
             idx_nonzero_dept, non_zero_weight_indices_sizes_pure,
             team_weights, team_to_knapsack_m);
             fstream file_output("../ut_results/forward_wrapper"+ std::to_string(department_index), ios::out | ios::binary | ios:: trunc);
@@ -92,8 +91,7 @@ void ut_forward_backward(string& ut_name){
         }
 
         else if (ut_name == "KnapsackBackward"){
-            vector<vector<impalib_type>> stage_backward_messages(N_TEAMS+1, vector<impalib_type>(max_state_department+1,zero_value));
-            modelKnapsacks.backward(department_index, stage_backward_messages, max_state_department,
+            auto stage_backward_messages = modelKnapsacks.backward(department_index, max_state_department,
             idx_nonzero_dept, non_zero_weight_indices_sizes_pure,
             team_weights, team_to_knapsack_m);
             
@@ -302,7 +300,7 @@ void ut_process_extrinsic_output_department(string& ut_name){
         for (int department_index=0; department_index<N_DEPARTMENTS; department_index++){
             modelKnapsacks.process_extrinsic_output_department(department_index,
                                     iter, 
-                                    extrinsic_output_department_dummy[department_index], extrinsic_output_department);
+                                    extrinsic_output_department_dummy[department_index], extrinsic_output_department[department_index]);
         }
     }
 

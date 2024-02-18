@@ -21,10 +21,10 @@ private:
     vector<vector<impalib_type>> extrinsicOutputDepartmentOld_; ///< messages from departments to teams equality constraint before filtering
 
 public:
-    void forward(int, vector<vector<impalib_type>> &, int, const vector<int> &, const int *, const vector<int> &,
+    vector<vector<impalib_type>> forward(int, int, const vector<int> &, const int *, const vector<int> &,
                  const vector<vector<impalib_type>> &); ///< forward pass of forward-backward algorithm
 
-    void backward(int, vector<vector<impalib_type>> &, int, const vector<int> &, const int *, const vector<int> &,
+    vector<vector<impalib_type>> backward(int, int, const vector<int> &, const int *, const vector<int> &,
                   const vector<vector<impalib_type>> &); ///< backward pass of forward-backward algorithm
 
     vector<impalib_type> extrinsic_output_department_lhs(const vector<int> &, const vector<vector<impalib_type>> &,
@@ -32,7 +32,7 @@ public:
 
     void team_to_knapsack_update(const vector<vector<int>> &, vector<vector<impalib_type>> &, const vector<impalib_type> &,
                                  const vector<vector<impalib_type>> &, const vector<impalib_type> &); ///< calculate messages from teams to knapsack constraints
-    void process_extrinsic_output_department(int, int, const vector<impalib_type> &, vector<vector<impalib_type>> &); ///< perform filtering (if needed) on messages from departments to teams
+    void process_extrinsic_output_department(int, int, const vector<impalib_type> &, vector<impalib_type> &); ///< perform filtering (if needed) on messages from departments to teams
 
     Knapsack(int N_DEPARTMENTS, int N_TEAMS, bool FILT_FLAG, impalib_type ALPHA); ///< constructor
 };
@@ -70,12 +70,13 @@ Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_F
  * 
  */
 
-void Knapsack::forward(const int department_index, vector<vector<impalib_type>> &rStageForwardMessages,
+vector<vector<impalib_type>> Knapsack::forward(const int department_index,
                        const int max_state_department, const vector<int> &rNonZeroWeightIndices,
                        const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const vector<int> &rTeamWeights,
                        const vector<vector<impalib_type>> &rTeam2KnapsackM)
 {
     vector<int>::const_iterator upper;
+    vector<vector<impalib_type>> rStageForwardMessages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
 
     // Initialize initial forward messages
     vector<impalib_type> initial_forward_messages(max_state_department + 1, zero_value);
@@ -142,6 +143,7 @@ void Knapsack::forward(const int department_index, vector<vector<impalib_type>> 
             }
         }
     }
+    return rStageForwardMessages;
 }
 
 /**
@@ -157,13 +159,14 @@ void Knapsack::forward(const int department_index, vector<vector<impalib_type>> 
  * 
  */
 
-void Knapsack::backward(const int department_index, vector<vector<impalib_type>> &rStageBackwardMessages,
+vector<vector<impalib_type>> Knapsack::backward(const int department_index,
                         const int max_state_department, const vector<int> &rNonZeroWeightIndices,
                         const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const vector<int> &rTeamsWeightsPerDepartment,
                         const vector<vector<impalib_type>> &rTeam2KnapsackM)
 {
 
     vector<int>::const_iterator upper;
+    vector<vector<impalib_type>> rStageBackwardMessages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
 
     // Initialize initial backward messages
     vector<impalib_type>  initial_backward_messages(max_state_department + 1, zero_value);
@@ -230,6 +233,7 @@ void Knapsack::backward(const int department_index, vector<vector<impalib_type>>
             }
         }
     }
+    return rStageBackwardMessages;
 }
 
 /**
@@ -372,7 +376,7 @@ void Knapsack::team_to_knapsack_update(const vector<vector<int>>          &rNonZ
 
 void Knapsack::process_extrinsic_output_department(const int department_index, const int iter,
                                                    const vector<impalib_type> &rExtrinsicOutput,
-                                                   vector<vector<impalib_type>> &rExtrinsicOutputDepartment)
+                                                   vector<impalib_type> &rExtrinsicOutputDepartment)
 {
 
     if ((filteringFlag_) and (alpha_ != zero_value))
@@ -392,17 +396,17 @@ void Knapsack::process_extrinsic_output_department(const int department_index, c
         if (iter == 0)
         {
             copy(intermediate_dummy.begin(), intermediate_dummy.end(),
-                 rExtrinsicOutputDepartment[department_index].begin());
+                 rExtrinsicOutputDepartment.begin());
         }
         else
         {
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(),
                       std::back_inserter(intermediate_extrinsic), std::plus<impalib_type>());
             copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(),
-                 rExtrinsicOutputDepartment[department_index].begin());
+                 rExtrinsicOutputDepartment.begin());
         }
         
-        copy(rExtrinsicOutputDepartment[department_index].begin(), rExtrinsicOutputDepartment[department_index].end(),
+        copy(rExtrinsicOutputDepartment.begin(), rExtrinsicOutputDepartment.end(),
              extrinsicOutputDepartmentOld_[department_index].begin());
     }
 
@@ -410,6 +414,6 @@ void Knapsack::process_extrinsic_output_department(const int department_index, c
     {
         copy(rExtrinsicOutput.begin(),
              rExtrinsicOutput.end(),
-             rExtrinsicOutputDepartment[department_index].begin());
+             rExtrinsicOutputDepartment.begin());
     }
 }

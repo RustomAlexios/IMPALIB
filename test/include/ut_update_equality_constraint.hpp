@@ -52,7 +52,7 @@ void ut_eq_constraint_kc_mwm(string& ut_name){
             copy ( extrinsic_output_department_pure + N_TEAMS*department_index, extrinsic_output_department_pure + N_TEAMS*(department_index+1), extrinsic_output_department[department_index].begin() );
         }
 
-            modelEqConstraint.team_eq_constraint_to_oric_update(extrinsic_output_department, team_to_oric_m, reward_team);
+            team_to_oric_m = modelEqConstraint.team_eq_constraint_to_oric_update(extrinsic_output_department, reward_team);
 
             fstream file_output("../ut_results/team_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
