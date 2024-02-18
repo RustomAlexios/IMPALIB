@@ -151,7 +151,7 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
                               pMAX_STATE);
           model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES);
           for (int i=0; i<N_TEAMS; i++) {
-              cout << model_graph.outputs.ExtrinsicOutputTeam[i]+model_graph.modelInputs_.RewardTeam[i]<<endl;
+              cout << model_graph.outputs.extrinsic[i]+model_graph.inputs_.RewardTeam[i]<<endl;
           }
           }
   ```
@@ -238,8 +238,8 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
       model_graph.iterate_relaxed_graph();
 
       if (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG){
-          if (model_graph.delta_S_indices_list.size() >0){
-                  vector<vector<impalib_type>> temp(model_graph.delta_S_indices_list.size(), vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
+          if (model_graph.idx_delta_S.size() >0){
+                  vector<vector<impalib_type>> temp(model_graph.idx_delta_S.size(), vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
                   model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
                   model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
           }
@@ -255,8 +255,8 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
               break;
           }
 
-          if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.delta_S_indices_list.size()){
-              size_t numLists2Add = model_graph.delta_S_indices_list.size() - model_graph.subtourConstraints2EdgeEcM.size();
+          if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.idx_delta_S.size()){
+              size_t numLists2Add = model_graph.idx_delta_S.size() - model_graph.subtourConstraints2EdgeEcM.size();
               vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
               model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
               model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;

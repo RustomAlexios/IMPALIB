@@ -43,7 +43,7 @@ void ut_oric(string& ut_name){
     }
 
     if (ut_name == "Oric2TeamUpdate"){
-        auto oric_to_team_m = modelOric.oric_to_team_update(eq_constraint_to_oric_m);
+        auto oric_to_team_m = modelOric.messages_to_team_eq(eq_constraint_to_oric_m);
 
         fstream file_output1("../ut_results/oric_to_team_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output1.is_open()) {
@@ -62,9 +62,9 @@ void ut_oric(string& ut_name){
         copy ( team_to_oric_m_pure, team_to_oric_m_pure + N_TEAMS, team_to_oric_m.begin() );
 
         vector<vector<impalib_type>> oric_to_eq_constraint_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
-        vector<vector<impalib_type>> eq_constraint_to_project_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));   
-        
-        modelOric.oric_to_project_eq_constraint_update(eq_constraint_to_oric_m, team_to_oric_m, oric_to_eq_constraint_m, eq_constraint_to_project_m, reward_project);
+        vector<vector<impalib_type>> eq_constraint_to_project_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
+
+        modelOric.messages_to_project_eq(eq_constraint_to_oric_m, team_to_oric_m, oric_to_eq_constraint_m, eq_constraint_to_project_m, reward_project);
 
             fstream file_output2("../ut_results/oric_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output2.is_open()) {
