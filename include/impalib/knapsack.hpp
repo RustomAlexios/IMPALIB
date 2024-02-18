@@ -30,8 +30,8 @@ public:
     vector<impalib_type> extrinsic_output_department_lhs(vector<int> &, vector<vector<impalib_type>> &,
                                          vector<vector<impalib_type>> &, int, vector<vector<impalib_type>> &, int); ///< extrinsic output of department constraint
 
-    void team_to_knapsack_update(vector<vector<int>> &, vector<vector<impalib_type>> &, vector<impalib_type> &,
-                                 vector<vector<impalib_type>> &, vector<impalib_type> &); ///< calculate messages from teams to knapsack constraints
+    void team_to_knapsack_update(const vector<vector<int>> &, vector<vector<impalib_type>> &, const vector<impalib_type> &,
+                                 const vector<vector<impalib_type>> &, const vector<impalib_type> &); ///< calculate messages from teams to knapsack constraints
     void process_extrinsic_output_department(int, int, vector<impalib_type> &, vector<vector<impalib_type>> &); ///< perform filtering (if needed) on messages from departments to teams
 
     Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA); ///< constructor
@@ -313,10 +313,10 @@ vector<impalib_type> Knapsack::extrinsic_output_department_lhs(vector<int>      
  * 
  */
 
-void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWeightIndices,
-                                       vector<vector<impalib_type>> &rTeam2KnapsackM, vector<impalib_type> &rRewardTeam,
-                                       vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
-                                       vector<impalib_type>         &mORIC2Team)
+void Knapsack::team_to_knapsack_update(const vector<vector<int>>          &rNonZeroWeightIndices,
+                                       vector<vector<impalib_type>> &rTeam2KnapsackM, const vector<impalib_type> &rRewardTeam,
+                                       const vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
+                                       const vector<impalib_type>         &mORIC2Team)
 {
     for (int i = 0; i < rExtrinsicOutputDepartment.size(); i++)
     {
