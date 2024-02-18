@@ -18,13 +18,13 @@ private:
     int numDepartments_; ///< number of departments
 
 public:
-    void team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<impalib_type> &,
-                                           vector<impalib_type> &); ///< calculate messages from team equality constraint to ORIC
+    void team_eq_constraint_to_oric_update(const vector<vector<impalib_type>> &, vector<impalib_type> &,
+                                           const vector<impalib_type> &); ///< calculate messages from team equality constraint to ORIC
 
-    void project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                                              vector<vector<impalib_type>> &); ///< calculate messages from project equality constraint to ORIC
+    void project_eq_constraint_to_oric_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
+                                              const vector<vector<impalib_type>> &); ///< calculate messages from project equality constraint to ORIC
 
-    EqualityConstraintKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS); ///< constructor
+    EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS); ///< constructor
 };
 
 /**
@@ -51,8 +51,8 @@ EqualityConstraintKcMwm::EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS,
  */
 
 void EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(
-    vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rTeam2OricM,
-    vector<impalib_type> &rewardTeam)
+    const vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rTeam2OricM,
+    const vector<impalib_type> &rewardTeam)
 {
     vector<impalib_type> intermediate_team_to_oric_m(numTeams_, 0);
 
@@ -74,9 +74,9 @@ void EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(
  * @param[in] rewardProject: rewards of teams-projects combinations
  */
 
-void EqualityConstraintKcMwm::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
+void EqualityConstraintKcMwm::project_eq_constraint_to_oric_update(const vector<vector<impalib_type>> &rProject2EqConstraintM,
                                                                    vector<vector<impalib_type>> &rEqConstraint2OricM,
-                                                                   vector<vector<impalib_type>> &rewardProject)
+                                                                   const vector<vector<impalib_type>> &rewardProject)
 {
     for (int i = 0; i < rProject2EqConstraintM.size(); i++)
     {

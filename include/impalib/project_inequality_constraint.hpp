@@ -20,8 +20,8 @@ private:
     int maxStateIc_ = 1; ///< maximum value of project inequality constraint (<=1)
 
 public:
-    void project_inequality_constraint_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< calculate messages from project inequality constraint to project equality constraint
-    InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS); ///< constructor
+    void project_inequality_constraint_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< calculate messages from project inequality constraint to project equality constraint
+    InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS); ///< constructor
 };
 
 /**
@@ -45,7 +45,7 @@ InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_
  * 
  */
 
-void InequalityConstraint::project_inequality_constraint_update(vector<vector<impalib_type>> &rEqConstraint2ProjectM,
+void InequalityConstraint::project_inequality_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2ProjectM,
                                                                 vector<vector<impalib_type>> &rProject2EqConstraintM)
 {
 
