@@ -20,7 +20,7 @@ private:
     int maxStateIc_ = 1; ///< maximum value of project inequality constraint (<=1)
 
 public:
-    void project_inequality_constraint_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< calculate messages from project inequality constraint to project equality constraint
+    vector<vector<impalib_type>> project_inequality_constraint_update(const vector<vector<impalib_type>> &); ///< calculate messages from project inequality constraint to project equality constraint
     InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS); ///< constructor
 };
 
@@ -45,10 +45,10 @@ InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_
  * 
  */
 
-void InequalityConstraint::project_inequality_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2ProjectM,
-                                                                vector<vector<impalib_type>> &rProject2EqConstraintM)
+vector<vector<impalib_type>> InequalityConstraint::project_inequality_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2ProjectM)
 {
 
+    vector<vector<impalib_type>> rProject2EqConstraintM(numProjects_, vector<impalib_type>(numTeams_, 0));
     vector<vector<impalib_type>> stage_forward_messages_project_EC(numTeams_ + 1,
                                                                    vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> stage_backward_messages_project_EC(numTeams_ + 1,
@@ -90,4 +90,5 @@ void InequalityConstraint::project_inequality_constraint_update(const vector<vec
             rProject2EqConstraintM[i][j] = -min(minimumValue, zero_value);
         }
     }
+    return rProject2EqConstraintM;
 }

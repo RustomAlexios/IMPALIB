@@ -145,7 +145,7 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
 
         auto team2OricM_ = modelEqConstraint_.team_eq_constraint_to_oric_update(extrinsicOutputDepartment_, modelInputs_.RewardTeam);
         modelOric_.oric_to_project_eq_constraint_update(eqConstraint2OricM_, team2OricM_, oric2EqConstraintM_, eqConstraint2ProjectM_, modelInputs_.RewardProject);
-        projectIneqConstraint_.project_inequality_constraint_update(eqConstraint2ProjectM_, project2EqConstraintM_);
+        project2EqConstraintM_ = projectIneqConstraint_.project_inequality_constraint_update(eqConstraint2ProjectM_);
         modelEqConstraint_.project_eq_constraint_to_oric_update(project2EqConstraintM_, eqConstraint2OricM_, modelInputs_.RewardProject);
 
         oric2PackageM_ = modelOric_.oric_to_team_update(eqConstraint2OricM_);
@@ -184,7 +184,7 @@ class GraphicalModelTsp {
     vector<vector<impalib_type>> edgeEc2SubtourConstraintsM_; ///< messages from edge equality constraint to subtour constraints
     void iterate_augmented_graph(); ///< function of IMPA on augmented graph
     void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &); ///< analysis of subtour constraints
-    void hard_decision_analysis(vector<vector<int>> &); ///< function for hard decision solution on IMPA solution
+    vector<vector<int>> hard_decision_analysis(); ///< function for hard decision solution on IMPA solution
     bool isSubsequence(const vector<int> &, const vector<int> &, int); ///< function for post-processing loops
     vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &); ///< function for getting loops
     vector<int> find_closed_loop(const unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &); ///< function for finding loops
@@ -313,9 +313,7 @@ void GraphicalModelTsp::iterate_relaxed_graph() {
     outputs.update_extrinsic_relaxed(DegreeConstraint2EqConstraintM_);
     outputs.update_intrinsic(modelInputs_.CostEdgeVariable);
 
-    // Perform hard decision analysis to select edges
-    vector<vector<int>> selected_edges;
-    hard_decision_analysis(selected_edges);
+    auto selected_edges = hard_decision_analysis();
 
     // Initialize graph for subtour elimination constraints analysis
     unordered_map<int, vector<int>> graph;
@@ -494,8 +492,7 @@ void GraphicalModelTsp::iterate_augmented_graph() {
     outputs.update_intrinsic(modelInputs_.CostEdgeVariable);
 
     selectedEdges_.clear();
-    vector<vector<int>> selected_edges;
-    hard_decision_analysis(selected_edges);
+    auto selected_edges = hard_decision_analysis();
 
     // Check for solution improvement
     if (!selected_edges_old_.empty()) {
@@ -544,7 +541,8 @@ void GraphicalModelTsp::iterate_augmented_graph() {
  * @param[out] rSelectedEdges: activated edges after running IMPA
  *
  */
-void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSelectedEdges) {
+vector<vector<int>> GraphicalModelTsp::hard_decision_analysis() {
+    vector<vector<int>> rSelectedEdges;
     hard_decision.resize(numEdgeVariables_);
     fill(hard_decision.begin(), hard_decision.begin() + numEdgeVariables_, numeric_limits<int>::max());
 
@@ -595,6 +593,8 @@ void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSelectedEdg
 
     cout << "C++ cost_impa: " << cost_impa << '\n';
     costImpa_ = cost_impa;
+
+    return rSelectedEdges;
 }
 
 /**
