@@ -101,59 +101,72 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 - Demo code of Application $1$:
 
   ```cpp
-      // Copyright 2023, Alexios Rustom.
-      // https://github.com/RustomAlexios/IMPALIB
-      // Distributed under the MIT License.
-      // (See accompanying LICENSE file or at
-      //  https://opensource.org/licenses/MIT)
+  // Copyright 2023, Alexios Rustom.
+  // https://github.com/RustomAlexios/IMPALIB
+  // Distributed under the MIT License.
+  // (See accompanying LICENSE file or at
+  //  https://opensource.org/licenses/MIT)
 
-      #include "impalib/impalib.hpp"
+  #include "impalib/impalib.hpp"
 
-      int main(){
-          const int N_PROJECTS = 2; //number of projects
-          const bool FILT_FLAG = true; //whether filtering is activated or not
-          const int N_ITER = 400; //number of iterations of IMPA
-          const int N_DEPARTMENTS = 2; //number of departments
-          int max_state[N_DEPARTMENTS] = {3,3}; //size of each department
-          const impalib_type ALPHA = 0.9; //filtering parameter
-          const int N_TEAMS = 5; //number of teams
-          int non_zero_weight_indices_sizes[N_DEPARTMENTS] = {4, 4}; 
+  int main()
+  {
+      // Problem parameters
+      const int                 N_PROJECTS                    = 2;      ///< number of projects
+      const bool                FILT_FLAG                     = true;   ///< whether filtering is activated or not
+      const int                 N_ITER                        = 400;    ///< number of iterations of IMPA
+      const int                 N_DEPARTMENTS                 = 2;      ///< number of departments
+      array<int, N_DEPARTMENTS> max_state                     = {3, 3}; ///< size of each department
+      const impalib_type        ALPHA                         = 0.9;    ///< filtering parameter
+      const int                 N_TEAMS                       = 5;      ///< number of teams
+      array<int, N_DEPARTMENTS> non_zero_weight_indices_sizes = {4, 4}; ///< sizes of non-zero connections per department
 
-          const int* pNON_ZERO_WEIGHT_INDICES_SIZES = non_zero_weight_indices_sizes;
-          int max_size_non_zero_weight = *max_element(pNON_ZERO_WEIGHT_INDICES_SIZES , pNON_ZERO_WEIGHT_INDICES_SIZES + N_DEPARTMENTS);
+      // Extracting data pointers
+      const int *pNON_ZERO_WEIGHT_INDICES_SIZES = non_zero_weight_indices_sizes.data();
 
-          GraphicalModelKcMwm model_graph(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, max_size_non_zero_weight, N_ITER, FILT_FLAG, ALPHA);
+      // Calculate max size of non-zero weight
+      const auto max_size_non_zero_weight_iter =
+          max_element(non_zero_weight_indices_sizes.begin(), non_zero_weight_indices_sizes.end());
+      int max_size_non_zero_weight = *max_size_non_zero_weight_iter;
 
-          impalib_type reward_team[N_TEAMS] = {-22, -31, -68, -39, -84}; //cost of activating a team
-          impalib_type reward_project[N_PROJECTS*N_TEAMS] = {44, 1, 41, 10, 3,
-                                                          7, 17, 56, 98, 63}; //cost of assigning a team to a project
+      // Initialize the graphical model
+      GraphicalModelKcMwm model_graph(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, max_size_non_zero_weight, N_ITER, FILT_FLAG,
+                                      ALPHA);
 
-          const impalib_type* pREWARD_PROJECT = reward_project;
-          const impalib_type* pREWARD_TEAM = reward_team;
+      // Define rewards for teams and projects
+      array<impalib_type, N_TEAMS>             reward_team    = {-22, -31, -68, -39, -84};
+      array<impalib_type, N_PROJECTS *N_TEAMS> reward_project = {
+          44, 1,  41, 10, 3,
+          7,  17, 56, 98, 63};
 
-          impalib_type transition_model[N_DEPARTMENTS*N_TEAMS]= {-22, -31, -68, -39, 0,  
-                                                          0, -31, -68, -39, -84};
-          impalib_type* pTransition_model = transition_model;
+      // Extracting data pointers
+      const impalib_type *pREWARD_PROJECT = reward_project.data();
+      const impalib_type *pREWARD_TEAM    = reward_team.data();
 
-          int teams_weights_per_department[N_DEPARTMENTS*N_TEAMS]= {2,1,1,1,0,
-                                                                  0,1,1,1,2}; //red edges correspond to weight=2
-                                                                              //blue edges correspond to weight=1
-          const int* pTEAMS_WEIGHTS_PER_DEPARTMENT = teams_weights_per_department;
+      // Defining and extracting variables
+      array<impalib_type, N_DEPARTMENTS *N_TEAMS> transition_model  = {-22, -31, -68, -39, 0, 0, -31, -68, -39, -84};
+      impalib_type                               *pTransition_model = transition_model.data();
+      
+      array<int, N_DEPARTMENTS *N_TEAMS> teams_weights_per_department = {2, 1, 1, 1, 0, 0, 1, 1, 1, 2};
 
-          int non_zero_weight_indices[N_DEPARTMENTS*N_TEAMS] = {0,1,2,3,1,2,3,4}; 
-          const int* p_NON_ZERO_WEIGHT_INDICES = non_zero_weight_indices;
+      const int *pTEAMS_WEIGHTS_PER_DEPARTMENT = teams_weights_per_department.data();
 
+      array<int, N_DEPARTMENTS *N_TEAMS> non_zero_weight_indices   = {0, 1, 2, 3, 1, 2, 3, 4};
+      const int                         *p_NON_ZERO_WEIGHT_INDICES = non_zero_weight_indices.data();
 
-          const int* pMAX_STATE = max_state;
+      const int *pMAX_STATE = max_state.data();
 
-          model_graph.initialize(pREWARD_TEAM, pTransition_model, pTEAMS_WEIGHTS_PER_DEPARTMENT,
-                              pNON_ZERO_WEIGHT_INDICES_SIZES, p_NON_ZERO_WEIGHT_INDICES, pREWARD_PROJECT, 
-                              pMAX_STATE);
-          model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES);
-          for (int i=0; i<N_TEAMS; i++) {
-              cout << model_graph.outputs.ExtrinsicOutputTeam[i]+model_graph.modelInputs_.RewardTeam[i]<<endl;
-          }
-          }
+      // Initialize and iterate through the model
+      model_graph.initialize(pREWARD_TEAM, pTransition_model, pTEAMS_WEIGHTS_PER_DEPARTMENT,
+                            pNON_ZERO_WEIGHT_INDICES_SIZES, p_NON_ZERO_WEIGHT_INDICES, pREWARD_PROJECT, pMAX_STATE);
+      model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES);
+      
+      // Print results
+      for (int i = 0; i < N_TEAMS; i++)
+      {
+          cout << model_graph.outputs.ExtrinsicOutputTeam[i] + model_graph.modelInputs_.RewardTeam[i] << '\n';
+      }
+  }
   ```
 
 <!--Graphical Model of Application $1$:
@@ -174,93 +187,75 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 
   #include "impalib/impalib.hpp"
 
-  int main(){
-      const int N_NODES = 5; //number of nodes
-      const bool FILT_FLAG = true; //whether filtering is activated or not
-      const int N_ITER = 200; //number of iterations of IMPA
-      const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;; //number of edge variables
-      const impalib_type ALPHA = 0.5; //filtering parameter
-      const bool SYM_FLAG = true; //symmetric flag
-      const bool RESET_FLAG = false; //reset flag
-      const impalib_type THRESHOLD = -0.0001; //threshold parameter
-      const bool AUGM_FLAG = true; //augmentation flag
-      const int MAX_AUGM_COUNT = 50; //maximum augmentation count
-      const int MAX_FAILURE_COUNT = 50; //maximum count for failure
+  int main()
+  {
+      const int  N_NODES          = 5;    ///< number of nodes
+      const bool FILT_FLAG        = true; ///< whether filtering is activated or not
+      const int  N_ITER           = 200;  ///< number of iterations of IMPA
+      const int  N_EDGE_VARIABLES = N_NODES * N_NODES - N_NODES;  ///< number of edge variables
+      const impalib_type ALPHA             = 0.5;     ///< filtering parameter
+      const bool         SYM_FLAG          = true;    ///< symmetric flag
+      const bool         RESET_FLAG        = false;   ///< reset flag
+      const impalib_type THRESHOLD         = -0.0001; ///< threshold parameter
+      const bool         AUGM_FLAG         = true;    ///< augmentation flag
+      const int          MAX_AUGM_COUNT    = 50;      ///< maximum augmentation count
+      const int          MAX_FAILURE_COUNT = 50;      ///< maximum count for failure
 
-      //connections between nodes for each edge variable
-      int edge_connections[N_EDGE_VARIABLES][2] = {{0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 0}, {1, 2}, {1, 3}, {1, 4}, {2, 0}, {2, 1}, {2, 3}, {2, 4}, {3, 0}, {3, 1}, {3, 2}, {3, 4}, {4, 0}, {4, 1}, {4, 2},{4, 3}};
+      // connections between nodes for each edge variable
+      array<array<int, 2>, N_EDGE_VARIABLES> edge_connections = {{{0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 0}, {1, 2}, {1, 3},
+                                                                  {1, 4}, {2, 0}, {2, 1}, {2, 3}, {2, 4}, {3, 0}, {3, 1},
+                                                                  {3, 2}, {3, 4}, {4, 0}, {4, 1}, {4, 2}, {4, 3}}};
 
-      //cost matrix of the tsp problem
-      impalib_type cost_matrix[N_NODES][N_NODES] = {{  0.0, 151.75578773,  56.18610887, 718.31915651, 293.02503715},
-                                                  {151.75578773,   0.0,         568.4231286,   83.25740946, 545.45357536},
-                                                  { 56.18610887, 568.4231286,    0.0,         445.55107005, 888.09445172},
-                                                  {718.31915651,  83.25740946, 445.55107005,   0.0,         719.05730714},
-                                                  {293.02503715, 545.45357536, 888.09445172, 719.05730714,   0.0}};
+      // cost matrix of the tsp problem
+      array<array<impalib_type, N_NODES>, N_NODES> cost_matrix = {
+          {{0.0, 151.75578773, 56.18610887, 718.31915651, 293.02503715},
+          {151.75578773, 0.0, 568.4231286, 83.25740946, 545.45357536},
+          {56.18610887, 568.4231286, 0.0, 445.55107005, 888.09445172},
+          {718.31915651, 83.25740946, 445.55107005, 0.0, 719.05730714},
+          {293.02503715, 545.45357536, 888.09445172, 719.05730714, 0.0}}};
 
-      //cost_edge_variable constructed from edge_connections and cost_matrix
-      impalib_type cost_edge_variable[N_EDGE_VARIABLES] = {151.75578773,  56.18610887, 718.31915651, 293.02503715, 151.75578773,
-                                                          568.4231286,   83.25740946, 545.45357536,  56.18610887, 568.4231286,
-                                                          445.55107005, 888.09445172, 718.31915651,  83.25740946, 445.55107005,
-                                                          719.05730714, 293.02503715, 545.45357536, 888.09445172, 719.05730714};
+      // cost_edge_variable constructed from edge_connections and cost_matrix
+      array<impalib_type, N_EDGE_VARIABLES> cost_edge_variable = {
+          151.75578773, 56.18610887,  718.31915651, 293.02503715, 151.75578773, 568.4231286,  83.25740946,
+          545.45357536, 56.18610887,  568.4231286,  445.55107005, 888.09445172, 718.31915651, 83.25740946,
+          445.55107005, 719.05730714, 293.02503715, 545.45357536, 888.09445172, 719.05730714};
 
-      //edge_degree_constraint_cost constructed from edge_connections and cost_matrix
-      impalib_type edge_degree_constraint_cost[N_EDGE_VARIABLES][N_NODES] = {{151.75578773, 151.75578773,   0.0,          0.0,          0.0        },
-                                                                          { 56.18610887,   0.0,          56.18610887,  0.0,          0.0        },
-                                                                          {718.31915651,   0.0,           0.0,         718.31915651, 0.0        },
-                                                                          {293.02503715,   0.0,           0.0,          0.0,        293.02503715},
-                                                                          {151.75578773, 151.75578773,   0.0,          0.0,          0.0        },
-                                                                          {  0.0,        568.4231286,   568.4231286,   0.0,          0.0        },
-                                                                          {  0.0,         83.25740946,   0.0,         83.25740946,  0.0        },
-                                                                          {  0.0,        545.45357536,   0.0,          0.0,        545.45357536},
-                                                                          { 56.18610887,   0.0,          56.18610887,  0.0,          0.0        },
-                                                                          {  0.0,        568.4231286,   568.4231286,   0.0,          0.0        },
-                                                                          {  0.0,          0.0,         445.55107005, 445.55107005,  0.0        },
-                                                                          {  0.0,          0.0,         888.09445172,   0.0,        888.09445172},
-                                                                          {718.31915651,   0.0,           0.0,         718.31915651, 0.0        },
-                                                                          {  0.0,         83.25740946,   0.0,         83.25740946,  0.0        },
-                                                                          {  0.0,          0.0,         445.55107005, 445.55107005,  0.0        },
-                                                                          {  0.0,          0.0,           0.0,         719.05730714, 719.05730714},
-                                                                          {293.02503715,   0.0,           0.0,          0.0,        293.02503715},
-                                                                          {  0.0,        545.45357536,   0.0,          0.0,        545.45357536},
-                                                                          {  0.0,          0.0,         888.09445172,   0.0,        888.09445172},
-                                                                          {  0.0,          0.0,           0.0,         719.05730714, 719.05730714}};
+      // edge_degree_constraint_cost constructed from edge_connections and cost_matrix
+      array<array<impalib_type, N_NODES>, N_EDGE_VARIABLES> edge_degree_constraint_cost = {
+          {{151.75578773, 151.75578773, 0.0, 0.0, 0.0}, {56.18610887, 0.0, 56.18610887, 0.0, 0.0},
+          {718.31915651, 0.0, 0.0, 718.31915651, 0.0}, {293.02503715, 0.0, 0.0, 0.0, 293.02503715},
+          {151.75578773, 151.75578773, 0.0, 0.0, 0.0}, {0.0, 568.4231286, 568.4231286, 0.0, 0.0},
+          {0.0, 83.25740946, 0.0, 83.25740946, 0.0},   {0.0, 545.45357536, 0.0, 0.0, 545.45357536},
+          {56.18610887, 0.0, 56.18610887, 0.0, 0.0},   {0.0, 568.4231286, 568.4231286, 0.0, 0.0},
+          {0.0, 0.0, 445.55107005, 445.55107005, 0.0}, {0.0, 0.0, 888.09445172, 0.0, 888.09445172},
+          {718.31915651, 0.0, 0.0, 718.31915651, 0.0}, {0.0, 83.25740946, 0.0, 83.25740946, 0.0},
+          {0.0, 0.0, 445.55107005, 445.55107005, 0.0}, {0.0, 0.0, 0.0, 719.05730714, 719.05730714},
+          {293.02503715, 0.0, 0.0, 0.0, 293.02503715}, {0.0, 545.45357536, 0.0, 0.0, 545.45357536},
+          {0.0, 0.0, 888.09445172, 0.0, 888.09445172}, {0.0, 0.0, 0.0, 719.05730714, 719.05730714}}};
 
-      const int *pEDGE_CONNECTIONS_PY = (const int *)edge_connections;
-      const impalib_type *pCOST_MATRIX_PY = (const impalib_type*) cost_matrix;
-      const impalib_type *pCOST_EDGE_VARIABLE_PY = cost_edge_variable;
-      impalib_type *pEdge_ec_to_degree_constraint_m_py = (impalib_type*)edge_degree_constraint_cost;
-      const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY = (const impalib_type*)edge_degree_constraint_cost;
+      // Extract data pointers from various structures
+      const int          *pEDGE_CONNECTIONS_PY               = addressof(get<0>(edge_connections[0]));
+      const impalib_type *pCOST_MATRIX_PY                    = addressof(get<0>(cost_matrix[0]));
+      const impalib_type *pCOST_EDGE_VARIABLE_PY             = cost_edge_variable.data();
+      impalib_type       *pEdge_ec_to_degree_constraint_m_py = addressof(get<0>(edge_degree_constraint_cost[0]));
+      const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY    = addressof(get<0>(edge_degree_constraint_cost[0]));
 
-      GraphicalModelTsp model_graph(N_ITER, N_NODES, N_EDGE_VARIABLES, AUGM_FLAG, RESET_FLAG, FILT_FLAG, ALPHA, THRESHOLD, MAX_FAILURE_COUNT);
+      GraphicalModelTsp model_graph(N_ITER, N_NODES, N_EDGE_VARIABLES, AUGM_FLAG, RESET_FLAG, FILT_FLAG, ALPHA, THRESHOLD,
+                                    MAX_FAILURE_COUNT);
 
-      model_graph.initialize(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
+      // Initialize the model with provided data pointers
+      model_graph.initialize(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY,
+                            pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
 
+      // Iterate through the relaxed graph
       model_graph.iterate_relaxed_graph();
 
-      if (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG){
-          if (model_graph.delta_S_indices_list.size() >0){
-                  vector<vector<impalib_type>> temp(model_graph.delta_S_indices_list.size(), vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
-                  model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
-                  model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
-          }
-      }
+      // Check if subtour constraints are not satisfied and augmentation is enabled
+      if (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG)
+      {   
+          // Perform augmentation if conditions are met
+          model_graph.perform_augmentation(MAX_AUGM_COUNT);
 
-      while (!model_graph.subtourConstraintsSatisfiedFlag && AUGM_FLAG && !model_graph.tourImpaFlag){
-
-          //Investigation of MAX_FAILURE_COUNT should be here and is shown in the full code
-          model_graph.iterate_augmented_graph();
-
-          if (model_graph.numAugmentations_==MAX_AUGM_COUNT){
-              cout<<"MAX_AUGM_COUNT reached"<<endl;
-              break;
-          }
-
-          if (model_graph.subtourConstraints2EdgeEcM.size() != model_graph.delta_S_indices_list.size()){
-              size_t numLists2Add = model_graph.delta_S_indices_list.size() - model_graph.subtourConstraints2EdgeEcM.size();
-              vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
-              model_graph.subtourConstraints2EdgeEcM.insert(model_graph.subtourConstraints2EdgeEcM.end(), temp.begin(), temp.end());
-              model_graph.subtourConstraints2EdgeEcDummyM  = model_graph.subtourConstraints2EdgeEcM;
-          }
       }
   }
   ```
