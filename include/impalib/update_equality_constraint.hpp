@@ -101,7 +101,7 @@ public:
     void edge_ec_to_degree_constraint_relaxed_graph_update(vector<vector<int>> &, vector<vector<impalib_type>> &,
                                                            vector<vector<impalib_type>> &,
                                                            vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for relaxed TSP
-    void flip_matrix(vector<vector<impalib_type>> &, vector<vector<int>> &, vector<vector<impalib_type>> &); ///< flip matrix
+    vector<vector<impalib_type>> flip_matrix(vector<vector<impalib_type>> &, vector<vector<int>> &); ///< flip matrix
     vector<vector<impalib_type>> edge_ec_to_subtour_constraints_update(vector<vector<int>> &, vector<impalib_type> &,
                                                                        vector<vector<impalib_type>> &,
                                                                        vector<vector<impalib_type>> &,
@@ -150,13 +150,12 @@ void EqualityConstraintTsp::edge_ec_to_degree_constraint_relaxed_graph_update(
     vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM)
 {
 
-    vector<vector<impalib_type>> flipped_degree_constraint_to_eq_constraint_m = rDegreeConstraint2EqConstraintM;
-    flip_matrix(rDegreeConstraint2EqConstraintM, rEdgeConnections, flipped_degree_constraint_to_eq_constraint_m);
+    auto reversed = flip_matrix(rDegreeConstraint2EqConstraintM, rEdgeConnections);
 
     for (int i = 0; i < numEdgeVariables_; i++)
     {
-        transform(flipped_degree_constraint_to_eq_constraint_m[i].begin(),
-                  flipped_degree_constraint_to_eq_constraint_m[i].end(),
+        transform(reversed[i].begin(),
+                  reversed[i].end(),
                   rEdgeDegreeConstraintCost[i].begin(),
                   rEdgeEc2DegreeConstraintM[i].begin(), plus<impalib_type>());
     }
@@ -269,14 +268,16 @@ void EqualityConstraintTsp::edge_ec_to_degree_constraint_augmented_graph_update(
     {
 
         // Update the message for the first node of the edge
-        rEdgeEc2DegreeConstraintM[i][rEdgeConnections[i][0]] =
-            combined_subtour_constraints_to_edge_ec_m[i] + rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][1]]
-            + rEdgeDegreeConstraintCost[i][rEdgeConnections[i][0]];
+        const auto first_node = rEdgeConnections[i][0];
+        const auto second_node = rEdgeConnections[i][1];
+        rEdgeEc2DegreeConstraintM[i][first_node] =
+            combined_subtour_constraints_to_edge_ec_m[i] + rDegreeConstraint2EqConstraintM[i][second_node]
+            + rEdgeDegreeConstraintCost[i][first_node];
 
         // Update the message for the second node of the edge
-        rEdgeEc2DegreeConstraintM[i][rEdgeConnections[i][1]] =
-            combined_subtour_constraints_to_edge_ec_m[i] + rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][0]]
-            + rEdgeDegreeConstraintCost[i][rEdgeConnections[i][1]];
+        rEdgeEc2DegreeConstraintM[i][second_node] =
+            combined_subtour_constraints_to_edge_ec_m[i] + rDegreeConstraint2EqConstraintM[i][first_node]
+            + rEdgeDegreeConstraintCost[i][second_node];
     }
 }
 
@@ -289,17 +290,15 @@ void EqualityConstraintTsp::edge_ec_to_degree_constraint_augmented_graph_update(
  * 
  */
 
-void EqualityConstraintTsp::flip_matrix(vector<vector<impalib_type>> &rMatrix, vector<vector<int>> &rEdgeConnections,
-                                        vector<vector<impalib_type>> &rFlippedMatrix)
+vector<vector<impalib_type>> EqualityConstraintTsp::flip_matrix(vector<vector<impalib_type>> &rMatrix, vector<vector<int>> &rEdgeConnections)
 {
-    // Iterate over each edge connection
+    auto flipped = rMatrix;
     for (size_t l = 0; l < rEdgeConnections.size(); ++l)
     {
-        // Row index
         int row                = rEdgeConnections[l][0];
-        // Column index
         int col                = rEdgeConnections[l][1];
-        rFlippedMatrix[l][row] = rMatrix[l][col];
-        rFlippedMatrix[l][col] = rMatrix[l][row];
+        flipped[l][row] = rMatrix[l][col];
+        flipped[l][col] = rMatrix[l][row];
     }
+    return flipped;
 }

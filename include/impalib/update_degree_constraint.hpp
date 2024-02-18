@@ -19,10 +19,8 @@ private:
     bool                         filteringFlag_; ///< filtering flag
     impalib_type                 alpha_; ///< filtering parameter
     vector<vector<impalib_type>> degreeConstraint2EqConstraintOld; ///< messages from degree constraints to equality constraints before filtering
-    impalib_type                 initial_forward_message_; ///< initial forward message of forward-backward algorithm
-    impalib_type                 initial_backward_message_; ///< initial backward message of forward-backward algorithm
-    vector<vector<impalib_type>> stage_forward_messages; ///< forward messages of trellis representation
-    vector<vector<impalib_type>> stage_backward_messages; ///< backward messages of trellis representation
+    impalib_type                 initial_forward_message_ = value_inf; ///< initial forward message of forward-backward algorithm
+    impalib_type                 initial_backward_message_ = value_inf; ///< initial backward message of forward-backward algorithm
 
 public:
     void degree_constraint_to_edge_ec_update(vector<vector<impalib_type>> &, vector<vector<int>> &,
@@ -51,9 +49,6 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
     : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES),
       degreeConstraint2EqConstraintOld(numEdgeVariables_, vector<impalib_type>(numNodes_, 0))
 {
-    // Set initial forward and backward messages to infinity
-    initial_forward_message_  = value_inf;
-    initial_backward_message_ = value_inf;
 };
 
 /**

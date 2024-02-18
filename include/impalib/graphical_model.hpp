@@ -23,7 +23,6 @@ class GraphicalModelKcMwm {
     bool filteringFlag_; ///< filtering flag of knapsack constraints
     impalib_type alpha_; ///< filtering parameter
     vector<vector<impalib_type>> extrinsicOutputDepartment_; ///< messages from departments to teams after filtering
-    vector<impalib_type> oric2PackageM_; ///< messages from ORIC to packages
     vector<vector<impalib_type>> eqConstraint2OricM_; ///< messages from team equality constraint to ORIC
     vector<vector<impalib_type>> oric2EqConstraintM_; ///< messages from ORIC to team equality constraint
     vector<vector<impalib_type>> eqConstraint2ProjectM_; ///< messages from project equality constraint to project inequality constraint
@@ -85,7 +84,6 @@ GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TE
       numIterations_(N_ITERATIONS),
       filteringFlag_(FILT_FLAG),
       alpha_(ALPHA),
-      oric2PackageM_(numTeams_, 0),
       team2OricM_(numTeams_, 0),
       eqConstraint2OricM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
       oric2EqConstraintM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
@@ -155,7 +153,7 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
         projectIneqConstraint_.project_inequality_constraint_update(eqConstraint2ProjectM_, project2EqConstraintM_);
         modelEqConstraint_.project_eq_constraint_to_oric_update(project2EqConstraintM_, eqConstraint2OricM_, modelInputs_.RewardProject);
 
-        modelOric_.oric_to_team_update(eqConstraint2OricM_, oric2PackageM_);
+        auto oric2PackageM_ = modelOric_.oric_to_team_update(eqConstraint2OricM_);
         outputs.update_intrinsic(oric2EqConstraintM_, project2EqConstraintM_, modelInputs_.RewardProject);
         modelKnapsacks_.team_to_knapsack_update(modelInputs_.NonZeroWeightIndices, modelInputs_.Team2KnapsackM, modelInputs_.RewardTeam, extrinsicOutputDepartment_, oric2PackageM_);
     }
