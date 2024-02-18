@@ -27,7 +27,6 @@ class GraphicalModelKcMwm {
     vector<vector<impalib_type>> oric2EqConstraintM_; ///< messages from ORIC to team equality constraint
     vector<vector<impalib_type>> eqConstraint2ProjectM_; ///< messages from project equality constraint to project inequality constraint
     vector<vector<impalib_type>> project2EqConstraintM_; ///< messages from project inequality constraint to project equality constraint
-    vector<impalib_type> team2OricM_; ///< messages from team equality constraint to ORIC
     Knapsack modelKnapsacks_; ///< Knapsack object
     InequalityConstraint projectIneqConstraint_; ///< Project Inequality constraint object
     EqualityConstraintKcMwm modelEqConstraint_; ///< Equality constraint object
@@ -84,7 +83,6 @@ GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TE
       numIterations_(N_ITERATIONS),
       filteringFlag_(FILT_FLAG),
       alpha_(ALPHA),
-      team2OricM_(numTeams_, 0),
       eqConstraint2OricM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
       oric2EqConstraintM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
       eqConstraint2ProjectM_(numProjects_, vector<impalib_type>(numTeams_, 0)),
@@ -135,21 +133,17 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
             auto& idx_nonzero_dept = modelInputs_.NonZeroWeightIndices[j];
             auto& team_weights = modelInputs_.TeamsWeightsPerDepartment[j];
 
-            // Initialize forward and backward message vectors
-            vector<vector<impalib_type>> stage_forward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
-            vector<vector<impalib_type>> stage_backward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
-
-            modelKnapsacks_.forward(j, stage_forward_messages, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+            auto stage_forward_messages = modelKnapsacks_.forward(j, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                     team_weights, modelInputs_.Team2KnapsackM);
-            modelKnapsacks_.backward(j, stage_backward_messages, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+            auto stage_backward_messages = modelKnapsacks_.backward(j, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                      team_weights, modelInputs_.Team2KnapsackM);
 
             auto extrinsic_out = modelKnapsacks_.extrinsic_output_department_lhs(team_weights, stage_forward_messages, modelInputs_.Team2KnapsackM, j, stage_backward_messages,
                                                             max_state_department);
-            modelKnapsacks_.process_extrinsic_output_department(j, i, extrinsic_out, extrinsicOutputDepartment_);
+            modelKnapsacks_.process_extrinsic_output_department(j, i, extrinsic_out, extrinsicOutputDepartment_[j]);
         }
 
-        modelEqConstraint_.team_eq_constraint_to_oric_update(extrinsicOutputDepartment_, team2OricM_, modelInputs_.RewardTeam);
+        auto team2OricM_ = modelEqConstraint_.team_eq_constraint_to_oric_update(extrinsicOutputDepartment_, modelInputs_.RewardTeam);
         modelOric_.oric_to_project_eq_constraint_update(eqConstraint2OricM_, team2OricM_, oric2EqConstraintM_, eqConstraint2ProjectM_, modelInputs_.RewardProject);
         projectIneqConstraint_.project_inequality_constraint_update(eqConstraint2ProjectM_, project2EqConstraintM_);
         modelEqConstraint_.project_eq_constraint_to_oric_update(project2EqConstraintM_, eqConstraint2OricM_, modelInputs_.RewardProject);

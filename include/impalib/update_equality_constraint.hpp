@@ -18,8 +18,7 @@ private:
     int numDepartments_; ///< number of departments
 
 public:
-    void team_eq_constraint_to_oric_update(const vector<vector<impalib_type>> &, vector<impalib_type> &,
-                                           const vector<impalib_type> &); ///< calculate messages from team equality constraint to ORIC
+    vector<impalib_type> team_eq_constraint_to_oric_update(const vector<vector<impalib_type>> &, const vector<impalib_type> &); ///< calculate messages from team equality constraint to ORIC
 
     void project_eq_constraint_to_oric_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
                                               const vector<vector<impalib_type>> &); ///< calculate messages from project equality constraint to ORIC
@@ -50,20 +49,21 @@ EqualityConstraintKcMwm::EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS,
  * @param[in] rewardTeam: rewards of teams
  */
 
-void EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(
-    const vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rTeam2OricM,
+vector<impalib_type> EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(
+    const vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
     const vector<impalib_type> &rewardTeam)
 {
-    vector<impalib_type> intermediate_team_to_oric_m(numTeams_, 0);
+    vector<impalib_type> team2oric(numTeams_, 0);
 
     for (int i = 0; i < rExtrinsicOutputDepartment.size(); i++)
     {
         transform(rExtrinsicOutputDepartment[i].begin(),
-                  rExtrinsicOutputDepartment[i].end(), intermediate_team_to_oric_m.begin(),
-                  intermediate_team_to_oric_m.begin(), std::plus<impalib_type>());
+                  rExtrinsicOutputDepartment[i].end(), team2oric.begin(),
+                  team2oric.begin(), std::plus<impalib_type>());
     }
-    transform(intermediate_team_to_oric_m.begin(), intermediate_team_to_oric_m.end(), rewardTeam.begin(),
-              rTeam2OricM.begin(), std::plus<impalib_type>());
+    transform(team2oric.begin(), team2oric.end(), rewardTeam.begin(),
+              team2oric.begin(), std::plus<impalib_type>());
+    return team2oric;
 }
 
 /**
