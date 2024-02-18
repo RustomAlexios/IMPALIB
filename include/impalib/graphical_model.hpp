@@ -128,6 +128,7 @@ void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, impali
  */
 
 void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) {
+    vector<impalib_type> oric2PackageM_(numTeams_, 0);
     for (int i = 0; i < numIterations_; i++) {
         for (int j = 0; j < numDepartments_; j++) {
             int max_state_department = modelInputs_.MaxState[j];
@@ -153,7 +154,7 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
         projectIneqConstraint_.project_inequality_constraint_update(eqConstraint2ProjectM_, project2EqConstraintM_);
         modelEqConstraint_.project_eq_constraint_to_oric_update(project2EqConstraintM_, eqConstraint2OricM_, modelInputs_.RewardProject);
 
-        auto oric2PackageM_ = modelOric_.oric_to_team_update(eqConstraint2OricM_);
+        oric2PackageM_ = modelOric_.oric_to_team_update(eqConstraint2OricM_);
         outputs.update_intrinsic(oric2EqConstraintM_, project2EqConstraintM_, modelInputs_.RewardProject);
         modelKnapsacks_.team_to_knapsack_update(modelInputs_.NonZeroWeightIndices, modelInputs_.Team2KnapsackM, modelInputs_.RewardTeam, extrinsicOutputDepartment_, oric2PackageM_);
     }
