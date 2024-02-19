@@ -79,14 +79,14 @@ void ut_iterate_kc_mwm(string& ut_name){
     fstream file_output1("../ut_results/extrinsic_output_team_wrapper", ios::out | ios::binary | ios:: trunc);
     if (file_output1.is_open()) {
         for (int i=0; i<N_TEAMS; i++){
-            file_output1.write((char*)(&model_graph.outputs.ExtrinsicOutputTeam[i]), sizeof(model_graph.outputs.ExtrinsicOutputTeam[i]));}
+            file_output1.write((char*)(&model_graph.outputs.extrinsic[i]), sizeof(model_graph.outputs.extrinsic[i]));}
             file_output1.close();}
     else {cout << "Error! File cannot be opened!" << "\n";}
 
     fstream file_output2("../ut_results/intrinsic_out_mwm_wrapper", ios::out | ios::binary | ios:: trunc);
     if (file_output2.is_open()) {
         for (int i=0; i<N_TEAMS*N_PROJECTS; i++){
-            file_output2.write((char*)(&model_graph.outputs.IntrinsicOutMwm[i]), sizeof(model_graph.outputs.IntrinsicOutMwm[i]));}
+            file_output2.write((char*)(&model_graph.outputs.intrinsic[i]), sizeof(model_graph.outputs.intrinsic[i]));}
             file_output2.close();}
     else {cout << "Error! File cannot be opened!" << "\n";}
 }
@@ -154,14 +154,14 @@ void ut_iterate_sample_graph_kc_mwm(string& ut_name){
     fstream file_output1("../ut_results/extrinsic_output_team_wrapper", ios::out | ios::binary | ios:: trunc);
     if (file_output1.is_open()) {
         for (int i=0; i<N_TEAMS; i++){
-            file_output1.write((char*)(&model_graph.outputs.ExtrinsicOutputTeam[i]), sizeof(model_graph.outputs.ExtrinsicOutputTeam[i]));}
+            file_output1.write((char*)(&model_graph.outputs.extrinsic[i]), sizeof(model_graph.outputs.extrinsic[i]));}
             file_output1.close();}
     else {cout << "Error! File cannot be opened!" << "\n";}
 
     fstream file_output2("../ut_results/intrinsic_out_mwm_wrapper", ios::out | ios::binary | ios:: trunc);
     if (file_output2.is_open()) {
         for (int i=0; i<N_TEAMS*N_PROJECTS; i++){
-            file_output2.write((char*)(&model_graph.outputs.IntrinsicOutMwm[i]), sizeof(model_graph.outputs.IntrinsicOutMwm[i]));}
+            file_output2.write((char*)(&model_graph.outputs.intrinsic[i]), sizeof(model_graph.outputs.intrinsic[i]));}
             file_output2.close();}
     else {cout << "Error! File cannot be opened!" << "\n";}
 }
@@ -231,7 +231,7 @@ void ut_model_graph_tsp(string& ut_name){
         fstream file_output("../ut_results/intrinsic_out_edge_ec_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_EDGE_VARIABLES; i++){
-                    file_output.write((char*)(&model_graph.outputs.IntrinsicOutputEdgeEc[i]), sizeof(model_graph.outputs.IntrinsicOutputEdgeEc[i]));}
+                    file_output.write((char*)(&model_graph.outputs.intrinsic[i]), sizeof(model_graph.outputs.intrinsic[i]));}
                     file_output.close();}
             else {cout << "Error! File cannot be opened!" << "\n";}
 
@@ -261,7 +261,7 @@ void ut_model_graph_tsp(string& ut_name){
         fstream file_output("../ut_results/intrinsic_out_edge_ec_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_EDGE_VARIABLES; i++){
-                    file_output.write((char*)(&model_graph.outputs.IntrinsicOutputEdgeEc[i]), sizeof(model_graph.outputs.IntrinsicOutputEdgeEc[i]));}
+                    file_output.write((char*)(&model_graph.outputs.intrinsic[i]), sizeof(model_graph.outputs.intrinsic[i]));}
                     file_output.close();}
             else {cout << "Error! File cannot be opened!" << "\n";}
 

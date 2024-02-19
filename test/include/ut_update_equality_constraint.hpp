@@ -52,7 +52,7 @@ void ut_eq_constraint_kc_mwm(string& ut_name){
             copy ( extrinsic_output_department_pure + N_TEAMS*department_index, extrinsic_output_department_pure + N_TEAMS*(department_index+1), extrinsic_output_department[department_index].begin() );
         }
 
-            team_to_oric_m = modelEqConstraint.team_eq_constraint_to_oric_update(extrinsic_output_department, reward_team);
+            team_to_oric_m = modelEqConstraint.team_messages_to_oric(extrinsic_output_department, reward_team);
 
             fstream file_output("../ut_results/team_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
@@ -74,8 +74,8 @@ void ut_eq_constraint_kc_mwm(string& ut_name){
         for (int project_index=0; project_index<N_PROJECTS; project_index++){
             copy ( project_to_eq_constraint_m_pure + N_TEAMS*project_index, project_to_eq_constraint_m_pure + N_TEAMS*(project_index+1), project_to_eq_constraint_m[project_index].begin() );
         }
-    
-    modelEqConstraint.project_eq_constraint_to_oric_update(project_to_eq_constraint_m, eq_constraint_to_oric_m, reward_project);
+
+        modelEqConstraint.project_messages_to_oric(project_to_eq_constraint_m, eq_constraint_to_oric_m, reward_project);
 
     fstream file_output("../ut_results/eq_constraint_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
         if (file_output.is_open()) {
@@ -149,7 +149,7 @@ void ut_equality_constraint_tsp(string& ut_name){
         
         vector<vector<impalib_type>> edge_ec_to_degree_constraint_m(N_EDGE_VARIABLES, vector<impalib_type>(N_NODES, zero_value));
 
-        modelEqualityConstraint.edge_ec_to_degree_constraint_relaxed_graph_update(edge_connections, edge_degree_constraint_cost, degree_constraint_to_eq_constraint_m, edge_ec_to_degree_constraint_m);
+        modelEqualityConstraint.messages_to_degree_relaxed(edge_connections, edge_degree_constraint_cost, degree_constraint_to_eq_constraint_m, edge_ec_to_degree_constraint_m);
         
         fstream file_output("../ut_results/edge_ec_to_degree_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
@@ -194,7 +194,8 @@ void ut_equality_constraint_tsp(string& ut_name){
 
         vector<vector<impalib_type>> edge_ec_to_subtour_constraints_m(N_SUBTOURS, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
 
-        edge_ec_to_subtour_constraints_m = modelEqualityConstraint.edge_ec_to_subtour_constraints_update(delta_S_indices_list, cost_edge_variable, degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m, edge_connections);
+        edge_ec_to_subtour_constraints_m =
+            modelEqualityConstraint.messages_to_subtour(delta_S_indices_list, cost_edge_variable, degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m, edge_connections);
         
         fstream file_output("../ut_results/edge_ec_to_subtour_constraints_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
@@ -219,7 +220,8 @@ void ut_equality_constraint_tsp(string& ut_name){
 
         vector<vector<impalib_type>> edge_ec_to_degree_constraint_m(N_EDGE_VARIABLES, vector<impalib_type>(N_NODES, zero_value));
 
-        modelEqualityConstraint.edge_ec_to_degree_constraint_augmented_graph_update(degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m, edge_connections, edge_degree_constraint_cost, edge_ec_to_degree_constraint_m);
+        modelEqualityConstraint.messages_to_degree_augmented(degree_constraint_to_eq_constraint_m, subtour_constraints_to_edge_ec_m, edge_connections, edge_degree_constraint_cost,
+                                                             edge_ec_to_degree_constraint_m);
         
         fstream file_output("../ut_results/edge_ec_to_degree_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {

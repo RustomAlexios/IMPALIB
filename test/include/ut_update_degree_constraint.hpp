@@ -54,7 +54,7 @@ void ut_degree_constraint(string& ut_name){
         
         vector<vector<impalib_type>> degree_constraint_to_eq_constraint_m(N_EDGE_VARIABLES, vector<impalib_type>(N_NODES, zero_value));
 
-        modelDegreeConstraint.degree_constraint_to_edge_ec_update(edge_ec_to_degree_constraint_m, edge_connections, degree_constraint_to_eq_constraint_m);
+        modelDegreeConstraint.messages_to_edge_ec(edge_ec_to_degree_constraint_m, edge_connections, degree_constraint_to_eq_constraint_m);
         
         fstream file_output("../ut_results/degree_constraint_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {

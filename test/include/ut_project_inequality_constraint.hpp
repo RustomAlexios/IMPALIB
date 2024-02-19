@@ -36,10 +36,8 @@ void ut_project_ineq_constraint(string& ut_name){
             for (int project_index=0; project_index<N_PROJECTS; project_index++){
                 copy ( eq_constraint_to_project_m_pure + N_TEAMS*project_index, eq_constraint_to_project_m_pure + N_TEAMS*(project_index+1), eq_constraint_to_project_m[project_index].begin() );
             }
-            
-            vector<vector<impalib_type>> project_to_eq_constraint_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
 
-            projectIneqConstraint.project_inequality_constraint_update(eq_constraint_to_project_m, project_to_eq_constraint_m);
+            auto project_to_eq_constraint_m = projectIneqConstraint.messages_to_equality(eq_constraint_to_project_m);
 
             fstream file_output("../ut_results/project_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {

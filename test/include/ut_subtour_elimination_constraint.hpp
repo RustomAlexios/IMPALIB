@@ -64,7 +64,7 @@ void ut_subtour_constraint(string& ut_name){
         
         vector<vector<impalib_type>> subtour_constraints_to_edge_ec_m(N_SUBTOURS, vector<impalib_type>(N_EDGE_VARIABLES, zero_value));
 
-        modelSubtourConstraint.subtour_constraints_to_edge_ec_update(edge_ec_to_subtour_constraints_m, delta_S_indices_list, subtour_constraints_to_edge_ec_m);
+        modelSubtourConstraint.messages_to_edge_ec(edge_ec_to_subtour_constraints_m, delta_S_indices_list, subtour_constraints_to_edge_ec_m);
         
         fstream file_output("../ut_results/subtour_constraints_to_edge_ec_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
