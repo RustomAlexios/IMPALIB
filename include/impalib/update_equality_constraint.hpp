@@ -20,7 +20,7 @@ class EqualityConstraintKcMwm {
     vector<impalib_type> team_messages_to_oric(const vector<vector<impalib_type>> &extrinsic,
                                                const vector<impalib_type> &reward_team);  ///< calculate messages from team equality constraint to ORIC
 
-    void project_messages_to_oric(const vector<vector<impalib_type>> &proj2eq, vector<vector<impalib_type>> &eq2oric,
+    vector<vector<impalib_type>> project_messages_to_oric(const vector<vector<impalib_type>> &proj2eq,
                                   const vector<vector<impalib_type>> &reward_proj);  ///< calculate messages from project equality constraint to ORIC
 
     EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  ///< constructor
@@ -65,10 +65,12 @@ vector<impalib_type> EqualityConstraintKcMwm::team_messages_to_oric(const vector
  * @param[in] reward_proj: rewards of teams-projects combinations
  */
 
-void EqualityConstraintKcMwm::project_messages_to_oric(const vector<vector<impalib_type>> &proj2eq, vector<vector<impalib_type>> &eq2oric, const vector<vector<impalib_type>> &reward_proj) {
+vector<vector<impalib_type>> EqualityConstraintKcMwm::project_messages_to_oric(const vector<vector<impalib_type>> &proj2eq, const vector<vector<impalib_type>> &reward_proj) {
+    vector<vector<impalib_type>> eq2oric(proj2eq.size());
     for (int i = 0; i < proj2eq.size(); i++) {
         transform(proj2eq[i].begin(), proj2eq[i].end(), reward_proj[i].begin(), eq2oric[i].begin(), std::plus<impalib_type>());
     }
+    return eq2oric;
 }
 
 /**

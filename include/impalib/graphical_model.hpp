@@ -143,7 +143,7 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
         auto team2OricM_ = EqKcMwm_.team_messages_to_oric(extrinsic_, modelInputs_.RewardTeam);
         Oric_.messages_to_project_eq(M_eq2oric_, team2OricM_, M_oric2eq_, M_eq2ineq_, modelInputs_.RewardProject);
         M_ineq2eq_ = projectIneq_.messages_to_equality(M_eq2ineq_);
-        EqKcMwm_.project_messages_to_oric(M_ineq2eq_, M_eq2oric_, modelInputs_.RewardProject);
+        M_eq2oric_ = EqKcMwm_.project_messages_to_oric(M_ineq2eq_, modelInputs_.RewardProject);
 
         oric2PackageM_ = Oric_.messages_to_team_eq(M_eq2oric_);
         outputs.update_intrinsic(M_oric2eq_, M_ineq2eq_, modelInputs_.RewardProject);
@@ -182,9 +182,9 @@ class GraphicalModelTsp {
     void iterate_augmented_graph();                      ///< function of IMPA on augmented graph
     void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                    ///< analysis of subtour constraints
     vector<vector<int>> hard_decision_analysis();                                                                                     ///< function for hard decision solution on IMPA solution
-    bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                                ///< function for post-processing loops
-    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                             ///< function for getting loops
-    vector<int> find_closed_loop(const unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &);  ///< function for finding loops
+    bool isSubsequence(const vector<int> &, const vector<int> &);                                                                ///< function for post-processing loops_sz
+    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                             ///< function for getting loops_sz
+    vector<int> find_closed_loop(const unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>);  ///< function for finding loops_sz
     InputsTsp inputs_;                                                                                                                ///< Graphical Model Input object
     vector<vector<int>> selectedEdges_;                                                                                               ///< activated edges of IMPA
     int numAugmentations_ = 0;                                                                                                        ///< number of performed augmentations in IMPA
@@ -196,7 +196,7 @@ class GraphicalModelTsp {
     bool osc = false;                             ///< flag for failure case (oscillation in the solution)
     vector<int> tour;                             ///< list of nodes of tour (if detected)
     vector<vector<int>> subtours;                 ///< list of detected subtours (if detected)
-    vector<int> loops;                            ///< list of sizes of loops
+    vector<int> loops_sz;                            ///< list of sizes of loops_sz
     impalib_type cost = zero_value;               ///< cost of IMPA solution
     vector<vector<impalib_type>> M_subtour2edge;  ///< messages from subtour constraints to edge equality constraint
 
@@ -420,7 +420,7 @@ void GraphicalModelTsp::process_ouputs(impalib_type *pExtrinsic_output_edge_ec, 
         return acc;
     });
     copy(flattened_closed_paths.begin(), flattened_closed_paths.begin() + static_cast<int>(flattened_closed_paths.size()), pSubtour_paths);
-    copy(loops.begin(), loops.begin() + static_cast<int>(loops.size()), pSubtour_paths_size);
+    copy(loops_sz.begin(), loops_sz.begin() + static_cast<int>(loops_sz.size()), pSubtour_paths_size);
 }
 
 /**
@@ -599,9 +599,9 @@ vector<vector<int>> GraphicalModelTsp::hard_decision_analysis() {
  */
 
 void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
-    loops.clear();  // just store it at the end if applicable
+    loops_sz.clear();  // just store it at the end if applicable
 
-    // Get closed loops from the graph
+    // Get closed loops_sz from the graph
     vector<vector<int>> loops_list = get_closed_loops(rGraph, rSelectedEdges);
     subtours.clear();
     subtours = loops_list;
@@ -638,7 +638,7 @@ void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<i
         noConsClosedLoopsCount_ = 0;
         for (const auto &loop : loops_list) {
             // Store the size of each subtour
-            loops.push_back(static_cast<int>(loop.size()));
+            loops_sz.push_back(static_cast<int>(loop.size()));
             cout << "Subtour of size " << loop.size() << " detected @: ";
             cout << "[";
             for (size_t i = 0; i < loop.size(); ++i) {
@@ -682,12 +682,12 @@ void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<i
 }
 
 /**
- * Get closed loops. Function for building the graphical model of activated
- * edges and obtain loops
+ * Get closed loops_sz. Function for building the graphical model of activated
+ * edges and obtain loops_sz
  * @param[in] rSelectedEdges: activated edges in the graphical model
  * @param[out] G: graphical model of activated egdes. Defines connections
  * between nodes. Will be used for detecting of subtours
- * @return new_loops_list: list of detected loops in G
+ * @return new_loops_list: list of detected loops_sz in G
  *
  */
 vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &G, const vector<vector<int>> &edges) {
@@ -701,28 +701,22 @@ vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vecto
     }
 
     vector<vector<int>> loops;
-    vector<int> visited;
 
     for (const auto &connection : G) {
         int start_node = connection.first;
         const vector<int> &end_nodes = connection.second;
-        // Skip if node is already visited
-        if (find(visited.begin(), visited.end(), start_node) != visited.end()) {
-            continue;
-        } else {
             for (int j = 0; j < end_nodes.size(); j++) {
                 unordered_set<int> visited_set;
                 vector<int> path;
 
-                vector<int> closed_loop = find_closed_loop(G, start_node, end_nodes[j], visited_set, path, visited);
+                vector<int> closed_loop = find_closed_loop(G, start_node, end_nodes[j], visited_set, path);
                 if (!closed_loop.empty()) {
                     loops.push_back(closed_loop);
                 }
-            }
         }
     }
 
-    // Remove duplicate/subset loops
+    // Remove duplicate/subset loops_sz
     vector<int> to_remove;
     vector<vector<int>> loops_new;
 
@@ -750,13 +744,13 @@ vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vecto
                 continue;
             }
 
-            else if (isSubsequence(double_list_1, list_2, j)) {
+            else if (isSubsequence(double_list_1, list_2)) {
                 to_remove.push_back(j);
             }
         }
     }
 
-    // Collect non-duplicate/non-subset loops
+    // Collect non-duplicate/non-subset loops_sz
     for (size_t i = 0; i < loops.size(); ++i) {
         if (find(to_remove.begin(), to_remove.end(), i) == to_remove.end()) {
             loops_new.push_back(loops[i]);
@@ -767,7 +761,7 @@ vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vecto
 }
 
 /**
- * Function used during the detection of loops. This function efficiently checks
+ * Function used during the detection of loops_sz. This function efficiently checks
  * for the presence of a subsequence within a larger sequence by iterating over
  * all possible starting positions for the subsequence and comparing elements at
  * corresponding positions
@@ -778,7 +772,7 @@ vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vecto
  * @return false or true if subseq is a isSubsequence of seq
  *
  */
-bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vector<int> &subseq, int j) {
+bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vector<int> &subseq) {
     for (int i = 0; i < static_cast<int>(seq.size() - subseq.size()); ++i) {
         if (equal(seq.begin() + i, seq.begin() + i + static_cast<int>(subseq.size()), subseq.begin())) {
             return true;
@@ -788,24 +782,20 @@ bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vector<int> 
 }
 
 /**
- * This function will be called to find closed loops. This is called multiple
+ * This function will be called to find closed loops_sz. This is called multiple
  * times as shown in get_closed_loops function. It will find path between nodes.
  * Will return any path (which could be a tour)
  * @param[in] G: graph of activated edges. Mapping between nodes and their
  * neighboring nodes
  * @param[in] start_node: node the path is starting from
  * @param[in] current: current node under investigation in the path
- * @param[in] visited: This includes all visited_all nodes. This can help in
- * skipping the investigation of nodes that are already in the path to avoid
- * processing of loops list in get_closed_loops. This was deactivated in this
- * code, and can be used in the future to reduce processing of detected loops.
  * @param[out] visited_all: visited_all nodes while constructing the path
  * @param[out] path: current detected path, which will be augmented
  * @return new_path or empty vector if no path is found. new_path is a path
  * between the nodes (if a tour is found, )
  *
  */
-vector<int> GraphicalModelTsp::find_closed_loop(const unordered_map<int, vector<int>> &G, int start_node, int current, unordered_set<int> visited_all, vector<int> path, vector<int> &visited) {
+vector<int> GraphicalModelTsp::find_closed_loop(const unordered_map<int, vector<int>> &G, int start_node, int current, unordered_set<int> visited_all, vector<int> path) {
     visited_all.insert(current);
     path.push_back(current);
 
@@ -824,7 +814,7 @@ vector<int> GraphicalModelTsp::find_closed_loop(const unordered_map<int, vector<
     for (int node : G.at(current)) {
         // If node is not visited_all, continue search
         if (visited_all.find(node) == visited_all.end()) {
-            vector<int> new_path = find_closed_loop(G, start_node, node, visited_all, path, visited);
+            vector<int> new_path = find_closed_loop(G, start_node, node, visited_all, path);
             // Return new path if loop is found
             if (!new_path.empty()) {
                 return new_path;

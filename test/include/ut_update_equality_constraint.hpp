@@ -64,9 +64,6 @@ void ut_eq_constraint_kc_mwm(string& ut_name){
     }
 
     else if (ut_name == "ProjectEqConst2OricUpdate"){
-        
-        vector<vector<impalib_type>> eq_constraint_to_oric_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
-        
         cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/project_to_eq_constraint_m_pure.npy");
         impalib_type* project_to_eq_constraint_m_pure = input5.data<impalib_type>();
         vector<vector<impalib_type>> project_to_eq_constraint_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
@@ -75,7 +72,7 @@ void ut_eq_constraint_kc_mwm(string& ut_name){
             copy ( project_to_eq_constraint_m_pure + N_TEAMS*project_index, project_to_eq_constraint_m_pure + N_TEAMS*(project_index+1), project_to_eq_constraint_m[project_index].begin() );
         }
 
-        modelEqConstraint.project_messages_to_oric(project_to_eq_constraint_m, eq_constraint_to_oric_m, reward_project);
+        auto eq_constraint_to_oric_m = modelEqConstraint.project_messages_to_oric(project_to_eq_constraint_m, reward_project);
 
     fstream file_output("../ut_results/eq_constraint_to_oric_m_wrapper", ios::out | ios::binary | ios:: trunc);
         if (file_output.is_open()) {
