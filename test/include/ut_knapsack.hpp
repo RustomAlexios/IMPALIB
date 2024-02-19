@@ -298,9 +298,9 @@ void ut_process_extrinsic_output_department(string& ut_name){
 
     for (int iter=0; iter<N_ITER; iter++){
         for (int department_index=0; department_index<N_DEPARTMENTS; department_index++){
-            modelKnapsacks.process_extrinsic_output_department(department_index,
+            extrinsic_output_department[department_index] = modelKnapsacks.process_extrinsic_output_department(department_index,
                                     iter, 
-                                    extrinsic_output_department_dummy[department_index], extrinsic_output_department[department_index]);
+                                    extrinsic_output_department_dummy[department_index]);
         }
     }
 
