@@ -158,35 +158,39 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
  */
 class GraphicalModelTsp {
    private:
-    int numNodes_;                                       ///< number of nodes of TSP
-    int numIterations_;                                  ///< number of iterations of IMPA
-    int numEdgeVariables_;                               ///< number of edges in TSP
-    bool doReset_;                                       ///< flag for resetting messages after each augmentation step
-    bool doFilter_;                                      ///< flag for filtering messages from degree/subtour constraints to edge equality constraints
-    bool doAugment_;                                     ///< whether to activate augmentation
-    vector<int> hard_decision;                           ///< hard decision vector of IMPA solution
-    impalib_type alpha_;                                 ///< filtering parameter
-    impalib_type threshold_;                             ///< threshold on hard decision
-    EqualityConstraintTsp EqTsp_;                        ///< Equality Constraint object for TSP
-    DegreeConstraint degree;                             ///< Degree Constraint object for TSP
-    SubtourEliminationConstraint subtour;                ///< Subtour constraint for TSP
-    vector<vector<impalib_type>> M_degree2eq_before;     ///< messages from degree constraint to team equality constraint before filtering
-    vector<vector<impalib_type>> M_degree2eq;            ///< messages from degree constraint to team equality constraint afters filtering
-    vector<vector<int>> selected_edges_old_;             ///< old list of selected edges (used for failure investigation)
-    vector<vector<int>> selected_edges_old_old_;         ///< another old list of selected edges (used for failure investigation)
-    int maxCount_;                                       ///< maximum count of failures
-    bool tourImpaFlag_ = false;                          ///< set flag for detected tour to be false (will be updated later)
-    vector<vector<int>> idx_delta_S;                     ///< will contain indices of edges that contribute to each subtour constraint
-    vector<vector<impalib_type>> M_subtour2edge_before;  ///< messages from subtour constraints to edge equality constraint before filtering
-    vector<vector<impalib_type>> M_edge2subtour;         ///< messages from edge equality constraint to subtour constraints
     void iterate_augmented_graph();                      ///< function of IMPA on augmented graph
     void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                    ///< analysis of subtour constraints
     vector<vector<int>> hard_decision_analysis();                                                                                     ///< function for hard decision solution on IMPA solution
     bool isSubsequence(const vector<int> &, const vector<int> &);                                                                ///< function for post-processing loops_sz
     vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                             ///< function for getting loops_sz
     vector<int> find_closed_loop(const unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>);  ///< function for finding loops_sz
+
+    int numNodes_;                                       ///< number of nodes of TSP
+    int numIterations_;                                  ///< number of iterations of IMPA
+    int numEdgeVariables_;                               ///< number of edges in TSP
+    bool doReset_;                                       ///< flag for resetting messages after each augmentation step
+    bool doFilter_;                                      ///< flag for filtering messages from degree/subtour constraints to edge equality constraints
+    bool doAugment_;                                     ///< whether to activate augmentation
+
+    impalib_type alpha_;                                 ///< filtering parameter
+
+    impalib_type threshold_;                             ///< threshold on hard decision
+    EqualityConstraintTsp EqTsp_;                        ///< Equality Constraint object for TSP
+    DegreeConstraint degree;                             ///< Degree Constraint object for TSP
+
+    SubtourEliminationConstraint subtour;                ///< Subtour constraint for TSP
+    vector<vector<impalib_type>> M_degree2eq_before;     ///< messages from degree constraint to team equality constraint before filtering
+    vector<vector<impalib_type>> M_degree2eq;            ///< messages from degree constraint to team equality constraint afters filtering
+    int maxCount_;                                       ///< maximum count of failures
+    bool tourImpaFlag_ = false;                          ///< set flag for detected tour to be false (will be updated later)
+    vector<vector<int>> idx_delta_S;                     ///< will contain indices of edges that contribute to each subtour constraint
+    vector<vector<impalib_type>> M_subtour2edge_before;  ///< messages from subtour constraints to edge equality constraint before filtering
+    vector<vector<impalib_type>> M_edge2subtour;         ///< messages from edge equality constraint to subtour constraints
     InputsTsp inputs_;                                                                                                                ///< Graphical Model Input object
     vector<vector<int>> selectedEdges_;                                                                                               ///< activated edges of IMPA
+
+    vector<vector<int>> selected_edges_old_;             ///< old list of selected edges (used for failure investigation)
+    vector<vector<int>> selected_edges_old_old_;         ///< another old list of selected edges (used for failure investigation)
     int numAugmentations_ = 0;                                                                                                        ///< number of performed augmentations in IMPA
     int noConsClosedLoopsCount_ = 0;              ///< count for failure case (no consecutive loop detection and no tour)
     int n_osc = 0;                                ///< count for failure case (oscillation in the solution)
@@ -535,7 +539,7 @@ void GraphicalModelTsp::iterate_augmented_graph() {
  */
 vector<vector<int>> GraphicalModelTsp::hard_decision_analysis() {
     vector<vector<int>> selected;
-    hard_decision.resize(numEdgeVariables_);
+    vector<int> hard_decision(numEdgeVariables_);
     fill(hard_decision.begin(), hard_decision.begin() + numEdgeVariables_, numeric_limits<int>::max());
 
     // Apply threshold to intrinsic output to determine hard decision

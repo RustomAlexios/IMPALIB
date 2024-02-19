@@ -20,8 +20,6 @@ class DegreeConstraint {
     bool filteringFlag_;                        ///< filtering flag
     impalib_type alpha_;                        ///< filtering parameter
     vector<vector<impalib_type>> M_deg2eq_old;  ///< messages from degree constraints to equality constraints before filtering
-    impalib_type M_forward_init = value_inf;    ///< initial forward message of forward-backward algorithm
-    impalib_type M_backward_init = value_inf;   ///< initial backward message of forward-backward algorithm
 
    public:
     void messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges,
@@ -58,6 +56,9 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
  */
 
 void DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges, vector<vector<impalib_type>> &degree2eq) {
+    static const impalib_type M_forward_init = value_inf;    ///< initial forward message of forward-backward algorithm
+    static const impalib_type M_backward_init = value_inf;   ///< initial backward message of forward-backward algorithm
+
     vector<impalib_type> forward(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> backward(numEdgeVariables_ + 1, zero_value);
 
