@@ -137,7 +137,7 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
             auto stage_backward_messages = knapsack_.backward(j, max_state_department, idx_nonzero_dept, pNON_ZERO_WEIGHT_INDICES_SIZES_PY, team_weights, modelInputs_.M_team2knapsack);
 
             auto extrinsic_out = knapsack_.extrinsic_output_department_lhs(team_weights, stage_forward_messages, modelInputs_.M_team2knapsack, j, stage_backward_messages, max_state_department);
-            knapsack_.process_extrinsic_output_department(j, i, extrinsic_out, extrinsic_[j]);
+            extrinsic_[j] = knapsack_.process_extrinsic_output_department(j, i, extrinsic_out);
         }
 
         auto team2OricM_ = EqKcMwm_.team_messages_to_oric(extrinsic_, modelInputs_.RewardTeam);
@@ -301,7 +301,7 @@ void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impali
 void GraphicalModelTsp::iterate_relaxed_graph() {
     for (int i = 0; i < numIterations_; i++) {
         degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges, M_degree2eq_before);
-        degree.process_filtering(i, M_degree2eq_before, M_degree2eq);
+        M_degree2eq = degree.process_filtering(i, M_degree2eq_before);
         EqTsp_.messages_to_degree_relaxed(inputs_.edges, inputs_.cost_edge_mat, M_degree2eq, inputs_.M_edge2degree);
     }
     outputs.update_extrinsic_relaxed(M_degree2eq);
@@ -457,11 +457,11 @@ void GraphicalModelTsp::iterate_augmented_graph() {
 
     for (int i = 0; i < numIterations_; i++) {
         degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges, M_degree2eq_before);
-        degree.process_filtering(i, M_degree2eq_before, M_degree2eq);
+        M_degree2eq = degree.process_filtering(i, M_degree2eq_before);
 
         M_edge2subtour = EqTsp_.messages_to_subtour(idx_delta_S, inputs_.cost_edge, M_degree2eq, M_subtour2edge, inputs_.edges);
         subtour.messages_to_edge_ec(M_edge2subtour, idx_delta_S, M_subtour2edge_before);
-        subtour.process_filtering(i, M_subtour2edge_before, M_subtour2edge, idx_delta_S);
+        M_subtour2edge = subtour.process_filtering(i, M_subtour2edge_before, idx_delta_S);
         EqTsp_.messages_to_degree_augmented(M_degree2eq, M_subtour2edge, inputs_.edges, inputs_.cost_edge_mat, inputs_.M_edge2degree);
     }
 

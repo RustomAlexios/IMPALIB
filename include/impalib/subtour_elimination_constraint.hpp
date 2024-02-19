@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <cassert>
+
 #include "impalib/impalib.hpp"
 
 /**
@@ -25,8 +27,8 @@ class SubtourEliminationConstraint {
     vector<vector<impalib_type>> M_subtour2edge_old;  ///< messages from subtour constraints to edge equality constraint before filtering
     void messages_to_edge_ec(const vector<vector<impalib_type>> &edge2subtour, const vector<vector<int>> &deltaS,
                              vector<vector<impalib_type>> &subtour2edge);  ///< calculate messages from subtour to edge equality constraints
-    void process_filtering(int, const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                           const vector<vector<int>> &);  ///< perform filtering on messages from subtour to edge equality constraints
+    vector<vector<impalib_type>> process_filtering(int, const vector<vector<impalib_type>> &,
+                                                   const vector<vector<int>> &);  ///< perform filtering on messages from subtour to edge equality constraints
 
     SubtourEliminationConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
                                  impalib_type ALPHA);  ///< constructor
@@ -96,28 +98,21 @@ void SubtourEliminationConstraint::messages_to_edge_ec(const vector<vector<impal
  *
  */
 
-void SubtourEliminationConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &subtour2edge_in, vector<vector<impalib_type>> &subtour2edge_out,
-                                                     const vector<vector<int>> &deltaS) {
+vector<vector<impalib_type>> SubtourEliminationConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &subtour2edge_in, const vector<vector<int>> &deltaS) {
+    assert(subtour2edge_in.size() == deltaS.size());
+    if (!doFilter) {
+        return subtour2edge_in;
+    }
+
+    auto subtour2edge_out = subtour2edge_in;
     for (int i = 0; i < deltaS.size(); i++) {
-        if ((doFilter) and (alpha_ != zero_value)) {
-            vector<impalib_type> temp(subtour2edge_in[i]), temp_old(M_subtour2edge_old[i]), temp_extrinsic;
-
-            impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-            transform(temp.begin(), temp.end(), temp.begin(), [w_2](impalib_type &c) { return c * w_2; });
-            transform(temp_old.begin(), temp_old.end(), temp_old.begin(), [w_1](impalib_type &c) { return c * w_1; });
-
-            if (iter == 0) {
-                copy(temp.begin(), temp.end(), subtour2edge_out[i].begin());
-            } else {
-                transform(temp.begin(), temp.end(), temp_old.begin(), back_inserter(temp_extrinsic), plus<impalib_type>());
-                copy(temp_extrinsic.begin(), temp_extrinsic.end(), subtour2edge_out[i].begin());
-            }
+        for (int j = 0; j < subtour2edge_in[i].size(); ++j) {
+            subtour2edge_out[i][j] = (1 - alpha_) * subtour2edge_out[i][j] + (alpha_)*M_subtour2edge_old[i][j];
 
             copy(subtour2edge_out[i].begin(), subtour2edge_out[i].end(), M_subtour2edge_old[i].begin());
         }
-
-        else {
-            copy(subtour2edge_in[i].begin(), subtour2edge_in[i].end(), subtour2edge_out[i].begin());
-        }
     }
+
+    M_subtour2edge_old = subtour2edge_out;
+    return subtour2edge_out;
 }

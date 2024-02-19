@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <cassert>
+
 #include "impalib/impalib.hpp"
 
 /**
@@ -23,8 +25,8 @@ class DegreeConstraint {
 
    public:
     void messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges,
-                             vector<vector<impalib_type>> &degree2eq);                                  ///< calculate messages from degree constraint to edge equality constraint
-    void process_filtering(int iter, const vector<vector<impalib_type>> &deg2eq_in, vector<vector<impalib_type>> &deg2eq_out);  ///< process filtering on messages from degree constraint to edge equality constraint
+                             vector<vector<impalib_type>> &degree2eq);                                        ///< calculate messages from degree constraint to edge equality constraint
+    vector<vector<impalib_type>> process_filtering(int iter, const vector<vector<impalib_type>> &deg2eq_in);  ///< process filtering on messages from degree constraint to edge equality constraint
 
     DegreeConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
                      impalib_type ALPHA);  ///< constructor
@@ -125,29 +127,19 @@ void DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &e
  *
  */
 
-void DegreeConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &deg2eq_in, vector<vector<impalib_type>> &deg2eq_out) {
-    for (int i = 0; i < numEdgeVariables_; i++) {
-        if ((filteringFlag_) and (alpha_ != zero_value)) {
-            // Calculate weighted values for current and old messages
-            vector<impalib_type> temp(deg2eq_in[i]);
-            vector<impalib_type> temp_old(M_deg2eq_old[i]);
-            vector<impalib_type> temp_extrinsic;
+vector<vector<impalib_type>> DegreeConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &deg2eq_in) {
+    assert(deg2eq_in.size() == numEdgeVariables_);
+    if (!filteringFlag_) {
+        return deg2eq_in;
+    }
 
-            impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-            transform(temp.begin(), temp.end(), temp.begin(), [w_2](impalib_type &c) { return c * w_2; });
-            transform(temp_old.begin(), temp_old.end(), temp_old.begin(), [w_1](impalib_type &c) { return c * w_1; });
-
-            if (iter == 0) {
-                copy(temp.begin(), temp.end(), deg2eq_out[i].begin());
-            } else {
-                transform(temp.begin(), temp.end(), temp_old.begin(), back_inserter(temp_extrinsic), plus<impalib_type>());
-                copy(temp_extrinsic.begin(), temp_extrinsic.end(), deg2eq_out[i].begin());
-            }
-            copy(deg2eq_out[i].begin(), deg2eq_out[i].end(), M_deg2eq_old[i].begin());
-        }
-
-        else {
-            copy(deg2eq_in[i].begin(), deg2eq_in[i].end(), deg2eq_out[i].begin());
+    // Calculate weighted values for current and old messages
+    auto deg2eq_out = deg2eq_in;
+    for (int i = 0; i < numEdgeVariables_; ++i) {
+        for (int j = 0; j < deg2eq_out.size(); ++j) {
+            deg2eq_out[i][j] = (1 - alpha_) * deg2eq_out[i][j] + (alpha_)*M_deg2eq_old[i][j];
         }
     }
+    M_deg2eq_old = deg2eq_out;
+    return deg2eq_out;
 }

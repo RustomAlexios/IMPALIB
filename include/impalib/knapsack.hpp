@@ -30,8 +30,8 @@ class Knapsack {
                                                          int);  ///< extrinsic_ output of department constraint
 
     void team_to_knapsack_update(const vector<vector<int>> &, vector<vector<impalib_type>> &, const vector<impalib_type> &, const vector<vector<impalib_type>> &,
-                                 const vector<impalib_type> &);                                                ///< calculate messages from teams to knapsack constraints
-    void process_extrinsic_output_department(int, int, const vector<impalib_type> &, vector<impalib_type> &);  ///< perform filtering (if needed) on messages from departments to teams
+                                 const vector<impalib_type> &);                                        ///< calculate messages from teams to knapsack constraints
+    vector<impalib_type> process_extrinsic_output_department(int, int, const vector<impalib_type> &);  ///< perform filtering (if needed) on messages from departments to teams
 
     Knapsack(int N_DEPARTMENTS, int N_TEAMS, bool FILT_FLAG, impalib_type ALPHA);  ///< constructor
 };
@@ -285,29 +285,17 @@ void Knapsack::team_to_knapsack_update(const vector<vector<int>> &idx_nonzero, v
  *
  */
 
-void Knapsack::process_extrinsic_output_department(const int idx, const int iter, const vector<impalib_type> &extrinsic_in, vector<impalib_type> &extrinsic_out) {
-    if ((filteringFlag_) and (alpha_ != zero_value)) {
-        auto temp = extrinsic_in;
-        auto temp_old = extrinsic_old[idx];
-        vector<impalib_type> temp_extrinsic;
-
-        impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-
-        // Calculate weighted extrinsic_ outputs
-        transform(temp.begin(), temp.end(), temp.begin(), [w_2](impalib_type &c) { return c * w_2; });
-        transform(temp_old.begin(), temp_old.end(), temp_old.begin(), [w_1](impalib_type &c) { return c * w_1; });
-
-        if (iter == 0) {
-            copy(temp.begin(), temp.end(), extrinsic_out.begin());
-        } else {
-            transform(temp.begin(), temp.end(), temp_old.begin(), std::back_inserter(temp_extrinsic), std::plus<impalib_type>());
-            copy(temp_extrinsic.begin(), temp_extrinsic.end(), extrinsic_out.begin());
-        }
-
-        copy(extrinsic_out.begin(), extrinsic_out.end(), extrinsic_old[idx].begin());
+vector<impalib_type> Knapsack::process_extrinsic_output_department(const int idx, const int iter, const vector<impalib_type> &extrinsic_in) {
+    if (!filteringFlag_) {
+        return extrinsic_in;
     }
 
-    else {
-        copy(extrinsic_in.begin(), extrinsic_in.end(), extrinsic_out.begin());
+    // Calculate weighted extrinsic outputs
+    auto extrinsic_out = extrinsic_in;
+    for (int j = 0; j < extrinsic_out.size(); ++j) {
+        extrinsic_out[j] = (1 - alpha_) * extrinsic_out[j] + (alpha_)*extrinsic_old[idx][j];
     }
+
+    extrinsic_old[idx] = extrinsic_out;
+    return extrinsic_out;
 }
