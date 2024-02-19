@@ -82,12 +82,12 @@ class EqualityConstraintTsp {
     impalib_type alpha_;    ///< filtering parameter
 
    public:
-    void messages_to_degree_relaxed(vector<vector<int>> &edges, vector<vector<impalib_type>> &cost_edges, vector<vector<impalib_type>> &deg2eq,
+    void messages_to_degree_relaxed(const vector<vector<int>> &edges, const vector<vector<impalib_type>> &cost_edges, const vector<vector<impalib_type>> &deg2eq,
                                     vector<vector<impalib_type>> &edge2deg);                          ///< calculate messages from edge to degree constraints for relaxed TSP
-    vector<vector<impalib_type>> flip_matrix(vector<vector<impalib_type>> &, vector<vector<int>> &);  ///< flip matrix
-    vector<vector<impalib_type>> messages_to_subtour(vector<vector<int>> &deltaS, vector<impalib_type> &edge_costs, vector<vector<impalib_type>> &deg2edge, vector<vector<impalib_type>> &subtour2edge,
-                                                     vector<vector<int>> &edges);  ///< calculate message from edge to subtour constraint
-    void messages_to_degree_augmented(vector<vector<impalib_type>> &deg2eq, vector<vector<impalib_type>> &subtour2edge, vector<vector<int>> &edges, vector<vector<impalib_type>> &edge_costs,
+    vector<vector<impalib_type>> flip_matrix(const vector<vector<impalib_type>> &, const vector<vector<int>> &);  ///< flip matrix
+    vector<vector<impalib_type>> messages_to_subtour(const vector<vector<int>> &deltaS, const vector<impalib_type> &edge_costs, const vector<vector<impalib_type>> &deg2edge, const vector<vector<impalib_type>> &subtour2edge,
+                                                     const vector<vector<int>> &edges);  ///< calculate message from edge to subtour constraint
+    void messages_to_degree_augmented(const vector<vector<impalib_type>> &deg2eq, const vector<vector<impalib_type>> &subtour2edge, const vector<vector<int>> &edges, const vector<vector<impalib_type>> &edge_costs,
                                       vector<vector<impalib_type>> &edge2deg);  ///< calculate messages from edge to degree constraints for augmented TSP
 
     EqualityConstraintTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
@@ -120,7 +120,7 @@ EqualityConstraintTsp::EqualityConstraintTsp(const int NUM_NODES, const int NUM_
  *
  */
 
-void EqualityConstraintTsp::messages_to_degree_relaxed(vector<vector<int>> &edges, vector<vector<impalib_type>> &cost_edges, vector<vector<impalib_type>> &deg2eq,
+void EqualityConstraintTsp::messages_to_degree_relaxed(const vector<vector<int>> &edges, const vector<vector<impalib_type>> &cost_edges, const vector<vector<impalib_type>> &deg2eq,
                                                        vector<vector<impalib_type>> &edge2deg) {
     auto reversed = flip_matrix(deg2eq, edges);
 
@@ -141,8 +141,8 @@ void EqualityConstraintTsp::messages_to_degree_relaxed(vector<vector<int>> &edge
  *
  */
 
-vector<vector<impalib_type>> EqualityConstraintTsp::messages_to_subtour(vector<vector<int>> &deltaS, vector<impalib_type> &edge_costs, vector<vector<impalib_type>> &deg2edge,
-                                                                        vector<vector<impalib_type>> &subtour2edge, vector<vector<int>> &edges) {
+vector<vector<impalib_type>> EqualityConstraintTsp::messages_to_subtour(const vector<vector<int>> &deltaS, const vector<impalib_type> &edge_costs, const vector<vector<impalib_type>> &deg2edge,
+                                                                        const vector<vector<impalib_type>> &subtour2edge, const vector<vector<int>> &edges) {
     vector<vector<impalib_type>> edge2subtour_list;
 
     if (deltaS.size() == 1) {
@@ -193,8 +193,8 @@ vector<vector<impalib_type>> EqualityConstraintTsp::messages_to_subtour(vector<v
  *
  */
 
-void EqualityConstraintTsp::messages_to_degree_augmented(vector<vector<impalib_type>> &deg2eq, vector<vector<impalib_type>> &subtour2edge, vector<vector<int>> &edges,
-                                                         vector<vector<impalib_type>> &edge_costs, vector<vector<impalib_type>> &edge2deg) {
+void EqualityConstraintTsp::messages_to_degree_augmented(const vector<vector<impalib_type>> &deg2eq, const vector<vector<impalib_type>> &subtour2edge, const vector<vector<int>> &edges,
+                                                         const vector<vector<impalib_type>> &edge_costs, vector<vector<impalib_type>> &edge2deg) {
     vector<impalib_type> subtour2edge_sum(numEdgeVariables_, zero_value);
     for (const auto &row : subtour2edge) {
         transform(subtour2edge_sum.begin(), subtour2edge_sum.end(), row.begin(), subtour2edge_sum.begin(), std::plus<impalib_type>());
@@ -220,7 +220,7 @@ void EqualityConstraintTsp::messages_to_degree_augmented(vector<vector<impalib_t
  *
  */
 
-vector<vector<impalib_type>> EqualityConstraintTsp::flip_matrix(vector<vector<impalib_type>> &M, vector<vector<int>> &edges) {
+vector<vector<impalib_type>> EqualityConstraintTsp::flip_matrix(const vector<vector<impalib_type>> &M, const vector<vector<int>> &edges) {
     auto flipped = M;
     for (size_t l = 0; l < edges.size(); ++l) {
         int row = edges[l][0];
