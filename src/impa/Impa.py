@@ -4,6 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
+# Import necessary modules and functions from the environmentModule
 from impa.environmentModule import (
     np,
     math,
@@ -22,6 +23,8 @@ from impa.environmentModule import (
     pkl,
     chain,
 )
+
+# Import necessary variables and functions from the initializationModule
 from impa.initializationModule import (
     fighters_count,
     weasels_count,
@@ -31,6 +34,8 @@ from impa.initializationModule import (
     distance_metric_rendezvouz,
     K_1,
 )
+
+# Import necessary types and function prototypes from the cFunctionAPI
 from impa.cFunctionAPI import (
     c_int_p,
     c_impa_lib_type_p,
@@ -103,6 +108,8 @@ class GraphicalModelTsp:
         """
         Initialize Graphical Model for the TSP
         """
+
+        # Initialize variables and flags
         self.results_composed = []
 
         self.num_augmentations = 0
@@ -111,16 +118,19 @@ class GraphicalModelTsp:
         self.no_consecutive_loops_count_exceeded_flag = False
         self.sol_oscillation_count_exceeded_flag = False
 
+        # If not performing random testing, load data from input_load
         if not self.random_test_flag:
             self.num_nodes = self.input_load[0]
             self.symmetric_flag = self.input_load[1]
 
+        # Extract necessary parameters
         num_nodes = self.num_nodes
         symmetric_flag = self.symmetric_flag
 
         print(f"num_nodes: {self.num_nodes}")
         print(f"symmetric_flag: {self.symmetric_flag}")
 
+        # Create cost matrix and edge connections
         cost_matrix, edge_connections = self.create_cost_matrix(symmetric_flag)
         self.tour_impa_flag = False
         self.tour_impa = np.zeros(num_nodes + 1, dtype=np.int32)  # +1 to account for returning edge
@@ -129,25 +139,30 @@ class GraphicalModelTsp:
         self.subtour_paths = np.zeros(self.num_nodes**2, dtype=np.int32)
         self.open_paths = np.zeros(self.num_nodes**2, dtype=np.int32)
 
+        # If not performing random testing, use loaded data for cost_matrix and edge_connections
         if not self.random_test_flag:
             self.cost_matrix = self.input_load[2]
             self.edge_connections = self.input_load[3]
             cost_matrix = self.cost_matrix
             edge_connections = self.edge_connections
 
+        # Assign cost_matrix and edge_connections
         self.cost_matrix = cost_matrix
         self.edge_connections = edge_connections
 
+        # Calculate number of edge variables
         num_edge_variables = num_nodes**2 - num_nodes
 
         self.num_edge_variables = num_edge_variables
 
+        # Initialize arrays for edge variables
         self.intrinsic_out_edge_ec = np.zeros(num_edge_variables, dtype=np_impa_lib)
 
         cost_edge_variable = np.zeros(num_edge_variables, dtype=np_impa_lib)
 
         edge_ec_to_degree_constraint_m = np.zeros((num_edge_variables, num_nodes), dtype=np_impa_lib)
 
+        # Populate arrays based on edge connections and cost matrix
         for i in range(len(edge_connections)):
             connection = edge_connections[i]
             cost = cost_matrix[connection[0], connection[1]]
@@ -155,6 +170,7 @@ class GraphicalModelTsp:
             edge_ec_to_degree_constraint_m[i][connection[0]] = cost
             edge_ec_to_degree_constraint_m[i][connection[1]] = cost
 
+        # Assign calculated arrays
         self.cost_edge_variable = cost_edge_variable
         self.edge_degree_constraint_cost = edge_ec_to_degree_constraint_m
 
@@ -171,15 +187,19 @@ class GraphicalModelTsp:
            matrix: cost matrix
            edge_connections: list of edges. Each element consist of the nodes of the edge
         """
-
+        # Generate a random matrix for the upper triangle
         n = self.num_nodes
         upper_triangle = np.random.uniform(1, 1000, size=(n, n))
+
+        # Make the matrix symmetric if symmetric_flag is True
         if symmetric_flag:
             matrix = np.triu(upper_triangle) + np.triu(upper_triangle, k=1).T
             np.fill_diagonal(matrix, zero_value)
         else:
+            # Otherwise, keep it asymmetric
             matrix = upper_triangle.copy()
             np.fill_diagonal(matrix, zero_value)
+        # Find edge connections from the cost matrix
         edge_connections = np.transpose(np.nonzero(matrix))
         return matrix, edge_connections
 
@@ -187,7 +207,7 @@ class GraphicalModelTsp:
         """
         Run impa in the C++ code
         """
-
+        # Process inputs and get ctypes pointers
         (
             edge_connection_flatten_p,
             cost_edge_variable_flatten_p,
@@ -208,6 +228,7 @@ class GraphicalModelTsp:
             num_added_constraints_p,
         ) = self.process_inputs_ctypes()
 
+        # Call the IMPA wrapper function with the necessary arguments
         WrapperTsp(
             np.int32(self.num_iterations),
             np.int32(self.num_nodes),
@@ -238,6 +259,7 @@ class GraphicalModelTsp:
             np.int32(self.max_augm_count),
         )
 
+        # Process outputs from ctypes pointers
         self.process_outputs_ctypes(
             sol_oscillation_count_exceeded_flag_p,
             selected_edges_size_p,
@@ -276,7 +298,7 @@ class GraphicalModelTsp:
             subtour_paths_size_flatten_p: a pointer that will store the number of detected subtours after running the IMPA in C++
             num_added_constraints_p: a pointer that will stire the number of added constraints after running the IMPA in C++
         """
-
+        # Flatten and get pointers
         edge_connection_flatten = self.edge_connections.flatten().astype(np.int32)
         edge_connection_flatten_p = edge_connection_flatten.ctypes.data_as(c_int_p)
         cost_edge_variable_flatten = self.cost_edge_variable.flatten().astype(np_impa_lib)
@@ -291,6 +313,7 @@ class GraphicalModelTsp:
         extrinsic_output_edge_ec = np.array(extrinsic_output_edge_ec).flatten().astype(np_impa_lib)
         extrinsic_output_edge_ec_p = extrinsic_output_edge_ec.ctypes.data_as(c_impa_lib_type_p)
 
+        # Get pointers for other variables
         num_augmentations_p = np.array(self.num_augmentations).ctypes.data_as(c_int_p)
         num_added_constraints_p = np.array(self.num_added_constraints).ctypes.data_as(c_int_p)
         tour_impa_flatten = self.tour_impa.flatten().astype(np.int32)
@@ -361,11 +384,12 @@ class GraphicalModelTsp:
             extrinsic_output_edge_ec_p: a pointer that stores extrinsic output messages from edge equality constraints which are calculated in C++
             num_added_constraints_p: a pointer that stores the number of added constraints after running the IMPA in C++
         """
-
+        # Extract values from pointers
         selected_edges_size = list(selected_edges_size_p.__dict__.values())[0]
         selected_edges_flatten = list(selected_edges_p.__dict__.values())[0][:selected_edges_size]
         self.selected_edges = [[selected_edges_flatten[i], selected_edges_flatten[i + 1]] for i in range(0, len(selected_edges_flatten), 2)]
 
+        # Extract subtour paths
         subtour_paths_size = list(subtour_paths_size_flatten_p.__dict__.values())[0]
         subtour_paths_size = [x for x in subtour_paths_size if x != 0]
         if len(subtour_paths_size) != 0:
@@ -383,6 +407,7 @@ class GraphicalModelTsp:
         else:
             self.subtour_paths = None
 
+        # Update flags and tour
         self.sol_oscillation_count_exceeded_flag = list(sol_oscillation_count_exceeded_flag_p.__dict__.values())[0]
         self.no_improvement_sol_count_exceeded_flag = list(no_improvement_sol_count_exceeded_flag_p.__dict__.values())[0]
         self.no_consecutive_loops_count_exceeded_flag = list(no_consecutive_loops_count_exceeded_flag_p.__dict__.values())[0]
@@ -392,18 +417,20 @@ class GraphicalModelTsp:
         else:
             self.tour_impa = [x for x in tour_impa]
 
+        # Update augmentation and added constraints information
         self.num_augmentations = int(list(num_augmentations_p.__dict__.values())[0])
         if self.augmentation_flag:
             self.num_added_constraints = int(list(num_added_constraints_p.__dict__.values())[0])
         else:
             self.num_added_constraints = 0
-
+        # Update cost information
         self.cost_impa = list(cost_impa_p.__dict__.values())[0][0]
         extrinsic_output_edge_ec = list(extrinsic_output_edge_ec_p.__dict__.values())[0]
         intrinsic_out_edge_ec = extrinsic_output_edge_ec + self.cost_edge_variable
         self.intrinsic_out_edge_ec = intrinsic_out_edge_ec
         if self.subtour_paths is not None:
             self.subtour_paths = [sublist + [sublist[0]] for sublist in self.subtour_paths if sublist]
+        # If subtours detected and post-processing flag is set, run post-processing
         if self.tour_impa is None and self.post_process_flag:
             self.run_post_processing_improved()
             self.pp_performed = True
@@ -419,18 +446,22 @@ class GraphicalModelTsp:
         Returns:
             graph: undirected graph that contains the connection between the nodes
         """
-
+        # Initialize an empty dictionary to represent the graph
         graph = {}
+
+        # Iterate over each activated edge
         for connection in selected_edges:
+            # Add the first node of the edge to the graph
             if connection[0] in graph:
                 graph[connection[0]].append(connection[1])
             else:
                 graph[connection[0]] = [connection[1]]
-
+            # Add the second node of the edge to the graph
             if connection[1] in graph:
                 graph[connection[1]].append(connection[0])
             else:
                 graph[connection[1]] = [connection[0]]
+        # Return the constructed undirected graph
         return graph
 
     def paths_cleaning(self, removed_edges, investigated_paths):
@@ -444,17 +475,23 @@ class GraphicalModelTsp:
             final_investigated_paths: paths obtained after removing desired edges
             removed_edge_flag_list: list that indicates where an investigated path inside investigated_paths has been disconnected
         """
-
+        # If investigated_paths is None, return None for both outputs
         if investigated_paths is None:
             return None, None
+        # Convert removed_edges to a list of tuples for easy comparison
         removed_edges = [tuple(edge) for edge in removed_edges]
+        # Initialize lists to store modified paths and flags indicating removed edges
         new_investigated_paths = []
         removed_edge_flag_list = []
+
+        # Iterate over each path in investigated_paths
         for path in investigated_paths:
-            removed_edge_flag = False
-            new_path = []
+            removed_edge_flag = False  # Flag to indicate if any edge in the path is removed
+            new_path = []  # List to store the modified path
             i = 0
+            # Iterate over length of the path
             while i < len(path) - 1:
+                # Check if the edge is in removed_edges
                 if (path[i], path[i + 1]) in removed_edges:
                     removed_edge_flag = True
                     if new_path:
@@ -470,7 +507,9 @@ class GraphicalModelTsp:
             if new_path:  # Add the last path if it's not empty
                 new_investigated_paths.append(new_path)
             removed_edge_flag_list.append(removed_edge_flag)
+            # Remove any duplicate paths from new_investigated_paths
         final_investigated_paths = [path for i, path in enumerate(new_investigated_paths) if not any(set(path).issubset(p) for p in new_investigated_paths[:i] + new_investigated_paths[i + 1 :])]
+        # Return the final lists
         return final_investigated_paths, removed_edge_flag_list
 
     def construct_graph(self, selected_edges):
@@ -482,7 +521,9 @@ class GraphicalModelTsp:
         Returns:
             graph: graph that will be used during post-processing for forming a tour of the TSP
         """
+        # Initialize an empty dictionary to represent the graph
         graph = {}
+        # Iterate over each activated edge
         for connection in selected_edges:
             if connection[0] in graph:
                 graph[connection[0]][1].append(connection[1])
@@ -493,6 +534,7 @@ class GraphicalModelTsp:
                 graph[connection[1]][0].append(connection[0])
             else:
                 graph[connection[1]] = ([connection[0]], [])
+        # Return the constructed graph
         return graph
 
     def run_post_processing_improved(self):
@@ -502,21 +544,26 @@ class GraphicalModelTsp:
         print("--------")
         print("Post Processing Started:")
         print("--------")
+        # Retrieve necessary data
         num_nodes = self.num_nodes
         # edge_connections = self.edge_connections
         # cost_edge_variable = self.cost_edge_variable
         subtour_paths = self.subtour_paths
-
+        # Print subtour paths if available
         if subtour_paths is not None:
             for i, subtour_path in enumerate(subtour_paths):
                 print(f"Subtour path of size {len(subtour_path)-1}: {subtour_path}")
         print("--------")
+
+        # Create a copy of selected edges
         self.selected_edges_pp = copy.deepcopy(self.selected_edges)
         selected_edges_pp = self.selected_edges_pp[:]
         degree_constraints_satisfied = False
 
+        # Construct the graph
         graph = self.construct_graph(selected_edges_pp)
 
+        # Check degree constraints
         degree_constraints_satisfied = True
         keys = []
         for node, (inward_edges_nodes, outward_edges_nodes) in graph.items():
@@ -525,6 +572,7 @@ class GraphicalModelTsp:
             if len(inward_edges_nodes) != 1 or len(outward_edges_nodes) != 1:
                 degree_constraints_satisfied = False
 
+        # Investigate violated degree constraints with degree > 1
         print(f"Degree Constraints Satisfied? {degree_constraints_satisfied}")
         removed_edges_violated_dc = []
         if len(keys) != 0:
@@ -571,10 +619,12 @@ class GraphicalModelTsp:
         else:
             print("No Violated Degree Constraints with degree >1")
 
+        # Clean subtour paths
         subtour_paths, removed_edge_flag_list = self.paths_cleaning(removed_edges_violated_dc, self.subtour_paths)
         print(f"subtour_paths after removing removed_edges_violated_dc {removed_edges_violated_dc}: \n {subtour_paths}")
         print("------")
 
+        # Investigate connected subtour paths
         if self.subtour_paths is not None:
             subtour_paths_disconnected_flag_list = removed_edge_flag_list[:]
             removed_subtour_paths_edges = []
@@ -600,9 +650,13 @@ class GraphicalModelTsp:
 
         print("------")
 
+        # Construct a graph from the updated selected edges
         graph = self.construct_graph(selected_edges_pp)
+
+        # Get final paths from the updated graph
         final_paths = self.get_paths(graph)
 
+        # Check degree constraints satisfaction
         degree_constraints_satisfied = True
         for node, (inward_edges_nodes, outward_edges_nodes) in graph.items():
             if len(inward_edges_nodes) != 1 or len(outward_edges_nodes) != 1:
@@ -610,6 +664,7 @@ class GraphicalModelTsp:
 
         print("Degree Constraints Satisfied?", degree_constraints_satisfied)
 
+        # Print final paths and check for missing nodes and duplicate nodes
         for i, path in enumerate(final_paths):
             print(f"path {i} of size {len(path)}: {path}")
 
@@ -622,6 +677,7 @@ class GraphicalModelTsp:
             for node, count in duplicate_nodes_counts:
                 print(f"Node {node} occurs {count} times.")
 
+        # If there are multiple final paths, connect them to form a tour
         if len(final_paths) > 1:
             print("------")
             print("Connecting Paths to form a tour")
@@ -632,6 +688,7 @@ class GraphicalModelTsp:
             possible_tours = []
             cost_tours = []
 
+            # Investigate different connections to find the optimal tour
             for i, result in enumerate(results):
                 print(f"Investigating connection {i} out of {len(results)} connections")
                 tour = []
@@ -640,30 +697,35 @@ class GraphicalModelTsp:
                     tour.extend(final_paths[result[count_used_paths]])
                     count_used_paths += 1
 
+                # Add missing nodes if any
                 if len(missing_nodes) != 0:
                     tour = self.add_missing_nodes(tour, missing_nodes)
 
+                # Calculate the cost of the tour
                 pair_occurrences = self.find_indices_edges_from_tour(tour)
                 possible_tours.append(tour)
                 cost_tours.append(sum(self.cost_edge_variable[pair_occurrences]))
 
+            # Choose the tour with the minimum cost
             index_best_tour = np.argmin(cost_tours)
             tour_impa_pp = possible_tours[index_best_tour]
             cost_impa_pp = cost_tours[index_best_tour]
             min_cost = cost_impa_pp
             best_tour = tour_impa_pp[:]
 
+            # Perform k-opt optimization if enabled
             if self.k_opt_flag:
                 print(f"tour_impa_pp: {tour_impa_pp+ [possible_tours[index_best_tour][0]]}")
                 print(f"cost_impa_pp: {cost_impa_pp}")
                 best_tour, min_cost = self.perform_k_opt(best_tour, min_cost)
 
+            # Finalize the tour
             tour_impa_pp = best_tour[:]
             tour_impa_pp = tour_impa_pp + [tour_impa_pp[0]]
             cost_impa_pp = min_cost
             print(f"tour_impa_pp of size {len(tour_impa_pp)-1}: {tour_impa_pp}")
             print(f"cost_impa_pp: {cost_impa_pp}")
-
+        # If there is only one final path, form a tour from it
         else:
             print("------")
             print("Forming a tour from one path")
@@ -673,10 +735,12 @@ class GraphicalModelTsp:
             else:
                 tour = final_paths[0]
 
+            # Calculate the cost of the tour
             pair_occurrences = self.find_indices_edges_from_tour(tour)
             cost_impa_pp = sum(self.cost_edge_variable[pair_occurrences])
             tour_impa_pp = tour[:]
 
+            # Perform k-opt optimization if enabled
             if self.k_opt_flag:
                 print(f"tour_impa_pp: {tour_impa_pp + [tour_impa_pp[0]]}")
                 print(f"cost_impa_pp: {cost_impa_pp}")
@@ -685,12 +749,14 @@ class GraphicalModelTsp:
                 best_tour = tour_impa_pp[:]
                 min_cost = cost_impa_pp
 
+            # Finalize the tour
             tour_impa_pp = best_tour[:]
             tour_impa_pp = tour_impa_pp + [tour_impa_pp[0]]
             cost_impa_pp = min_cost
             print(f"tour_impa_pp of size {len(tour_impa_pp)-1}: {tour_impa_pp}")
             print(f"cost_impa_pp: {cost_impa_pp}")
 
+        # Update the cost and tour attributes
         self.cost_impa = cost_impa_pp
         self.tour_impa = tour_impa_pp
 
@@ -707,13 +773,18 @@ class GraphicalModelTsp:
         """
         print("------")
         print("Performing K-OPT")
+        # Iterate over each value of k in [3, 2]
         for k in [3, 2]:
             print(f"{k}-opt")
+            # Generate candidate paths using k-opt
             candidate_paths = self.generate_k_opt_paths(best_tour, k)
             candidate_path = candidate_paths[0]
+            # Evaluate each candidate path
             for candidate_path in candidate_paths:
+                # Calculate the cost of the candidate path
                 pair_occurrences = self.find_indices_edges_from_tour(candidate_path)
                 cost = sum(self.cost_edge_variable[element] for element in pair_occurrences)
+                # Update minimum cost and best tour if the cost is lower
                 if cost < min_cost:
                     min_cost = cost
                     best_tour = candidate_path[:]
@@ -730,11 +801,17 @@ class GraphicalModelTsp:
             tour: tour obtained after adding the missing nodes to the connected paths
         """
         added_missing_nodes = []
+        # Loop until all missing nodes are added to the tour
         while len(added_missing_nodes) != len(missing_nodes):
+            # Generate combinations of missing nodes with the start and end nodes of the tour
             missing_combinations_left = [[node, tour[0]] for node in missing_nodes if node not in added_missing_nodes]
             missing_combinations_right = [[tour[-1], node] for node in missing_nodes if node not in added_missing_nodes]
+
+            # Initialize minimum costs for left and right combinations
             min_cost_left = np_impa_lib("inf")
             min_cost_right = np_impa_lib("inf")
+
+            # Find the combination with the minimum cost for the left and right connections
             for combination in missing_combinations_left:
                 cost = self.cost_matrix[combination[0]][combination[1]]
                 if cost < min_cost_left:
@@ -745,13 +822,16 @@ class GraphicalModelTsp:
                 if cost < min_cost_right:
                     min_cost_right = cost
                     combination_right = combination
+            # Determine which combination has the minimum cost
             costs_left_right = [min_cost_left, min_cost_right]
             # added_cost = np.min(costs_left_right)
             added_cost_index = np.argmin(costs_left_right)
+
+            # Add the corresponding missing node to the tour
             if added_cost_index == 0:  # left
                 added_missing_nodes.append(combination_left[0])
                 tour.insert(0, combination_left[0])
-            else:
+            else:  # right
                 added_missing_nodes.append(combination_right[1])
                 tour.append(combination_right[1])
         return tour
@@ -765,9 +845,12 @@ class GraphicalModelTsp:
         Returns:
             pair_occurrences: edges (or pair of nodes) forming the tour
         """
+        # Create pairs of nodes representing edges in the tour
         pairs = np.column_stack((tour, np.roll(tour, -1)))
         edge_connections_arr = np.array(self.edge_connections)
+        # Check for matching pairs (edges) in the list of edge connections
         matching_pairs = (edge_connections_arr[:, None, :] == pairs).all(axis=-1)
+        # Get the indices of matching pairs
         pair_occurrences = np.where(matching_pairs)[0]
         return pair_occurrences
 
@@ -782,19 +865,26 @@ class GraphicalModelTsp:
         Returns:
             path: detected path
         """
+        # Mark the current node as visited
         visited.add(node)
 
+        # Append the current node to the visited nodes list
         self.visited_nodes.append(node)
 
+        # Add the current node to the current path
         path = path + [node]
 
+        # If the current node has no outgoing edges, add the path to the list of open paths and return
         if len(graph[node][1]) == 0:
             self.open_paths_dummy.append(path)
             return path
 
+        # Recursively explore neighbors of the current node
         for neighbor in graph[node][1]:
             if neighbor not in visited:
+                # Recursively find paths starting from the neighbor node
                 new_path = self.find_paths(graph, neighbor, visited.copy(), path.copy())
+                # If a new path is found, return it
                 if new_path:
                     return new_path
 
@@ -807,16 +897,22 @@ class GraphicalModelTsp:
         Returns:
             final_paths: detected paths in the graph. These paths will be used in the post-processing
         """
+        # Initialize variables
         self.open_paths_dummy = []
         path_lists = []
         self.visited_nodes = []
+        # Iterate through all nodes in the graph
         for start_node in graph.keys():
+            # If the start node has already been visited, skip it
             if start_node in self.visited_nodes:
                 continue
             else:
+                # Call the find_paths function to find paths starting from the current node
                 path = self.find_paths(graph, start_node, set(), [])
+                # If a path is found, add it to the list of path_lists
                 if path:
                     path_lists.append(path)
+        # Remove duplicate paths from path_lists
         final_paths = [path for i, path in enumerate(path_lists) if not any(set(path).issubset(p) for p in path_lists[:i] + path_lists[i + 1 :])]
         return final_paths
 
@@ -831,15 +927,20 @@ class GraphicalModelTsp:
             new_paths: paths after running the k-opt algorithm
         """
         n = len(path)
+        # Check if the value of k is within valid range
         if k < 2 or k > n - 2:
             raise ValueError("k must be between 2 and n-2 for a valid k-opt operation.")
 
+        # Generate all combinations of k indices from the path
         swap_combinations = np.array(list(combinations(range(n), k)), dtype=np.int32)
         new_paths = []
 
+        # Iterate over each combination of k indices
         for swap_indices in swap_combinations:
             new_path = np.array(path, dtype=np.int32)
+            # Generate all possible pairs of indices to swap
             swap_pairs = np.array(list(combinations(swap_indices, 2)), dtype=np.int32)
+            # Swap the elements at the selected indices
             new_path[swap_pairs[:, 0]], new_path[swap_pairs[:, 1]] = (
                 new_path[swap_pairs[:, 1]],
                 new_path[swap_pairs[:, 0]],
@@ -852,19 +953,24 @@ class GraphicalModelTsp:
         """
         This function will run an analysis for the TSP. Other known algorithms could be evaluated on the TSP, and the IMPA solution could be stored
         """
+        # Calculate runtime for IMPA
         self.runtime_impa = time.time() - self.start_time
         print(f"IMPA Time: {self.runtime_impa}")
         print("--------")
 
+        # Solve TSP using exact solver if enabled
         if self.exact_solver_flag:
             self.solve_tsp_exact()
+        # Solve TSP using LKH solver if enabled
         if self.lkh_solver_flag:
             start_time = time.time()
             self.tour_lkh, self.cost_lkh = self.solve_tsp_lkh()
             self.runtime_lkh = time.time() - start_time
             print(f"LKH Time: {self.runtime_lkh}")
+        # Solve TSP using simulated annealing if enabled
         if self.sim_annealing_flag:
             self.solve_tsp_simulated_annealing()
+        # Store results if save flag is enabled
         if self.save_flag:
             self.results_composed.append(
                 (
@@ -903,22 +1009,30 @@ class GraphicalModelTsp:
             path: closed loop if found
         """
 
+        # Add the current node to the visited set
         visited.add(current)
 
+        # Append the current node to the path
         self.visited_nodes_loop.append(current)
 
         path = path + [current]
 
+        # If the current node is the start node, a loop is found
         if current == start:
             visited.add(current)
             return path
 
+        # If the current node is not in the graph, return None
         if current not in graph:
             return None
 
+        # Explore neighbors of the current node
         for node in graph[current]:
+            # If the neighbor node has not been visited, explore it
             if node not in visited:
+                # Recursively call find_loops with the neighbor node
                 new_path = self.find_loops(graph, start, node, visited.copy(), path)
+                # If a loop is found in the recursion, return the path
                 if new_path:
                     return new_path
 
@@ -932,7 +1046,9 @@ class GraphicalModelTsp:
         Returns:
             closed_loop: detected closed loop
         """
+        # Initialize an empty graph dictionary
         graph = {}
+        # Populate the graph dictionary with the selected edges
         for connection in selected_edges:
             if connection[0] in graph:
                 graph[connection[0]].append(connection[1])
@@ -940,13 +1056,19 @@ class GraphicalModelTsp:
                 graph[connection[0]] = [connection[1]]
 
         self.graph = graph
+        # Initialize an empty list to store visited nodes during loop detection
         self.visited_nodes_loop = []
+        # Iterate through each start node in the graph
         for start_node, end_node in graph.items():
+            # If the start node has already been visited, skip it
             if start_node in self.visited_nodes_loop:
                 continue
             else:
+                # Iterate through each end node connected to the start node
                 for j in range(len(end_node)):
+                    # Find closed loops starting from the current start node and end node
                     closed_loop = self.find_loops(graph, start_node, end_node[j], set())
+                    # If a closed loop of the specified path length is found, return it
                     if closed_loop is not None and len(closed_loop) == path_length:
                         return closed_loop
 
@@ -957,6 +1079,7 @@ class GraphicalModelTsp:
         print("--------")
         print("Exact Solver: ")
         print("--------")
+        # Calling the brute force solver
         tour_exact, cost_exact = solve_tsp_brute_force(self.cost_matrix)
         print("tour_exact: ", tour_exact)
         print("cost_exact: ", cost_exact)
@@ -969,8 +1092,11 @@ class GraphicalModelTsp:
         print("--------")
         print("LKH Solver: ")
         print("--------")
+        # Creating a distance matrix for LKH solver
         cost_matrix_h = elkai.DistanceMatrix(self.cost_matrix)
+        # Solving TSP using LKH solver
         tour_h = cost_matrix_h.solve_tsp()
+        # Calculating the cost of the tour
         cost_h = sum(self.cost_matrix[tour_h[i], tour_h[i + 1]] for i in range(len(tour_h) - 1))
         print("tour_h: ", tour_h)
         print("cost_h: ", cost_h)
@@ -983,6 +1109,7 @@ class GraphicalModelTsp:
         print("--------")
         print("Simulated Annealing Solver:")
         print("--------")
+        # Solving TSP using simulated annealing
         tour_h, cost_h = solve_tsp_simulated_annealing(self.cost_matrix)
         print("tour_h: ", tour_h)
         print("cost_h: {:.4f}".format(cost_h))
@@ -991,6 +1118,7 @@ class GraphicalModelTsp:
         """
         This function will save results_composed (a dictionary containing variables of interest)
         """
+        # Saving the results to a file
         with open(f"{self.folder_outputs}/outputs_set{self.test_file}.pkl", "wb") as f:
             pkl.dump(self.results_composed, f)
 
@@ -1032,6 +1160,7 @@ class ImpaKcMwm:
         Args:
             input_load: inputs of the graphical model (input_load[0] contains capacities of departments, input_load[1] contains the types of teams, input_load[3][0] contains the number of projects)
         """
+        # Extracting inputs from input_load
         max_state = np.array(input_load[0])
         teams_types = input_load[1]  # .tolist()
         num_projects = len(input_load[3][0])
@@ -1069,6 +1198,7 @@ class ImpaKcMwm:
         #    min(weasels_count), max(weasels_count) + 1, num_projects
         # )
 
+        # Pruning teams and generating team rewards
         self.prune_teams()
 
         (
@@ -1078,6 +1208,7 @@ class ImpaKcMwm:
             last_index,
         ) = self.team_reward_generation()
 
+        # Setting additional instance variables
         self.teams_weights_per_department = teams_weights_per_department
         self.last_index = last_index
         print("Total Number of Projects: ", num_projects)
@@ -1096,13 +1227,16 @@ class ImpaKcMwm:
 
         print("-------")
 
+        # Initializing intrinsic_out_mwm
         self.intrinsic_out_mwm = np.zeros((self.num_projects, self.num_teams))
 
+        # Checking if the problem is unbalanced
         if self.num_projects != self.num_teams:
             self.unbalanced_flag = True
         else:
             self.unbalanced_flag = False
 
+        # Assertions for data consistency
         assert self.intrinsic_out_mwm.shape[0] == self.reward_project.shape[0], "Row Shape mismatch between MWM and Rewards"
         assert self.intrinsic_out_mwm.shape[1] == self.reward_project.shape[1], "Column Shape mismatch between MWM and Rewards"
 
@@ -1117,11 +1251,13 @@ class ImpaKcMwm:
 
         list_pruning = []
 
+        # Evaluate combinations and prune based on specified conditions
         for i in range(0, len(combinations_units_pre_pruning)):
             combination = combinations_units_pre_pruning[i]
             r_1 = math.exp(-F_u[combination[0] - 1]) * math.exp(-W_u[combination[1] - 1])
             r_2 = math.exp(-F_u[combination[1] - 1]) * math.exp(-W_u[combination[0] - 1])
 
+            # Prune combinations based on ratios and distance metrics
             if (
                 r_1 > r_2
                 and distance_metric[combination[1] - 1][combination[0] - 1] == distance_metric[combination[0] - 1][combination[1] - 1]
@@ -1137,33 +1273,41 @@ class ImpaKcMwm:
             elif r_2 == r_1 and distance_metric_rendezvouz[combination[1] - 1][combination[0] - 1] == distance_metric_rendezvouz[combination[0] - 1][combination[1] - 1]:
                 list_pruning.append(combination[::-1])
 
+        # Update available combinations after pruning
         self.available_combinations = [x for x in permutations_units if x not in list_pruning]
 
     def team_reward_generation(self):
         """
         This function will generate the rewards of the team of the graphical model
         """
+
+        # Initialize lists to store team weights and types per department, rewards for each team, and other variables
         teams_weights_per_department = []
         teams_types_per_department = []
         reward_team = []
         total_team_array = []
 
+        # Loop through each department to initialize team weight and type lists
         for state_index in range(0, len(self.max_state)):
             teams_weights_per_department.append([])
             teams_types_per_department.append([])
 
-        sum_teams = []
+        sum_teams = []  # Initialize a list to store sum of teams per combination
 
-        max_state = self.max_state
+        max_state = self.max_state  # Get maximum states for each department
 
-        indices_departments = np.array(range(1, len(max_state) + 1))
+        indices_departments = np.array(range(1, len(max_state) + 1))  # Get indices of departments
 
+        # Iterate over available combinations of departments
         for combination in self.available_combinations:
-            u = combination[0]
-            v = combination[1]
+            u = combination[0]  # Get first department index in the combination
+            v = combination[1]  # Get second department index in the combination
             team_array = []
+            # Iterate over team types
             for type in self.teams_types:
+                # Perform calculations based on team type
                 if type == 1:
+                    # Calculations for type 1 teams
                     if u == v:
                         team_size = max_state[u - 1]
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1])
@@ -1175,6 +1319,7 @@ class ImpaKcMwm:
                     else:
                         team_size = 0
                 elif type == 2:
+                    # Calculations for type 2 teams
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 2)
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1])
@@ -1196,6 +1341,7 @@ class ImpaKcMwm:
                         remaining_departments = np.setdiff1d(indices_departments, [u, v])
                         reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
                 elif type == 3:
+                    # Calculations for type 3 teams
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 2)
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1])
@@ -1207,6 +1353,7 @@ class ImpaKcMwm:
                     else:
                         team_size = 0
                 elif type == 4:
+                    # Calculations for type 4 teams
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 3)
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1])
@@ -1228,6 +1375,7 @@ class ImpaKcMwm:
                         remaining_departments = np.setdiff1d(indices_departments, [u, v])
                         reward = distance_metric[v - 1][u - 1] + F_u[u - 1] - K_1 + W_u[v - 1]
                 elif type == 5:
+                    # Calculations for type 5 teams
                     if u == v:
                         team_size = math.floor(max_state[u - 1] / 4)
                         teams_weights_per_department[u - 1].append(fighters_count[type - 1] + weasels_count[type - 1])
@@ -1267,12 +1415,13 @@ class ImpaKcMwm:
 
         sum_teams = np.array(sum_teams)
         last_index = []
+        # Iterate over sum_teams to calculate last indices for each combination
         for i in range(0, len(sum_teams)):
             if i == 0:
                 last_index.append(sum_teams[i] - 1)
             else:
                 last_index.append(sum(sum_teams[0:i]) + sum_teams[i] - 1)
-
+        # Return tuple containing calculated values
         return (
             reward_team,
             teams_weights_per_department,
@@ -1296,6 +1445,7 @@ class ImpaKcMwm:
             non_zero_weight_indices_sizes_p: a pointer that stores the sizes of non-zero weight indices for each department
             max_size_nonzero_weights: a pointer that stores the maximum size of non-zero weight indices across all departments
         """
+        # Extract required data from object attributes
         teams_weights_per_department = self.teams_weights_per_department
         reward_project = self.reward_project
         reward_team = self.reward_team
@@ -1304,21 +1454,25 @@ class ImpaKcMwm:
         num_teams = self.num_teams
         num_projects = self.num_projects
 
+        # Initialize arrays to store messages, rewards, etc.
         message_team_to_department = np.zeros((num_departments, num_teams), dtype=np_impa_lib)
 
         intrinsic_out_mwm = np.zeros((num_projects, num_teams), dtype=np_impa_lib)
 
+        # Compute messages from teams to departments
         for i in range(0, num_departments):
             for j in range(0, num_teams):
                 if self.teams_weights_per_department[i][j] != 0:
                     message_team_to_department[i][j] = reward_team[j]
 
+        # Compute non-zero weight indices
         non_zero_weight_indices = []
 
         for department_index in range(0, num_departments):
             indices = [i for i, e in enumerate(teams_weights_per_department[department_index]) if e != 0]
             non_zero_weight_indices = non_zero_weight_indices + [indices]
 
+        # Flatten and convert arrays to ctypes pointers
         extrinsic_output_team = np.zeros((num_teams))
         transitional_model = message_team_to_department.flatten().astype(np_impa_lib)
         transitional_model_p = transitional_model.ctypes.data_as(c_impa_lib_type_p)
@@ -1349,6 +1503,7 @@ class ImpaKcMwm:
         non_zero_weight_indices_sizes = np.array(non_zero_weight_indices_sizes).flatten().astype(np.int32)
         non_zero_weight_indices_sizes_p = non_zero_weight_indices_sizes.ctypes.data_as(c_int_p)
 
+        # Return the ctypes pointers as a tuple
         return (
             transitional_model_p,
             max_state_p,
@@ -1366,6 +1521,7 @@ class ImpaKcMwm:
         """
         This function will run IMPA on the graphical model of the Knapsack-MWM problem
         """
+        # Prepare inputs for C++ code
         (
             transitional_model_p,
             max_state_p,
@@ -1379,6 +1535,7 @@ class ImpaKcMwm:
             max_size_nonzero_weights,
         ) = self.process_inputs_ctypes()
 
+        # Call the C++ function to execute the IMPA algorithm
         WrapperKcMwm(
             np.int32(self.num_iterations),
             np.int32(self.num_departments),
@@ -1398,11 +1555,13 @@ class ImpaKcMwm:
             np_impa_lib(self.alpha),
         )
 
+        # Retrieve and process outputs
         extrinsic_output_team = list(extrinsic_output_team_p.__dict__.values())[0]
         intrinsic_out_mwm = np.reshape(
             list(intrisic_out_mwm_p.__dict__.values())[0],
             (self.num_projects, self.num_teams),
         )
+        # Update intrinsic output
         self.intrinsic_out_mwm = intrinsic_out_mwm
 
         self.intrinsic_output = extrinsic_output_team + self.reward_team
@@ -1411,16 +1570,23 @@ class ImpaKcMwm:
         """
         This function will run a pre-analysis on the C++ IMPA solution
         """
+        # Retrieve necessary data
         intrinsic_output = self.intrinsic_output
         threshold = self.threshold
 
+        # Check for valid match and calculate IMPA metric
         valid_match, impa_metric, p_mwm = self.check_match()
+
+        # Identify selected teams indices
         self.matching_array = np.where(p_mwm == 1)
         selected_teams_indices = np.where(p_mwm == 1)[1]
         self.selected_teams_indices = np.unique(selected_teams_indices)
+
+        # Apply threshold to obtain hard decisions
         hard_decision = np.array(deepcopy(intrinsic_output))
         hard_decision[intrinsic_output > threshold] = 0
 
+        # Perform pre-processing analysis
         self.pre_processing_analysis()
 
     def check_match(self):
@@ -1433,26 +1599,32 @@ class ImpaKcMwm:
             P: hard-decision on the MWM problem
         """
 
+        # Retrieve intrinsic output matrix
         A = self.intrinsic_out_mwm
 
+        # Retrieve unbalanced flag
         unbalanced_flag = self.unbalanced_flag
 
+        # Calculate match metric
         match_metric = sum(x for x in A.flatten() if x < 0)
         P = deepcopy(A)
         threshold = self.threshold
+        # Apply threshold to obtain hard decisions
         P[P > threshold] = 0
         P[P < threshold] = 1
         valid_match = False
 
         min_N = min(A.shape[0], A.shape[1])
-
+        # Check for unbalanced flag
         if unbalanced_flag:
             P_interm = self.check_unbalanced_flag(P)
         else:
             P_interm = P
+        # Calculate row and column sums
         row_sums = np.sum(P_interm, axis=1)
         col_sums = np.sum(P_interm, axis=0)
 
+        # Check if constraints of the MWM problem are true
         if np.array_equal(col_sums, np.ones(min_N)):
             if np.array_equal(row_sums, np.ones(min_N)):
                 valid_match = True
@@ -1470,9 +1642,11 @@ class ImpaKcMwm:
         idx = 0
         idy = 0
         P_interm = deepcopy(P)
+        # Find columns with all zeros and delete them
         idy = np.argwhere(np.all(P_interm[..., :] == 0, axis=0))  # find which columns there are zeros
         P_interm = np.delete(P_interm, idy, axis=1)
         idx = np.argwhere(np.all(P_interm[:, ...] == 0, axis=1))  # find which rows there are zeros
+        # Find rows with all zeros and delete them
         P_interm = np.delete(P_interm, idx, axis=0)
         return P_interm
 
@@ -1480,6 +1654,8 @@ class ImpaKcMwm:
         """
         This function will run an analysis on the IMPA solution before post-processing
         """
+
+        # Extract necessary attributes
         num_departments = self.num_departments
         num_projects = self.num_projects
 
@@ -1493,12 +1669,15 @@ class ImpaKcMwm:
         available_combinations = self.available_combinations
         max_state = self.max_state
 
+        # Initialize flags
         capacity_exceeded_flag = False
         project_matched_flag = False
         ic_violated_flag = False
 
+        # Create an array of all project indices
         all_projects = np.array(range(0, num_projects))
 
+        # Initialize arrays
         team_departments_weights = np.zeros((num_departments), dtype=int)
 
         department_weights = []
@@ -1516,18 +1695,21 @@ class ImpaKcMwm:
         team_locations = []
         total_value = 0
         total_weight = 0
+        # Loop through selected teams to analyze assignment
         for i in range(0, len(selected_teams_indices)):
             team_departments = []
             index = selected_teams_indices[i]
             project_index = np.where(matching_array[1] == index)[0]
             total_value = total_value + reward_team[index]
             team_type.append(teams_types[index])
+            # Store assigned departments and their weights
             for j in range(0, num_departments):
                 weight = teams_weights_per_department[j][index]
                 if weight != 0:
                     team_departments.append(j)
                     department_weights[j].append(weight)
                     team_departments_weights[j] = team_departments_weights[j] + weight
+            # Compute package location
             location_package = next(x[0] for x in enumerate(last_index) if x[1] >= index)
             team_locations.append(location_package)
             print(
@@ -1543,6 +1725,7 @@ class ImpaKcMwm:
 
         print("-------")
         print("BEFORE POST-PROCESSING")
+        # Check department capacities
         for i in range(0, num_departments):
             print("Unit ", i, " has a used capacity ", team_departments_weights[i])
             print("Unit ", i, " has a MAX capacity ", max_state[i])
@@ -1583,6 +1766,7 @@ class ImpaKcMwm:
         reused_teams = []
         combination_reused_team = []
         visited_combinations = []
+        # Analyze project-team assignments
         for i in range(0, len(matching_array[0])):
             team_index = matching_array[1][i]
             project_index = matching_array[0][i]
@@ -1600,6 +1784,7 @@ class ImpaKcMwm:
         print("MWM")
         print("-------------")
 
+        # Check if all projects are matched to teams
         if len(matching_array[0]) == num_projects:
             project_matched_flag = True
 
@@ -1612,6 +1797,7 @@ class ImpaKcMwm:
         )
         print("Total Weight RHS: ", total_weight)
 
+        # Update class attributes with analysis results
         self.capacity_exceeded_flag = capacity_exceeded_flag
         self.ic_violated_flag = ic_violated_flag
         self.combination_reused_team = combination_reused_team
@@ -1623,8 +1809,10 @@ class ImpaKcMwm:
         """
         This function will run an analysis on the IMPA solution after post-processing
         """
+        # Retrieve post-processing flags and options
         post_process_flag = self.post_process_flag
 
+        # Execute post-processing based on the selected option
         if post_process_flag:
             if self.post_process_option == 1:  # brute force post-processing on bins
                 self.apply_post_processing_departments_brute()
@@ -1632,15 +1820,18 @@ class ImpaKcMwm:
                 self.apply_post_processing_teams_brute()
                 # exit()
         else:
+            # If post-processing is not required, retain the intermediate results
             self.intermediate_selected_teams_indices = self.selected_teams_indices
             self.post_processing_ic_combination = []
 
+        # Perform analysis on the post-processed results
         self.results_analysis()
 
     def apply_post_processing_departments_brute(self):
         """
         This function will run post-processing by investigating departments and removing least confident teams from these departments
         """
+        # Retrieve necessary data
         max_state = self.max_state
         ic_violated_flag = self.ic_violated_flag
         combination_reused_team = self.combination_reused_team
@@ -1657,6 +1848,7 @@ class ImpaKcMwm:
 
         print("-------")
         post_processing_ic_combination = []
+        # Handle cases where internal constraints are violated
         if ic_violated_flag:
             post_processing_ic_combination = [0] * len(combination_reused_team)
             for i in range(0, len(combination_reused_team)):
@@ -1678,18 +1870,22 @@ class ImpaKcMwm:
                     )
             print("post_processing_IC_combination: ", post_processing_ic_combination)
 
+        # Initialize intermediate variables for post-processing
         intermediate_team_department_weights = deepcopy(team_departments_weights)
         intermediate_selected_teams_indices = deepcopy(selected_teams_indices)
 
+        # Perform post-processing if capacity constraints are violated
         if capacity_exceeded_flag:
             print("-------")
             print("POST-PROCESSING STARTED")
             print("-------")
+            # Iterate until all departments satisfy capacity constraints
             while any(intermediate_team_department_weights > max_state):
                 post_processing_departments = np.where(intermediate_team_department_weights > max_state)[0]
                 print("Post-processing Departments: ", post_processing_departments)
                 print("-------")
                 if len(post_processing_departments):
+                    # Find the least confident team in the department
                     intrinsic_output_selected = intrinsic_output[intermediate_selected_teams_indices]
                     processing_department_index = post_processing_departments[0]
                     print("Post-processing department: ", processing_department_index)
@@ -1717,6 +1913,7 @@ class ImpaKcMwm:
                         " from bins ",
                         removed_team_combination,
                     )
+                    # Update weights and indices after removing the team
                     intermediate_selected_teams_indices = np.setdiff1d(intermediate_selected_teams_indices, removed_team)
                     team_locations.remove(removed_team_location)
                     u = removed_team_combination[0]
@@ -1738,7 +1935,7 @@ class ImpaKcMwm:
             print("-------")
             print("POST-PROCESSING ENDED")
             print("-------")
-
+        # Update class attributes with post-processing results
         self.intermediate_selected_teams_indices = intermediate_selected_teams_indices
         self.post_processing_ic_combination = post_processing_ic_combination
 
@@ -1746,6 +1943,7 @@ class ImpaKcMwm:
         """
         This function will run post-processing by investigating all teams associated with a department with a violated capacity. Least confident ones belonging to multiple departments will be removed first
         """
+        # Retrieve necessary data
         max_state = self.max_state
         ic_violated_flag = self.ic_violated_flag
         combination_reused_team = self.combination_reused_team
@@ -1762,6 +1960,7 @@ class ImpaKcMwm:
 
         print("-------")
         post_processing_ic_combination = []
+        # Handle cases where inequality constraints are violated
         if ic_violated_flag:
             post_processing_ic_combination = [0] * len(combination_reused_team)
             for i in range(0, len(combination_reused_team)):
@@ -1783,9 +1982,11 @@ class ImpaKcMwm:
                     )
             print("post_processing_IC_combination: ", post_processing_ic_combination)
 
+        # Initialize intermediate variables for post-processing
         intermediate_team_department_weights = deepcopy(team_departments_weights)
         intermediate_selected_teams_indices = deepcopy(selected_teams_indices)
 
+        # Perform post-processing if capacity constraints are violated
         if capacity_exceeded_flag:
             print("-------")
             print("POST-PROCESSING STARTED")
@@ -1798,6 +1999,7 @@ class ImpaKcMwm:
                 if len(post_processing_departments):
                     intrinsic_output_selected = intrinsic_output[intermediate_selected_teams_indices]
                     for department in post_processing_departments:
+                        # Find teams associated with the current department and other departments
                         teams_processing_department_indices_combinations = [
                             [
                                 i,
@@ -1812,6 +2014,7 @@ class ImpaKcMwm:
                         ]  # and
                         # len(set(np.array(available_combinations[team_locations[np.where(intermediate_selected_teams_indices==i)[0][0]]])-1)) != 1)]
                         if not len(teams_processing_department_indices_combinations):
+                            # If there are no teams associated with multiple departments, consider teams associated only with the current department
                             teams_processing_department_indices_combinations = [
                                 [
                                     i,
@@ -1848,6 +2051,7 @@ class ImpaKcMwm:
                         "intrinsic_output_selected :",
                         intrinsic_output_selected[intermediate_selected_teams_indices.searchsorted(np.array(team_indices_processing)[index_processing_combinations])],
                     )
+                    # Remove the least confident team
                     removed_team = intermediate_selected_teams_indices[
                         np.where(
                             intrinsic_output_selected
@@ -1871,6 +2075,7 @@ class ImpaKcMwm:
                     team_locations.remove(removed_team_location)
                     u = removed_team_combination[0]
                     v = removed_team_combination[1]
+                    # Update department weights
                     if removed_team_type == 1:
                         intermediate_team_department_weights[u] = intermediate_team_department_weights[u] - 1
                     elif removed_team_type == 2:
@@ -1888,6 +2093,7 @@ class ImpaKcMwm:
             print("POST-PROCESSING ENDED")
             print("-------")
 
+        # Store updated values
         self.intermediate_selected_teams_indices = intermediate_selected_teams_indices
         self.post_processing_ic_combination = post_processing_ic_combination
 
@@ -1895,6 +2101,7 @@ class ImpaKcMwm:
         """
         This function will analyze the results of the IMPA solution
         """
+        # Retrieve necessary data
         intermediate_selected_teams_indices = self.intermediate_selected_teams_indices
         reused_teams = self.reused_teams
         post_process_flag = self.post_process_flag
@@ -1919,8 +2126,10 @@ class ImpaKcMwm:
         total_value = 0
         project_array = []
         # test=[]
+        # Iterate through selected teams and analyze assignments
         for i in range(0, len(intermediate_selected_teams_indices)):
             index = intermediate_selected_teams_indices[i]
+            # Determine the associated project index
             if index in reused_teams and post_process_flag:
                 project_index = np.where(matching_array[0] == [i[0] for i in post_processing_ic_combination if i[1] == index][0])[0]
             else:
@@ -1928,6 +2137,7 @@ class ImpaKcMwm:
             project_array.append(project_index)
             total_value = total_value + reward_team[index]
             team_type.append(teams_types[index])
+            # Update department weights based on team assignments
             for j in range(0, num_departments):
                 weight = teams_weights_per_department[j][index]
                 if weight != 0:
@@ -1973,6 +2183,7 @@ class ImpaKcMwm:
         )
 
         # Added to compare OR-tools & IMPA
+        # Store results for comparison and print summary statistics
         self.results_composed = results_composed
 
         print("-------")
@@ -1999,6 +2210,7 @@ class ImpaKcMwm:
             num_projects,
         )
 
+        # Calculate total weight of matched projects-teams
         total_weight = 0
         total_weight_used_teams = []
         for i in range(0, len(matching_array[1])):
@@ -2011,6 +2223,7 @@ class ImpaKcMwm:
                 total_weight = total_weight + reward_project[project_index, team_index]
                 total_weight_used_teams.append(team_index)
 
+        # Display MWM matching results
         print("MWM")
         print("-------------")
 

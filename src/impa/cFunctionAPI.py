@@ -7,9 +7,11 @@
 import ctypes
 from impa.environmentModule import os
 
-
+# Load the C library
 c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
 # c_lib_kc_mwm = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
+
+# Define pointer types for C data types
 c_int_p = ctypes.POINTER(ctypes.c_int)
 c_double_p = ctypes.POINTER(ctypes.c_double)
 c_bool_p = ctypes.POINTER(ctypes.c_bool)
@@ -22,6 +24,7 @@ c_impa_lib_type = ctypes.c_double  # ctypes_cfloat
 # np_impa_lib = np.double
 # np_impa_lib = np.float32
 
+# Define function prototypes for the TSP wrapper
 WrapperTsp = c_lib.WrapperTsp
 
 WrapperTsp.argtypes = [
@@ -54,6 +57,7 @@ WrapperTsp.argtypes = [
     ctypes.c_int,
 ]
 
+# Define function prototypes for the KC-MWM wrapper
 WrapperKcMwm = c_lib.WrapperKcMwm
 
 WrapperKcMwm.argtypes = [

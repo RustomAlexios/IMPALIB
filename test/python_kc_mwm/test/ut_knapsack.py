@@ -71,9 +71,7 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
                 team_to_knapsack_m[department_index],
                 teams_weights_per_department[department_index],
             )
-            f_pure_path = (
-                os.getcwd() + "/../ut_results/forward_pure" + str(department_index)
-            )
+            f_pure_path = os.getcwd() + "/../ut_results/forward_pure" + str(department_index)
             output_file_python_pure = open(f_pure_path, "wb")
             np.save(
                 output_file_python_pure,
@@ -88,9 +86,7 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
                 team_to_knapsack_m[department_index],
                 teams_weights_per_department[department_index],
             )
-            f_pure_path = (
-                os.getcwd() + "/../ut_results/backward_pure" + str(department_index)
-            )
+            f_pure_path = os.getcwd() + "/../ut_results/backward_pure" + str(department_index)
             output_file_python_pure = open(f_pure_path, "wb")
             np.save(
                 output_file_python_pure,

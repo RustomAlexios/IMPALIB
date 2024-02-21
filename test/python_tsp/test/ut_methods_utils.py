@@ -24,32 +24,22 @@ if __name__ == "__main__":
 
     if ut_name == "ExtrinsicOutputEdgeEcRelaxedGraphUpdate":
         f_path_pure = "../ut_results/extrinsic_output_edge_ec_relaxed_graph_pure"
-        f_path_wrapper = (
-            "../ut_results/extrinsic_output_edge_ec_relaxed_graph_wrapper"
-        )
+        f_path_wrapper = "../ut_results/extrinsic_output_edge_ec_relaxed_graph_wrapper"
     elif ut_name == "ExtrinsicOutputEdgeEcAugmentedGraphUpdate":
         f_path_pure = "../ut_results/extrinsic_output_edge_ec_augmented_graph_pure"
-        f_path_wrapper = (
-            "../ut_results/extrinsic_output_edge_ec_augmented_graph_wrapper"
-        )
+        f_path_wrapper = "../ut_results/extrinsic_output_edge_ec_augmented_graph_wrapper"
     elif ut_name == "DegreeConstraint2EdgeEcUpdate":
         f_path_pure = "../ut_results/degree_constraint_to_eq_constraint_m_pure"
-        f_path_wrapper = (
-            "../ut_results/degree_constraint_to_eq_constraint_m_wrapper"
-        )
+        f_path_wrapper = "../ut_results/degree_constraint_to_eq_constraint_m_wrapper"
     elif ut_name == "SubtourConstraints2EdgeEcUpdate":
         f_path_pure = "../ut_results/subtour_constraints_to_edge_ec_m_pure"
-        f_path_wrapper = (
-            "../ut_results/subtour_constraints_to_edge_ec_m_wrapper"
-        )
+        f_path_wrapper = "../ut_results/subtour_constraints_to_edge_ec_m_wrapper"
     elif ut_name == "EdgeEc2DegreeConstraintRelaxedGraphUpdate":
         f_path_pure = "../ut_results/edge_ec_to_degree_constraint_m_pure"
         f_path_wrapper = "../ut_results/edge_ec_to_degree_constraint_m_wrapper"
     elif ut_name == "EdgeEc2SubtourConstraintsUpdate":
         f_path_pure = "../ut_results/edge_ec_to_subtour_constraints_m_pure"
-        f_path_wrapper = (
-            "../ut_results/edge_ec_to_subtour_constraints_m_wrapper"
-        )
+        f_path_wrapper = "../ut_results/edge_ec_to_subtour_constraints_m_wrapper"
     elif ut_name == "EdgeEc2DegreeConstraintAugmentedGraphUpdate":
         f_path_pure = "../ut_results/edge_ec_to_degree_constraint_m_pure"
         f_path_wrapper = "../ut_results/edge_ec_to_degree_constraint_m_wrapper"

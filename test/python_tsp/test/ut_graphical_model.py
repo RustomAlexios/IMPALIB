@@ -66,14 +66,10 @@ def ut_model_graph(ut_name, n_nodes, filt_flag, alpha, threshold, random_test_fl
         f_input3 = os.getcwd() + "/../ut_inputs/cost_matrix_pure.npy"
         np.save(f_input3, np.array(ModelIMPA.cost_matrix, dtype=np_impa_lib).flatten())
 
-        f_input4 = (
-            os.getcwd() + "/../ut_inputs/edge_ec_to_degree_constraint_m_pure.npy"
-        )
+        f_input4 = os.getcwd() + "/../ut_inputs/edge_ec_to_degree_constraint_m_pure.npy"
         np.save(f_input4, np.array(ModelIMPA.edge_ec_to_degree_constraint_m, dtype=np_impa_lib).flatten())
 
-        f_input5 = (
-            os.getcwd() + "/../ut_inputs/edge_degree_constraint_cost_pure.npy"
-        )
+        f_input5 = os.getcwd() + "/../ut_inputs/edge_degree_constraint_cost_pure.npy"
         np.save(f_input5, np.array(ModelIMPA.edge_degree_constraint_cost, dtype=np_impa_lib).flatten())
 
         ModelIMPA.iterate_relaxed_graph()
@@ -123,14 +119,10 @@ def ut_model_graph(ut_name, n_nodes, filt_flag, alpha, threshold, random_test_fl
         f_input3 = os.getcwd() + "/../ut_inputs/cost_matrix_pure.npy"
         np.save(f_input3, np.array(ModelIMPA.cost_matrix, dtype=np_impa_lib).flatten())
 
-        f_input4 = (
-            os.getcwd() + "/../ut_inputs/edge_ec_to_degree_constraint_m_pure.npy"
-        )
+        f_input4 = os.getcwd() + "/../ut_inputs/edge_ec_to_degree_constraint_m_pure.npy"
         np.save(f_input4, np.array(ModelIMPA.edge_ec_to_degree_constraint_m, dtype=np_impa_lib).flatten())
 
-        f_input5 = (
-            os.getcwd() + "/../ut_inputs/edge_degree_constraint_cost_pure.npy"
-        )
+        f_input5 = os.getcwd() + "/../ut_inputs/edge_degree_constraint_cost_pure.npy"
         np.save(f_input5, np.array(ModelIMPA.edge_degree_constraint_cost, dtype=np_impa_lib).flatten())
 
         ModelIMPA.iterate_relaxed_graph()

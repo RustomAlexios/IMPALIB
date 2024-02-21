@@ -20,21 +20,13 @@ def ut_subtour_constraint(ut_name, n_edge_variables, n_nodes, filt_flag, alpha, 
     ALPHA = alpha
     N_SUBTOURS = n_subtours
 
-    model_subtour_constraint = subtour_constraint.SubtourEliminationConstraint(
-        N_NODES, N_EDGE_VARIABLES, FILT_FLAG, ALPHA
-    )
+    model_subtour_constraint = subtour_constraint.SubtourEliminationConstraint(N_NODES, N_EDGE_VARIABLES, FILT_FLAG, ALPHA)
 
     delta_S_indices_list_length = N_SUBTOURS
-    delta_S_indices_list = [
-        random.sample(range(N_EDGE_VARIABLES), k=random.randint(2, N_NODES)) for _ in range(delta_S_indices_list_length)
-    ]
+    delta_S_indices_list = [random.sample(range(N_EDGE_VARIABLES), k=random.randint(2, N_NODES)) for _ in range(delta_S_indices_list_length)]
 
-    f_input1 = (
-        os.getcwd() + "/../ut_inputs/edge_ec_to_subtour_constraints_m_pure.npy"
-    )
-    edge_ec_to_subtour_constraints_m_pure = np.random.uniform(
-        10, 500, size=(delta_S_indices_list_length, N_EDGE_VARIABLES)
-    )
+    f_input1 = os.getcwd() + "/../ut_inputs/edge_ec_to_subtour_constraints_m_pure.npy"
+    edge_ec_to_subtour_constraints_m_pure = np.random.uniform(10, 500, size=(delta_S_indices_list_length, N_EDGE_VARIABLES))
     edge_ec_to_subtour_constraints_m_pure = edge_ec_to_subtour_constraints_m_pure.astype(np_impa_lib)
     np.save(f_input1, edge_ec_to_subtour_constraints_m_pure.flatten())
 
@@ -51,13 +43,9 @@ def ut_subtour_constraint(ut_name, n_edge_variables, n_nodes, filt_flag, alpha, 
     np.save(f_input_alpha, ALPHA)
 
     if ut_name == "SubtourConstraints2EdgeEcUpdate":
-        subtour_constraints_to_edge_ec_m_pure = model_subtour_constraint.subtour_constraints_to_edge_ec_update(
-            edge_ec_to_subtour_constraints_m_pure, delta_S_indices_list
-        )
+        subtour_constraints_to_edge_ec_m_pure = model_subtour_constraint.subtour_constraints_to_edge_ec_update(edge_ec_to_subtour_constraints_m_pure, delta_S_indices_list)
         subtour_constraints_to_edge_ec_m_pure = np.array(subtour_constraints_to_edge_ec_m_pure)
-        f_output_path = (
-            os.getcwd() + "/../ut_results/subtour_constraints_to_edge_ec_m_pure"
-        )
+        f_output_path = os.getcwd() + "/../ut_results/subtour_constraints_to_edge_ec_m_pure"
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, subtour_constraints_to_edge_ec_m_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()

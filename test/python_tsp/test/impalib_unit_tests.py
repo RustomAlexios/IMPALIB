@@ -87,11 +87,7 @@ if __name__ == "__main__":
             alpha=ALPHA,
             n_subtours=N_SUBTOURS,
         )
-    elif (
-        ut_name == "EdgeEc2DegreeConstraintRelaxedGraphUpdate"
-        or ut_name == "EdgeEc2SubtourConstraintsUpdate"
-        or ut_name == "EdgeEc2DegreeConstraintAugmentedGraphUpdate"
-    ):
+    elif ut_name == "EdgeEc2DegreeConstraintRelaxedGraphUpdate" or ut_name == "EdgeEc2SubtourConstraintsUpdate" or ut_name == "EdgeEc2DegreeConstraintAugmentedGraphUpdate":
         ut_update_equality_constraint.ut_equality_constraint(
             ut_name=ut_name,
             n_edge_variables=N_EDGE_VARIABLES,

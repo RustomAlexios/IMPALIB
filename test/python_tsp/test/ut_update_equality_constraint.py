@@ -33,22 +33,15 @@ def ut_equality_constraint(
     N_SUBTOURS = n_subtours
     AUGM_FLAG = augm_flag
 
-    model_equality_constraint = equality_constraint.EqualityConstraint(
-        N_NODES, N_EDGE_VARIABLES, 0, EDGE_CONNECTIONS, edge_degree_constraint_cost, AUGM_FLAG, FILT_FLAG, ALPHA
-    )
+    model_equality_constraint = equality_constraint.EqualityConstraint(N_NODES, N_EDGE_VARIABLES, 0, EDGE_CONNECTIONS, edge_degree_constraint_cost, AUGM_FLAG, FILT_FLAG, ALPHA)
 
     delta_S_indices_list_length = N_SUBTOURS
-    delta_S_indices_list = [
-        random.sample(range(N_EDGE_VARIABLES), k=random.randint(2, N_NODES)) for _ in range(delta_S_indices_list_length)
-    ]
+    delta_S_indices_list = [random.sample(range(N_EDGE_VARIABLES), k=random.randint(2, N_NODES)) for _ in range(delta_S_indices_list_length)]
 
     delta_S_indices_list_sizes = [len(lst) for lst in delta_S_indices_list]
     delta_S_indices_list_flattened = sum(delta_S_indices_list, [])
 
-    f_input1 = (
-        os.getcwd()
-        + "/../ut_inputs/degree_constraint_to_eq_constraint_m_pure.npy"
-    )
+    f_input1 = os.getcwd() + "/../ut_inputs/degree_constraint_to_eq_constraint_m_pure.npy"
     degree_constraint_to_eq_constraint_m_pure = np.random.uniform(10, 500, size=(N_EDGE_VARIABLES, N_NODES))
     for row_idx, edge_indices in enumerate(EDGE_CONNECTIONS):
         for col_idx in range(N_NODES):
@@ -60,9 +53,7 @@ def ut_equality_constraint(
     f_input_alpha = os.getcwd() + "/../ut_inputs/alpha.npy"
     np.save(f_input_alpha, ALPHA)
 
-    f_input2 = (
-        os.getcwd() + "/../ut_inputs/edge_degree_constraint_cost_pure.npy"
-    )
+    f_input2 = os.getcwd() + "/../ut_inputs/edge_degree_constraint_cost_pure.npy"
     edge_degree_constraint_cost_pure = edge_degree_constraint_cost.astype(np_impa_lib)
     np.save(f_input2, edge_degree_constraint_cost_pure.flatten())
 
@@ -70,15 +61,9 @@ def ut_equality_constraint(
     np.save(f_input3, np.array(EDGE_CONNECTIONS, dtype=np.int32).flatten())
 
     if ut_name == "EdgeEc2DegreeConstraintRelaxedGraphUpdate":
-        edge_ec_to_degree_constraint_m_pure = (
-            model_equality_constraint.edge_ec_to_degree_constraint_relaxed_graph_update(
-                degree_constraint_to_eq_constraint_m_pure
-            )
-        )
+        edge_ec_to_degree_constraint_m_pure = model_equality_constraint.edge_ec_to_degree_constraint_relaxed_graph_update(degree_constraint_to_eq_constraint_m_pure)
         edge_ec_to_degree_constraint_m_pure = np.array(edge_ec_to_degree_constraint_m_pure)
-        f_output_path = (
-            os.getcwd() + "/../ut_results/edge_ec_to_degree_constraint_m_pure"
-        )
+        f_output_path = os.getcwd() + "/../ut_results/edge_ec_to_degree_constraint_m_pure"
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, edge_ec_to_degree_constraint_m_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
@@ -87,15 +72,10 @@ def ut_equality_constraint(
         f_input4 = os.getcwd() + "/../ut_inputs/delta_S_indices_list_pure.npy"
         np.save(f_input4, np.array(delta_S_indices_list_flattened, dtype=np.int32).flatten())
 
-        f_input5 = (
-            os.getcwd() + "/../ut_inputs/delta_S_indices_list_sizes_pure.npy"
-        )
+        f_input5 = os.getcwd() + "/../ut_inputs/delta_S_indices_list_sizes_pure.npy"
         np.save(f_input5, np.array(delta_S_indices_list_sizes, dtype=np.int32).flatten())
 
-        f_input6 = (
-            os.getcwd()
-            + "/../ut_inputs/subtour_constraints_to_edge_ec_m_pure.npy"
-        )
+        f_input6 = os.getcwd() + "/../ut_inputs/subtour_constraints_to_edge_ec_m_pure.npy"
         subtour_constraints_to_edge_ec_m_pure = np.random.uniform(10, 500, size=(N_SUBTOURS, N_EDGE_VARIABLES))
         for row_idx, subtour_indices in enumerate(delta_S_indices_list):
             for col_idx in range(N_EDGE_VARIABLES):
@@ -115,19 +95,13 @@ def ut_equality_constraint(
             cost_edge_variable_pure,
         )
         edge_ec_to_subtour_constraints_m_pure = np.array(edge_ec_to_subtour_constraints_m_pure)
-        f_output_path = (
-            os.getcwd()
-            + "/../ut_results/edge_ec_to_subtour_constraints_m_pure"
-        )
+        f_output_path = os.getcwd() + "/../ut_results/edge_ec_to_subtour_constraints_m_pure"
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, edge_ec_to_subtour_constraints_m_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
 
     elif ut_name == "EdgeEc2DegreeConstraintAugmentedGraphUpdate":
-        f_input8 = (
-            os.getcwd()
-            + "/../ut_inputs/subtour_constraints_to_edge_ec_m_pure.npy"
-        )
+        f_input8 = os.getcwd() + "/../ut_inputs/subtour_constraints_to_edge_ec_m_pure.npy"
         subtour_constraints_to_edge_ec_m_pure = np.random.uniform(10, 500, size=(N_SUBTOURS, N_EDGE_VARIABLES))
         for row_idx, subtour_indices in enumerate(delta_S_indices_list):
             for col_idx in range(N_EDGE_VARIABLES):
@@ -136,15 +110,11 @@ def ut_equality_constraint(
         subtour_constraints_to_edge_ec_m_pure = subtour_constraints_to_edge_ec_m_pure.astype(np_impa_lib)
         np.save(f_input8, subtour_constraints_to_edge_ec_m_pure.flatten())
 
-        edge_ec_to_degree_constraint_m_pure = (
-            model_equality_constraint.edge_ec_to_degree_constraint_augmented_graph_update(
-                degree_constraint_to_eq_constraint_m_pure, subtour_constraints_to_edge_ec_m_pure
-            )
+        edge_ec_to_degree_constraint_m_pure = model_equality_constraint.edge_ec_to_degree_constraint_augmented_graph_update(
+            degree_constraint_to_eq_constraint_m_pure, subtour_constraints_to_edge_ec_m_pure
         )
         edge_ec_to_degree_constraint_m_pure = np.array(edge_ec_to_degree_constraint_m_pure)
-        f_output_path = (
-            os.getcwd() + "/../ut_results/edge_ec_to_degree_constraint_m_pure"
-        )
+        f_output_path = os.getcwd() + "/../ut_results/edge_ec_to_degree_constraint_m_pure"
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, edge_ec_to_degree_constraint_m_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
