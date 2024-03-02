@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cassert>
+#include <optional>
 
 #include "impalib/impalib.hpp"
 
@@ -22,9 +23,8 @@ class DegreeConstraint {
     vector<vector<impalib_type>> M_deg2eq_old;  ///< messages from degree constraints to equality constraints before filtering
 
    public:
-    void messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges,
-                             vector<vector<impalib_type>> &degree2eq);                                        ///< calculate messages from degree constraint to edge equality constraint
-    vector<vector<impalib_type>> process_filtering(int iter, const vector<vector<impalib_type>> &deg2eq_in);  ///< process filtering on messages from degree constraint to edge equality constraint
+    vector<vector<impalib_type>> messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges);                                        ///< calculate messages from degree constraint to edge equality constraint
+    vector<vector<impalib_type>> process_filtering(const vector<vector<impalib_type>> &deg2eq_in);  ///< process filtering on messages from degree constraint to edge equality constraint
 
     DegreeConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
                      impalib_type ALPHA);  ///< constructor
@@ -55,9 +55,11 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
  *
  */
 
-void DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges, vector<vector<impalib_type>> &degree2eq) {
+vector<vector<impalib_type>> DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges) {
     static const impalib_type M_forward_init = value_inf;    ///< initial forward message of forward-backward algorithm
     static const impalib_type M_backward_init = value_inf;   ///< initial backward message of forward-backward algorithm
+
+    vector<vector<impalib_type>> degree2eq(numEdgeVariables_, vector<impalib_type>(numNodes_, 0));
 
     vector<impalib_type> forward(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> backward(numEdgeVariables_ + 1, zero_value);
@@ -117,6 +119,7 @@ void DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &e
             degree2eq[second[j]][i] = -minimumValue;
         }
     }
+    return degree2eq;
 }
 
 /**
@@ -128,7 +131,7 @@ void DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &e
  *
  */
 
-vector<vector<impalib_type>> DegreeConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &deg2eq_in) {
+vector<vector<impalib_type>> DegreeConstraint::process_filtering(const vector<vector<impalib_type>> &deg2eq_in) {
     assert(deg2eq_in.size() == numEdgeVariables_);
     if (!filteringFlag_) {
         return deg2eq_in;

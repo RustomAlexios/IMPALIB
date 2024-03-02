@@ -152,14 +152,24 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
     outputs.update_extrinsic(extrinsic_, oric2PackageM_);
 }
 
+struct SubtourAnalysisResult {
+    vector<int> loops_sz;
+    vector<vector<int>> subtours;
+    vector<int> tour;
+
+    bool tourImpaFlag_ = false;
+    bool closedLoops = false;
+    bool subtourConstraintsSatisfiedFlag = false;
+};
+
 /**
  * Represents a graphical model for the TSP for computing the shortest route
  * between nodes (while visiting each node exactly once).
  */
 class GraphicalModelTsp {
    private:
-    void iterate_augmented_graph();                      ///< function of IMPA on augmented graph
-    void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                    ///< analysis of subtour constraints
+    SubtourAnalysisResult iterate_augmented_graph();                      ///< function of IMPA on augmented graph
+    SubtourAnalysisResult subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                    ///< analysis of subtour constraints
     vector<vector<int>> hard_decision_analysis();                                                                                     ///< function for hard decision solution on IMPA solution
     bool isSubsequence(const vector<int> &, const vector<int> &);                                                                ///< function for post-processing loops_sz
     vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                             ///< function for getting loops_sz
@@ -179,10 +189,8 @@ class GraphicalModelTsp {
     DegreeConstraint degree;                             ///< Degree Constraint object for TSP
 
     SubtourEliminationConstraint subtour;                ///< Subtour constraint for TSP
-    vector<vector<impalib_type>> M_degree2eq_before;     ///< messages from degree constraint to team equality constraint before filtering
     vector<vector<impalib_type>> M_degree2eq;            ///< messages from degree constraint to team equality constraint afters filtering
     int maxCount_;                                       ///< maximum count of failures
-    bool tourImpaFlag_ = false;                          ///< set flag for detected tour to be false (will be updated later)
     vector<vector<int>> idx_delta_S;                     ///< will contain indices of edges that contribute to each subtour constraint
     vector<vector<impalib_type>> M_subtour2edge_before;  ///< messages from subtour constraints to edge equality constraint before filtering
     vector<vector<impalib_type>> M_edge2subtour;         ///< messages from edge equality constraint to subtour constraints
@@ -191,24 +199,22 @@ class GraphicalModelTsp {
 
     vector<vector<int>> selected_edges_old_;             ///< old list of selected edges (used for failure investigation)
     vector<vector<int>> selected_edges_old_old_;         ///< another old list of selected edges (used for failure investigation)
+
+    // Solver state -- for tracking solver progress or determining convergence
     int numAugmentations_ = 0;                                                                                                        ///< number of performed augmentations in IMPA
     int noConsClosedLoopsCount_ = 0;              ///< count for failure case (no consecutive loop detection and no tour)
     int n_osc = 0;                                ///< count for failure case (oscillation in the solution)
-    bool n_closedLoops = false;                   ///< flag for failure case (no consecutive loop detection and no tour)
     int n_noimprove = 0;                          ///< count for failure case (no solution improvement)
     bool noimprove = false;                       ///< flag for failure case (no solution improvement)
     bool osc = false;                             ///< flag for failure case (oscillation in the solution)
-    vector<int> tour;                             ///< list of nodes of tour (if detected)
-    vector<vector<int>> subtours;                 ///< list of detected subtours (if detected)
-    vector<int> loops_sz;                            ///< list of sizes of loops_sz
     impalib_type cost = zero_value;               ///< cost of IMPA solution
     vector<vector<impalib_type>> M_subtour2edge;  ///< messages from subtour constraints to edge equality constraint
 
    public:
-    bool subtourConstraintsSatisfiedFlag = false;                                                                          ///< initially set this flag for satisfied subtour constraints to false
+    ///< initially set this flag for satisfied subtour constraints to false
     OutputsTsp outputs;                                                                                                    ///< TSP graphical model outputs object
     void initialize(const int *, const impalib_type *, const impalib_type *, const impalib_type *, const impalib_type *);  ///< initialize graphical model
-    void iterate_relaxed_graph();                                                                                          ///< iterate over relaxed graphical model
+    SubtourAnalysisResult iterate_relaxed_graph();                                                                                          ///< iterate over relaxed graphical model
     void perform_augmentation(int);                                                                                        ///< perform augmentation on graphical model
     void process_ouputs(impalib_type *, int *, int *, int *, impalib_type *, bool *, bool *, bool *, int *, int *, int *, int *);  ///< process outputs of Graphical Model
     GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
@@ -267,7 +273,6 @@ GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NOD
       numEdgeVariables_(NUM_EDGE_VARIABLES),
       threshold_(THRESHOLD),
       maxCount_(MAX_COUNT),
-      M_degree2eq_before(numEdgeVariables_, vector<impalib_type>(numNodes_, 0)),
       M_degree2eq(numEdgeVariables_, vector<impalib_type>(numNodes_, 0)){};
 
 /**
@@ -302,10 +307,12 @@ void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impali
  * constraints and edge equality constraints
  *
  */
-void GraphicalModelTsp::iterate_relaxed_graph() {
+SubtourAnalysisResult GraphicalModelTsp::iterate_relaxed_graph() {
     for (int i = 0; i < numIterations_; i++) {
-        degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges, M_degree2eq_before);
-        M_degree2eq = degree.process_filtering(i, M_degree2eq_before);
+        // degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges, M_degree2eq_before);
+        // M_degree2eq = degree.process_filtering(M_degree2eq_before);
+        auto deg2eq = degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges);
+        M_degree2eq = degree.process_filtering(deg2eq);
         EqTsp_.messages_to_degree_relaxed(inputs_.edges, inputs_.cost_edge_mat, M_degree2eq, inputs_.M_edge2degree);
     }
     outputs.update_extrinsic_relaxed(M_degree2eq);
@@ -315,9 +322,10 @@ void GraphicalModelTsp::iterate_relaxed_graph() {
 
     // Initialize graph for subtour elimination constraints analysis
     unordered_map<int, vector<int>> graph;
-    subtour_elimination_constraints_analysis(graph, selected_edges);
+    auto result = subtour_elimination_constraints_analysis(graph, selected_edges);
 
     selectedEdges_ = selected_edges;
+    return result;
 }
 
 /**
@@ -338,6 +346,12 @@ void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
         M_subtour2edge_before = M_subtour2edge;
     }
 
+    if (!doAugment_) return;
+
+    for (auto n_augment = 0; n_augment < MAX_AUGM_COUNT; ++n_augment) {
+        
+    }
+
     // Continue augmentation
     while (!subtourConstraintsSatisfiedFlag && doAugment_ && !tourImpaFlag_) {
         if (n_closedLoops || noimprove || osc) {
@@ -352,7 +366,7 @@ void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
             exit(0);
         }
 
-        iterate_augmented_graph();
+        auto result = iterate_augmented_graph();
 
         if (numAugmentations_ == MAX_AUGM_COUNT) {
             cout << "MAX_AUGM_COUNT reached" << '\n';
@@ -431,7 +445,8 @@ void GraphicalModelTsp::process_ouputs(impalib_type *pExtrinsic_output_edge_ec, 
  * This function will run IMPA on augmented grahical model
  *
  */
-void GraphicalModelTsp::iterate_augmented_graph() {
+ // NOTE:
+SubtourAnalysisResult GraphicalModelTsp::iterate_augmented_graph() {
     // Reset messages if flag is set
     if (doReset_) {
         for (size_t i = 0; i < inputs_.edges.size(); i++) {
@@ -460,10 +475,13 @@ void GraphicalModelTsp::iterate_augmented_graph() {
     }
 
     for (int i = 0; i < numIterations_; i++) {
-        degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges, M_degree2eq_before);
-        M_degree2eq = degree.process_filtering(i, M_degree2eq_before);
+        // degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges, M_degree2eq_before);
+        // M_degree2eq = degree.process_filtering(M_degree2eq_before);
+        auto deg2eq = degree.messages_to_edge_ec(inputs_.M_edge2degree, inputs_.edges);
+        auto filtered = degree.process_filtering(deg2eq);
 
-        M_edge2subtour = EqTsp_.messages_to_subtour(idx_delta_S, inputs_.cost_edge, M_degree2eq, M_subtour2edge, inputs_.edges);
+        // M_edge2subtour = EqTsp_.messages_to_subtour(idx_delta_S, inputs_.cost_edge, M_degree2eq, M_subtour2edge, inputs_.edges);
+        M_edge2subtour = EqTsp_.messages_to_subtour(idx_delta_S, inputs_.cost_edge, filtered, M_subtour2edge, inputs_.edges);
         subtour.messages_to_edge_ec(M_edge2subtour, idx_delta_S, M_subtour2edge_before);
         M_subtour2edge = subtour.process_filtering(i, M_subtour2edge_before, idx_delta_S);
         EqTsp_.messages_to_degree_augmented(M_degree2eq, M_subtour2edge, inputs_.edges, inputs_.cost_edge_mat, inputs_.M_edge2degree);
@@ -599,16 +617,18 @@ vector<vector<int>> GraphicalModelTsp::hard_decision_analysis() {
  * @param[in] rSelectedEdges: activated edges in the graphical model
  * @param[out] rGraph: graphical model of activated egdes. Defines connections
  * between nodes
- *
- */
+ * **/
 
-void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
-    loops_sz.clear();  // just store it at the end if applicable
+// NOTE: this resets loops_sz and subtours
+// sets various failure/satisfy flags
+// resets tour
 
-    // Get closed loops_sz from the graph
+SubtourAnalysisResult GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
     vector<vector<int>> loops_list = get_closed_loops(rGraph, rSelectedEdges);
-    subtours.clear();
-    subtours = loops_list;
+    vector<int> loops_sz;
+    auto subtours = loops_list;
+    SubtourAnalysisResult result;
+    vector<int> tour;
 
     if (loops_list.empty()) {
         cout << "Exited: Cannot find tours using get_closed_loops()" << '\n';
@@ -617,13 +637,13 @@ void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<i
             cout << "Exited: noConsClosedLoopsCount_ Exceeded maximum allowable "
                     "number: "
                  << maxCount_ << '\n';
-            n_closedLoops = true;
+            result.closedLoops = true;
         }
     }
 
     else if (loops_list.size() == 1 && loops_list[0].size() == numNodes_) {
-        tourImpaFlag_ = true;
-        subtourConstraintsSatisfiedFlag = true;
+        result.tourImpaFlag_ = true;
+        result.subtourConstraintsSatisfiedFlag = true;
         tour = loops_list[0];
         tour.push_back(loops_list[0][0]);
         cout << "Tour found" << '\n';
@@ -683,6 +703,11 @@ void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<i
             }
         }
     }
+
+    result.subtours = subtours;
+    result.tour = tour;
+    result.loops_sz = loops_sz;
+    return result;
 }
 
 /**
