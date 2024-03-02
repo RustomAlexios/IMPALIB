@@ -250,9 +250,9 @@ void ut_model_graph_tsp(string& ut_name){
 
         model_graph.initialize(edge_connections_pure, cost_edge_variable_pure, cost_matrix_pure, edge_ec_to_degree_constraint_m_pure, edge_degree_constraint_cost_pure);
 
-        model_graph.iterate_relaxed_graph();
+        auto result = model_graph.iterate_relaxed_graph();
 
-        if (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG)
+        if (!result.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG)
         {
             model_graph.perform_augmentation(MAX_AUGM_COUNT);
 

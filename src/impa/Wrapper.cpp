@@ -49,12 +49,12 @@ extern "C" void WrapperKcMwm(const int NUM_ITERATIONS, const int NUM_DEPARTMENTS
     model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES_PY);
 
     // Copy the extrinsic output for each team to the provided variable
-    copy(model_graph.outputs.ExtrinsicOutputTeam.begin(), model_graph.outputs.ExtrinsicOutputTeam.begin() + NUM_TEAMS,
+    copy(model_graph.outputs.extrinsic.begin(), model_graph.outputs.extrinsic.begin() + NUM_TEAMS,
          pExtrinsic_output_team);
     
     // Copy the intrinsic output for each team-project pair to the provided variable
-    copy(model_graph.outputs.IntrinsicOutMwm.begin(),
-         model_graph.outputs.IntrinsicOutMwm.begin() + NUM_TEAMS * NUM_PROJECTS, pIntrinsic_out_mwm);
+    copy(model_graph.outputs.intrinsic.begin(),
+         model_graph.outputs.intrinsic.begin() + NUM_TEAMS * NUM_PROJECTS, pIntrinsic_out_mwm);
 }
 
 /**
@@ -111,16 +111,16 @@ extern "C" void WrapperTsp(const int NUM_ITERATIONS, const int NUM_NODES, const 
                            pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
 
     // Perform IMPA on the relaxed graph
-    model_graph.iterate_relaxed_graph();
+    auto out = model_graph.iterate_relaxed_graph();
 
     // Check and perform augmentation if needed
-    if (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG)
+    if (!out.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG)
     {
         model_graph.perform_augmentation(MAX_AUGM_COUNT);
 
     }
 
     // Process the outputs of the model
-    model_graph.process_ouputs(pExtrinsic_output_edge_ec, pNum_augmentations, pNum_added_constraints, pTour_impa, pCost_impa, pNo_improv_sol_count_exc_flag, \
+    model_graph.process_outputs(pExtrinsic_output_edge_ec, pNum_augmentations, pNum_added_constraints, pTour_impa, pCost_impa, pNo_improv_sol_count_exc_flag, \
                               pNo_cons_loops_count_exc_flag, pSol_osc_count_exc_flag, pSelected_edges, pSelected_edges_size, pSubtour_paths, pSubtour_paths_size);
 }
