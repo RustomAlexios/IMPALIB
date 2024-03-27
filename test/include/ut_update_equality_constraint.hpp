@@ -25,7 +25,7 @@ void ut_eq_constraint_kc_mwm(string& ut_name){
     const int N_DEPARTMENTS = atoi(n_departments_bash);  
     const int N_PROJECTS = atoi(n_projects_bash);
 
-    EqualityConstraintKcMwm modelEqConstraint(N_DEPARTMENTS, N_TEAMS, N_PROJECTS);
+    EqualityConstraint modelEqConstraint(N_DEPARTMENTS, N_TEAMS, N_PROJECTS);
 
     cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/reward_project_pure.npy");
     impalib_type* reward_project_pure = input2.data<impalib_type>();
@@ -114,7 +114,7 @@ void ut_equality_constraint_tsp(string& ut_name){
     impalib_type* alpha_pure = input_alpha.data<impalib_type>();
     const impalib_type ALPHA = *alpha_pure;
     
-    EqualityConstraintTsp modelEqualityConstraint(N_NODES, N_EDGE_VARIABLES, FILT_FLAG, ALPHA);
+    EqualityConstraint modelEqualityConstraint(N_NODES, N_EDGE_VARIABLES, FILT_FLAG, ALPHA);
 
     cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/edge_connections_pure.npy");
     int* edge_connections_pure = input1.data<int>();

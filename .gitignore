@@ -3,3 +3,6 @@ build/
 _skbuild
 *.egg-info/
 .idea/
+data/gcn
+src/tspML/
+src/impa/generate_outputs.sh

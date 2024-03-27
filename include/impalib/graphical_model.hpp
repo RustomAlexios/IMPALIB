@@ -32,7 +32,8 @@ class GraphicalModelKcMwm {
     vector<impalib_type> team2OricM_; ///< messages from team equality constraint to ORIC
     Knapsack modelKnapsacks_; ///< Knapsack object
     InequalityConstraint projectIneqConstraint_; ///< Project Inequality constraint object
-    EqualityConstraintKcMwm modelEqConstraint_; ///< Equality constraint object
+    //EqualityConstraintKcMwm modelEqConstraint_; ///< Equality constraint object
+    EqualityConstraint modelEqConstraint_; ///< Equality constraint object
     OrInequalityConstraint modelOric_; ///< ORIC object
 
    public:
@@ -222,7 +223,7 @@ class GraphicalModelTsp {
     vector<int> hard_decision; ///< hard decision vector of IMPA solution
     impalib_type alpha_; ///< filtering parameter
     impalib_type threshold_; ///< threshold on hard decision
-    EqualityConstraintTsp modelEqConstraint_; ///< Equality Constraint object for TSP
+    EqualityConstraint modelEqConstraint_; ///< Equality Constraint object for TSP
     DegreeConstraint modelDegreeConstraint_; ///< Degree Constraint object for TSP
     SubtourEliminationConstraint modelSubtourEliminationConstraint_; ///< Subtour constraint for TSP
     vector<vector<impalib_type>> DegreeConstraint2EqConstraintDummyM_; ///< messages from degree constraint to team equality constraint before filtering

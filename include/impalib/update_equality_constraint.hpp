@@ -7,40 +7,50 @@
 #pragma once
 
 #include "impalib/impalib.hpp"
-/**
- * Represents a class for the equality constraint for the Knapsack-MWM problem
- */
-class EqualityConstraintKcMwm
+
+class EqualityConstraint
 {
 private:
     int numTeams_; ///< number of teams
     int numProjects_; ///< number of projects
     int numDepartments_; ///< number of departments
+    int          numNodes_; ///< number of nodes
+    int          numEdgeVariables_; ///< number of edge connections
+    bool         filteringFlag_; ///< filtering flag
+    impalib_type alpha_; ///< filtering parameter
 
 public:
+
+    EqualityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS)
+    : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS), 
+        filteringFlag_(false), alpha_(zero_value), numNodes_(0), numEdgeVariables_(0){};
+
+    EqualityConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
+                                             const bool FILTERING_FLAG, const impalib_type ALPHA)
+    : numProjects_(0), numTeams_(0), numDepartments_(0),
+      filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES),
+      numEdgeVariables_(NUM_EDGE_VARIABLES){};
+
     void team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<impalib_type> &,
                                            vector<impalib_type> &); ///< calculate messages from team equality constraint to ORIC
 
     void project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
                                               vector<vector<impalib_type>> &); ///< calculate messages from project equality constraint to ORIC
 
-    EqualityConstraintKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS); ///< constructor
+    void edge_ec_to_degree_constraint_relaxed_graph_update(vector<vector<int>> &, vector<vector<impalib_type>> &,
+                                                           vector<vector<impalib_type>> &,
+                                                           vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for relaxed TSP
+    
+    void flip_matrix(vector<vector<impalib_type>> &, vector<vector<int>> &, vector<vector<impalib_type>> &); ///< flip matrix
+    vector<vector<impalib_type>> edge_ec_to_subtour_constraints_update(vector<vector<int>> &, vector<impalib_type> &,
+                                                                       vector<vector<impalib_type>> &,
+                                                                       vector<vector<impalib_type>> &,
+                                                                       vector<vector<int>> &); ///< calculate message from edge to subtour constraint
+    void                         edge_ec_to_degree_constraint_augmented_graph_update(vector<vector<impalib_type>> &,
+                                                                                     vector<vector<impalib_type>> &, vector<vector<int>> &,
+                                                                                     vector<vector<impalib_type>> &,
+                                                                                     vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for augmented TSP                                             
 };
-
-/**
- * Construct Equality constraint object for the Knapsack-MWM problem
- *
- * @param[in] N_DEPARTMENTS: number of departments
- * @param[in] N_TEAMS: number of teams
- * @param[in] N_PROJECTS: number of projects
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
- */
-
-EqualityConstraintKcMwm::EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS)
-    : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){
-                                                    };
 
 /**
  * Calculate messages from team equality constraint to ORIC for the Knapsack-MWM problem
@@ -50,7 +60,7 @@ EqualityConstraintKcMwm::EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS,
  * @param[in] rewardTeam: rewards of teams
  */
 
-void EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(
+void EqualityConstraint::team_eq_constraint_to_oric_update(
     vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rTeam2OricM,
     vector<impalib_type> &rewardTeam)
 {
@@ -78,7 +88,7 @@ void EqualityConstraintKcMwm::team_eq_constraint_to_oric_update(
  * @param[in] rewardProject: rewards of teams-projects combinations
  */
 
-void EqualityConstraintKcMwm::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
+void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
                                                                    vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                                    vector<vector<impalib_type>> &rewardProject)
 {
@@ -93,54 +103,6 @@ void EqualityConstraintKcMwm::project_eq_constraint_to_oric_update(vector<vector
 }
 
 /**
- * Represents a class for the equality constraint for the TSP
- */
-class EqualityConstraintTsp
-{
-private:
-    int          numNodes_; ///< number of nodes
-    int          numEdgeVariables_; ///< number of edge connections
-    bool         filteringFlag_; ///< filtering flag
-    impalib_type alpha_; ///< filtering parameter
-
-public:
-    void edge_ec_to_degree_constraint_relaxed_graph_update(vector<vector<int>> &, vector<vector<impalib_type>> &,
-                                                           vector<vector<impalib_type>> &,
-                                                           vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for relaxed TSP
-    void flip_matrix(vector<vector<impalib_type>> &, vector<vector<int>> &, vector<vector<impalib_type>> &); ///< flip matrix
-    vector<vector<impalib_type>> edge_ec_to_subtour_constraints_update(vector<vector<int>> &, vector<impalib_type> &,
-                                                                       vector<vector<impalib_type>> &,
-                                                                       vector<vector<impalib_type>> &,
-                                                                       vector<vector<int>> &); ///< calculate message from edge to subtour constraint
-    void                         edge_ec_to_degree_constraint_augmented_graph_update(vector<vector<impalib_type>> &,
-                                                                                     vector<vector<impalib_type>> &, vector<vector<int>> &,
-                                                                                     vector<vector<impalib_type>> &,
-                                                                                     vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for augmented TSP
-
-    EqualityConstraintTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
-                          const impalib_type ALPHA); ///< constructor
-};
-
-/**
- * Construct equality constraint object for the TSP
- *
- * @param[in] NUM_NODES: number of nodes of TSP
- * @param[in] NUM_EDGE_VARIABLES: number of connections between nodes
- * @param[in] FILTERING_FLAG: filtering on or off
- * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
- */
-
-EqualityConstraintTsp::EqualityConstraintTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
-                                             const bool FILTERING_FLAG, const impalib_type ALPHA)
-    : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES),
-      numEdgeVariables_(NUM_EDGE_VARIABLES){
-      };
-
-/**
  * Calculate messages from edge equality constraints to degree constraints for the relaxed TSP
  *
  * @param[in] rEdgeConnections: list of connections for each edge equality constraint
@@ -150,7 +112,7 @@ EqualityConstraintTsp::EqualityConstraintTsp(const int NUM_NODES, const int NUM_
  * 
  */
 
-void EqualityConstraintTsp::edge_ec_to_degree_constraint_relaxed_graph_update(
+void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_update(
     vector<vector<int>> &rEdgeConnections, vector<vector<impalib_type>> &rEdgeDegreeConstraintCost,
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
     vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM)
@@ -185,7 +147,7 @@ void EqualityConstraintTsp::edge_ec_to_degree_constraint_relaxed_graph_update(
  * 
  */
 
-vector<vector<impalib_type>> EqualityConstraintTsp::edge_ec_to_subtour_constraints_update(
+vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_constraints_update(
     vector<vector<int>> &rDeltaSIndicesList, vector<impalib_type> &rCostEdgeVaribale,
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
     vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, vector<vector<int>> &rEdgeConnections)
@@ -278,7 +240,7 @@ vector<vector<impalib_type>> EqualityConstraintTsp::edge_ec_to_subtour_constrain
  * 
  */
 
-void EqualityConstraintTsp::edge_ec_to_degree_constraint_augmented_graph_update(
+void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_update(
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
     vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, vector<vector<int>> &rEdgeConnections,
     vector<vector<impalib_type>> &rEdgeDegreeConstraintCost, vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM)
@@ -318,7 +280,7 @@ void EqualityConstraintTsp::edge_ec_to_degree_constraint_augmented_graph_update(
  * 
  */
 
-void EqualityConstraintTsp::flip_matrix(vector<vector<impalib_type>> &rMatrix, vector<vector<int>> &rEdgeConnections,
+void EqualityConstraint::flip_matrix(vector<vector<impalib_type>> &rMatrix, vector<vector<int>> &rEdgeConnections,
                                         vector<vector<impalib_type>> &rFlippedMatrix)
 {
     // Iterate over each edge connection
