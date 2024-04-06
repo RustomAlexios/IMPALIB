@@ -53,24 +53,9 @@ class GraphicalModelKcMwm {
  * @param[in] N_ITERATIONS: number of iterations for running IMPA
  * @param[in] FILT_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] modelInputs_: object of type InputsKcMwm: inputs of graphical
- * model
- * @param[out] outputs: object of type OutputsKcMwm: outputs of graphical model
- * @param[out] projectIneqConstraint_: object of type InequalityConstraint:
- * object associated with inequality constraint operations
- * @param[out] modelEqConstraint_: object of type EqualityConstraintKcMwm:
- * object associated with equality constraint operations
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] maxSizeNonZeroWeights_: MAX_SIZE_NON_ZERO_WEIGHTS
- * @param[out] numIterations_: N_ITERATIONS
- * @param[out] filteringFlag_: FILT_FLAG
- * @param[out] alpha_: ALPHA
  *
  */
-
-GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG,
+inline GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG,
                                          const impalib_type ALPHA)
     : modelInputs_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS),
       outputs(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
@@ -107,8 +92,7 @@ GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TE
  * @param[in] pMAX_STATE_PY: contains maximum capacity of departments
  *
  */
-
-void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, const impalib_type *pTransition_model_py, const int *pITEMS_WEIGHTS_PER_DEPARTMENT_PY,
+inline void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, const impalib_type *pTransition_model_py, const int *pITEMS_WEIGHTS_PER_DEPARTMENT_PY,
                                      const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
     /// calls a method process_inputs() on an object inputs_, passing
     /// several pointers to Python objects as arguments
@@ -124,8 +108,7 @@ void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, const 
  * between teams and departments
  *
  */
-
-void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) {
+inline void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) {
     vector<impalib_type> oric2PackageM_(numTeams_, 0);
     for (int i = 0; i < numIterations_; i++) {
         for (int j = 0; j < numDepartments_; j++) {
@@ -240,30 +223,9 @@ class GraphicalModelTsp {
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
  * @param[in] THRESHOLD: threshold for hard decision on intrinsic messages
  * @param[in] MAX_COUNT: maximum count of failure cases before exiting the code
- * @param[out] modelDegreeConstraint_: object of type DegreeConstraint: object
- * associated with degree constraint operations
- * @param[out] modelEqConstraint_: object of type EqualityConstraintTsp: object
- * associated with equality constraint operations
- * @param[out] modelSubtourEliminationConstraint_: object of type
- * SubtourEliminationConstraint: object associated with subtour elimination
- * constraint operations
- * @param[out] modelInputs_: object of type InputsTsp: object associated with
- * inputs of tsp
- * @param[out] outputs: object of type OutputsTsp: object associated with
- * outputs of tsp
- * @param[out] numIterations_: NUM_ITERATIONS
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numNodes_: NUM_NODES
- * @param[out] augmentationFlag_: AUGMENTATION_FLAG
- * @param[out] resetFlag_: RESET_FLAG
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
- * @param[out] threshold_: THRESHOLD
- * @param[out] maxCount_: MAX_COUNT
  *
  */
-
-GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
+inline GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
                                      const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT)
     : degree(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
       EqTsp_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
@@ -299,8 +261,7 @@ GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NOD
  * computations in the IMPA
  *
  */
-
-void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY,
+inline void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY,
                                    const impalib_type *pEdge_ec_to_degree_constraint_m_py, const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
     // Populate model data
     inputs_.process_inputs(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
@@ -343,8 +304,7 @@ SubtourAnalysisResult GraphicalModelTsp::iterate_relaxed_graph() {
  * @param[in] MAX_AUGM_COUNT: maximum number of augmentation steps
  *
  */
-
-void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
+inline void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
     // Add empty vectors to subtour constraints if needed
     if (idx_delta_S.size() > 0) {
         vector<vector<impalib_type>> temp(idx_delta_S.size(), vector<impalib_type>(numEdgeVariables_, zero_value));
@@ -409,8 +369,7 @@ void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
  * @param[out] pSubtour_paths_size: number of subtour paths
  *
  */
-
-void GraphicalModelTsp::process_outputs(impalib_type *pExtrinsic_output_edge_ec, int *pNum_augmentations, int *pNum_added_constraints, int *pTour_impa, impalib_type *pCost_impa,
+inline void GraphicalModelTsp::process_outputs(impalib_type *pExtrinsic_output_edge_ec, int *pNum_augmentations, int *pNum_added_constraints, int *pTour_impa, impalib_type *pCost_impa,
                                        bool *pNo_improv_sol_count_exc_flag, bool *pNo_cons_loops_count_exc_flag, bool *pSol_osc_count_exc_flag, int *pSelected_edges, int *pSelected_edges_size,
                                        int *pSubtour_paths, int *pSubtour_paths_size) {
     // Copy extrinsic_ output for edge equality constraints
@@ -452,7 +411,7 @@ void GraphicalModelTsp::process_outputs(impalib_type *pExtrinsic_output_edge_ec,
  *
  */
  // NOTE:
-SubtourAnalysisResult GraphicalModelTsp::iterate_augmented_graph() {
+inline SubtourAnalysisResult GraphicalModelTsp::iterate_augmented_graph() {
     // Reset messages if flag is set
     if (doReset_) {
         for (size_t i = 0; i < inputs_.edges.size(); i++) {
@@ -561,7 +520,7 @@ SubtourAnalysisResult GraphicalModelTsp::iterate_augmented_graph() {
 /**
  * This will get the hard decision on edges by investigating the sign
  * intrinsic
- * @param[out] rSelectedEdges: activated edges after running IMPA
+ * @returns: activated edges after running IMPA
  *
  */
 vector<vector<int>> GraphicalModelTsp::hard_decision_analysis() {
@@ -626,13 +585,12 @@ vector<vector<int>> GraphicalModelTsp::hard_decision_analysis() {
  * @param[in] rSelectedEdges: activated edges in the graphical model
  * @param[out] rGraph: graphical model of activated egdes. Defines connections
  * between nodes
- * **/
-
-// NOTE: this resets loops_sz and subtours
-// sets various failure/satisfy flags
-// resets tour
-
-SubtourAnalysisResult GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
+ *
+ * NOTE: this resets loops_sz and subtours
+ * sets various failure/satisfy flags
+ * resets tour
+**/
+inline SubtourAnalysisResult GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
     vector<vector<int>> loops_list = get_closed_loops(rGraph, rSelectedEdges);
     vector<int> loops_sz;
     auto subtours = loops_list;
@@ -724,13 +682,13 @@ SubtourAnalysisResult GraphicalModelTsp::subtour_elimination_constraints_analysi
 /**
  * Get closed loops_sz. Function for building the graphical model of activated
  * edges and obtain loops_sz
- * @param[in] rSelectedEdges: activated edges in the graphical model
+ * @param[in] edges: activated edges in the graphical model
  * @param[out] G: graphical model of activated egdes. Defines connections
  * between nodes. Will be used for detecting of subtours
  * @return new_loops_list: list of detected loops_sz in G
  *
  */
-vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &G, const vector<vector<int>> &edges) {
+inline vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &G, const vector<vector<int>> &edges) {
     // Update the graph based on selected edges
     for (const auto &connection : edges) {
         if (G.find(connection[0]) != G.end()) {
@@ -807,12 +765,10 @@ vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vecto
  * corresponding positions
  * @param[in] seq: subsequence
  * @param[in] subseq: subsequence
- * @param[in] j: index in loops_list. For printing purposes, if needed. It is
- * not used in the code.
- * @return false or true if subseq is a isSubsequence of seq
+ * @returns false or true if subseq is a isSubsequence of seq
  *
  */
-bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vector<int> &subseq) {
+inline bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vector<int> &subseq) {
     for (int i = 0; i < static_cast<int>(seq.size() - subseq.size()); ++i) {
         if (equal(seq.begin() + i, seq.begin() + i + static_cast<int>(subseq.size()), subseq.begin())) {
             return true;
@@ -829,13 +785,13 @@ bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vector<int> 
  * neighboring nodes
  * @param[in] start_node: node the path is starting from
  * @param[in] current: current node under investigation in the path
- * @param[out] visited_all: visited_all nodes while constructing the path
- * @param[out] path: current detected path, which will be augmented
- * @return new_path or empty vector if no path is found. new_path is a path
- * between the nodes (if a tour is found, )
+ * @param[in] visited_all: visited_all nodes while constructing the path
+ * @returns current detected path, which will be augmented
+ *   new_path or empty vector if no path is found. new_path is a path
+ *   between the nodes (if a tour is found, )
  *
  */
-vector<int> GraphicalModelTsp::find_closed_loop(const unordered_map<int, vector<int>> &G, int start_node, int current, unordered_set<int> visited_all, vector<int> path) {
+inline vector<int> GraphicalModelTsp::find_closed_loop(const unordered_map<int, vector<int>> &G, int start_node, int current, unordered_set<int> visited_all, vector<int> path) {
     visited_all.insert(current);
     path.push_back(current);
 

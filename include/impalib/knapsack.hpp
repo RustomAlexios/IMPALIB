@@ -43,14 +43,9 @@ class Knapsack {
  * @param[in] N_TEAMS: number of teams
  * @param[in] FILT_FLAG: filtering flag
  * @param[in] ALPHA: filtering parameter (between 0 and 1)
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] filteringFlag_: FILT_FLAG
- * @param[out] alpha_: ALPHA
  *
  */
-
-Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA)
+inline Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA)
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), filteringFlag_(FILT_FLAG), alpha_(ALPHA), extrinsic_old(numDepartments_, vector<impalib_type>(numTeams_, 0)){};
 
 /**
@@ -60,13 +55,12 @@ Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_F
  * @param[in] capacity: capacity of department under
  * @param[in] idx_nonzero: indices where connections are present between teams and departments
  * @param[in] idx_nonzero_sizes: sizes of non-zero weight indices
- * @param[in] rTeamsWeightsPerDepartment: weights of teams for the department under investigation
+ * @param[in] weights: weights of teams for the department under investigation
  * @param[in] team2knapsack: messages from teams to knapsack constraints
- * @param[out] rStageForwardMessages: calculated forward messages on the trellis
+ * @returns: calculated forward messages on the trellis
  *
  */
-
-vector<vector<impalib_type>> Knapsack::forward(const int idx, const int capacity, const vector<int> &idx_nonzero, const int *idx_nonzero_sizes, const vector<int> &weights,
+inline vector<vector<impalib_type>> Knapsack::forward(const int idx, const int capacity, const vector<int> &idx_nonzero, const int *idx_nonzero_sizes, const vector<int> &weights,
                                                const vector<vector<impalib_type>> &team2knapsack) {
     vector<int>::const_iterator upper;
     vector<vector<impalib_type>> forward(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
@@ -128,11 +122,10 @@ vector<vector<impalib_type>> Knapsack::forward(const int idx, const int capacity
  * @param[in] idx_nonzero_sizes: sizes of non-zero weight indices
  * @param[in] weights: weights of teams for the department under investigation
  * @param[in] team2knapsack: messages from teams to knapsack constraints
- * @param[out] rStageBackwardMessages: calculated backward messages on the trellis
+ * @returns: calculated backward messages on the trellis
  *
  */
-
-vector<vector<impalib_type>> Knapsack::backward(const int idx, const int capacity, const vector<int> &idx_nonzero, const int *idx_nonzero_sizes, const vector<int> &weights,
+inline vector<vector<impalib_type>> Knapsack::backward(const int idx, const int capacity, const vector<int> &idx_nonzero, const int *idx_nonzero_sizes, const vector<int> &weights,
                                                 const vector<vector<impalib_type>> &team2knapsack) {
     vector<int>::const_iterator upper;
     vector<vector<impalib_type>> backward(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
@@ -193,11 +186,10 @@ vector<vector<impalib_type>> Knapsack::backward(const int idx, const int capacit
  * @param[in] idx: index of department (knapsack constraint)
  * @param[in] backward: calculated backward messages on the trellis
  * @param[in] capacity: capacity of department under
- * @param[out] rExtrinsicOutputDepartment: extrinsic_ output messages from department to teams
+ * @returns: extrinsic_ output messages from department to teams
  *
  */
-
-vector<impalib_type> Knapsack::extrinsic_output_department_lhs(const vector<int> &weights, const vector<vector<impalib_type>> &forward, const vector<vector<impalib_type>> &team2knapsack,
+inline vector<impalib_type> Knapsack::extrinsic_output_department_lhs(const vector<int> &weights, const vector<vector<impalib_type>> &forward, const vector<vector<impalib_type>> &team2knapsack,
                                                                const int idx, const vector<vector<impalib_type>> &backward, const int capacity) {
     vector<impalib_type> extrinsic(weights.size());
     vector<impalib_type> solid, dash;
@@ -239,8 +231,7 @@ vector<impalib_type> Knapsack::extrinsic_output_department_lhs(const vector<int>
  * @param[out] oric2team: messages from ORIC to teams
  *
  */
-
-void Knapsack::team_to_knapsack_update(const vector<vector<int>> &idx_nonzero, vector<vector<impalib_type>> &team2knapsack, const vector<impalib_type> &reward,
+inline void Knapsack::team_to_knapsack_update(const vector<vector<int>> &idx_nonzero, vector<vector<impalib_type>> &team2knapsack, const vector<impalib_type> &reward,
                                        const vector<vector<impalib_type>> &extrinsic, const vector<impalib_type> &oric2team) {
     for (int i = 0; i < extrinsic.size(); i++) {
         // Create a list of remaining departments
@@ -281,11 +272,10 @@ void Knapsack::team_to_knapsack_update(const vector<vector<int>> &idx_nonzero, v
  * @param[in] idx: index of department (knapsack constraint)
  * @param[in] iter: iteration index
  * @param[in] extrinsic_in: extrinsic_ output messages from department to teams before filtering
- * @param[out] extrinsic_out: extrinsic_ output messages from department to teams after filtering
+ * @returns: extrinsic_ output messages from department to teams after filtering
  *
  */
-
-vector<impalib_type> Knapsack::process_extrinsic_output_department(const int idx, const int iter, const vector<impalib_type> &extrinsic_in) {
+inline vector<impalib_type> Knapsack::process_extrinsic_output_department(const int idx, const int iter, const vector<impalib_type> &extrinsic_in) {
     if (!filteringFlag_) {
         return extrinsic_in;
     }

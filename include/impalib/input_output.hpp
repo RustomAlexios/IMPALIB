@@ -56,14 +56,9 @@ class OutputsKcMwm {
  * @param[in] N_TEAMS: number of teams
  * @param[in] N_PROJECTS: number of projects
  * @param[in] MAX_SIZE_NON_ZERO_WEIGHTS: maximum number of connections between teams and departments
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] maxSizeNonzeroWeights_: MAX_SIZE_NON_ZERO_WEIGHTS
  *
  */
-
-InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS)
+inline InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS)
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), numProjects_(N_PROJECTS), maxSizeNonzeroWeights_(MAX_SIZE_NON_ZERO_WEIGHTS) {
     weights.reserve(numDepartments_);
     NonZeroWeightIndices.reserve(numDepartments_);
@@ -94,8 +89,7 @@ InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N
  * @param[in] pMAX_STATE_PY: contains maximum capacity of departments
  *
  */
-
-void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, const impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
+inline void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, const impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
                                  const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
     // Copy reward values for each team and maximum states per department
     copy(pREWARD_TEAM_PY, pREWARD_TEAM_PY + numTeams_, back_inserter(RewardTeam));
@@ -121,13 +115,9 @@ void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, const impa
  * @param[in] N_DEPARTMENTS: number of departments
  * @param[in] N_TEAMS: number of teams
  * @param[in] N_PROJECTS: number of projects
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numProjects_: N_PROJECTS
  *
  */
-
-OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
+inline OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), numProjects_(N_PROJECTS), extrinsic(numTeams_, 0), intrinsic(numProjects_ * numTeams_, 0){};
 
 /**
@@ -138,8 +128,7 @@ OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int
  * @param[in] reward: rewards of project-team combinations
  *
  */
-
-void OutputsKcMwm::update_intrinsic(const vector<vector<impalib_type>> &oric2eq, const vector<vector<impalib_type>> &project2eq, const vector<vector<impalib_type>> &reward) {
+inline void OutputsKcMwm::update_intrinsic(const vector<vector<impalib_type>> &oric2eq, const vector<vector<impalib_type>> &project2eq, const vector<vector<impalib_type>> &reward) {
     for (int i = 0; i < reward.size(); i++)  // over projects
     {
         for (int j = 0; j < reward[i].size(); j++)  // over teams
@@ -157,8 +146,7 @@ void OutputsKcMwm::update_intrinsic(const vector<vector<impalib_type>> &oric2eq,
  * @param[in] oric2team: messages from ORIC to team equality constraints
  *
  */
-
-void OutputsKcMwm::update_extrinsic(const vector<vector<impalib_type>> &extrinsic_out, const vector<impalib_type> &oric2team) {
+inline void OutputsKcMwm::update_extrinsic(const vector<vector<impalib_type>> &extrinsic_out, const vector<impalib_type> &oric2team) {
     extrinsic = oric2team;
 
     for (int i = 0; i < extrinsic_out.size(); i++) {
@@ -192,12 +180,9 @@ class InputsTsp {
  *
  * @param[in] NUM_NODES: number of nodes
  * @param[in] NUM_EDGE_VARIABLES: number of edge variables (edge connections)
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
  *
  */
-
-InputsTsp::InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : n_Nodes(NUM_NODES), n_Edges(NUM_EDGE_VARIABLES){};
+inline InputsTsp::InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : n_Nodes(NUM_NODES), n_Edges(NUM_EDGE_VARIABLES){};
 
 /**
  * Represents a class for outputs of TSP
@@ -222,12 +207,9 @@ class OutputsTsp {
  *
  * @param[in] NUM_NODES: number of nodes
  * @param[in] NUM_EDGE_VARIABLES: number of edge variables (edge connections)
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
  *
  */
-
-OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES) {
+inline OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES) {
     // Reserve and initialize memory for extrinsic_ and intrinsic edge equality constraints outputs
     extrinsic.reserve(numEdgeVariables_);
     extrinsic.resize(numEdgeVariables_);
@@ -248,8 +230,7 @@ OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : numN
  * Refer to example of TSP to understand how the various costs differ. The various various will facilitate computations in the IMPA
  *
  */
-
-void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, const impalib_type *pEdge_ec_to_degree_constraint_m_py,
+inline void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, const impalib_type *pEdge_ec_to_degree_constraint_m_py,
                                const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
     // Copy cost edge variable data
     copy(pCOST_EDGE_VARIABLE_PY, pCOST_EDGE_VARIABLE_PY + n_Edges, back_inserter(cost_edge));
@@ -280,8 +261,7 @@ void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_ty
  * @param[in] deg2eq: messages from degree constraints to edge equality constraints
  *
  */
-
-void OutputsTsp::update_extrinsic_relaxed(vector<vector<impalib_type>> &deg2eq) {
+inline void OutputsTsp::update_extrinsic_relaxed(vector<vector<impalib_type>> &deg2eq) {
     for (int i = 0; i < deg2eq.size(); i++) {
         extrinsic[i] = accumulate(deg2eq[i].begin(), deg2eq[i].end(), zero_value);
     }
@@ -294,8 +274,7 @@ void OutputsTsp::update_extrinsic_relaxed(vector<vector<impalib_type>> &deg2eq) 
  * @param[in] subtour2edge: messages from subtour elimination constraints to edge equality constraints
  *
  */
-
-void OutputsTsp::update_extrinsic_augmented(vector<vector<impalib_type>> &deg2eq, vector<vector<impalib_type>> &subtour2edge) {
+inline void OutputsTsp::update_extrinsic_augmented(vector<vector<impalib_type>> &deg2eq, vector<vector<impalib_type>> &subtour2edge) {
     // Update extrinsic_ output for edge equality constraints based on messages from degree constraints to equality constraints
     for (int i = 0; i < deg2eq.size(); i++) {
         extrinsic[i] = accumulate(deg2eq[i].begin(), deg2eq[i].end(), zero_value);
@@ -313,8 +292,7 @@ void OutputsTsp::update_extrinsic_augmented(vector<vector<impalib_type>> &deg2eq
  * @param[in] costs: cost of each edge equality constraint
  *
  */
-
-void OutputsTsp::update_intrinsic(vector<impalib_type> &costs) {
+inline void OutputsTsp::update_intrinsic(vector<impalib_type> &costs) {
     // Calculate intrinsic output for edge equality constraints by adding extrinsic_ output for edge equality constraints to cost edge variable
     transform(extrinsic.begin(), extrinsic.end(), costs.begin(), intrinsic.begin(), plus<impalib_type>());
 }

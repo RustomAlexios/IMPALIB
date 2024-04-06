@@ -37,13 +37,8 @@ class DegreeConstraint {
  * @param[in] NUM_EDGE_VARIABLES: number of connections between nodes
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
  */
-
-DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG, const impalib_type ALPHA)
+inline DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG, const impalib_type ALPHA)
     : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES), M_deg2eq_old(numEdgeVariables_, vector<impalib_type>(numNodes_, 0)){};
 
 /**
@@ -51,11 +46,10 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
  *
  * @param[in] edge2degree: messages from edge equality constraints to degree constraints
  * @param[in] edges: list of connections for each edge equality constraint
- * @param[out] degree2eq: messages from degree constraints to edge equality constraints before filtering
+ * @returns: messages from degree constraints to edge equality constraints before filtering
  *
  */
-
-vector<vector<impalib_type>> DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges) {
+inline vector<vector<impalib_type>> DegreeConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2degree, const vector<vector<int>> &edges) {
     static const impalib_type M_forward_init = value_inf;    ///< initial forward message of forward-backward algorithm
     static const impalib_type M_backward_init = value_inf;   ///< initial backward message of forward-backward algorithm
 
@@ -125,13 +119,11 @@ vector<vector<impalib_type>> DegreeConstraint::messages_to_edge_ec(const vector<
 /**
  * Perform filtering on messages from degree constraints to edge equality constraints for the TSP
  *
- * @param[in] iter: iteration index of IMPA
  * @param[in] deg2eq_in: messages from degree constraints to edge equality constraints before filtering
- * @param[in] deg2eq_out: messages from degree constraints to edge equality constraints after filtering
+ * @returns: messages from degree constraints to edge equality constraints after filtering
  *
  */
-
-vector<vector<impalib_type>> DegreeConstraint::process_filtering(const vector<vector<impalib_type>> &deg2eq_in) {
+inline vector<vector<impalib_type>> DegreeConstraint::process_filtering(const vector<vector<impalib_type>> &deg2eq_in) {
     assert(deg2eq_in.size() == numEdgeVariables_);
     if (!filteringFlag_) {
         return deg2eq_in;

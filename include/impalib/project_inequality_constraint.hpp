@@ -26,23 +26,21 @@ class InequalityConstraint {
 /**
  * Construct InequalityConstraint object for the Knapsack-MWM problem
  *
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
+ * @param N_PROJECTS: Number of projects
+ * @param N_TEAMS: Number of teams
+ * @param N_DEPARTMENTS: Number of departments
  *
  */
-
-InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){};
+inline InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){};
 
 /**
  * Calculate messages from project inequality constraint to project equality constraint for the Knapsack-MWM problem
  *
  * @param[in] eq2proj: messages from project equality constraint to project inequality constraint
- * @param[out] rProject2EqConstraintM: messages from project inequality constraint to project equality constraint
+ * @returns: messages from project inequality constraint to project equality constraint
  *
  */
-
-vector<vector<impalib_type>> InequalityConstraint::messages_to_equality(const vector<vector<impalib_type>> &eq2proj) {
+inline vector<vector<impalib_type>> InequalityConstraint::messages_to_equality(const vector<vector<impalib_type>> &eq2proj) {
     vector<vector<impalib_type>> proj2eq(numProjects_, vector<impalib_type>(numTeams_, 0));
     vector<vector<impalib_type>> forward(numTeams_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> backward(numTeams_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));

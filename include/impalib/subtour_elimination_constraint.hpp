@@ -13,7 +13,6 @@
 /**
  * Represents a class for the subtour elimination constraint for the TSP
  */
-
 class SubtourEliminationConstraint {
    private:
     int n_Nodes;             ///< number of nodes
@@ -41,14 +40,8 @@ class SubtourEliminationConstraint {
  * @param[in] NUM_EDGE_VARIABLES: number of connections between nodes
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
- * @param[out] initial_forward_message_: set to infinity
- * @param[out] initial_backward_message_: set to infinity
  */
-SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG, const impalib_type ALPHA)
+inline SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG, const impalib_type ALPHA)
     : doFilter(FILTERING_FLAG), alpha_(ALPHA), n_Nodes(NUM_NODES), n_Edges(NUM_EDGE_VARIABLES), forward0(value_inf), backward0(value_inf){};
 
 /**
@@ -59,8 +52,7 @@ SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, 
  * @param[out] subtour2edge: messages from subtour elimination constraints to edge equality constraints
  *
  */
-
-void SubtourEliminationConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2subtour, const vector<vector<int>> &deltaS, vector<vector<impalib_type>> &subtour2edge) {
+inline void SubtourEliminationConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2subtour, const vector<vector<int>> &deltaS, vector<vector<impalib_type>> &subtour2edge) {
     vector<impalib_type> forward(n_Edges + 1, zero_value);
     vector<impalib_type> backward(n_Edges + 1, zero_value);
 
@@ -93,12 +85,11 @@ void SubtourEliminationConstraint::messages_to_edge_ec(const vector<vector<impal
  *
  * @param[in] iter: index of iteration of IMPA
  * @param[in] subtour2edge_in: messages from subtour elimination constraints to edge equality constraints before filtering
- * @param[out] subtour2edge_out: messages from subtour elimination constraints to edge equality constraints after filtering
  * @param[in] deltaS: list of sub-list of indices. Each sub-list is asscoiated with a subtour constraint, and contains indices of edges related to this constraint
+ * @returns: messages from subtour elimination constraints to edge equality constraints after filtering
  *
  */
-
-vector<vector<impalib_type>> SubtourEliminationConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &subtour2edge_in, const vector<vector<int>> &deltaS) {
+inline vector<vector<impalib_type>> SubtourEliminationConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &subtour2edge_in, const vector<vector<int>> &deltaS) {
     assert(subtour2edge_in.size() == deltaS.size());
     if (!doFilter) {
         return subtour2edge_in;

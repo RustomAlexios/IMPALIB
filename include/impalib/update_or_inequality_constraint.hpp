@@ -33,13 +33,10 @@ class OrInequalityConstraint {
  * @param[in] N_DEPARTMENTS: number of departments
  * @param[in] N_TEAMS: number of teams
  * @param[in] N_PROJECTS: number of projects
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
  *
  */
 
-OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){};
+inline OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){};
 
 /**
  * Calculate messages from ORIC to project equality constraints for the Knapsack-MWM problem
@@ -51,8 +48,7 @@ OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const in
  * @param[in] reward_project: rewards for project equality constraints
  *
  */
-
-void OrInequalityConstraint::messages_to_project_eq(const vector<vector<impalib_type>> &eq2oric, const vector<impalib_type> &team2oric, vector<vector<impalib_type>> &oric2eq,
+inline void OrInequalityConstraint::messages_to_project_eq(const vector<vector<impalib_type>> &eq2oric, const vector<impalib_type> &team2oric, vector<vector<impalib_type>> &oric2eq,
                                                     vector<vector<impalib_type>> &eq2proj, const vector<vector<impalib_type>> &reward_project) {
     vector<vector<impalib_type>> forward(numProjects_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> backward(numProjects_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
@@ -92,11 +88,10 @@ void OrInequalityConstraint::messages_to_project_eq(const vector<vector<impalib_
  * Calculate messages from ORIC to team equality constraints for the Knapsack-MWM problem
  *
  * @param[in] eq2oric: messages from project equality constraint to ORIC
- * @param[out] rOric2TeamM: messages from ORIC to teams
+ * @returns : messages from ORIC to teams
  *
  */
-
-vector<impalib_type> OrInequalityConstraint::messages_to_team_eq(const vector<vector<impalib_type>> &eq2oric) {
+inline vector<impalib_type> OrInequalityConstraint::messages_to_team_eq(const vector<vector<impalib_type>> &eq2oric) {
     vector<impalib_type> oric2team(numTeams_);
     for (int i = 0; i < oric2team.size(); i++) {
         impalib_type minValue = 1000000;
