@@ -206,8 +206,8 @@ class GraphicalModelTsp {
     SubtourAnalysisResult iterate_relaxed_graph();                                                                                          ///< iterate over relaxed graphical model
     void perform_augmentation(int);                                                                                        ///< perform augmentation on graphical model
     void process_outputs(impalib_type *, int *, int *, int *, impalib_type *, bool *, bool *, bool *, int *, int *, int *, int *);  ///< process outputs of Graphical Model
-    GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
-                      const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT);  ///< Constructor
+    GraphicalModelTsp(int NUM_ITERATIONS, int NUM_NODES, int NUM_EDGE_VARIABLES, bool AUGMENTATION_FLAG, bool RESET_FLAG, bool FILTERING_FLAG,
+                      impalib_type ALPHA, impalib_type THRESHOLD, int MAX_COUNT);  ///< Constructor
 };
 
 /**

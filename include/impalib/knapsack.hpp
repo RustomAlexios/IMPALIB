@@ -21,16 +21,16 @@ class Knapsack {
 
    public:
     vector<vector<impalib_type>> forward(int, int, const vector<int> &, const int *, const vector<int> &,
-                                         const vector<vector<impalib_type>> &);  ///< forward pass of forward-backward algorithm
+                                         const vector<vector<impalib_type>> &) const;  ///< forward pass of forward-backward algorithm
 
     vector<vector<impalib_type>> backward(int, int, const vector<int> &, const int *, const vector<int> &,
-                                          const vector<vector<impalib_type>> &);  ///< backward pass of forward-backward algorithm
+                                          const vector<vector<impalib_type>> &) const;  ///< backward pass of forward-backward algorithm
 
-    vector<impalib_type> extrinsic_output_department_lhs(const vector<int> &, const vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &, int, const vector<vector<impalib_type>> &,
+    static vector<impalib_type> extrinsic_output_department_lhs(const vector<int> &, const vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &, int, const vector<vector<impalib_type>> &,
                                                          int);  ///< extrinsic_ output of department constraint
 
     void team_to_knapsack_update(const vector<vector<int>> &, vector<vector<impalib_type>> &, const vector<impalib_type> &, const vector<vector<impalib_type>> &,
-                                 const vector<impalib_type> &);                                        ///< calculate messages from teams to knapsack constraints
+                                 const vector<impalib_type> &) const;                                        ///< calculate messages from teams to knapsack constraints
     vector<impalib_type> process_extrinsic_output_department(int, int, const vector<impalib_type> &);  ///< perform filtering (if needed) on messages from departments to teams
 
     Knapsack(int N_DEPARTMENTS, int N_TEAMS, bool FILT_FLAG, impalib_type ALPHA);  ///< constructor
@@ -61,7 +61,7 @@ inline Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool
  *
  */
 inline vector<vector<impalib_type>> Knapsack::forward(const int idx, const int capacity, const vector<int> &idx_nonzero, const int *idx_nonzero_sizes, const vector<int> &weights,
-                                               const vector<vector<impalib_type>> &team2knapsack) {
+                                               const vector<vector<impalib_type>> &team2knapsack) const {
     vector<int>::const_iterator upper;
     vector<vector<impalib_type>> forward(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
 
@@ -126,7 +126,7 @@ inline vector<vector<impalib_type>> Knapsack::forward(const int idx, const int c
  *
  */
 inline vector<vector<impalib_type>> Knapsack::backward(const int idx, const int capacity, const vector<int> &idx_nonzero, const int *idx_nonzero_sizes, const vector<int> &weights,
-                                                const vector<vector<impalib_type>> &team2knapsack) {
+                                                const vector<vector<impalib_type>> &team2knapsack) const {
     vector<int>::const_iterator upper;
     vector<vector<impalib_type>> backward(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
 
@@ -232,7 +232,7 @@ inline vector<impalib_type> Knapsack::extrinsic_output_department_lhs(const vect
  *
  */
 inline void Knapsack::team_to_knapsack_update(const vector<vector<int>> &idx_nonzero, vector<vector<impalib_type>> &team2knapsack, const vector<impalib_type> &reward,
-                                       const vector<vector<impalib_type>> &extrinsic, const vector<impalib_type> &oric2team) {
+                                       const vector<vector<impalib_type>> &extrinsic, const vector<impalib_type> &oric2team) const {
     for (int i = 0; i < extrinsic.size(); i++) {
         // Create a list of remaining departments
         vector<int> remaining(numDepartments_);

@@ -18,9 +18,9 @@ class EqualityConstraintKcMwm {
 
    public:
     vector<impalib_type> team_messages_to_oric(const vector<vector<impalib_type>> &extrinsic,
-                                               const vector<impalib_type> &reward_team);  ///< calculate messages from team equality constraint to ORIC
+                                               const vector<impalib_type> &reward_team) const;  ///< calculate messages from team equality constraint to ORIC
 
-    vector<vector<impalib_type>> project_messages_to_oric(const vector<vector<impalib_type>> &proj2eq,
+    static vector<vector<impalib_type>> project_messages_to_oric(const vector<vector<impalib_type>> &proj2eq,
                                   const vector<vector<impalib_type>> &reward_proj);  ///< calculate messages from project equality constraint to ORIC
 
     EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  ///< constructor
@@ -33,7 +33,7 @@ class EqualityConstraintKcMwm {
  * @param[in] N_TEAMS: number of teams
  * @param[in] N_PROJECTS: number of projects
  */
-inline EqualityConstraintKcMwm::EqualityConstraintKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS) : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){};
+inline EqualityConstraintKcMwm::EqualityConstraintKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){};
 
 /**
  * Calculate messages from team equality constraint to ORIC for the Knapsack-MWM problem
@@ -42,7 +42,7 @@ inline EqualityConstraintKcMwm::EqualityConstraintKcMwm(int N_DEPARTMENTS, int N
  * @param[in] reward_team: rewards of teams
  * @returns: messages from team equality constraint to ORIC
  */
-inline vector<impalib_type> EqualityConstraintKcMwm::team_messages_to_oric(const vector<vector<impalib_type>> &extrinsic, const vector<impalib_type> &reward_team) {
+inline vector<impalib_type> EqualityConstraintKcMwm::team_messages_to_oric(const vector<vector<impalib_type>> &extrinsic, const vector<impalib_type> &reward_team) const {
     vector<impalib_type> team2oric(numTeams_, 0);
 
     for (int i = 0; i < extrinsic.size(); i++) {
@@ -80,14 +80,14 @@ class EqualityConstraintTsp {
    public:
     void messages_to_degree_relaxed(const vector<vector<int>> &edges, const vector<vector<impalib_type>> &cost_edges, const vector<vector<impalib_type>> &deg2eq,
                                     vector<vector<impalib_type>> &edge2deg);                          ///< calculate messages from edge to degree constraints for relaxed TSP
-    vector<vector<impalib_type>> flip_matrix(const vector<vector<impalib_type>> &, const vector<vector<int>> &);  ///< flip matrix
+    static vector<vector<impalib_type>> flip_matrix(const vector<vector<impalib_type>> &, const vector<vector<int>> &);  ///< flip matrix
     vector<vector<impalib_type>> messages_to_subtour(const vector<vector<int>> &deltaS, const vector<impalib_type> &edge_costs, const vector<vector<impalib_type>> &deg2edge, const vector<vector<impalib_type>> &subtour2edge,
-                                                     const vector<vector<int>> &edges);  ///< calculate message from edge to subtour constraint
+                                                     const vector<vector<int>> &edges) const;  ///< calculate message from edge to subtour constraint
     void messages_to_degree_augmented(const vector<vector<impalib_type>> &deg2eq, const vector<vector<impalib_type>> &subtour2edge, const vector<vector<int>> &edges, const vector<vector<impalib_type>> &edge_costs,
-                                      vector<vector<impalib_type>> &edge2deg);  ///< calculate messages from edge to degree constraints for augmented TSP
+                                      vector<vector<impalib_type>> &edge2deg) const;  ///< calculate messages from edge to degree constraints for augmented TSP
 
-    EqualityConstraintTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
-                          const impalib_type ALPHA);  ///< constructor
+    EqualityConstraintTsp(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
+                          impalib_type ALPHA);  ///< constructor
 };
 
 /**
@@ -130,7 +130,7 @@ inline void EqualityConstraintTsp::messages_to_degree_relaxed(const vector<vecto
  *
  */
 inline vector<vector<impalib_type>> EqualityConstraintTsp::messages_to_subtour(const vector<vector<int>> &deltaS, const vector<impalib_type> &edge_costs, const vector<vector<impalib_type>> &deg2edge,
-                                                                        const vector<vector<impalib_type>> &subtour2edge, const vector<vector<int>> &edges) {
+                                                                        const vector<vector<impalib_type>> &subtour2edge, const vector<vector<int>> &edges) const {
     vector<vector<impalib_type>> edge2subtour_list;
 
     if (deltaS.size() == 1) {
@@ -181,7 +181,7 @@ inline vector<vector<impalib_type>> EqualityConstraintTsp::messages_to_subtour(c
  *
  */
 inline void EqualityConstraintTsp::messages_to_degree_augmented(const vector<vector<impalib_type>> &deg2eq, const vector<vector<impalib_type>> &subtour2edge, const vector<vector<int>> &edges,
-                                                         const vector<vector<impalib_type>> &edge_costs, vector<vector<impalib_type>> &edge2deg) {
+                                                         const vector<vector<impalib_type>> &edge_costs, vector<vector<impalib_type>> &edge2deg) const {
     vector<impalib_type> subtour2edge_sum(numEdgeVariables_, zero_value);
     for (const auto &row : subtour2edge) {
         transform(subtour2edge_sum.begin(), subtour2edge_sum.end(), row.begin(), subtour2edge_sum.begin(), std::plus<impalib_type>());

@@ -20,9 +20,9 @@ class OrInequalityConstraint {
 
    public:
     void messages_to_project_eq(const vector<vector<impalib_type>> &eq2oric, const vector<impalib_type> &team2oric, vector<vector<impalib_type>> &oric2eq, vector<vector<impalib_type>> &eq2proj,
-                                const vector<vector<impalib_type>> &reward_project);  ///< update messages from ORIC to project equality constraint
+                                const vector<vector<impalib_type>> &reward_project) const;  ///< update messages from ORIC to project equality constraint
 
-    vector<impalib_type> messages_to_team_eq(const vector<vector<impalib_type>> &eq2oric);  ///< calculate messages from team ORIC to team equality constraint
+    vector<impalib_type> messages_to_team_eq(const vector<vector<impalib_type>> &eq2oric) const;  ///< calculate messages from team ORIC to team equality constraint
 
     OrInequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  ///< constructor
 };
@@ -49,7 +49,7 @@ inline OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, c
  *
  */
 inline void OrInequalityConstraint::messages_to_project_eq(const vector<vector<impalib_type>> &eq2oric, const vector<impalib_type> &team2oric, vector<vector<impalib_type>> &oric2eq,
-                                                    vector<vector<impalib_type>> &eq2proj, const vector<vector<impalib_type>> &reward_project) {
+                                                    vector<vector<impalib_type>> &eq2proj, const vector<vector<impalib_type>> &reward_project) const {
     vector<vector<impalib_type>> forward(numProjects_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> backward(numProjects_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
 
@@ -91,7 +91,7 @@ inline void OrInequalityConstraint::messages_to_project_eq(const vector<vector<i
  * @returns : messages from ORIC to teams
  *
  */
-inline vector<impalib_type> OrInequalityConstraint::messages_to_team_eq(const vector<vector<impalib_type>> &eq2oric) {
+inline vector<impalib_type> OrInequalityConstraint::messages_to_team_eq(const vector<vector<impalib_type>> &eq2oric) const {
     vector<impalib_type> oric2team(numTeams_);
     for (int i = 0; i < oric2team.size(); i++) {
         impalib_type minValue = 1000000;

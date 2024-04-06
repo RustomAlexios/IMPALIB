@@ -25,7 +25,7 @@ class SubtourEliminationConstraint {
    public:
     vector<vector<impalib_type>> M_subtour2edge_old;  ///< messages from subtour constraints to edge equality constraint before filtering
     void messages_to_edge_ec(const vector<vector<impalib_type>> &edge2subtour, const vector<vector<int>> &deltaS,
-                             vector<vector<impalib_type>> &subtour2edge);  ///< calculate messages from subtour to edge equality constraints
+                             vector<vector<impalib_type>> &subtour2edge) const;  ///< calculate messages from subtour to edge equality constraints
     vector<vector<impalib_type>> process_filtering(int, const vector<vector<impalib_type>> &,
                                                    const vector<vector<int>> &);  ///< perform filtering on messages from subtour to edge equality constraints
 
@@ -52,7 +52,7 @@ inline SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_
  * @param[out] subtour2edge: messages from subtour elimination constraints to edge equality constraints
  *
  */
-inline void SubtourEliminationConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2subtour, const vector<vector<int>> &deltaS, vector<vector<impalib_type>> &subtour2edge) {
+inline void SubtourEliminationConstraint::messages_to_edge_ec(const vector<vector<impalib_type>> &edge2subtour, const vector<vector<int>> &deltaS, vector<vector<impalib_type>> &subtour2edge) const {
     vector<impalib_type> forward(n_Edges + 1, zero_value);
     vector<impalib_type> backward(n_Edges + 1, zero_value);
 

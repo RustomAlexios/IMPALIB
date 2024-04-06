@@ -19,7 +19,7 @@ class InequalityConstraint {
     int maxStateIc_ = 1;  ///< maximum value of project inequality constraint (<=1)
 
    public:
-    vector<vector<impalib_type>> messages_to_equality(const vector<vector<impalib_type>> &eq2proj);  ///< calculate messages from project inequality constraint to project equality constraint
+    vector<vector<impalib_type>> messages_to_equality(const vector<vector<impalib_type>> &eq2proj) const;  ///< calculate messages from project inequality constraint to project equality constraint
     InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);                            ///< constructor
 };
 
@@ -40,7 +40,7 @@ inline InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const
  * @returns: messages from project inequality constraint to project equality constraint
  *
  */
-inline vector<vector<impalib_type>> InequalityConstraint::messages_to_equality(const vector<vector<impalib_type>> &eq2proj) {
+inline vector<vector<impalib_type>> InequalityConstraint::messages_to_equality(const vector<vector<impalib_type>> &eq2proj) const {
     vector<vector<impalib_type>> proj2eq(numProjects_, vector<impalib_type>(numTeams_, 0));
     vector<vector<impalib_type>> forward(numTeams_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> backward(numTeams_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));

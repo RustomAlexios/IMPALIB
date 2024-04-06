@@ -172,7 +172,7 @@ class InputsTsp {
 
     void process_inputs(const int *, const impalib_type *, const impalib_type *, const impalib_type *, const impalib_type *);  ///< process inputs of TSP graphical model
 
-    InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES);  ///< constructor
+    InputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);  ///< constructor
 };
 
 /**
