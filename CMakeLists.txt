@@ -51,6 +51,10 @@ else()
         target_link_libraries(impalib_unit_tests_tsp PRIVATE impalib cnpy)
         target_include_directories(impalib_unit_tests_tsp PRIVATE test/include test/external/cnpy)
 
+        add_executable(impalib_unit_tests_ksat test/src/impalib_unit_tests_ksat.cpp)
+        target_link_libraries(impalib_unit_tests_ksat PRIVATE impalib cnpy)
+        target_include_directories(impalib_unit_tests_ksat PRIVATE test/include test/external/cnpy)
+
         file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
         file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()

@@ -978,3 +978,69 @@ vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> 
 
     return vector<int>();
 }
+
+
+class GraphicalModelKsat {
+   private:
+    int numIterations_;
+    int numVariables_;
+    int numConstraints_;
+    int kVariable_;
+    bool filteringFlag_;
+    impalib_type alpha_;
+    int numUsedVariables_;
+    EqualityConstraint modelEqConstraint_;
+    KsatConstraint modelKsatConstraint_;
+    InputsKsat modelInputs_;
+
+   public:
+    vector<vector<impalib_type>> KsatConstraint2EqConstraintDummyM_;
+    vector<vector<impalib_type>> KsatConstraint2EqConstraintM_;
+    OutputsKsat outputs;
+    void initialize(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);
+    void iterate();;
+    GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA, const int NUM_USED_VARIABLES);
+};
+
+GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA, const int NUM_USED_VARIABLES)
+    : modelInputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, numUsedVariables_),
+      modelEqConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
+      modelKsatConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
+      outputs(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE),
+      numIterations_(NUM_ITERATIONS),
+      numVariables_(NUM_VARIABLES),
+      numConstraints_(NUM_CONSTRAINTS),
+      kVariable_(K_VARIABLE),
+      filteringFlag_(FILTERING_FLAG),
+      alpha_(ALPHA),
+      numUsedVariables_(NUM_USED_VARIABLES)
+    {
+
+    KsatConstraint2EqConstraintDummyM_.reserve(numConstraints_);
+    KsatConstraint2EqConstraintM_.reserve(numConstraints_);
+
+    for (int constraint_index = 0; constraint_index < numConstraints_; constraint_index++) {
+        KsatConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numVariables_, zero_value));
+        KsatConstraint2EqConstraintM_.push_back(vector<impalib_type>(numVariables_, zero_value));
+    }
+};
+
+void GraphicalModelKsat::initialize(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, 
+                                    const int *pCONSTRAINTS_CONNECTIONS, const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
+    modelInputs_.process_inputs(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST, pVariable_ec_to_ksat_constraint_m_py);
+}
+
+void GraphicalModelKsat::iterate(){
+    
+    for (int iter = 0; iter < numIterations_; iter++) {
+
+        modelKsatConstraint_.ksat_constraint_to_variable_ec_update(modelInputs_.VariableEc2KsatConstraintM, KsatConstraint2EqConstraintDummyM_, modelInputs_.ConstraintsConnections, modelInputs_.ConstraintsConnectionsType);
+
+        modelKsatConstraint_.process_filtering(iter, KsatConstraint2EqConstraintDummyM_, KsatConstraint2EqConstraintM_);
+
+        modelEqConstraint_.variable_ec_to_ksat_constraint_update(KsatConstraint2EqConstraintM_, modelInputs_.VariableEc2KsatConstraintM, modelInputs_.UsedVariables, modelInputs_.IncomingMetricsCost, modelInputs_.VariablesConnections);
+
+    }
+
+    outputs.extrinsic_output_variable_ec_update(KsatConstraint2EqConstraintM_);
+}

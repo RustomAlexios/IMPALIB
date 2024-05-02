@@ -231,3 +231,114 @@ void ut_equality_constraint_tsp(string& ut_name){
     
     }
 }
+
+void ut_equality_constraint_ksat(string&);
+
+void ut_equality_constraint_ksat(string& ut_name){
+
+
+    const char *n_variables_bash=getenv("NUM_VARIABLES");
+    if(n_variables_bash == NULL)
+    {cout << "n_variables_bash not available\n";}
+
+    const char *k_variable_bash=getenv("K_VARIABLE");
+    if(k_variable_bash == NULL)
+    {cout << "k_variable_bash not available\n";}
+
+    const char *filt_flag_bash=getenv("FILT_FLAG");
+    if(filt_flag_bash == NULL)
+    {cout << "filt_flag_bash not available\n";}
+
+    const int NUM_VARIABLES = atoi(n_variables_bash);  
+    const int K_VARIABLE = atoi(k_variable_bash);
+    const bool FILT_FLAG(filt_flag_bash);
+
+    cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/alpha.npy");
+    impalib_type* alpha_pure = input_alpha.data<impalib_type>();
+    const impalib_type ALPHA = *alpha_pure;
+
+    cnpy::NpyArray input_num_constraints = cnpy::npy_load("../ut_inputs/num_constraints.npy");
+    int* num_constraints_pure = input_num_constraints.data<int>();
+    const int NUM_CONSTRAINTS = *num_constraints_pure;
+
+    EqualityConstraint modelEqualityConstraint(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILT_FLAG, ALPHA);
+
+    cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/size_used_variables_pure.npy");
+    int* size_used_variables_pure = input1.data<int>();
+    int size_used_variables = *size_used_variables_pure;
+
+    cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/used_variables_pure.npy");
+    int* used_variables_pure = input2.data<int>(); 
+
+    vector<int> used_variables;
+
+    copy(used_variables_pure, used_variables_pure + size_used_variables, back_inserter(used_variables));
+
+    cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/sizes_of_variables_connections_pure.npy");
+    int* sizes_of_variables_connections_pure = input3.data<int>(); 
+    vector<int> sizes_of_variables_connections;
+    copy(sizes_of_variables_connections_pure, sizes_of_variables_connections_pure + NUM_VARIABLES, back_inserter(sizes_of_variables_connections));
+
+    cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/variables_connections_pure.npy");
+    int* variables_connections_pure = input4.data<int>(); 
+    
+    vector<vector<int>> variables_connections;
+
+    int connections_size_old = 0;
+
+    for (int variable_index = 0; variable_index < NUM_VARIABLES; variable_index++){
+        
+        if (find(used_variables.begin(), used_variables.end(), variable_index) != used_variables.end()) {
+            
+            int connections_size = sizes_of_variables_connections[variable_index];
+            
+            variables_connections.push_back(vector<int>(connections_size, 0));
+            
+            copy(variables_connections_pure + connections_size_old,
+             variables_connections_pure + connections_size_old + connections_size,
+             variables_connections[variable_index].begin());
+
+            connections_size_old += connections_size;
+
+        } else {
+            variables_connections.push_back(vector<int>());
+        }
+    }
+
+    cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/incoming_metrics_cost_pure.npy");
+    impalib_type* incoming_metrics_cost_pure = input5.data<impalib_type>(); 
+    vector<impalib_type> incoming_metrics_cost;
+    copy(incoming_metrics_cost_pure, incoming_metrics_cost_pure + NUM_VARIABLES, back_inserter(incoming_metrics_cost));
+
+    cnpy::NpyArray input6 = cnpy::npy_load("../ut_inputs/ksat_constraint_to_eq_constraint_m_pure.npy");
+    impalib_type* ksat_constraint_to_eq_constraint_m_pure = input6.data<impalib_type>(); 
+    vector<vector<impalib_type>> ksat_constraint_to_eq_constraint_m(NUM_CONSTRAINTS, vector<impalib_type>(NUM_VARIABLES,zero_value));
+
+    for (int constraint_index=0; constraint_index<NUM_CONSTRAINTS; constraint_index++){
+    copy (ksat_constraint_to_eq_constraint_m_pure + NUM_VARIABLES*constraint_index, ksat_constraint_to_eq_constraint_m_pure+NUM_VARIABLES*(constraint_index+1), ksat_constraint_to_eq_constraint_m[constraint_index].begin() );
+    }
+
+    cnpy::NpyArray input7 = cnpy::npy_load("../ut_inputs/constraints_connections_pure.npy");
+    int* constraints_connections_pure = input7.data<int>(); 
+    vector<vector<int>> constraints_connections(NUM_CONSTRAINTS, vector<int>(K_VARIABLE,0));
+
+    for (int constraint_index=0; constraint_index<NUM_CONSTRAINTS; constraint_index++){
+    copy (constraints_connections_pure + K_VARIABLE*constraint_index, constraints_connections_pure+K_VARIABLE*(constraint_index+1), constraints_connections[constraint_index].begin() );
+    }
+
+    if (ut_name == "VariableEc2KsatConstraintUpdate"){
+        
+        vector<vector<impalib_type>> variable_ec_to_ksat_constraint_m(NUM_CONSTRAINTS, vector<impalib_type>(NUM_VARIABLES, zero_value));
+
+        modelEqualityConstraint.variable_ec_to_ksat_constraint_update(ksat_constraint_to_eq_constraint_m, variable_ec_to_ksat_constraint_m, used_variables, incoming_metrics_cost, variables_connections);
+        
+        fstream file_output("../ut_results/variable_ec_to_ksat_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
+            if (file_output.is_open()) {
+                for (int i=0; i<NUM_CONSTRAINTS; i++){
+                for (int j=0; j<NUM_VARIABLES; j++){
+                    file_output.write((char*)(&variable_ec_to_ksat_constraint_m[i][j]), sizeof(variable_ec_to_ksat_constraint_m[i][j]));}}
+                    file_output.close();}
+            else {cout << "Error! File cannot be opened!" << "\n";}
+    }
+
+}

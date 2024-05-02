@@ -45,7 +45,7 @@
   - Run: ``cmake -B build ``
   - Run: ``cmake --build build ``
   - Run: ``cd build/test/src``
-  - Run: ``./unit_test_kc_mwm.sh or ./unit_test_tsp.sh``
+  - Run: ``./unit_test_kc_mwm.sh or ./unit_test_tsp.sh or ./unit_test_ksat.sh``
 
 - Note that in unit testing, we loop over all unit tests names and Multiple sub-tests could be performed depending on the value of the "total_sub_tests" variable. 
 

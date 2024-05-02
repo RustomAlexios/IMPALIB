@@ -78,3 +78,23 @@ WrapperKcMwm.argtypes = [
     ctypes.c_bool,
     c_impa_lib_type,
 ]
+
+WrapperKsat = c_lib.WrapperKsat
+
+WrapperKsat.argtypes = [
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_int,
+    c_impa_lib_type,
+    ctypes.c_bool,
+    c_int_p,
+    c_int_p,
+    c_int_p,
+    c_int_p,
+    c_int_p,
+    c_impa_lib_type_p,
+    c_impa_lib_type_p,
+    c_impa_lib_type_p,
+    ctypes.c_int,
+]

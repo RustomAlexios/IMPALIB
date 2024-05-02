@@ -18,18 +18,27 @@ private:
     int          numEdgeVariables_; ///< number of edge connections
     bool         filteringFlag_; ///< filtering flag
     impalib_type alpha_; ///< filtering parameter
-
+    int numVariables_;
+    int numConstraints_;
+    int kvariable_;
 public:
 
     EqualityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS)
     : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS), 
-        filteringFlag_(false), alpha_(zero_value), numNodes_(0), numEdgeVariables_(0){};
+        filteringFlag_(false), alpha_(zero_value), numNodes_(0), numEdgeVariables_(0),
+        numVariables_(0), numConstraints_(0), kvariable_(0){};
 
     EqualityConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
                                              const bool FILTERING_FLAG, const impalib_type ALPHA)
     : numProjects_(0), numTeams_(0), numDepartments_(0),
       filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES),
-      numEdgeVariables_(NUM_EDGE_VARIABLES){};
+      numEdgeVariables_(NUM_EDGE_VARIABLES), numVariables_(0), numConstraints_(0), kvariable_(0){};
+    
+    EqualityConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE,
+                                             const bool FILTERING_FLAG, const impalib_type ALPHA)
+    : numProjects_(0), numTeams_(0), numDepartments_(0),
+      filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(0),
+      numEdgeVariables_(0), numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kvariable_(K_VARIABLE){};
 
     void team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<impalib_type> &,
                                            vector<impalib_type> &); ///< calculate messages from team equality constraint to ORIC
@@ -49,7 +58,9 @@ public:
     void                         edge_ec_to_degree_constraint_augmented_graph_update(vector<vector<impalib_type>> &,
                                                                                      vector<vector<impalib_type>> &, vector<vector<int>> &,
                                                                                      vector<vector<impalib_type>> &,
-                                                                                     vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for augmented TSP                                             
+                                                                                     vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for augmented TSP      
+
+    void variable_ec_to_ksat_constraint_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, vector<int> &, vector<impalib_type> &, vector<vector<int>> &);                                 
 };
 
 /**
@@ -292,5 +303,34 @@ void EqualityConstraint::flip_matrix(vector<vector<impalib_type>> &rMatrix, vect
         int col                = rEdgeConnections[l][1];
         rFlippedMatrix[l][row] = rMatrix[l][col];
         rFlippedMatrix[l][col] = rMatrix[l][row];
+    }
+}
+
+void EqualityConstraint::variable_ec_to_ksat_constraint_update(vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_, vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<int> &rUsedVariables, vector<impalib_type> &rIncomingMetricsCost, vector<vector<int>> &rVariablesConnections)
+{
+
+    vector<impalib_type> used_incoming_metrics_cost(numVariables_, zero_value);
+
+    for (int i = 0; i < rUsedVariables.size(); ++i) {
+        used_incoming_metrics_cost[rUsedVariables[i]] = rIncomingMetricsCost[rUsedVariables[i]];
+    }
+    
+    vector<impalib_type> sum_messages(numVariables_, zero_value);
+
+    for (int i = 0; i < numConstraints_; ++i) {
+        for (int j = 0; j < numVariables_; ++j) {
+            sum_messages[j] += rKsatConstraint2EqConstraintM_[i][j];
+        }
+    }
+    for (int i = 0; i < numVariables_; ++i) {
+        sum_messages[i] += used_incoming_metrics_cost[i];
+    }
+    
+    for (int index_variable = 0; index_variable < rUsedVariables.size(); ++index_variable) {
+        int variable = rUsedVariables[index_variable];
+        for (int i = 0; i < rVariablesConnections[variable].size(); ++i) {
+            int constraint = rVariablesConnections[variable][i];
+            rVariableEc2KsatConstraintM[constraint][variable] = sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable];
+        }
     }
 }

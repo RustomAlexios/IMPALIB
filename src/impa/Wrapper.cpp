@@ -124,3 +124,23 @@ extern "C" void WrapperTsp(const int NUM_ITERATIONS, const int NUM_NODES, const 
     model_graph.process_ouputs(pExtrinsic_output_edge_ec, pNum_augmentations, pNum_added_constraints, pTour_impa, pCost_impa, pNo_improv_sol_count_exc_flag, \
                               pNo_cons_loops_count_exc_flag, pSol_osc_count_exc_flag, pSelected_edges, pSelected_edges_size, pSubtour_paths, pSubtour_paths_size);
 }
+
+
+
+extern "C" void WrapperKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS,
+                            const int NUM_USED_VARIABLES, const impalib_type ALPHA, const bool FILTERING_FLAG, 
+                            const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY,
+                            const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
+                            const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST,
+                            impalib_type *pVariable_ec_to_ksat_constraint_m_py, impalib_type *pExtrinsic_output_variable_ec,
+                            const int K_VARIABLE)
+{
+    GraphicalModelKsat model_graph(NUM_ITERATIONS, NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA, NUM_USED_VARIABLES);
+
+    model_graph.initialize(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST, pVariable_ec_to_ksat_constraint_m_py);
+
+    model_graph.iterate();
+
+    copy(model_graph.outputs.ExtrinsicOutputVariableEc.begin(), model_graph.outputs.ExtrinsicOutputVariableEc.begin() + NUM_VARIABLES,
+         pExtrinsic_output_variable_ec);
+}

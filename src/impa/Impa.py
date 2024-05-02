@@ -22,6 +22,9 @@ from impa.environmentModule import (
     permutations,
     pkl,
     chain,
+    random,
+    defaultdict,
+    sys
 )
 
 # Import necessary variables and functions from the initializationModule
@@ -42,6 +45,7 @@ from impa.cFunctionAPI import (
     c_bool_p,
     WrapperTsp,
     WrapperKcMwm,
+    WrapperKsat,
 )
 
 """
@@ -2232,3 +2236,531 @@ class ImpaKcMwm:
 
         print(f"Matching All Projects to Teams : {project_matched_flag}")
         print("Total Weight RHS: ", total_weight)
+        
+        
+class GraphicalModelKsat:
+    def __init__(
+        self,
+        NUM_ITERATIONS,
+        NUM_VARIABLES,
+        NUM_CONSTRAINTS,
+        K_VARIABLE,
+        FILTERING_FLAG,
+        ALPHA,
+        THRESHOLD,
+        RANDOM_TEST_FLAG,
+        POST_PROCESS_FLAG,
+        TYPE_METRICS,
+        PP_ELEMENTS,
+        IM_VARIANCE,
+        OVERWRITE,
+    ):
+        self.num_iterations = NUM_ITERATIONS
+        self.num_variables = NUM_VARIABLES
+        self.num_constraints = NUM_CONSTRAINTS
+        self.k_variable = K_VARIABLE
+        self.threshold = THRESHOLD
+        self.filtering_flag = FILTERING_FLAG
+        self.alpha = ALPHA
+        self.random_test_flag = RANDOM_TEST_FLAG
+        self.type_metrics = TYPE_METRICS
+        self.pp_elements = PP_ELEMENTS
+        self.num_decisions = 2
+        self.var = IM_VARIANCE
+        self.overwrite = OVERWRITE
+        self.post_process_flag = POST_PROCESS_FLAG
+        
+    def initialize(self):
+        
+        self.results_composed = []
+
+        if not self.random_test_flag:
+            self.num_variables = self.input_load[0]
+            self.num_constraints = self.input_load[1]
+            self.k_variable = self.input_load[2] 
+            type_metrics = self.input_load[9]
+            self.valid_sol = self.input_load[10]
+            
+
+        num_variables = self.num_variables
+        num_constraints = self.num_constraints
+        k_variable = self.k_variable
+
+        print(f"num_variables: {num_variables}")
+        print(f"num_constraints: {num_constraints}")
+        print(f"k_variable: {k_variable}")
+        if (not self.overwrite and not self.random_test_flag):
+            print(f"type_metrics: {type_metrics}")
+            self.type_metrics = type_metrics
+        elif (not self.overwrite and self.random_test_flag):
+            print(f"type_metrics: {self.type_metrics}")
+        elif (self.overwrite and not self.random_test_flag):
+            print(f"type_metrics changed from {type_metrics} to {self.type_metrics}")
+        elif (self.overwrite and self.random_test_flag):
+            print("Cannot Overwrite Metrics")
+            print(f"type_metrics: {self.type_metrics}")
+        
+        type_metrics = self.type_metrics
+    
+        if (self.random_test_flag):
+            constraints_connections, constraints_connections_type, incoming_metrics_cost, used_variables, variables_connections, variables_connections_type, valid_sol = self.create_model_structure(num_variables, num_constraints, k_variable, type_metrics = type_metrics)
+            self.valid_sol = valid_sol
+            num_constraints = len(constraints_connections)
+            if (num_constraints != self.num_constraints):
+                print("Duplicate constraints were found. Pre-processing completed.")
+                print(f"num_constraints: {num_constraints}")
+            self.num_constraints  = num_constraints
+        
+        if not self.random_test_flag:
+            self.constraints_connections = self.input_load[3]
+            self.constraints_connections_type = self.input_load[4]
+            self.incoming_metrics_cost = self.input_load[5]
+            self.used_variables = self.input_load[6]
+            self.variables_connections = self.input_load[7]
+            self.variables_connections_type = self.input_load[8]
+            constraints_connections = self.constraints_connections
+            constraints_connections_type = self.constraints_connections_type
+            incoming_metrics_cost = self.incoming_metrics_cost
+            used_variables = self.used_variables
+            variables_connections = self.variables_connections
+            variables_connections_type = self.variables_connections_type
+            
+            if (self.overwrite):
+                incoming_metrics_cost = self.generate_incoming_metrics(self.valid_sol)
+                self.incoming_metrics_cost = incoming_metrics_cost
+            
+        self.constraints_connections = constraints_connections
+        self.constraints_connections_type = constraints_connections_type
+        self.incoming_metrics_cost = incoming_metrics_cost
+        self.variables_connections = variables_connections
+        self.variables_connections_type = variables_connections_type
+        valid_sol = self.valid_sol
+        
+        self.used_variables = used_variables
+
+        self.intrinsic_out_variable_ec = np.zeros(
+            num_variables,
+            dtype=np_impa_lib,
+        )
+
+        variable_ec_to_ksat_constraint_m = np.zeros(
+            (
+                num_constraints,
+                num_variables,
+            ),
+            dtype=np_impa_lib,
+        )
+
+        for i in range(len(constraints_connections)):
+            connection = constraints_connections[i]
+            for variable in connection:
+                cost = incoming_metrics_cost[variable]
+                variable_ec_to_ksat_constraint_m[i][variable] = cost
+                variable_ec_to_ksat_constraint_m[i][variable] = cost
+        
+        self.variable_ec_to_ksat_constraint_m = variable_ec_to_ksat_constraint_m
+        
+        self.num_used_variables = len(self.used_variables)
+        
+        self.variables_connections_sizes = np.array([len(connection) for connection in self.variables_connections])
+
+    def generate_incoming_metrics(self, valid_sol):
+        incoming_metrics_cost = np.zeros(self.num_variables)
+        type_metrics = self.type_metrics
+        normal_variance = self.var
+        for i, valid_sol_value in enumerate(valid_sol):
+            if (type_metrics == 1): # correctly biased
+                mean = -normal_variance/2 if valid_sol_value == 1 else normal_variance/2
+                incoming_metrics_cost[i] = np.random.normal(loc=mean, scale=np.sqrt(normal_variance))
+            elif (type_metrics == 0): # random IM
+                random_sign = np.random.choice([-1, 1])
+                mean = random_sign*normal_variance/2
+                incoming_metrics_cost[i] = np.random.normal(mean, np.sqrt(normal_variance))
+            elif (type_metrics == 2): #normal(0,sigma^2)
+                incoming_metrics_cost[i] = np.random.normal(0, np.sqrt(normal_variance))
+        
+        return incoming_metrics_cost
+    
+    def create_model_structure(self, num_variables, num_constraints, k_variable, type_metrics = 1):
+        
+        constraints_connections = [[] for _ in range(num_constraints)]
+        constraints_connections_type = [[] for _ in range(num_constraints)]
+        variables_connections = [[] for _ in range(num_variables)] 
+        variables_connections_type = [[] for _ in range(num_variables)]
+        used_variables = []
+        
+        valid_sol = np.random.randint(2, size=num_variables, dtype=int)
+        incoming_metrics_cost = self.generate_incoming_metrics(valid_sol)     
+        index_constraint = 0
+        for constraint_idx in range(num_constraints):
+            connections = []
+            connections_types = []
+            
+            satisfying_variable_index = random.randint(0, num_variables - 1)
+            satisfying_variable_value = valid_sol[satisfying_variable_index]
+            connection_type = -1 if satisfying_variable_value == 0 else 1
+            connections.append(satisfying_variable_index)
+            connections_types.append(connection_type)
+            used_variables.append(satisfying_variable_index)
+            variables_connections[satisfying_variable_index].append(index_constraint)
+            variables_connections_type[satisfying_variable_index].append(connection_type)
+            
+            for k_variable_idx in range(k_variable-1):
+                choice_variable = random.choice([idx for idx in range(num_variables) if idx not in connections])
+                connections.append(choice_variable)
+                choice_connection_type = random.choice([-1, 1])
+                connections_types.append(choice_connection_type)
+                
+                variables_connections[choice_variable].append(index_constraint)
+                used_variables.append(choice_variable)
+                variables_connections_type[choice_variable].append(choice_connection_type)
+ 
+            found = False
+            for i, sublist_i in enumerate(constraints_connections):
+                if(set(sublist_i) == set(connections)):
+                    index_found = i
+                    found = True
+                    
+            if (not found):
+                constraints_connections[index_constraint] = connections
+                constraints_connections_type[index_constraint] = connections_types 
+                index_constraint+=1
+            else:
+                for variable in connections:
+                    index = variables_connections[variable].index(index_constraint)
+                    variables_connections[variable].pop(index)
+                    variables_connections_type[variable].pop(index)
+                
+        used_variables = list(set(used_variables))
+        constraints_connections = [sublist for sublist in constraints_connections if sublist]
+        constraints_connections_type = [sublist for sublist in constraints_connections_type if sublist]
+        return constraints_connections, constraints_connections_type, incoming_metrics_cost, used_variables, variables_connections, variables_connections_type, valid_sol
+    
+
+    def run_impa(self):
+        
+        print("--------------")
+        print("Running IMPA")
+        print("--------------")
+            
+        (
+            used_variables_flatten_p,
+            variables_connections_flatten_p,
+            variables_connections_sizes_flatten_p,
+            constraints_connections_flatten_p,
+            constraints_connections_type_flatten_p,
+            incoming_metrics_cost_flatten_p,
+            variable_ec_to_ksat_constraint_m_flatten_p,
+            extrinsic_output_variable_ec_p,
+        ) = self.process_inputs_ctypes()
+        
+        WrapperKsat(
+            np.int32(self.num_iterations),
+            np.int32(self.num_variables),
+            np.int32(self.num_constraints),
+            np.int32(self.num_used_variables),
+            np_impa_lib(self.alpha),
+            self.filtering_flag,
+            used_variables_flatten_p,
+            variables_connections_flatten_p,
+            variables_connections_sizes_flatten_p,
+            constraints_connections_flatten_p,
+            constraints_connections_type_flatten_p,
+            incoming_metrics_cost_flatten_p,
+            variable_ec_to_ksat_constraint_m_flatten_p,
+            extrinsic_output_variable_ec_p,
+            np.int32(self.k_variable)
+        )
+        
+        extrinsic_output_variable_ec = list(extrinsic_output_variable_ec_p.__dict__.values())[0]
+    
+        used_incoming_metrics_cost = np.zeros(self.num_variables)
+        used_incoming_metrics_cost[self.used_variables] = self.incoming_metrics_cost[self.used_variables]
+        intrinsic_out_variable_ec = extrinsic_output_variable_ec + used_incoming_metrics_cost
+        self.intrinsic_out_variable_ec = intrinsic_out_variable_ec
+        self.hard_decision_analysis()
+        
+        self.required_PP = False
+        if (len(self.unsatisfied_constraints) and self.post_process_flag):
+            self.required_PP = True
+            self.run_post_processing()
+
+        print('--------')
+        print("IMPA results:")
+        
+        if (not len(self.unsatisfied_constraints)):
+            print("Problem satisfied")  
+        else:
+            print("Problem not satisfied")  
+        
+        
+        print("Active variables: ",self.active_variables,)
+        print("Inactive variables: ", self.inactive_variables,)
+        
+        self.valid_sol_active_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if self.valid_sol[self.used_variables][i]]
+        self.valid_sol_inactive_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if not self.valid_sol[self.used_variables][i]]
+        
+        similarity_active = self.calculate_similarity(set(self.active_variables), set(self.valid_sol_active_variables))
+        similarity_inactive = self.calculate_similarity(set(self.inactive_variables), set(self.valid_sol_inactive_variables))
+        
+        self.average_similarity = 100*(similarity_active+similarity_inactive)/2
+        print(f"average_similarity: {self.average_similarity:.2f}")
+        
+        if self.save_flag:
+            self.results_composed.append(
+                (
+                    self.filtering_flag,
+                    self.alpha,
+                    self.type_metrics,
+                    self.num_variables,
+                    self.num_constraints,
+                    self.k_variable,
+                    self.constraints_connections,
+                    self.constraints_connections_type,
+                    self.incoming_metrics_cost,
+                    self.used_variables,
+                    self.variables_connections,
+                    self.variables_connections_type,
+                    self.valid_sol,
+                    self.intrinsic_out_variable_ec,
+                    self.active_variables,
+                    self.inactive_variables,
+                    self.satisfied_constraints,
+                    self.unsatisfied_constraints,
+                    self.formula_satisfied,
+                    self.average_similarity,
+                    self.required_PP
+                )
+            )
+
+    def calculate_similarity(self,set_1, set_2):
+        cardinality_intersection = len(set_1.intersection(set_2))
+        cardinality_union_set = len(set_1.union(set_2))
+        if (cardinality_union_set == 0):
+            similarity = 1
+        else:
+            similarity = cardinality_intersection/cardinality_union_set
+        return similarity
+        
+    def process_inputs_ctypes(self):
+        
+        used_variables_flatten = np.array(self.used_variables).flatten().astype(np.int32)
+        used_variables_flatten_p = used_variables_flatten.ctypes.data_as(c_int_p)
+        
+        variables_connections_flatten = np.array([item for sublist in self.variables_connections for item in sublist]).flatten().astype(np.int32)
+        variables_connections_flatten_p = variables_connections_flatten.ctypes.data_as(c_int_p)
+        
+        variables_connections_sizes_flatten = self.variables_connections_sizes.flatten().astype(np.int32)
+        variables_connections_sizes_flatten_p = variables_connections_sizes_flatten.ctypes.data_as(c_int_p)
+        
+        constraints_connections_flatten = np.array(self.constraints_connections).flatten().astype(np.int32)
+        constraints_connections_flatten_p = constraints_connections_flatten.ctypes.data_as(c_int_p)
+        
+        constraints_connections_type_flatten = np.array(self.constraints_connections_type).flatten().astype(np.int32)
+        constraints_connections_type_flatten_p = constraints_connections_type_flatten.ctypes.data_as(c_int_p)
+        
+        incoming_metrics_cost_flatten = self.incoming_metrics_cost.flatten().astype(np_impa_lib)
+        incoming_metrics_cost_flatten_p = incoming_metrics_cost_flatten.ctypes.data_as(c_impa_lib_type_p)
+        
+        variable_ec_to_ksat_constraint_m_flatten = self.variable_ec_to_ksat_constraint_m.flatten().astype(np_impa_lib)
+        variable_ec_to_ksat_constraint_m_flatten_p = variable_ec_to_ksat_constraint_m_flatten.ctypes.data_as(c_impa_lib_type_p)
+
+        extrinsic_output_variable_ec = np.zeros((self.num_variables))
+        extrinsic_output_variable_ec = np.array(extrinsic_output_variable_ec).flatten().astype(np_impa_lib)
+        extrinsic_output_variable_ec_p = extrinsic_output_variable_ec.ctypes.data_as(c_impa_lib_type_p)
+        
+        return (
+            used_variables_flatten_p,
+            variables_connections_flatten_p,
+            variables_connections_sizes_flatten_p,
+            constraints_connections_flatten_p,
+            constraints_connections_type_flatten_p,
+            incoming_metrics_cost_flatten_p,
+            variable_ec_to_ksat_constraint_m_flatten_p,
+            extrinsic_output_variable_ec_p,
+        )
+
+    def get_summary(self, hard_decision):
+        
+        self.active_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if hard_decision[self.used_variables][i]]
+        self.inactive_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if not hard_decision[self.used_variables][i]]
+        
+        indices_satisfied_constraints_solid = [(i, j) for i, sublist in enumerate(self.variables_connections_type) for j, element in enumerate(sublist) if element == 1 and i in self.active_variables]
+        satisfied_constraints_solid = list(set([self.variables_connections[index[0]][index[1]] for index in indices_satisfied_constraints_solid]))
+        
+        indices_satisfied_constraints_dashed = [(i, j) for i, sublist in enumerate(self.variables_connections_type) for j, element in enumerate(sublist) if element == -1 and i in self.inactive_variables]
+        satisfied_constraints_dashed = list(set([self.variables_connections[index[0]][index[1]] for index in indices_satisfied_constraints_dashed])) 
+        
+        satisfied_constraints = list(set(satisfied_constraints_solid + satisfied_constraints_dashed))
+        self.satisfied_constraints = satisfied_constraints
+        
+        unsatisfied_constraints = [constraint for constraint in range(self.num_constraints) if constraint not in satisfied_constraints]
+        self.unsatisfied_constraints = unsatisfied_constraints
+        
+        
+            
+    def print_summary(self, unsatisfied_constraints):
+        
+        if (len(unsatisfied_constraints)):
+            self.formula_satisfied = False
+            print(f"{len(unsatisfied_constraints)} unsatisfied constraints: {unsatisfied_constraints}")
+        else:
+            self.formula_satisfied = True
+            print(f"All {self.num_constraints} constraints are satisfied")
+            
+    def hard_decision_analysis(self,):
+        
+        intrinsic_out_variable_ec = self.intrinsic_out_variable_ec
+
+        hard_decision = np.array(deepcopy(intrinsic_out_variable_ec))
+        hard_decision[intrinsic_out_variable_ec > self.threshold] = 0
+        hard_decision[intrinsic_out_variable_ec <= self.threshold] = 1
+        
+        self.hard_decision = hard_decision
+        
+        self.get_summary(self.hard_decision)
+        self.print_summary(self.unsatisfied_constraints)
+        
+        similar_elements = []
+        for i, sublist_i in enumerate(self.constraints_connections):
+            for j, sublist_j in enumerate(self.constraints_connections):
+                if i<j and set(sublist_i) == set(sublist_j):
+                    similar_elements.append((i, j))
+        if (len(similar_elements)):
+            print("Duplicate constraints found")  
+        
+    def run_post_processing(self):
+    
+        print('--------')
+        print("Before Post-Processing")
+        print("Active variables: ",self.active_variables,)
+        print("Inactive variables: ", self.inactive_variables,)
+        
+        print("--------------")
+        print("Post-Processing started")
+        print("--------------")
+        
+        common_elements_list = []
+        
+        print("Checking common variables across violated constraints")
+        for violated_constraint in self.unsatisfied_constraints:
+            remaining_violated_constraints = [self.constraints_connections[i] for i in self.unsatisfied_constraints if i != violated_constraint]
+            remaining_violated_constraints_type = [self.constraints_connections_type[i] for i in self.unsatisfied_constraints if i != violated_constraint]
+            for index_remaining_constraint, remaining_constraint_connections in enumerate(remaining_violated_constraints):
+                common_elements = [(element_1, self.constraints_connections_type[violated_constraint][index_1]) for index_1, element_1 in enumerate(self.constraints_connections[violated_constraint]) for index_2, element_2 in enumerate(remaining_constraint_connections) if (element_1 == element_2 and self.constraints_connections_type[violated_constraint][index_1] == remaining_violated_constraints_type[index_remaining_constraint][index_2] \
+                                    and ((element_1 in self.active_variables and self.constraints_connections_type[violated_constraint][index_1] == -1) or (element_1 in self.inactive_variables and self.constraints_connections_type[violated_constraint][index_1] == 1)))]
+                if (common_elements):
+                    common_elements_with_count = [(element[0], element[1]) for element in common_elements]
+                    common_elements_list.extend([element for element in common_elements_with_count if element not in common_elements_list])
+        
+        old_length_unsatisfied_constraints = len(self.unsatisfied_constraints)
+        for variable, type in common_elements_list:
+            hard_decision_new = copy.deepcopy(self.hard_decision)
+            new_variable_hard_decision = 0 if type == -1 else 1
+            hard_decision_new[variable] = new_variable_hard_decision
+            self.get_summary(hard_decision_new)
+            if (len(self.unsatisfied_constraints)) < old_length_unsatisfied_constraints:
+                print(f"Variable {variable} changed to {new_variable_hard_decision}")
+                self.hard_decision[variable] = new_variable_hard_decision
+                old_length_unsatisfied_constraints = len(self.unsatisfied_constraints)
+                self.print_summary(self.unsatisfied_constraints)
+                if (not len(self.unsatisfied_constraints)):
+                    print("Post-Processing Ended")
+                    break
+        self.get_summary(self.hard_decision)
+        flattened_list = []
+        combinations_list = []
+        print('--------')
+        print("Checking common variables across each violated constraint and its neighboring constraints (only satisfied by nodes in a violated constraint)")
+        
+        for violated_constraint in self.unsatisfied_constraints:
+            combinations_list.append(self.constraints_connections[violated_constraint])
+            constraints_connections_investigated = [[connections, self.constraints_connections_type[index], index] for index, connections in enumerate(self.constraints_connections) if any(element in connections for element in self.constraints_connections[violated_constraint]) and not all(element in connections for element in self.constraints_connections[violated_constraint])]
+            count_satisfied = np.zeros(len(constraints_connections_investigated))
+            satisfying_variables_constraints = [[] for _ in constraints_connections_investigated]
+            for i in range(len(constraints_connections_investigated)):
+                for j in range(len(constraints_connections_investigated[i][0])):
+                    if (constraints_connections_investigated[i][0][j] not in self.constraints_connections[violated_constraint] and constraints_connections_investigated[i][1][j] ==1 and constraints_connections_investigated[i][0][j] in self.active_variables):
+                        count_satisfied[i] +=1
+                        satisfying_variables_constraints[i].append(constraints_connections_investigated[i][0][j])
+                    elif (constraints_connections_investigated[i][0][j] not in self.constraints_connections[violated_constraint] and constraints_connections_investigated[i][1][j] == -1 and constraints_connections_investigated[i][0][j] in self.inactive_variables):
+                        count_satisfied[i] +=1
+                        satisfying_variables_constraints[i].append(constraints_connections_investigated[i][0][j])
+            
+            index_constraints_of_interest = np.where(count_satisfied==0)[0]
+            overlap_common_type_list = []
+            overlap_forbidden_list = []
+            
+            num_decisions = self.num_decisions
+            for i in range(len(index_constraints_of_interest)):
+                index = index_constraints_of_interest[i]
+                index_constraint = constraints_connections_investigated[index][2]
+                overlap = [x for x in self.constraints_connections[index_constraint] if x in self.constraints_connections[violated_constraint]]
+                overlap_common_type = [x for x in overlap if self.constraints_connections_type[index_constraint][self.constraints_connections[index_constraint].index(x)] == self.constraints_connections_type[violated_constraint][self.constraints_connections[violated_constraint].index(x)]]
+                if (overlap_common_type):
+                    overlap_common_type_list.append(overlap_common_type)
+                if (len(overlap)==1):
+                    overlap_forbidden_list.append(overlap)
+                combinations_list.append(self.constraints_connections[index_constraint])
+            overlap_common_type_set = {item for sublist in overlap_common_type_list for item in sublist}
+            overlap_forbidden_set = {item for sublist in overlap_forbidden_list for item in sublist}
+            pool_variables = overlap_common_type_set.difference(overlap_forbidden_set)      
+            
+            hard_decision_old = copy.deepcopy(self.hard_decision)   
+            unsatisfied_constraints_old = copy.deepcopy(self.unsatisfied_constraints)
+            old_length_unsatisfied_constraints = len(unsatisfied_constraints_old)
+            if (len(pool_variables)):
+                for variable_in_pool in pool_variables:
+                    hard_decision_new = copy.deepcopy(self.hard_decision)
+                    new_variable_hard_decision = 1 if self.constraints_connections_type[violated_constraint][self.constraints_connections[violated_constraint].index(variable_in_pool)] ==1 else 0
+                    hard_decision_new[variable_in_pool] = new_variable_hard_decision
+                    self.get_summary(hard_decision_new)
+                    if (len(self.unsatisfied_constraints)) < old_length_unsatisfied_constraints:
+                        print(f"Variable {variable_in_pool} changed to {new_variable_hard_decision}")
+                        self.hard_decision[variable_in_pool] = new_variable_hard_decision
+                        old_length_unsatisfied_constraints = len(self.unsatisfied_constraints)
+                        self.print_summary(self.unsatisfied_constraints)
+                        if (not len(self.unsatisfied_constraints)):
+                            print("Post-Processing Ended")
+                            break
+        
+        print('--------')
+        self.get_summary(self.hard_decision)
+        print("Brute force search across variables in violated constraints and their neighboring constraints (only satisfied by nodes in a violated constraint)")
+        if (len(self.unsatisfied_constraints)):
+            unsatisfied_constraints_old = copy.deepcopy(self.unsatisfied_constraints)
+            old_length_unsatisfied_constraints = len(unsatisfied_constraints_old)
+            for num_elements in range(self.pp_elements, 1, -1):
+                print(f"Investigating combinations of size {num_elements}")
+                new_combinations_list = list(set(element for sublist in combinations_list for element in sublist))
+                new_combinations_list = list(itertools.combinations(new_combinations_list, num_elements)) 
+                print(f"Number of combinations: {len(new_combinations_list)}")
+                for index_element, element in enumerate(new_combinations_list):
+                    possible_element_decisions = list(itertools.product(range(num_decisions), repeat=num_elements))
+                    for element_decision in possible_element_decisions:
+                        hard_decision_new = copy.deepcopy(self.hard_decision)
+                        for i, sub_element_decision in enumerate(element_decision):
+                            hard_decision_new[element[i]] = sub_element_decision   
+                        self.get_summary(hard_decision_new)
+                        if (len(self.unsatisfied_constraints)) < old_length_unsatisfied_constraints:
+                            for i, sub_element_decision in enumerate(element_decision):
+                                if (self.hard_decision[element[i]] != hard_decision_new[element[i]]):
+                                    print(f"Variable {element[i]} changed to {int(hard_decision_new[element[i]])}")
+                            old_length_unsatisfied_constraints = len(self.unsatisfied_constraints)
+                            self.hard_decision = hard_decision_new
+                            self.print_summary(self.unsatisfied_constraints)
+                            if (not len(self.unsatisfied_constraints)):
+                                print("Post-Processing Ended")
+                            break  
+                    if (not len(self.unsatisfied_constraints)):
+                        break          
+        self.get_summary(self.hard_decision)
+        
+        
+    def save_outputs(self):
+        """
+        This function will save results_composed (a dictionary containing variables of interest)
+        """
+        # Saving the results to a file
+        with open(f"{self.folder_outputs}/outputs_set{self.test_file}.pkl", "wb") as f:
+            pkl.dump(self.results_composed, f)

@@ -269,3 +269,85 @@ void ut_model_graph_tsp(string& ut_name){
     }
 
 }
+
+
+void ut_model_graph_ksat(string&);
+
+void ut_model_graph_ksat(string& ut_name){
+
+    const char *n_variables_bash=getenv("NUM_VARIABLES");
+    if(n_variables_bash == NULL)
+    {cout << "n_variables_bash not available\n";}
+
+    const char *k_variable_bash=getenv("K_VARIABLE");
+    if(k_variable_bash == NULL)
+    {cout << "k_variable_bash not available\n";}
+
+    const char *filt_flag_bash=getenv("FILT_FLAG");
+    if(filt_flag_bash == NULL)
+    {cout << "filt_flag_bash not available\n";}
+
+    const char *n_iter_bash=getenv("N_ITER");
+    if(n_iter_bash == NULL)
+    {cout << "n_iter_bash not available\n";}
+
+    const int NUM_VARIABLES = atoi(n_variables_bash);  
+    const int K_VARIABLE = atoi(k_variable_bash);
+    const int N_ITER = atoi(n_iter_bash);
+    const bool FILT_FLAG(filt_flag_bash);
+
+    cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/alpha.npy");
+    impalib_type* alpha_pure = input_alpha.data<impalib_type>();
+    const impalib_type ALPHA = *alpha_pure;
+
+    cnpy::NpyArray input_num_constraints = cnpy::npy_load("../ut_inputs/num_constraints.npy");
+    int* num_constraints_pure = input_num_constraints.data<int>();
+    const int NUM_CONSTRAINTS = *num_constraints_pure;
+
+    cnpy::NpyArray input_num_used_variables = cnpy::npy_load("../ut_inputs/size_used_variables_pure.npy");
+    int* size_used_variables_pure = input_num_used_variables.data<int>();
+    const int NUM_USED_VARIABLES = *size_used_variables_pure;
+
+    cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/used_variables_pure.npy");
+    int* used_variables_pure = input1.data<int>(); 
+
+    cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/variables_connections_pure.npy");
+    int* variables_connections_pure = input2.data<int>(); 
+
+    cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/sizes_of_variables_connections_pure.npy");
+    int* sizes_of_variables_connections_pure = input3.data<int>(); 
+
+    cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/constraints_connections_pure.npy");
+    int* constraints_connections_pure = input4.data<int>(); 
+
+    cnpy::NpyArray input5 = cnpy::npy_load("../ut_inputs/constraints_connections_type_pure.npy");
+    int* constraints_connections_type_pure = input5.data<int>(); 
+
+    cnpy::NpyArray input6 = cnpy::npy_load("../ut_inputs/incoming_metrics_cost_pure.npy");
+    impalib_type* incoming_metrics_cost_pure = input6.data<impalib_type>(); 
+
+    cnpy::NpyArray input7 = cnpy::npy_load("../ut_inputs/variable_ec_to_ksat_constraint_m_pure.npy");
+    impalib_type* variable_ec_to_ksat_constraint_m_pure = input7.data<impalib_type>(); 
+
+    if (ut_name == "Iterate"){
+
+        cout<<"-------"<<"\n";
+        cout<<"C++"<<"\n";
+
+        GraphicalModelKsat model_graph(N_ITER, NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILT_FLAG, ALPHA, NUM_USED_VARIABLES);
+
+        model_graph.initialize(used_variables_pure, variables_connections_pure, sizes_of_variables_connections_pure, constraints_connections_pure, constraints_connections_type_pure, \
+                                incoming_metrics_cost_pure, variable_ec_to_ksat_constraint_m_pure);
+
+        model_graph.iterate();
+
+        fstream file_output("../ut_results/extrinsic_out_variable_ec_wrapper", ios::out | ios::binary | ios:: trunc);
+            if (file_output.is_open()) {
+                for (int i=0; i<NUM_VARIABLES; i++){
+                    file_output.write((char*)(&model_graph.outputs.ExtrinsicOutputVariableEc[i]), sizeof(model_graph.outputs.ExtrinsicOutputVariableEc[i]));}
+                    file_output.close();}
+            else {cout << "Error! File cannot be opened!" << "\n";}
+
+    }
+
+}

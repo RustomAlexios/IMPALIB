@@ -415,3 +415,115 @@ void OutputsTsp::intrinsic_output_edge_ec_update(vector<impalib_type> &rCostEdge
     transform(ExtrinsicOutputEdgeEc.begin(), ExtrinsicOutputEdgeEc.end(), rCostEdgeVariable.begin(),
               IntrinsicOutputEdgeEc.begin(), plus<impalib_type>());
 }
+
+
+class InputsKsat
+{
+private:
+    int numVariables_;
+    int numConstraints_;
+    int kVariable_;
+    int numUsedVariables_;
+
+public:
+    vector<int> UsedVariables;
+    vector<impalib_type> IncomingMetricsCost;
+    vector<vector<int>> ConstraintsConnections;
+    vector<vector<int>> ConstraintsConnectionsType;
+    vector<vector<int>> VariablesConnections;
+    vector<int> VariablesConnectionsSizes;
+    vector<vector<impalib_type>> VariableEc2KsatConstraintM;
+
+    void process_inputs(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);;
+
+    InputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const int NUM_USED_VARIABLES);
+};
+
+InputsKsat::InputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const int NUM_USED_VARIABLES)
+    : numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kVariable_(K_VARIABLE), numUsedVariables_(NUM_USED_VARIABLES){
+
+    };
+
+class OutputsKsat
+{
+private:
+    int numVariables_;
+    int numConstraints_;
+    int kVariable_;
+
+public:
+    vector<impalib_type> ExtrinsicOutputVariableEc;
+    OutputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE);
+    void extrinsic_output_variable_ec_update(vector<vector<impalib_type>> &);
+};
+
+OutputsKsat::OutputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE)
+    : numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kVariable_(K_VARIABLE)
+{
+
+    ExtrinsicOutputVariableEc.reserve(numVariables_);
+    fill(ExtrinsicOutputVariableEc.begin(), ExtrinsicOutputVariableEc.begin() + numVariables_, zero_value);
+};
+
+void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, 
+                                    const int *pCONSTRAINTS_CONNECTIONS, const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py)
+{
+    copy(pUSED_VARIABLES_PY, pUSED_VARIABLES_PY + numUsedVariables_, back_inserter(UsedVariables));
+
+    copy(pINCOMING_METRICS_COST, pINCOMING_METRICS_COST + numVariables_, back_inserter(IncomingMetricsCost));
+
+    copy(pVARIABLES_CONNECTIONS_SIZES, pVARIABLES_CONNECTIONS_SIZES + numVariables_, back_inserter(VariablesConnectionsSizes));
+
+    for (int constraint_index = 0; constraint_index < numConstraints_; constraint_index++){
+        
+        ConstraintsConnections.push_back(vector<int>(kVariable_, 0));
+        
+        copy(pCONSTRAINTS_CONNECTIONS + kVariable_ * constraint_index,
+             pCONSTRAINTS_CONNECTIONS + kVariable_ * (constraint_index + 1),
+             ConstraintsConnections[constraint_index].begin());
+
+        ConstraintsConnectionsType.push_back(vector<int>(kVariable_, 0));
+        
+        copy(pCONSTRAINTS_CONNECTIONS_TYPE + kVariable_ * constraint_index,
+             pCONSTRAINTS_CONNECTIONS_TYPE + kVariable_ * (constraint_index + 1),
+             ConstraintsConnectionsType[constraint_index].begin());
+
+        VariableEc2KsatConstraintM.push_back(vector<impalib_type>(numVariables_, zero_value));
+        copy(pVariable_ec_to_ksat_constraint_m_py + numVariables_ * constraint_index,
+                pVariable_ec_to_ksat_constraint_m_py + numVariables_ * (constraint_index + 1),
+                VariableEc2KsatConstraintM[constraint_index].begin());
+    }
+
+    int connections_size_old = 0;
+
+    for (int variable_index = 0; variable_index < numVariables_; variable_index++){
+        
+        if (find(UsedVariables.begin(), UsedVariables.end(), variable_index) != UsedVariables.end()) {
+            
+            int connections_size = VariablesConnectionsSizes[variable_index];
+            
+            VariablesConnections.push_back(vector<int>(connections_size, 0));
+            
+            copy(pVARIABLES_CONNECTIONS_PY + connections_size_old,
+             pVARIABLES_CONNECTIONS_PY + connections_size_old + connections_size,
+             VariablesConnections[variable_index].begin());
+
+            connections_size_old += connections_size;
+
+        } else {
+            VariablesConnections.push_back(vector<int>());
+        }
+    }
+
+}
+
+void OutputsKsat::extrinsic_output_variable_ec_update(vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM)
+{
+
+    for (int variable_index = 0; variable_index < numVariables_; variable_index++) {
+        for (int constraint_index = 0; constraint_index < numConstraints_; constraint_index++) {
+            ExtrinsicOutputVariableEc[variable_index] +=
+                rKsatConstraint2EqConstraintM[constraint_index][variable_index];
+        }
+    }
+}

@@ -109,22 +109,7 @@ class EqualityConstraint:
     def flip_matrix(self, matrix):
         flipped_matrix = np.copy(matrix)
         for l in range(len(self.edge_connections)):
-            (
-                row,
-                col,
-            ) = self.edge_connections[l]
-            flipped_matrix[
-                l,
-                row,
-            ] = matrix[
-                l,
-                col,
-            ]
-            flipped_matrix[
-                l,
-                col,
-            ] = matrix[
-                l,
-                row,
-            ]
+            (row,col,) = self.edge_connections[l]
+            flipped_matrix[l,row,] = matrix[l,col,]
+            flipped_matrix[l,col,] = matrix[l,row,]
         return flipped_matrix

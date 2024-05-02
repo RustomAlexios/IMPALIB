@@ -157,4 +157,49 @@ void ut_input_output_tsp(string& ut_name){
 
 }
 
+void ut_input_output_ksat(string&);
+
+void ut_input_output_ksat(string& ut_name){
+
+    const char *n_variables_bash=getenv("NUM_VARIABLES");
+    if(n_variables_bash == NULL)
+    {cout << "n_variables_bash not available\n";}
+
+    const char *n_constraints_bash=getenv("NUM_CONSTRAINTS");
+    if(n_constraints_bash == NULL)
+    {cout << "n_constraints_bash not available\n";}
+
+    const char *k_variable_bash=getenv("K_VARIABLE");
+    if(k_variable_bash == NULL)
+    {cout << "k_variable_bash not available\n";}
+
+    const int NUM_VARIABLES = atoi(n_variables_bash);  
+    const int NUM_CONSTRAINTS = atoi(n_constraints_bash);
+    const int K_VARIABLE = atoi(k_variable_bash);
+
+    cnpy::NpyArray input1 = cnpy::npy_load("../ut_inputs/ksat_constraint_to_eq_constraint_m_pure.npy");
+    impalib_type* ksat_constraint_to_eq_constraint_m_pure = input1.data<impalib_type>();
+
+    vector<vector<impalib_type>> ksat_constraint_to_eq_constraint_m(NUM_CONSTRAINTS, vector<impalib_type>(NUM_VARIABLES,zero_value));
+
+    for (int constraint_index=0; constraint_index<NUM_CONSTRAINTS; constraint_index++){
+    copy (ksat_constraint_to_eq_constraint_m_pure + NUM_VARIABLES*constraint_index, ksat_constraint_to_eq_constraint_m_pure+NUM_VARIABLES*(constraint_index+1), ksat_constraint_to_eq_constraint_m[constraint_index].begin() );
+    }
+
+    OutputsKsat outputs(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE);
+
+    if (ut_name == "ExtrinsicOutputVariableEcUpdate"){
+        
+        outputs.extrinsic_output_variable_ec_update(ksat_constraint_to_eq_constraint_m);
+        
+        fstream file_output("../ut_results/extrinsic_output_variable_ec_wrapper", ios::out | ios::binary | ios:: trunc);
+                if (file_output.is_open()) {
+                    for (int i=0; i<NUM_VARIABLES; i++){
+                        file_output.write((char*)(&outputs.ExtrinsicOutputVariableEc[i]), sizeof(outputs.ExtrinsicOutputVariableEc[i]));}
+                        file_output.close();}
+                else {cout << "Error! File cannot be opened!" << "\n";}
+    
+    }
+
+}
 

@@ -22,6 +22,7 @@ import re
 import elkai
 import copy
 import random
+import sys
 from itertools import combinations, permutations, chain, product
 from python_tsp.exact import solve_tsp_dynamic_programming, solve_tsp_brute_force
 from python_tsp.heuristics import solve_tsp_simulated_annealing
@@ -38,4 +39,6 @@ np.set_printoptions(suppress=True)
 # np_impa_lib = np.float32
 np_impa_lib = np.float64
 zero_value = np_impa_lib(0)
-# np.random.seed(17)
+
+#np.random.seed(30)
+#random.seed(30)
