@@ -49,28 +49,27 @@ if __name__ == "__main__":
 
     # Parse command-line arguments
     args = parser.parse_args()
-    NUM_ITERATIONS = args.nITER # number of iterations of IMPA
-    NUM_VARIABLES = args.nVariables # number of variables of k-SAT
-    NUM_CONSTRAINTS = args.nConstraints # number of constraints of k-SAT
+    NUM_ITERATIONS = args.nITER  # number of iterations of IMPA
+    NUM_VARIABLES = args.nVariables  # number of variables of k-SAT
+    NUM_CONSTRAINTS = args.nConstraints  # number of constraints of k-SAT
     K_VARIABLE = args.kVariable
-    THRESHOLD = args.threshold # threshold for hard decision analysis
-    FILTERING_FLAG = args.filteringFlag # perform filtering on messages from degree constraints and subtour elimination constraints
-    ALPHA = args.alpha # filtering parameter
-    test_file = args.testFile # test file number example if randomTestFlag is false
-    SAVE_FLAG = args.saveFlag # save results to analyze
-    RANDOM_TEST_FLAG = args.randomTestFlag # perform random graph analysis
-    input_path = args.inputPath # input path of test file if randomTestFlag is false
-    output_path = args.outputPath # output path for saving results
-    POST_PROCESS_FLAG = args.PPFlag # post processing flag
+    THRESHOLD = args.threshold  # threshold for hard decision analysis
+    FILTERING_FLAG = args.filteringFlag  # perform filtering on messages from degree constraints and subtour elimination constraints
+    ALPHA = args.alpha  # filtering parameter
+    test_file = args.testFile  # test file number example if randomTestFlag is false
+    SAVE_FLAG = args.saveFlag  # save results to analyze
+    RANDOM_TEST_FLAG = args.randomTestFlag  # perform random graph analysis
+    input_path = args.inputPath  # input path of test file if randomTestFlag is false
+    output_path = args.outputPath  # output path for saving results
+    POST_PROCESS_FLAG = args.PPFlag  # post processing flag
     TYPE_METRICS = args.typeMetrics
     PP_ELEMENTS = args.PPElements
     IM_VARIANCE = args.var
     OVERWRITE = args.overwrite
-    
+
     if K_VARIABLE >= NUM_VARIABLES:
         print("The value of K_VARIABLE has exceeded or reached the limit of NUM_VARIABLES. Exiting code.")
         sys.exit()
-        
 
     # Format alpha for output folder naming
     formatted_alpha = "{:.1f}".format(ALPHA)
@@ -93,9 +92,9 @@ if __name__ == "__main__":
     )
     # Set folder paths for inputs and outputs
     folder_inputs = "../../data/" + input_path
-    
+
     print(f"folder_inputs: {folder_inputs}")
-    
+
     if FILTERING_FLAG:
         ModelIMPA.folder_outputs = "../../data/" + output_path + f"_alpha{formatted_alpha}"
     else:
@@ -133,7 +132,7 @@ if __name__ == "__main__":
     # Start IMPA algorithm and pre-analysis
     ModelIMPA.start_time = time.time()
     ModelIMPA.run_impa()
-    #ModelIMPA.run_pre_analysis()
+    # ModelIMPA.run_pre_analysis()
 
     # Save outputs if saving is enabled and not doing random testing
     if ModelIMPA.save_flag and not ModelIMPA.random_test_flag:

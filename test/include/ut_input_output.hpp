@@ -190,7 +190,7 @@ void ut_input_output_ksat(string& ut_name){
 
     if (ut_name == "ExtrinsicOutputVariableEcUpdate"){
         
-        outputs.extrinsic_output_variable_ec_update(ksat_constraint_to_eq_constraint_m);
+        outputs.update_extrinsic(ksat_constraint_to_eq_constraint_m);
         
         fstream file_output("../ut_results/extrinsic_output_variable_ec_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {

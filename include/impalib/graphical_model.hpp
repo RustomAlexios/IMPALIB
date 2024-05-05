@@ -15,33 +15,34 @@
  */
 class GraphicalModelKcMwm {
    private:
-    int numProjects_;  ///< number of projects
-    int numTeams_; ///< number of teams
-    int numDepartments_; ///< number of departments
-    int maxSizeNonZeroWeights_; ///< maximum size of non-zero weights per department
-    int numIterations_; ///< number of iterations of IMPA
-    bool filteringFlag_; ///< filtering flag of knapsack constraints
-    impalib_type alpha_; ///< filtering parameter
-    vector<vector<impalib_type>> extrinsicOutputDepartmentDummy_; ///< messages from departments to teams before filtering
-    vector<vector<impalib_type>> extrinsicOutputDepartment_; ///< messages from departments to teams after filtering
-    vector<impalib_type> oric2PackageM_; ///< messages from ORIC to packages
-    vector<vector<impalib_type>> eqConstraint2OricM_; ///< messages from team equality constraint to ORIC
-    vector<vector<impalib_type>> oric2EqConstraintM_; ///< messages from ORIC to team equality constraint
-    vector<vector<impalib_type>> eqConstraint2ProjectM_; ///< messages from project equality constraint to project inequality constraint
-    vector<vector<impalib_type>> project2EqConstraintM_; ///< messages from project inequality constraint to project equality constraint
-    vector<impalib_type> team2OricM_; ///< messages from team equality constraint to ORIC
-    Knapsack modelKnapsacks_; ///< Knapsack object
-    InequalityConstraint projectIneqConstraint_; ///< Project Inequality constraint object
-    //EqualityConstraintKcMwm modelEqConstraint_; ///< Equality constraint object
-    EqualityConstraint modelEqConstraint_; ///< Equality constraint object
-    OrInequalityConstraint modelOric_; ///< ORIC object
+    int numProjects_;                                              ///< number of projects
+    int numTeams_;                                                 ///< number of teams
+    int numDepartments_;                                           ///< number of departments
+    int maxSizeNonZeroWeights_;                                    ///< maximum size of non-zero weights per department
+    int numIterations_;                                            ///< number of iterations of IMPA
+    bool filteringFlag_;                                           ///< filtering flag of knapsack constraints
+    impalib_type alpha_;                                           ///< filtering parameter
+    vector<vector<impalib_type>> extrinsicOutputDepartmentDummy_;  ///< messages from departments to teams before filtering
+    vector<vector<impalib_type>> extrinsicOutputDepartment_;       ///< messages from departments to teams after filtering
+    vector<impalib_type> oric2PackageM_;                           ///< messages from ORIC to packages
+    vector<vector<impalib_type>> eqConstraint2OricM_;              ///< messages from team equality constraint to ORIC
+    vector<vector<impalib_type>> oric2EqConstraintM_;              ///< messages from ORIC to team equality constraint
+    vector<vector<impalib_type>> eqConstraint2ProjectM_;           ///< messages from project equality constraint to project inequality constraint
+    vector<vector<impalib_type>> project2EqConstraintM_;           ///< messages from project inequality constraint to project equality constraint
+    vector<impalib_type> team2OricM_;                              ///< messages from team equality constraint to ORIC
+    Knapsack modelKnapsacks_;                                      ///< Knapsack object
+    InequalityConstraint projectIneqConstraint_;                   ///< Project Inequality constraint object
+    // EqualityConstraintKcMwm modelEqConstraint_; ///< Equality constraint object
+    EqualityConstraint modelEqConstraint_;  ///< Equality constraint object
+    OrInequalityConstraint modelOric_;      ///< ORIC object
 
    public:
-    OutputsKcMwm outputs; ///< Graphical model outputs objects
-    InputsKcMwm modelInputs_; ///< Graphical model inputs objects
-    void initialize(const impalib_type *, impalib_type *, const int *, const int *, const int *, const impalib_type *, const int *); ///< initialize graphical model
-    void iterate(const int *); ///< iterate over graphical model
-    GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG, const impalib_type ALPHA); ///< constructor
+    OutputsKcMwm outputs;                                                                                                             ///< Graphical model outputs objects
+    InputsKcMwm modelInputs_;                                                                                                         ///< Graphical model inputs objects
+    void initialize(const impalib_type *, impalib_type *, const int *, const int *, const int *, const impalib_type *, const int *);  ///< initialize graphical model
+    void iterate(const int *);                                                                                                        ///< iterate over graphical model
+    GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG,
+                        const impalib_type ALPHA);  ///< constructor
 };
 
 /**
@@ -214,57 +215,57 @@ void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) 
  */
 class GraphicalModelTsp {
    private:
-    int numNodes_; ///< number of nodes of TSP
-    int numIterations_; ///< number of iterations of IMPA
-    int numEdgeVariables_; ///< number of edges in TSP
-    bool resetFlag_; ///< flag for resetting messages after each augmentation step
-    bool filteringFlag_; ///< flag for filtering messages from degree/subtour constraints to edge equality constraints
-    bool augmentationFlag_; ///< whether to activate augmentation
-    vector<int> hard_decision; ///< hard decision vector of IMPA solution
-    impalib_type alpha_; ///< filtering parameter
-    impalib_type threshold_; ///< threshold on hard decision
-    EqualityConstraint modelEqConstraint_; ///< Equality Constraint object for TSP
-    DegreeConstraint modelDegreeConstraint_; ///< Degree Constraint object for TSP
-    SubtourEliminationConstraint modelSubtourEliminationConstraint_; ///< Subtour constraint for TSP
-    vector<vector<impalib_type>> DegreeConstraint2EqConstraintDummyM_; ///< messages from degree constraint to team equality constraint before filtering
-    vector<vector<impalib_type>> DegreeConstraint2EqConstraintM_; ///< messages from degree constraint to team equality constraint afters filtering
-    vector<vector<int>> selected_edges_old_; ///< old list of selected edges (used for failure investigation)
-    vector<vector<int>> selected_edges_old_old_; ///< another old list of selected edges (used for failure investigation)
-    int maxCount_; ///< maximum count of failures
-    bool tourImpaFlag_ = false; ///< set flag for detected tour to be false (will be updated later)
-    vector<vector<int>> delta_S_indices_list; ///< will contain indices of edges that contribute to each subtour constraint
-    vector<vector<impalib_type>> subtourConstraints2EdgeEcDummyM_; ///< messages from subtour constraints to edge equality constraint before filtering
-    vector<vector<impalib_type>> edgeEc2SubtourConstraintsM_; ///< messages from edge equality constraint to subtour constraints
-    void iterate_augmented_graph(); ///< function of IMPA on augmented graph
-    void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, vector<vector<int>> &); ///< analysis of subtour constraints
-    void hard_decision_analysis(vector<vector<int>> &); ///< function for hard decision solution on IMPA solution
-    bool isSubsequence(const vector<int> &, const vector<int> &, int); ///< function for post-processing loops
-    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, vector<vector<int>> &); ///< function for getting loops
-    vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &); ///< function for finding loops
-    InputsTsp modelInputs_; ///< Graphical Model Input object
-    vector<vector<int>> selectedEdges_; ///< activated edges of IMPA
-    int numAugmentations_; ///< number of performed augmentations in IMPA
-    int noConsClosedLoopsCount_; ///< count for failure case (no consecutive loop detection and no tour)
-    int solOscCount_; ///< count for failure case (oscillation in the solution)
-    bool noConsClosedLoopsCountExcFlag_; ///< flag for failure case (no consecutive loop detection and no tour)
-    int noImprovSolCount_; ///< count for failure case (no solution improvement)
-    bool noImprovSolCountExcFlag_; ///< flag for failure case (no solution improvement)
-    bool solOscCountExcFlag_; ///< flag for failure case (oscillation in the solution)
-    vector<int> tourImpa_; ///< list of nodes of tour (if detected)
-    vector<vector<int>> subtourPaths_; ///< list of detected subtours (if detected)
-    vector<int> closedPathsSize_; ///< list of sizes of loops
-    impalib_type costImpa_; ///< cost of IMPA solution
-    vector<vector<impalib_type>> subtourConstraints2EdgeEcM_; ///< messages from subtour constraints to edge equality constraint
+    int numNodes_;                                                      ///< number of nodes of TSP
+    int numIterations_;                                                 ///< number of iterations of IMPA
+    int numEdgeVariables_;                                              ///< number of edges in TSP
+    bool resetFlag_;                                                    ///< flag for resetting messages after each augmentation step
+    bool filteringFlag_;                                                ///< flag for filtering messages from degree/subtour constraints to edge equality constraints
+    bool augmentationFlag_;                                             ///< whether to activate augmentation
+    vector<int> hard_decision;                                          ///< hard decision vector of IMPA solution
+    impalib_type alpha_;                                                ///< filtering parameter
+    impalib_type threshold_;                                            ///< threshold on hard decision
+    EqualityConstraint modelEqConstraint_;                              ///< Equality Constraint object for TSP
+    DegreeConstraint modelDegreeConstraint_;                            ///< Degree Constraint object for TSP
+    SubtourEliminationConstraint modelSubtourEliminationConstraint_;    ///< Subtour constraint for TSP
+    vector<vector<impalib_type>> DegreeConstraint2EqConstraintDummyM_;  ///< messages from degree constraint to team equality constraint before filtering
+    vector<vector<impalib_type>> DegreeConstraint2EqConstraintM_;       ///< messages from degree constraint to team equality constraint afters filtering
+    vector<vector<int>> selected_edges_old_;                            ///< old list of selected edges (used for failure investigation)
+    vector<vector<int>> selected_edges_old_old_;                        ///< another old list of selected edges (used for failure investigation)
+    int maxCount_;                                                      ///< maximum count of failures
+    bool tourImpaFlag_ = false;                                         ///< set flag for detected tour to be false (will be updated later)
+    vector<vector<int>> delta_S_indices_list;                           ///< will contain indices of edges that contribute to each subtour constraint
+    vector<vector<impalib_type>> subtourConstraints2EdgeEcDummyM_;      ///< messages from subtour constraints to edge equality constraint before filtering
+    vector<vector<impalib_type>> edgeEc2SubtourConstraintsM_;           ///< messages from edge equality constraint to subtour constraints
+    void iterate_augmented_graph();                                     ///< function of IMPA on augmented graph
+    void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, vector<vector<int>> &);                    ///< analysis of subtour constraints
+    void hard_decision_analysis(vector<vector<int>> &);                                                                         ///< function for hard decision solution on IMPA solution
+    bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                          ///< function for post-processing loops
+    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, vector<vector<int>> &);                             ///< function for getting loops
+    vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &);  ///< function for finding loops
+    InputsTsp modelInputs_;                                                                                                     ///< Graphical Model Input object
+    vector<vector<int>> selectedEdges_;                                                                                         ///< activated edges of IMPA
+    int numAugmentations_;                                                                                                      ///< number of performed augmentations in IMPA
+    int noConsClosedLoopsCount_;                                                                                                ///< count for failure case (no consecutive loop detection and no tour)
+    int solOscCount_;                                                                                                           ///< count for failure case (oscillation in the solution)
+    bool noConsClosedLoopsCountExcFlag_;                                                                                        ///< flag for failure case (no consecutive loop detection and no tour)
+    int noImprovSolCount_;                                                                                                      ///< count for failure case (no solution improvement)
+    bool noImprovSolCountExcFlag_;                                                                                              ///< flag for failure case (no solution improvement)
+    bool solOscCountExcFlag_;                                                                                                   ///< flag for failure case (oscillation in the solution)
+    vector<int> tourImpa_;                                                                                                      ///< list of nodes of tour (if detected)
+    vector<vector<int>> subtourPaths_;                                                                                          ///< list of detected subtours (if detected)
+    vector<int> closedPathsSize_;                                                                                               ///< list of sizes of loops
+    impalib_type costImpa_;                                                                                                     ///< cost of IMPA solution
+    vector<vector<impalib_type>> subtourConstraints2EdgeEcM_;                                                                   ///< messages from subtour constraints to edge equality constraint
 
    public:
-    bool subtourConstraintsSatisfiedFlag = false; ///< initially set this flag for satisfied subtour constraints to false
-    OutputsTsp outputs; ///< TSP graphical model outputs object
-    void initialize(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *); ///< initialize graphical model
-    void iterate_relaxed_graph(); ///< iterate over relaxed graphical model
-    void perform_augmentation(const int); ///< perform augmentation on graphical model
-    void process_ouputs(impalib_type *, int *, int *, int *, impalib_type *, bool *, bool *, bool *, int *, int *, int *, int *); ///< process outputs of Graphical Model
+    bool subtourConstraintsSatisfiedFlag = false;                                                                    ///< initially set this flag for satisfied subtour constraints to false
+    OutputsTsp outputs;                                                                                              ///< TSP graphical model outputs object
+    void initialize(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *);  ///< initialize graphical model
+    void iterate_relaxed_graph();                                                                                    ///< iterate over relaxed graphical model
+    void perform_augmentation(const int);                                                                            ///< perform augmentation on graphical model
+    void process_ouputs(impalib_type *, int *, int *, int *, impalib_type *, bool *, bool *, bool *, int *, int *, int *, int *);  ///< process outputs of Graphical Model
     GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
-                      const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT); ///< Constructor
+                      const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT);  ///< Constructor
 };
 
 /**
@@ -979,30 +980,59 @@ vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> 
     return vector<int>();
 }
 
-
+/**
+ * Represents a graphical model for the k-sat problem for
+ * computing the assignment of variables to satisfy constraints.
+ */
 class GraphicalModelKsat {
    private:
-    int numIterations_;
-    int numVariables_;
-    int numConstraints_;
-    int kVariable_;
-    bool filteringFlag_;
-    impalib_type alpha_;
-    int numUsedVariables_;
-    EqualityConstraint modelEqConstraint_;
-    KsatConstraint modelKsatConstraint_;
-    InputsKsat modelInputs_;
+    int numIterations_;                     ///< number of iterations
+    int numVariables_;                      ///< total number of variables
+    int numConstraints_;                    ///< number of constraints
+    int kVariable_;                         ///< number of variables per constraint
+    bool filteringFlag_;                    ///< whether to apply filtering or not
+    impalib_type alpha_;                    ///< filtering parameter
+    int numUsedVariables_;                  ///< number of used variables to build a formula
+    EqualityConstraint modelEqConstraint_;  ///< Equality constraint object
+    KsatConstraint modelKsatConstraint_;    ///< ksat constraint object
+    InputsKsat modelInputs_;                ///< input object
 
    public:
-    vector<vector<impalib_type>> KsatConstraint2EqConstraintDummyM_;
-    vector<vector<impalib_type>> KsatConstraint2EqConstraintM_;
-    OutputsKsat outputs;
-    void initialize(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);
-    void iterate();;
-    GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA, const int NUM_USED_VARIABLES);
+    vector<vector<impalib_type>> KsatConstraint2EqConstraintDummyM_;  ///< messages from ksat constraints to equality constraints before filtering
+    vector<vector<impalib_type>> KsatConstraint2EqConstraintM_;       ///< messages from ksat constraints to equality constraints after filtering
+    OutputsKsat outputs;                                              ///< output object
+    void initialize(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);  ///< initialize graphical model
+    void iterate();                                                                                                          ///< iterate function
+    GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA,
+                       const int NUM_USED_VARIABLES);  ///< constructor for k-sat graphical model
 };
 
-GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA, const int NUM_USED_VARIABLES)
+/**
+ * Construct Graphical Model for the K-SAT problem
+ *
+ * @param[in] NUM_ITERATIONS: number of iterations
+ * @param[in] NUM_VARIABLES: total number of variables
+ * @param[in] NUM_CONSTRAINTS: number of constraints
+ * @param[in] K_VARIABLE: number of variables per constraint
+ * @param[in] FILTERING_FLAG: filtering on or off
+ * @param[in] ALPHA: filtering parameter value (between 0 and 1)
+ * @param[in] NUM_USED_VARIABLES: number of variables used to construct the formula
+ * @param[out] modelInputs_: object of type InputsKsat
+ * @param[out] modelEqConstraint_: object of type EqualityConstraint
+ * @param[out] modelKsatConstraint_: object of type KsatConstraint
+ * @param[out] outputs: object of type OutputsKsat
+ * @param[out] numIterations_: N_ITERATIONS
+ * @param[out] numVariables_: NUM_VARIABLES
+ * @param[out] numConstraints_: NUM_CONSTRAINTS
+ * @param[out] kVariable_: K_VARIABLE
+ * @param[out] filteringFlag_: FILTERING_FLAG
+ * @param[out] alpha_: ALPHA
+ * @param[out] numUsedVariables_: NUM_USED_VARIABLES
+ *
+ */
+
+GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA,
+                                       const int NUM_USED_VARIABLES)
     : modelInputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, numUsedVariables_),
       modelEqConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
       modelKsatConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
@@ -1013,34 +1043,62 @@ GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_V
       kVariable_(K_VARIABLE),
       filteringFlag_(FILTERING_FLAG),
       alpha_(ALPHA),
-      numUsedVariables_(NUM_USED_VARIABLES)
-    {
+      numUsedVariables_(NUM_USED_VARIABLES),
+      KsatConstraint2EqConstraintDummyM_(numConstraints_, vector<impalib_type>(numVariables_, zero_value)),
+      KsatConstraint2EqConstraintM_(numConstraints_, vector<impalib_type>(numVariables_, zero_value))
+      {
+    /// initializes and prepares data structures for mapping relationships
+    /// between variables and k-sat constraints
+    /// KsatConstraint2EqConstraintDummyM_.reserve(numConstraints_);
+    /// KsatConstraint2EqConstraintM_.reserve(numConstraints_);
 
-    KsatConstraint2EqConstraintDummyM_.reserve(numConstraints_);
-    KsatConstraint2EqConstraintM_.reserve(numConstraints_);
-
-    for (int constraint_index = 0; constraint_index < numConstraints_; constraint_index++) {
-        KsatConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numVariables_, zero_value));
-        KsatConstraint2EqConstraintM_.push_back(vector<impalib_type>(numVariables_, zero_value));
-    }
+    /// initializes and populates nested vectors for mapping relationships
+    /// between variables and k-sat constraints
+    /// for (int i = 0; i < numConstraints_; i++) {
+    ///    KsatConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numVariables_, zero_value));
+    ///    KsatConstraint2EqConstraintM_.push_back(vector<impalib_type>(numVariables_, zero_value));
+    ///}
 };
 
-void GraphicalModelKsat::initialize(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, 
-                                    const int *pCONSTRAINTS_CONNECTIONS, const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
-    modelInputs_.process_inputs(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST, pVariable_ec_to_ksat_constraint_m_py);
+/**
+ * Initialize Graphical Model inputs for the k-sat problem. The inputs
+ * are processed by reading inputs from python
+ *
+ * @param[in] pUSED_VARIABLES_PY: variables used in building the formula
+ * @param[in] pVARIABLES_CONNECTIONS_PY: connections to constraints for each variable
+ * @param[in] pVARIABLES_CONNECTIONS_SIZES: size of connections to constraints for each variable
+ * @param[in] pCONSTRAINTS_CONNECTIONS: connections to variables for each constraint
+ * @param[in] pCONSTRAINTS_CONNECTIONS_TYPE: types of connections to variables for each constraint
+ * @param[in] pINCOMING_METRICS_COST: incoming metrics for each variable
+ * @param[in] pVariable_ec_to_ksat_constraint_m_py: initial messages from variables equality constraints to k-sat constraints
+ *
+ */
+
+void GraphicalModelKsat::initialize(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
+                                    const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
+    /// calls a method process_inputs() on an object modelInputs_, passing
+    /// several pointers to Python objects as arguments
+    modelInputs_.process_inputs(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST,
+                                pVariable_ec_to_ksat_constraint_m_py);
 }
 
-void GraphicalModelKsat::iterate(){
-    
+/**
+ * Run IMPA on k-sat-MWM graphical model. This will propagate messages for a
+ * certain number of iterations across the whole graphical model
+ *
+ */
+
+void GraphicalModelKsat::iterate() {
     for (int iter = 0; iter < numIterations_; iter++) {
-
-        modelKsatConstraint_.ksat_constraint_to_variable_ec_update(modelInputs_.VariableEc2KsatConstraintM, KsatConstraint2EqConstraintDummyM_, modelInputs_.ConstraintsConnections, modelInputs_.ConstraintsConnectionsType);
-
+        /// update messages from k-sat constraints to variable equality constraints
+        modelKsatConstraint_.ksat_constraint_to_variable_ec_update(modelInputs_.VariableEc2KsatConstraintM, KsatConstraint2EqConstraintDummyM_, modelInputs_.ConstraintsConnections,
+                                                                   modelInputs_.ConstraintsConnectionsType);
+        /// perform filtering on messages from k-sat constraints to variable equality constraints
         modelKsatConstraint_.process_filtering(iter, KsatConstraint2EqConstraintDummyM_, KsatConstraint2EqConstraintM_);
-
-        modelEqConstraint_.variable_ec_to_ksat_constraint_update(KsatConstraint2EqConstraintM_, modelInputs_.VariableEc2KsatConstraintM, modelInputs_.UsedVariables, modelInputs_.IncomingMetricsCost, modelInputs_.VariablesConnections);
-
+        /// update messages from variable equality constraints to k-sat constraints
+        modelEqConstraint_.variable_ec_to_ksat_constraint_update(KsatConstraint2EqConstraintM_, modelInputs_.VariableEc2KsatConstraintM, modelInputs_.UsedVariables, modelInputs_.IncomingMetricsCost,
+                                                                 modelInputs_.VariablesConnections);
     }
-
-    outputs.extrinsic_output_variable_ec_update(KsatConstraint2EqConstraintM_);
+    /// process outputs of k-sat problem
+    outputs.update_extrinsic(KsatConstraint2EqConstraintM_);
 }

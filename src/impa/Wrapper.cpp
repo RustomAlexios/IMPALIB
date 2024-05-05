@@ -24,37 +24,27 @@
  * @param[out] pIntrinsic_out_mwm: pointer that will store the extrinsic output messages of projects-teams combinations
  * @param[in] FILTERING_FLAG: filtering flag
  * @param[in] ALPHA: filtering parameter (between 0 and 1)
- * 
+ *
  */
 
-extern "C" void WrapperKcMwm(const int NUM_ITERATIONS, const int NUM_DEPARTMENTS, const int NUM_TEAMS,
-                             const int NUM_PROJECTS, impalib_type *pTransition_model_py, const int *pMAX_STATE_PY,
-                             const impalib_type *pREWARD_TEAM_PY, const impalib_type *pREWARD_PROJECT_PY,
-                             const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY,
-                             const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int MAX_SIZE_NON_ZERO_WEIGHTS,
-                             impalib_type *pExtrinsic_output_team, impalib_type *pIntrinsic_out_mwm,
-                             const bool FILTERING_FLAG, const impalib_type ALPHA)
-{
-
+extern "C" void WrapperKcMwm(const int NUM_ITERATIONS, const int NUM_DEPARTMENTS, const int NUM_TEAMS, const int NUM_PROJECTS, impalib_type *pTransition_model_py, const int *pMAX_STATE_PY,
+                             const impalib_type *pREWARD_TEAM_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY,
+                             const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int MAX_SIZE_NON_ZERO_WEIGHTS, impalib_type *pExtrinsic_output_team, impalib_type *pIntrinsic_out_mwm,
+                             const bool FILTERING_FLAG, const impalib_type ALPHA) {
     // Instantiate a GraphicalModelKcMwm object
-    GraphicalModelKcMwm model_graph(NUM_DEPARTMENTS, NUM_TEAMS, NUM_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS, NUM_ITERATIONS,
-                                    FILTERING_FLAG, ALPHA);
+    GraphicalModelKcMwm model_graph(NUM_DEPARTMENTS, NUM_TEAMS, NUM_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS, NUM_ITERATIONS, FILTERING_FLAG, ALPHA);
 
     // Initialize the graphical model with provided parameters
-    model_graph.initialize(pREWARD_TEAM_PY, pTransition_model_py, pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
-                           pNON_ZERO_WEIGHT_INDICES_SIZES_PY, p_NON_ZERO_WEIGHT_INDICES_PY, pREWARD_PROJECT_PY,
-                           pMAX_STATE_PY);
+    model_graph.initialize(pREWARD_TEAM_PY, pTransition_model_py, pTEAMS_WEIGHTS_PER_DEPARTMENT_PY, pNON_ZERO_WEIGHT_INDICES_SIZES_PY, p_NON_ZERO_WEIGHT_INDICES_PY, pREWARD_PROJECT_PY, pMAX_STATE_PY);
 
     // Iterate over the graphical model
     model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES_PY);
 
     // Copy the extrinsic output for each team to the provided variable
-    copy(model_graph.outputs.ExtrinsicOutputTeam.begin(), model_graph.outputs.ExtrinsicOutputTeam.begin() + NUM_TEAMS,
-         pExtrinsic_output_team);
-    
+    copy(model_graph.outputs.ExtrinsicOutputTeam.begin(), model_graph.outputs.ExtrinsicOutputTeam.begin() + NUM_TEAMS, pExtrinsic_output_team);
+
     // Copy the intrinsic output for each team-project pair to the provided variable
-    copy(model_graph.outputs.IntrinsicOutMwm.begin(),
-         model_graph.outputs.IntrinsicOutMwm.begin() + NUM_TEAMS * NUM_PROJECTS, pIntrinsic_out_mwm);
+    copy(model_graph.outputs.IntrinsicOutMwm.begin(), model_graph.outputs.IntrinsicOutMwm.begin() + NUM_TEAMS * NUM_PROJECTS, pIntrinsic_out_mwm);
 }
 
 /**
@@ -87,60 +77,68 @@ extern "C" void WrapperKcMwm(const int NUM_ITERATIONS, const int NUM_DEPARTMENTS
  * @param[in] MAX_COUNT: maximum counts of allowed failure
  * @param[out] pNum_added_constraints: number of added subtour elimination constraints after running IMPA
  * @param[in] MAX_AUGM_COUNT: maximum number of augmentation before stopping IMPA
- * 
+ *
  */
 
-extern "C" void WrapperTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES,
-                           const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
-                           const impalib_type ALPHA, const int *pEDGE_CONNECTIONS_PY,
-                           const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY,
-                           impalib_type       *pEdge_ec_to_degree_constraint_m_py,
-                           const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY, impalib_type *pExtrinsic_output_edge_ec,
-                           const impalib_type THRESHOLD, int *pNum_augmentations, int *pTour_impa,
-                           impalib_type *pCost_impa, bool *pNo_improv_sol_count_exc_flag,
-                           bool *pNo_cons_loops_count_exc_flag, int *pSelected_edges, int *pSelected_edges_size,
-                           bool *pSol_osc_count_exc_flag, int *pSubtour_paths, int *pSubtour_paths_size,
-                           const int MAX_COUNT, int *pNum_added_constraints, const int MAX_AUGM_COUNT)
-{
+extern "C" void WrapperTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
+                           const impalib_type ALPHA, const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY,
+                           impalib_type *pEdge_ec_to_degree_constraint_m_py, const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY, impalib_type *pExtrinsic_output_edge_ec, const impalib_type THRESHOLD,
+                           int *pNum_augmentations, int *pTour_impa, impalib_type *pCost_impa, bool *pNo_improv_sol_count_exc_flag, bool *pNo_cons_loops_count_exc_flag, int *pSelected_edges,
+                           int *pSelected_edges_size, bool *pSol_osc_count_exc_flag, int *pSubtour_paths, int *pSubtour_paths_size, const int MAX_COUNT, int *pNum_added_constraints,
+                           const int MAX_AUGM_COUNT) {
     // Instantiate a GraphicalModelTsp object
-    GraphicalModelTsp model_graph(NUM_ITERATIONS, NUM_NODES, NUM_EDGE_VARIABLES, AUGMENTATION_FLAG, RESET_FLAG,
-                                  FILTERING_FLAG, ALPHA, THRESHOLD, MAX_COUNT);
+    GraphicalModelTsp model_graph(NUM_ITERATIONS, NUM_NODES, NUM_EDGE_VARIABLES, AUGMENTATION_FLAG, RESET_FLAG, FILTERING_FLAG, ALPHA, THRESHOLD, MAX_COUNT);
 
     // Initialize the graphical model with provided data
-    model_graph.initialize(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY,
-                           pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
+    model_graph.initialize(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
 
     // Perform IMPA on the relaxed graph
     model_graph.iterate_relaxed_graph();
 
     // Check and perform augmentation if needed
-    if (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG)
-    {
+    if (!model_graph.subtourConstraintsSatisfiedFlag && AUGMENTATION_FLAG) {
         model_graph.perform_augmentation(MAX_AUGM_COUNT);
-
     }
 
     // Process the outputs of the model
-    model_graph.process_ouputs(pExtrinsic_output_edge_ec, pNum_augmentations, pNum_added_constraints, pTour_impa, pCost_impa, pNo_improv_sol_count_exc_flag, \
-                              pNo_cons_loops_count_exc_flag, pSol_osc_count_exc_flag, pSelected_edges, pSelected_edges_size, pSubtour_paths, pSubtour_paths_size);
+    model_graph.process_ouputs(pExtrinsic_output_edge_ec, pNum_augmentations, pNum_added_constraints, pTour_impa, pCost_impa, pNo_improv_sol_count_exc_flag, pNo_cons_loops_count_exc_flag,
+                               pSol_osc_count_exc_flag, pSelected_edges, pSelected_edges_size, pSubtour_paths, pSubtour_paths_size);
 }
 
-
-
-extern "C" void WrapperKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS,
-                            const int NUM_USED_VARIABLES, const impalib_type ALPHA, const bool FILTERING_FLAG, 
-                            const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY,
-                            const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
-                            const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST,
-                            impalib_type *pVariable_ec_to_ksat_constraint_m_py, impalib_type *pExtrinsic_output_variable_ec,
-                            const int K_VARIABLE)
-{
+/**
+ * This function will run IMPA on k-SAT graphical model in C++
+ *
+ * @param[in] NUM_ITERATIONS: number of iterations
+ * @param[in] NUM_VARIABLES: number of variables from which a formula is constructed
+ * @param[in] NUM_CONSTRAINTS: number of constraints in k-sat problem
+ * @param[in] NUM_USED_VARIABLES: number of variables used to construct the formula
+ * @param[in] ALPHA: filtering parameter (between 0 and 1)
+ * @param[in] FILTERING_FLAG: whether filtering on constraints is activated or not
+ * @param[in] pUSED_VARIABLES_PY: variables used in building the formula
+ * @param[in] pVARIABLES_CONNECTIONS_PY: connections to constraints for each variable
+ * @param[in] pVARIABLES_CONNECTIONS_SIZES: size of connections to constraints for each variable
+ * @param[in] pCONSTRAINTS_CONNECTIONS: connections to variables for each constraint
+ * @param[in] pCONSTRAINTS_CONNECTIONS_TYPE: types of connections to variables for each constraint
+ * @param[in] pINCOMING_METRICS_COST: incoming metrics for each variable
+ * @param[in] pVariable_ec_to_ksat_constraint_m_py: initial messages from variables equality constraints to k-sat constraints
+ * @param[out] pExtrinsic_output_variable_ec: extrinsic messages of variables equality constraints
+ * @param[in] K_VARIABLE: number of variables forming each constraint
+ *
+ */
+extern "C" void WrapperKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int NUM_USED_VARIABLES, const impalib_type ALPHA, const bool FILTERING_FLAG,
+                            const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
+                            const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py,
+                            impalib_type *pExtrinsic_output_variable_ec, const int K_VARIABLE) {
+    // Instantiate a GraphicalModelKsat object
     GraphicalModelKsat model_graph(NUM_ITERATIONS, NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA, NUM_USED_VARIABLES);
 
-    model_graph.initialize(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST, pVariable_ec_to_ksat_constraint_m_py);
+    // Initialize the graphical model with provided data
+    model_graph.initialize(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST,
+                           pVariable_ec_to_ksat_constraint_m_py);
 
+    // Perform IMPA on the graph
     model_graph.iterate();
 
-    copy(model_graph.outputs.ExtrinsicOutputVariableEc.begin(), model_graph.outputs.ExtrinsicOutputVariableEc.begin() + NUM_VARIABLES,
-         pExtrinsic_output_variable_ec);
+    // Process the outputs of the model
+    copy(model_graph.outputs.ExtrinsicOutputVariableEc.begin(), model_graph.outputs.ExtrinsicOutputVariableEc.begin() + NUM_VARIABLES, pExtrinsic_output_variable_ec);
 }

@@ -22,9 +22,7 @@ from impa.environmentModule import (
     permutations,
     pkl,
     chain,
-    random,
-    defaultdict,
-    sys
+    random
 )
 
 # Import necessary variables and functions from the initializationModule
@@ -2418,7 +2416,6 @@ class GraphicalModelKsat:
             found = False
             for i, sublist_i in enumerate(constraints_connections):
                 if(set(sublist_i) == set(connections)):
-                    index_found = i
                     found = True
                     
             if (not found):
@@ -2668,7 +2665,6 @@ class GraphicalModelKsat:
                     print("Post-Processing Ended")
                     break
         self.get_summary(self.hard_decision)
-        flattened_list = []
         combinations_list = []
         print('--------')
         print("Checking common variables across each violated constraint and its neighboring constraints (only satisfied by nodes in a violated constraint)")
@@ -2705,8 +2701,7 @@ class GraphicalModelKsat:
             overlap_common_type_set = {item for sublist in overlap_common_type_list for item in sublist}
             overlap_forbidden_set = {item for sublist in overlap_forbidden_list for item in sublist}
             pool_variables = overlap_common_type_set.difference(overlap_forbidden_set)      
-            
-            hard_decision_old = copy.deepcopy(self.hard_decision)   
+              
             unsatisfied_constraints_old = copy.deepcopy(self.unsatisfied_constraints)
             old_length_unsatisfied_constraints = len(unsatisfied_constraints_old)
             if (len(pool_variables)):

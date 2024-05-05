@@ -37,3 +37,4 @@ data/outputs_ksat_zeromean_var_1_samples_500_alpha0.5
 data/outputs_ksat_zeromean_var_5_samples_500_alpha0.5
 data/outputs_ksat_zeromean_var_10_samples_500_alpha0.5
 src/impa/results_analysis.py
+src/impa/main_ksat_investigation.py
