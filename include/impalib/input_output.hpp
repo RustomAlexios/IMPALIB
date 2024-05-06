@@ -366,7 +366,7 @@ class InputsKsat {
 
     void process_inputs(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);  ///< process inputs from python
 
-    InputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const int NUM_USED_VARIABLES);  ///< constructor
+    InputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, int NUM_USED_VARIABLES);  ///< constructor
 };
 
 /**
@@ -383,7 +383,7 @@ class InputsKsat {
  *
  */
 
-InputsKsat::InputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const int NUM_USED_VARIABLES)
+InputsKsat::InputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, int NUM_USED_VARIABLES)
     : numVariables_(NUM_VARIABLES),
       numConstraints_(NUM_CONSTRAINTS),
       kVariable_(K_VARIABLE),
@@ -402,8 +402,8 @@ class OutputsKsat {
 
    public:
     vector<impalib_type> ExtrinsicOutputVariableEc;                                         ///< extrinsic messages of variables equality constraints
-    OutputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE);  ///< constructor
-    void update_extrinsic(vector<vector<impalib_type>> &);               ///< calculate extrinsic messages of variables equality constraints
+    OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE);  ///< constructor
+    void update_extrinsic(vector<vector<impalib_type>> &);                                  ///< calculate extrinsic messages of variables equality constraints
 };
 
 /**
@@ -418,10 +418,8 @@ class OutputsKsat {
  *
  */
 
-OutputsKsat::OutputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE) : numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kVariable_(K_VARIABLE), ExtrinsicOutputVariableEc(numVariables_, zero_value) {
-    //ExtrinsicOutputVariableEc.reserve(numVariables_);
-    //fill(ExtrinsicOutputVariableEc.begin(), ExtrinsicOutputVariableEc.begin() + numVariables_, zero_value);
-};
+OutputsKsat::OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE)
+    : numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kVariable_(K_VARIABLE), ExtrinsicOutputVariableEc(numVariables_, zero_value){};
 
 /**
  * Process inputs from python for the K-SAT problem
@@ -445,7 +443,6 @@ void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIA
     copy(pVARIABLES_CONNECTIONS_SIZES, pVARIABLES_CONNECTIONS_SIZES + numVariables_, back_inserter(VariablesConnectionsSizes));
 
     for (int i = 0; i < numConstraints_; i++) {
-
         ConstraintsConnections.push_back(vector<int>(kVariable_, 0));
 
         copy(pCONSTRAINTS_CONNECTIONS + kVariable_ * i, pCONSTRAINTS_CONNECTIONS + kVariable_ * (i + 1), ConstraintsConnections[i].begin());
@@ -456,8 +453,7 @@ void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIA
 
         VariableEc2KsatConstraintM.push_back(vector<impalib_type>(numVariables_, zero_value));
 
-        copy(pVariable_ec_to_ksat_constraint_m_py + numVariables_ * i, pVariable_ec_to_ksat_constraint_m_py + numVariables_ * (i + 1),
-             VariableEc2KsatConstraintM[i].begin());
+        copy(pVariable_ec_to_ksat_constraint_m_py + numVariables_ * i, pVariable_ec_to_ksat_constraint_m_py + numVariables_ * (i + 1), VariableEc2KsatConstraintM[i].begin());
     }
 
     int conx_size_old = 0;
@@ -465,7 +461,6 @@ void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIA
     for (int j = 0; j < numVariables_; j++) {
         // If the variable is used
         if (find(UsedVariables.begin(), UsedVariables.end(), j) != UsedVariables.end()) {
-
             int conx_size = VariablesConnectionsSizes[j];
 
             VariablesConnections.push_back(vector<int>(conx_size, 0));

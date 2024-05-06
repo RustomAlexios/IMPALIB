@@ -25,8 +25,8 @@ class KsatConstraint {
                                                vector<vector<int>> &);                            ///< update messages from k-sat constraints to equality constraints
     void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering
 
-    KsatConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG,
-                   const impalib_type ALPHA);  ///< constructor
+    KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG,
+                   impalib_type ALPHA);  ///< constructor
 };
 
 /**
@@ -44,16 +44,13 @@ class KsatConstraint {
  * @param[out] kVariable_: K_VARIABLE
  */
 
-KsatConstraint::KsatConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA)
-    : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kVariable_(K_VARIABLE), ksatConstraint2EqConstraintOld(numConstraints_, vector<impalib_type>(numVariables_, zero_value)) {
-    // Reserve memory
-    // ksatConstraint2EqConstraintOld.reserve(numConstraints_);
-
-    //for (int i = 0; i < numConstraints_; i++) {
-    //    // Initialize a vector of size numVariables_ with zero_value and add it to ksatConstraint2EqConstraintOld vector
-    //    ksatConstraint2EqConstraintOld.push_back(vector<impalib_type>(numVariables_, zero_value));
-    //}
-};
+KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA)
+    : filteringFlag_(FILTERING_FLAG),
+      alpha_(ALPHA),
+      numVariables_(NUM_VARIABLES),
+      numConstraints_(NUM_CONSTRAINTS),
+      kVariable_(K_VARIABLE),
+      ksatConstraint2EqConstraintOld(numConstraints_, vector<impalib_type>(numVariables_, zero_value)){};
 
 /**
  * Calculate messages from k-sat constraints to variable equality constraints for the K-SAT problem

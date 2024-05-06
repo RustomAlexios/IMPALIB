@@ -40,5 +40,5 @@ np.set_printoptions(suppress=True)
 np_impa_lib = np.float64
 zero_value = np_impa_lib(0)
 
-#np.random.seed(30)
-#random.seed(30)
+np.random.seed(30)
+random.seed(30)

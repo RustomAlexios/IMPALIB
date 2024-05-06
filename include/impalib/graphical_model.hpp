@@ -995,16 +995,16 @@ class GraphicalModelKsat {
     int numUsedVariables_;                  ///< number of used variables to build a formula
     EqualityConstraint modelEqConstraint_;  ///< Equality constraint object
     KsatConstraint modelKsatConstraint_;    ///< ksat constraint object
-    InputsKsat modelInputs_;                ///< input object
 
    public:
+    InputsKsat modelInputs_;                ///< input object
     vector<vector<impalib_type>> KsatConstraint2EqConstraintDummyM_;  ///< messages from ksat constraints to equality constraints before filtering
     vector<vector<impalib_type>> KsatConstraint2EqConstraintM_;       ///< messages from ksat constraints to equality constraints after filtering
     OutputsKsat outputs;                                              ///< output object
     void initialize(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);  ///< initialize graphical model
     void iterate();                                                                                                          ///< iterate function
-    GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA,
-                       const int NUM_USED_VARIABLES);  ///< constructor for k-sat graphical model
+    GraphicalModelKsat(int NUM_ITERATIONS, int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA,
+                       int NUM_USED_VARIABLES);  ///< constructor for k-sat graphical model
 };
 
 /**
@@ -1031,8 +1031,8 @@ class GraphicalModelKsat {
  *
  */
 
-GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA,
-                                       const int NUM_USED_VARIABLES)
+GraphicalModelKsat::GraphicalModelKsat(int NUM_ITERATIONS, int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA,
+                                       int NUM_USED_VARIABLES)
     : modelInputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, numUsedVariables_),
       modelEqConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
       modelKsatConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
@@ -1045,20 +1045,7 @@ GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_V
       alpha_(ALPHA),
       numUsedVariables_(NUM_USED_VARIABLES),
       KsatConstraint2EqConstraintDummyM_(numConstraints_, vector<impalib_type>(numVariables_, zero_value)),
-      KsatConstraint2EqConstraintM_(numConstraints_, vector<impalib_type>(numVariables_, zero_value))
-      {
-    /// initializes and prepares data structures for mapping relationships
-    /// between variables and k-sat constraints
-    /// KsatConstraint2EqConstraintDummyM_.reserve(numConstraints_);
-    /// KsatConstraint2EqConstraintM_.reserve(numConstraints_);
-
-    /// initializes and populates nested vectors for mapping relationships
-    /// between variables and k-sat constraints
-    /// for (int i = 0; i < numConstraints_; i++) {
-    ///    KsatConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numVariables_, zero_value));
-    ///    KsatConstraint2EqConstraintM_.push_back(vector<impalib_type>(numVariables_, zero_value));
-    ///}
-};
+      KsatConstraint2EqConstraintM_(numConstraints_, vector<impalib_type>(numVariables_, zero_value)){};
 
 /**
  * Initialize Graphical Model inputs for the k-sat problem. The inputs
