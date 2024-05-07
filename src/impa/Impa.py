@@ -2470,9 +2470,6 @@ class GraphicalModelKsat:
         )
         
         extrinsic_output_variable_ec = list(extrinsic_output_variable_ec_p.__dict__.values())[0]
-        
-        print(extrinsic_output_variable_ec)
-        exit()
     
         used_incoming_metrics_cost = np.zeros(self.num_variables)
         used_incoming_metrics_cost[self.used_variables] = self.incoming_metrics_cost[self.used_variables]
