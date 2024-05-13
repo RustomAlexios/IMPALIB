@@ -6,6 +6,7 @@ _skbuild
 data/gcn
 src/tspML/
 src/impa/generate_outputs.sh
+src/impa/generate_statistics.sh
 logs/
 data/inputs_ksat_biased_500
 data/inputs_ksat_unbiased_500
@@ -38,3 +39,19 @@ data/outputs_ksat_zeromean_var_5_samples_500_alpha0.5
 data/outputs_ksat_zeromean_var_10_samples_500_alpha0.5
 src/impa/results_analysis.py
 src/impa/main_ksat_investigation.py
+data/inputs_unbiased_var1_uf50.218.1000
+data/inputs_unbiased_var5_uf50.218.1000
+data/inputs_unbiased_var10_uf50.218.1000
+data/inputs_zeromean_var1_uf50.218.1000
+data/inputs_zeromean_var5_uf50.218.1000
+data/inputs_zeromean_var10_uf50.218.1000
+data/inputs_zeromean_var10_uf125.538.100
+data/outputs_unbiased_var1_uf50.218.1000_PPElements2_alpha0.5_pp
+data/outputs_unbiased_var5_uf50.218.1000_PPElements2_alpha0.5_pp
+data/outputs_unbiased_var10_uf50.218.1000_PPElements2_alpha0.5_pp
+data/outputs_zeromean_var1_uf50.218.1000_PPElements2_alpha0.5_pp
+data/outputs_zeromean_var5_uf50.218.1000_PPElements2_alpha0.5_pp
+data/outputs_zeromean_var10_uf50.218.1000_PPElements2_alpha0.5_pp
+data/outputs_zeromean_var10_uf125.538.100_PPElements2_alpha0.5_pp
+data/inputs_unbiased_var_10_aim
+test/python_ksat/src/process_inputs.py

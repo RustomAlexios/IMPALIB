@@ -2278,7 +2278,7 @@ class GraphicalModelKsat:
             self.k_variable = self.input_load[2] 
             type_metrics = self.input_load[9]
             self.valid_sol = self.input_load[10]
-            
+        
 
         num_variables = self.num_variables
         num_constraints = self.num_constraints
@@ -2299,7 +2299,7 @@ class GraphicalModelKsat:
             print(f"type_metrics: {self.type_metrics}")
         
         type_metrics = self.type_metrics
-    
+        print(f"var: {self.var}")
         if (self.random_test_flag):
             constraints_connections, constraints_connections_type, incoming_metrics_cost, used_variables, variables_connections, variables_connections_type, valid_sol = self.create_model_structure(num_variables, num_constraints, k_variable, type_metrics = type_metrics)
             self.valid_sol = valid_sol
@@ -2326,7 +2326,7 @@ class GraphicalModelKsat:
             if (self.overwrite):
                 incoming_metrics_cost = self.generate_incoming_metrics(self.valid_sol)
                 self.incoming_metrics_cost = incoming_metrics_cost
-            
+
         self.constraints_connections = constraints_connections
         self.constraints_connections_type = constraints_connections_type
         self.incoming_metrics_cost = incoming_metrics_cost
@@ -2366,17 +2366,28 @@ class GraphicalModelKsat:
         incoming_metrics_cost = np.zeros(self.num_variables)
         type_metrics = self.type_metrics
         normal_variance = self.var
-        for i, valid_sol_value in enumerate(valid_sol):
-            if (type_metrics == 1): # correctly biased
-                mean = -normal_variance/2 if valid_sol_value == 1 else normal_variance/2
-                incoming_metrics_cost[i] = np.random.normal(loc=mean, scale=np.sqrt(normal_variance))
-            elif (type_metrics == 0): # random IM
-                random_sign = np.random.choice([-1, 1])
-                mean = random_sign*normal_variance/2
-                incoming_metrics_cost[i] = np.random.normal(mean, np.sqrt(normal_variance))
-            elif (type_metrics == 2): #normal(0,sigma^2)
-                incoming_metrics_cost[i] = np.random.normal(0, np.sqrt(normal_variance))
-        
+        if (self.valid_sol):
+            for i, valid_sol_value in enumerate(valid_sol):
+                if (type_metrics == 1): # correctly biased
+                    mean = -normal_variance/2 if valid_sol_value == 1 else normal_variance/2
+                    incoming_metrics_cost[i] = np.random.normal(loc=mean, scale=np.sqrt(normal_variance))
+                elif (type_metrics == 0): # random IM
+                    random_sign = np.random.choice([-1, 1])
+                    mean = random_sign*normal_variance/2
+                    incoming_metrics_cost[i] = np.random.normal(mean, np.sqrt(normal_variance))
+                elif (type_metrics == 2): #normal(0,sigma^2)
+                    incoming_metrics_cost[i] = np.random.normal(0, np.sqrt(normal_variance))
+        else:
+            if type_metrics == 1:
+                raise ValueError("type_metrics cannot be equal to 1.")
+            else:
+                for i in range(self.num_variables):
+                    if (type_metrics == 0): # random IM
+                        random_sign = np.random.choice([-1, 1])
+                        mean = random_sign*normal_variance/2
+                        incoming_metrics_cost[i] = np.random.normal(mean, np.sqrt(normal_variance))
+                    elif (type_metrics == 2): #normal(0,sigma^2)
+                        incoming_metrics_cost[i] = np.random.normal(0, np.sqrt(normal_variance))   
         return incoming_metrics_cost
     
     def create_model_structure(self, num_variables, num_constraints, k_variable, type_metrics = 1):
@@ -2491,18 +2502,21 @@ class GraphicalModelKsat:
             print("Problem not satisfied")  
         
         
-        print("Active variables: ",self.active_variables,)
-        print("Inactive variables: ", self.inactive_variables,)
+        #print("Active variables: ",self.active_variables,)
+        #print("Inactive variables: ", self.inactive_variables,)
         
-        self.valid_sol_active_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if self.valid_sol[self.used_variables][i]]
-        self.valid_sol_inactive_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if not self.valid_sol[self.used_variables][i]]
-        
-        similarity_active = self.calculate_similarity(set(self.active_variables), set(self.valid_sol_active_variables))
-        similarity_inactive = self.calculate_similarity(set(self.inactive_variables), set(self.valid_sol_inactive_variables))
-        
-        self.average_similarity = 100*(similarity_active+similarity_inactive)/2
-        print(f"average_similarity: {self.average_similarity:.2f}")
-        
+        if (self.valid_sol):
+            self.valid_sol_active_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if self.valid_sol[self.used_variables][i]]
+            self.valid_sol_inactive_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if not self.valid_sol[self.used_variables][i]]
+            
+            similarity_active = self.calculate_similarity(set(self.active_variables), set(self.valid_sol_active_variables))
+            similarity_inactive = self.calculate_similarity(set(self.inactive_variables), set(self.valid_sol_inactive_variables))
+            
+            self.average_similarity = 100*(similarity_active+similarity_inactive)/2
+            print(f"average_similarity: {self.average_similarity:.2f}")
+        else:
+            self.average_similarity = []
+            
         if self.save_flag:
             self.results_composed.append(
                 (
@@ -2630,8 +2644,8 @@ class GraphicalModelKsat:
     
         print('--------')
         print("Before Post-Processing")
-        print("Active variables: ",self.active_variables,)
-        print("Inactive variables: ", self.inactive_variables,)
+        #print("Active variables: ",self.active_variables,)
+        #print("Inactive variables: ", self.inactive_variables,)
         
         print("--------------")
         print("Post-Processing started")
