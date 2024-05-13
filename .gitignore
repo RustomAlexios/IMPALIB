@@ -53,5 +53,5 @@ data/outputs_zeromean_var1_uf50.218.1000_PPElements2_alpha0.5_pp
 data/outputs_zeromean_var5_uf50.218.1000_PPElements2_alpha0.5_pp
 data/outputs_zeromean_var10_uf50.218.1000_PPElements2_alpha0.5_pp
 data/outputs_zeromean_var10_uf125.538.100_PPElements2_alpha0.5_pp
-data/inputs_unbiased_var_10_aim
+data/inputs_unbiased_var10_aim
 test/python_ksat/src/process_inputs.py
