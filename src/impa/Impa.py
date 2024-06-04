@@ -2361,12 +2361,13 @@ class GraphicalModelKsat:
         self.num_used_variables = len(self.used_variables)
         
         self.variables_connections_sizes = np.array([len(connection) for connection in self.variables_connections])
+        
 
     def generate_incoming_metrics(self, valid_sol):
         incoming_metrics_cost = np.zeros(self.num_variables)
         type_metrics = self.type_metrics
         normal_variance = self.var
-        if (self.valid_sol):
+        if (len(valid_sol)):
             for i, valid_sol_value in enumerate(valid_sol):
                 if (type_metrics == 1): # correctly biased
                     mean = -normal_variance/2 if valid_sol_value == 1 else normal_variance/2
@@ -2450,7 +2451,7 @@ class GraphicalModelKsat:
         print("--------------")
         print("Running IMPA")
         print("--------------")
-            
+        
         (
             used_variables_flatten_p,
             variables_connections_flatten_p,
@@ -2488,24 +2489,32 @@ class GraphicalModelKsat:
         self.intrinsic_out_variable_ec = intrinsic_out_variable_ec
         self.hard_decision_analysis()
         
+        self.runtime_impa = time.time() - self.start_time
+        print(f"IMPA Time: {self.runtime_impa}")
+        print("--------")
+        
         self.required_PP = False
+        self.start_time_pp = time.time()
+        self.runtime_pp = 0.0
         if (len(self.unsatisfied_constraints) and self.post_process_flag):
             self.required_PP = True
             self.run_post_processing()
-
+            self.runtime_pp = time.time() - self.start_time_pp 
+            print(f"PP Time: {self.runtime_pp}")
+        
         print('--------')
         print("IMPA results:")
         
         if (not len(self.unsatisfied_constraints)):
             print("Problem satisfied")  
         else:
-            print("Problem not satisfied")  
+            print("Problem not satisfied") 
         
         
         #print("Active variables: ",self.active_variables,)
         #print("Inactive variables: ", self.inactive_variables,)
         
-        if (self.valid_sol):
+        if (len(self.valid_sol) and not len(self.unsatisfied_constraints)):
             self.valid_sol_active_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if self.valid_sol[self.used_variables][i]]
             self.valid_sol_inactive_variables = [self.used_variables[i] for i in range(len(self.used_variables)) if not self.valid_sol[self.used_variables][i]]
             
@@ -2540,7 +2549,9 @@ class GraphicalModelKsat:
                     self.unsatisfied_constraints,
                     self.formula_satisfied,
                     self.average_similarity,
-                    self.required_PP
+                    self.required_PP,
+                    self.runtime_impa,
+                    self.runtime_pp
                 )
             )
 

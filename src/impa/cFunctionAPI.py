@@ -8,7 +8,8 @@ import ctypes
 from impa.environmentModule import os
 
 # Load the C library
-c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
+c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so") # for linux OS
+# c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.dylib") #for Mac OS
 # c_lib_kc_mwm = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
 
 # Define pointer types for C data types

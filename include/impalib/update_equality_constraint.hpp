@@ -306,15 +306,33 @@ void EqualityConstraint::flip_matrix(vector<vector<impalib_type>> &rMatrix, vect
     }
 }
 
+/**
+ * Calculate messages from variable equality constraints to k-sat constraints for the K-SAT problem
+ *
+ * @param[in] rKsatConstraint2EqConstraintM_: messages from k-sat constraints to variable equality constraints
+ * @param[out] rVariableEc2KsatConstraintM: messages variable equality constraints to from k-sat constraints
+ * @param[in] rUsedVariables: used variables in creating the constraints
+ * @param[in] rVariablesConnections: constraints connections for each variable
+ *
+ */
+
 void EqualityConstraint::variable_ec_to_ksat_constraint_update(vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_, vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<int> &rUsedVariables, vector<impalib_type> &rIncomingMetricsCost, vector<vector<int>> &rVariablesConnections)
 {
+    bool optimized_flag = true;
+
+    if (!optimized_flag)
+    {
+
+    for(auto& row : rVariableEc2KsatConstraintM) {
+        row.assign(row.size(), zero_value);
+    }
 
     vector<impalib_type> used_incoming_metrics_cost(numVariables_, zero_value);
 
     for (int i = 0; i < rUsedVariables.size(); ++i) {
         used_incoming_metrics_cost[rUsedVariables[i]] = rIncomingMetricsCost[rUsedVariables[i]];
     }
-    
+
     vector<impalib_type> sum_messages(numVariables_, zero_value);
 
     for (int i = 0; i < numConstraints_; ++i) {
@@ -322,15 +340,57 @@ void EqualityConstraint::variable_ec_to_ksat_constraint_update(vector<vector<imp
             sum_messages[j] += rKsatConstraint2EqConstraintM_[i][j];
         }
     }
+
     for (int i = 0; i < numVariables_; ++i) {
         sum_messages[i] += used_incoming_metrics_cost[i];
     }
-    
+
     for (int index_variable = 0; index_variable < rUsedVariables.size(); ++index_variable) {
         int variable = rUsedVariables[index_variable];
         for (int i = 0; i < rVariablesConnections[variable].size(); ++i) {
             int constraint = rVariablesConnections[variable][i];
+            // This if statement check was added to account for the fact that a constraint can have the same variable more than once,
+            // like in the benchmarks datasets. However, in practical cases, a variable cannot appear more than once in a constraint
+            // and thus this if statement check can be dropped
+            if (abs(rVariableEc2KsatConstraintM[constraint][variable])<abs(sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable])){
             rVariableEc2KsatConstraintM[constraint][variable] = sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable];
+            }
         }
+    }
+    }
+
+    else{
+
+    for(auto& row : rVariableEc2KsatConstraintM) {
+        row.assign(row.size(), zero_value);
+    }
+
+    vector<impalib_type> used_incoming_metrics_cost(numVariables_, zero_value);
+    
+    for_each(rUsedVariables.begin(), rUsedVariables.end(), [&](int n) {
+        used_incoming_metrics_cost[n] = rIncomingMetricsCost[n];
+    });
+
+    vector<impalib_type> sum_messages(numVariables_, zero_value);
+
+    for (int i = 0; i < numVariables_; ++i) {
+        for (int j = 0; j < rVariablesConnections[i].size(); ++j) {
+            sum_messages[i] += rKsatConstraint2EqConstraintM_[rVariablesConnections[i][j]][i];
+        }
+        sum_messages[i] +=used_incoming_metrics_cost[i];
+    }
+
+    for (int index_variable = 0; index_variable < rUsedVariables.size(); ++index_variable) {
+        int variable = rUsedVariables[index_variable];
+        for (int i = 0; i < rVariablesConnections[variable].size(); ++i) {
+            int constraint = rVariablesConnections[variable][i];
+            // This if statement check was added to account for the fact that a constraint can have the same variable more than once,
+            // like in the benchmarks datasets. However, in practical cases, a variable cannot appear more than once in a constraint
+            // and thus this if statement check can be dropped
+            if (abs(rVariableEc2KsatConstraintM[constraint][variable])<abs(sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable])){
+                rVariableEc2KsatConstraintM[constraint][variable] = sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable];
+            }
+        }
+    }
     }
 }
