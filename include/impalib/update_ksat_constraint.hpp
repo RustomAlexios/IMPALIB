@@ -67,10 +67,7 @@ KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VAR
 
 void KsatConstraint::ksat_constraint_to_variable_ec_update(vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_,
                                                            vector<vector<int>> &rConstraintsConnections, vector<vector<int>> &rConstraintsConnectionsType) {
-    
-    bool optimized_flag = true;
 
-    if (optimized_flag){
     for(auto& row : rKsatConstraint2EqConstraintDummyM_) {
         row.assign(row.size(), zero_value);
     }
@@ -132,102 +129,6 @@ void KsatConstraint::ksat_constraint_to_variable_ec_update(vector<vector<impalib
             rKsatConstraint2EqConstraintDummyM_[c][conx[stage]] = (min_solid_edges  - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage];
             }
         }
-    }
-
-    }
-
-    else{
-
-    // if you want to use unoptimized version of the code, uncomment this part and comment rKsatConstraint2EqConstraintDummyMImproved initialization
-    //for(auto& row : rKsatConstraint2EqConstraintDummyM_) {
-    //    row.assign(row.size(), zero_value);
-    //}
-    vector<vector<impalib_type>> rKsatConstraint2EqConstraintDummyMImproved(numConstraints_, vector<impalib_type>(numVariables_, zero_value));
-
-    for (int c = 0; c < numConstraints_; ++c) {
-        // Get connections and connection types for the current constraint
-        auto &conx = rConstraintsConnections[c];
-        auto &conx_type = rConstraintsConnectionsType[c];
-
-        for (size_t v = 0; v < conx.size(); ++v) {
-            // Get the current connected variable
-            auto variable = conx[v];
-
-            vector<int> conx_solid;
-            vector<int> conx_dashed;
-
-            // Separate solid and dashed connections
-            for (size_t i = 0; i < conx.size(); ++i) {
-                if (conx_type[i] == 1){// && conx[i] != variable) {
-                    // if (i!=v) was added && conx[i] != variable) was commented
-                    // to take into consideration that a variable can appear more than once
-                    // in a constraint (like bencmarks), but this is not common in practice
-                    if (i!=v) conx_solid.push_back(conx[i]);
-                } else if (conx_type[i] == -1){// && conx[i] != variable) {
-                    if (i!=v) conx_dashed.push_back(conx[i]);
-                }
-            }
-
-            impalib_type opt_solid_msgs = zero_value, opt_dashed_msgs = zero_value;
-
-            // Calculate optimum messages for solid connections
-            if (conx_solid.empty()) {
-                opt_solid_msgs = (conx_type[v] == 1) ? -value_inf : value_inf;
-            } else {
-                impalib_type minValue = value_inf;
-
-                for (int j = 0; j < conx_solid.size(); j++) {
-                    if (rVariableEc2KsatConstraintM[c][conx_solid[j]] < minValue) {
-                        minValue = rVariableEc2KsatConstraintM[c][conx_solid[j]];
-                    }
-                }
-
-                if (conx_type[v] == 1) {
-                    opt_solid_msgs = -minValue;
-                } else {
-                    opt_solid_msgs = minValue;
-                }
-            }
-
-            // Calculate optimum messages for dashed connections
-            if (conx_dashed.empty()) {
-                opt_dashed_msgs = (conx_type[v] == 1) ? -value_inf : value_inf;
-            } else {
-                impalib_type maxValue = -value_inf;
-
-                for (int j = 0; j < conx_dashed.size(); j++) {
-                    if (rVariableEc2KsatConstraintM[c][conx_dashed[j]] > maxValue) {
-                        maxValue = rVariableEc2KsatConstraintM[c][conx_dashed[j]];
-                    }
-                }
-
-                if (conx_type[v] == 1) {
-                    opt_dashed_msgs = maxValue;
-                } else {
-                    opt_dashed_msgs = -maxValue;
-                }
-            }
-
-            // Calculate the final message for the current variable
-            // The if statements checks (abs(rKsatConstraint2EqConstraintDummyMImproved[c][variable])<abs(min(zero_value, max(opt_solid_msgs, opt_dashed_msgs))))
-            // were added to account for the fact that a variable could occur multiple times in a constraint,
-            // like the case of benchmarks, but in practice, a constraint should not have the same variable appearing more than once
-            // and thus these if statements can be removed
-            if (conx_type[v] == 1) {
-                if (abs(rKsatConstraint2EqConstraintDummyMImproved[c][variable])<abs(min(zero_value, max(opt_solid_msgs, opt_dashed_msgs)))){
-                    //comment rKsatConstraint2EqConstraintDummyMImproved to use unimproved version of the code, and uncomment rKsatConstraint2EqConstraintDummyM_ to use improved version of the code
-                    rKsatConstraint2EqConstraintDummyMImproved[c][variable] = min(zero_value, max(opt_solid_msgs, opt_dashed_msgs));
-                    //rKsatConstraint2EqConstraintDummyM_[c][variable] = min(zero_value, max(opt_solid_msgs, opt_dashed_msgs));
-                }
-            } else {
-                if (abs(rKsatConstraint2EqConstraintDummyMImproved[c][variable])<abs(max(zero_value, min(opt_solid_msgs, opt_dashed_msgs)))){
-                //comment rKsatConstraint2EqConstraintDummyMImproved to use unimproved version of the code, and uncomment rKsatConstraint2EqConstraintDummyM_ to use improved version of the code
-                rKsatConstraint2EqConstraintDummyMImproved[c][variable] = max(zero_value, min(opt_solid_msgs, opt_dashed_msgs));
-                //rKsatConstraint2EqConstraintDummyM_[c][variable] = max(zero_value, min(opt_solid_msgs, opt_dashed_msgs));
-                }
-            }
-        }
-    }
     }
 }
 
