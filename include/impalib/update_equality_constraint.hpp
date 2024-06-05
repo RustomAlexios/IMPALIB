@@ -324,21 +324,18 @@ void EqualityConstraint::variable_ec_to_ksat_constraint_update(vector<vector<imp
     }
 
     vector<impalib_type> used_incoming_metrics_cost(numVariables_, zero_value);
-
-    for (int i = 0; i < rUsedVariables.size(); ++i) {
-        used_incoming_metrics_cost[rUsedVariables[i]] = rIncomingMetricsCost[rUsedVariables[i]];
-    }
+    
+    for_each(rUsedVariables.begin(), rUsedVariables.end(), [&](int n) {
+        used_incoming_metrics_cost[n] = rIncomingMetricsCost[n];
+    });
 
     vector<impalib_type> sum_messages(numVariables_, zero_value);
 
-    for (int i = 0; i < numConstraints_; ++i) {
-        for (int j = 0; j < numVariables_; ++j) {
-            sum_messages[j] += rKsatConstraint2EqConstraintM_[i][j];
-        }
-    }
-
     for (int i = 0; i < numVariables_; ++i) {
-        sum_messages[i] += used_incoming_metrics_cost[i];
+        for (int j = 0; j < rVariablesConnections[i].size(); ++j) {
+            sum_messages[i] += rKsatConstraint2EqConstraintM_[rVariablesConnections[i][j]][i];
+        }
+        sum_messages[i] +=used_incoming_metrics_cost[i];
     }
 
     for (int index_variable = 0; index_variable < rUsedVariables.size(); ++index_variable) {
@@ -349,7 +346,7 @@ void EqualityConstraint::variable_ec_to_ksat_constraint_update(vector<vector<imp
             // like in the benchmarks datasets. However, in practical cases, a variable cannot appear more than once in a constraint
             // and thus this if statement check can be dropped
             if (abs(rVariableEc2KsatConstraintM[constraint][variable])<abs(sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable])){
-            rVariableEc2KsatConstraintM[constraint][variable] = sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable];
+                rVariableEc2KsatConstraintM[constraint][variable] = sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable];
             }
         }
     }
