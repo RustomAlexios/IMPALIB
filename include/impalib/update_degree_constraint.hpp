@@ -25,12 +25,12 @@ private:
     vector<vector<impalib_type>> stage_backward_messages; ///< backward messages of trellis representation
 
 public:
-    void degree_constraint_to_edge_ec_update(vector<vector<impalib_type>> &, vector<vector<int>> &,
-                                             vector<vector<impalib_type>> &); ///< calculate messages from degree constraint to edge equality constraint
+    void degree_constraint_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
+                                             vector<vector<impalib_type>> &) const; ///< calculate messages from degree constraint to edge equality constraint
     void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< process filtering on messages from degree constraint to edge equality constraint
 
-    DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
-                     const impalib_type ALPHA); ///< constructor
+    DegreeConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
+                     impalib_type ALPHA); ///< constructor
 };
 
 /**
@@ -68,8 +68,8 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
  */
 
 void DegreeConstraint::degree_constraint_to_edge_ec_update(
-    vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM, vector<vector<int>> &rEdgeConnections,
-    vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM)
+    const vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM, const vector<vector<int>> &rEdgeConnections,
+    vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM) const
 {
     vector<impalib_type> stage_forward_messages(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> stage_backward_messages(numEdgeVariables_ + 1, zero_value);
@@ -176,9 +176,9 @@ void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> 
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(),
-                      [w_2](impalib_type &c) { return c * w_2; });
+                      [w_2](const impalib_type &c) { return c * w_2; });
             transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(),
-                      [w_1](impalib_type &c) { return c * w_1; });
+                      [w_1](const impalib_type &c) { return c * w_1; });
 
             if (iter == 0)
             {

@@ -41,8 +41,8 @@ class GraphicalModelKcMwm {
     InputsKcMwm modelInputs_;                                                                                                         ///< Graphical model inputs objects
     void initialize(const impalib_type *, impalib_type *, const int *, const int *, const int *, const impalib_type *, const int *);  ///< initialize graphical model
     void iterate(const int *);                                                                                                        ///< iterate over graphical model
-    GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG,
-                        const impalib_type ALPHA);  ///< constructor
+    GraphicalModelKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS, int MAX_SIZE_NON_ZERO_WEIGHTS, int N_ITERATIONS, bool FILT_FLAG,
+                        impalib_type ALPHA);  ///< constructor
 };
 
 /**
@@ -198,10 +198,10 @@ class GraphicalModelTsp {
     vector<vector<impalib_type>> subtourConstraints2EdgeEcDummyM_;      ///< messages from subtour constraints to edge equality constraint before filtering
     vector<vector<impalib_type>> edgeEc2SubtourConstraintsM_;           ///< messages from edge equality constraint to subtour constraints
     void iterate_augmented_graph();                                     ///< function of IMPA on augmented graph
-    void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, vector<vector<int>> &);                    ///< analysis of subtour constraints
+    void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                    ///< analysis of subtour constraints
     void hard_decision_analysis(vector<vector<int>> &);                                                                         ///< function for hard decision solution on IMPA solution
-    bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                          ///< function for post-processing loops
-    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, vector<vector<int>> &);                             ///< function for getting loops
+    static bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                          ///< function for post-processing loops
+    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                             ///< function for getting loops
     vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &);  ///< function for finding loops
     InputsTsp modelInputs_;                                                                                                     ///< Graphical Model Input object
     vector<vector<int>> selectedEdges_;                                                                                         ///< activated edges of IMPA
@@ -223,10 +223,10 @@ class GraphicalModelTsp {
     OutputsTsp outputs;                                                                                              ///< TSP graphical model outputs object
     void initialize(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *);  ///< initialize graphical model
     void iterate_relaxed_graph();                                                                                    ///< iterate over relaxed graphical model
-    void perform_augmentation(const int);                                                                            ///< perform augmentation on graphical model
+    void perform_augmentation(int);                                                                            ///< perform augmentation on graphical model
     void process_ouputs(impalib_type *, int *, int *, int *, impalib_type *, bool *, bool *, bool *, int *, int *, int *, int *);  ///< process outputs of Graphical Model
-    GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
-                      const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT);  ///< Constructor
+    GraphicalModelTsp(int NUM_ITERATIONS, int NUM_NODES, int NUM_EDGE_VARIABLES, bool AUGMENTATION_FLAG, bool RESET_FLAG, bool FILTERING_FLAG,
+                       impalib_type ALPHA, impalib_type THRESHOLD, int MAX_COUNT);  ///< Constructor
 };
 
 /**
@@ -616,7 +616,7 @@ void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSelectedEdg
  *
  */
 
-void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, vector<vector<int>> &rSelectedEdges) {
+void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
     closedPathsSize_.clear();  // just store it at the end if applicable
 
     // Get closed loops from the graph
@@ -708,7 +708,7 @@ void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<i
  * @return new_loops_list: list of detected loops in rGraph
  *
  */
-vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &rGraph, vector<vector<int>> &rSelectedEdges) {
+vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
     // Update the graph based on selected edges
     for (const auto &connection : rSelectedEdges) {
         if (rGraph.find(connection[0]) != rGraph.end()) {

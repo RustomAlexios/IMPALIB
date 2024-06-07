@@ -41,26 +41,26 @@ public:
       numEdgeVariables_(0), numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kvariable_(K_VARIABLE){};
 
     void team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<impalib_type> &,
-                                           vector<impalib_type> &); ///< calculate messages from team equality constraint to ORIC
+                                           vector<impalib_type> &) const; ///< calculate messages from team equality constraint to ORIC
 
-    void project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
+    static void project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
                                               vector<vector<impalib_type>> &); ///< calculate messages from project equality constraint to ORIC
 
-    void edge_ec_to_degree_constraint_relaxed_graph_update(vector<vector<int>> &, vector<vector<impalib_type>> &,
-                                                           vector<vector<impalib_type>> &,
-                                                           vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for relaxed TSP
+    void edge_ec_to_degree_constraint_relaxed_graph_update(const vector<vector<int>> &, vector<vector<impalib_type>> &,
+                                                           const vector<vector<impalib_type>> &,
+                                                           vector<vector<impalib_type>> &) const; ///< calculate messages from edge to degree constraints for relaxed TSP
     
-    void flip_matrix(vector<vector<impalib_type>> &, vector<vector<int>> &, vector<vector<impalib_type>> &); ///< flip matrix
-    vector<vector<impalib_type>> edge_ec_to_subtour_constraints_update(vector<vector<int>> &, vector<impalib_type> &,
-                                                                       vector<vector<impalib_type>> &,
-                                                                       vector<vector<impalib_type>> &,
-                                                                       vector<vector<int>> &); ///< calculate message from edge to subtour constraint
-    void                         edge_ec_to_degree_constraint_augmented_graph_update(vector<vector<impalib_type>> &,
-                                                                                     vector<vector<impalib_type>> &, vector<vector<int>> &,
-                                                                                     vector<vector<impalib_type>> &,
-                                                                                     vector<vector<impalib_type>> &); ///< calculate messages from edge to degree constraints for augmented TSP      
+    static void flip_matrix(const vector<vector<impalib_type>> &, const vector<vector<int>> &, vector<vector<impalib_type>> &); ///< flip matrix
+    vector<vector<impalib_type>> edge_ec_to_subtour_constraints_update(const vector<vector<int>> &, const vector<impalib_type> &,
+                                                                       const vector<vector<impalib_type>> &,
+                                                                       const vector<vector<impalib_type>> &,
+                                                                       const vector<vector<int>> &) const; ///< calculate message from edge to subtour constraint
+    void                         edge_ec_to_degree_constraint_augmented_graph_update(const vector<vector<impalib_type>> &,
+                                                                                     const vector<vector<impalib_type>> &, const vector<vector<int>> &,
+                                                                                     const vector<vector<impalib_type>> &,
+                                                                                     vector<vector<impalib_type>> &) const; ///< calculate messages from edge to degree constraints for augmented TSP
 
-    void variable_ec_to_ksat_constraint_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, vector<int> &, vector<impalib_type> &, vector<vector<int>> &);                                 
+    void variable_ec_to_ksat_constraint_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, vector<int> &, const vector<impalib_type> &, const vector<vector<int>> &) const;
 };
 
 /**
@@ -73,7 +73,7 @@ public:
 
 void EqualityConstraint::team_eq_constraint_to_oric_update(
     vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rTeam2OricM,
-    vector<impalib_type> &rewardTeam)
+    vector<impalib_type> &rewardTeam) const
 {
     vector<impalib_type> intermediate_team_to_oric_m(numTeams_, 0);
 
@@ -118,9 +118,9 @@ void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impa
  */
 
 void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_update(
-    vector<vector<int>> &rEdgeConnections, vector<vector<impalib_type>> &rEdgeDegreeConstraintCost,
-    vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
-    vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM)
+    const vector<vector<int>> &rEdgeConnections, vector<vector<impalib_type>> &rEdgeDegreeConstraintCost,
+    const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
+    vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM) const
 {
 
     vector<vector<impalib_type>> flipped_degree_constraint_to_eq_constraint_m = rDegreeConstraint2EqConstraintM;
@@ -149,9 +149,9 @@ void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_update(
  */
 
 vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_constraints_update(
-    vector<vector<int>> &rDeltaSIndicesList, vector<impalib_type> &rCostEdgeVaribale,
-    vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
-    vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, vector<vector<int>> &rEdgeConnections)
+    const vector<vector<int>> &rDeltaSIndicesList, const vector<impalib_type> &rCostEdgeVaribale,
+    const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
+    const vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, const vector<vector<int>> &rEdgeConnections) const
 {
 
     vector<vector<impalib_type>> edge_ec_to_subtour_constraints_list;
@@ -227,9 +227,9 @@ vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_constraints_
  */
 
 void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_update(
-    vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
-    vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, vector<vector<int>> &rEdgeConnections,
-    vector<vector<impalib_type>> &rEdgeDegreeConstraintCost, vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM)
+    const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
+    const vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, const vector<vector<int>> &rEdgeConnections,
+    const vector<vector<impalib_type>> &rEdgeDegreeConstraintCost, vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM) const
 {
 
     vector<impalib_type> combined_subtour_constraints_to_edge_ec_m(numEdgeVariables_, zero_value);
@@ -263,7 +263,7 @@ void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_update(
  * 
  */
 
-void EqualityConstraint::flip_matrix(vector<vector<impalib_type>> &rMatrix, vector<vector<int>> &rEdgeConnections,
+void EqualityConstraint::flip_matrix(const vector<vector<impalib_type>> &rMatrix, const vector<vector<int>> &rEdgeConnections,
                                         vector<vector<impalib_type>> &rFlippedMatrix)
 {
     // Iterate over each edge connection
@@ -288,7 +288,7 @@ void EqualityConstraint::flip_matrix(vector<vector<impalib_type>> &rMatrix, vect
  *
  */
 
-void EqualityConstraint::variable_ec_to_ksat_constraint_update(vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_, vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<int> &rUsedVariables, vector<impalib_type> &rIncomingMetricsCost, vector<vector<int>> &rVariablesConnections)
+void EqualityConstraint::variable_ec_to_ksat_constraint_update(const vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_, vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<int> &rUsedVariables, const vector<impalib_type> &rIncomingMetricsCost, const vector<vector<int>> &rVariablesConnections) const
 {
 
     for(auto& row : rVariableEc2KsatConstraintM) {

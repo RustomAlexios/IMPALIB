@@ -28,7 +28,7 @@ class InputsKcMwm {
 
     void process_inputs(const impalib_type *, impalib_type *, const int *, const int *, const int *, const impalib_type *, const int *);  ///< process input of graphical model
 
-    InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS);  ///< constructor
+    InputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS, int MAX_SIZE_NON_ZERO_WEIGHTS);  ///< constructor
 };
 
 /**
@@ -43,10 +43,10 @@ class OutputsKcMwm {
    public:
     vector<impalib_type> ExtrinsicOutputTeam;  ///< extrinsic output of team equality constraints
     vector<impalib_type> IntrinsicOutMwm;      ///< intrinsic outputs of project equality constraint
-    void intrinsic_out_mwm_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                                  vector<vector<impalib_type>> &);                              ///< calculate intrinsic outputs of project equality constraints
+    void intrinsic_out_mwm_update(const vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &,
+                                  const vector<vector<impalib_type>> &);                              ///< calculate intrinsic outputs of project equality constraints
     void extrinsic_output_team_update(vector<vector<impalib_type>> &, vector<impalib_type> &);  ///< calculate extrinsic output of team equality constraints
-    OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS);             ///< constructor
+    OutputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);             ///< constructor
 };
 
 /**
@@ -135,7 +135,7 @@ OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int
  *
  */
 
-void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2EqConstraintM, vector<vector<impalib_type>> &rProject2EqConstraintM, vector<vector<impalib_type>> &rRewardProject) {
+void OutputsKcMwm::intrinsic_out_mwm_update(const vector<vector<impalib_type>> &rOric2EqConstraintM, const vector<vector<impalib_type>> &rProject2EqConstraintM, const vector<vector<impalib_type>> &rRewardProject) {
     for (int project_index = 0; project_index < rRewardProject.size(); project_index++) {
         for (int team_index = 0; team_index < rRewardProject[project_index].size(); team_index++) {
             IntrinsicOutMwm[project_index + team_index + project_index * (numTeams_ - 1)] =
@@ -179,7 +179,7 @@ class InputsTsp {
 
     void process_inputs(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *);  ///< process inputs of TSP graphical model
 
-    InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES);  ///< constructor
+    InputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);  ///< constructor
 };
 
 /**
@@ -207,7 +207,7 @@ class OutputsTsp {
     void extrinsic_output_edge_ec_augmented_graph_update(vector<vector<impalib_type>> &,
                                                          vector<vector<impalib_type>> &);  ///< calculate extrinsic output of edge equality constraint for augmented TSP
     void intrinsic_output_edge_ec_update(vector<impalib_type> &);                          ///< calculate intrinsic output of edge equality constraint for augmented TSP
-    OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES);                         ///< constructor
+    OutputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);                         ///< constructor
 };
 
 /**
@@ -359,7 +359,7 @@ class OutputsKsat {
    public:
     vector<impalib_type> ExtrinsicOutputVariableEc;                                         ///< extrinsic messages of variables equality constraints
     OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE);  ///< constructor
-    void update_extrinsic(vector<vector<impalib_type>> &);                                  ///< calculate extrinsic messages of variables equality constraints
+    void update_extrinsic(const vector<vector<impalib_type>> &);                                  ///< calculate extrinsic messages of variables equality constraints
 };
 
 /**
@@ -434,7 +434,7 @@ void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIA
  *
  */
 
-void OutputsKsat::update_extrinsic(vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM) {
+void OutputsKsat::update_extrinsic(const vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM) {
     // Sum all messages coming into equality constraint except the
     // incoming message on the edge of interest
     for (int i = 0; i < numVariables_; i++) {

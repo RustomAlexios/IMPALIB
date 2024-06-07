@@ -20,13 +20,13 @@ private:
     int maxStateIc_ = 1; ///< maximum state of inequality constraint (>=1)
 
 public:
-    void oric_to_project_eq_constraint_update(vector<vector<impalib_type>> &, vector<impalib_type> &,
+    void oric_to_project_eq_constraint_update(const vector<vector<impalib_type>> &, const vector<impalib_type> &,
                                               vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                                              vector<vector<impalib_type>> &); ///< update messages from ORIC to project equality constraint
+                                              const vector<vector<impalib_type>> &) const; ///< update messages from ORIC to project equality constraint
 
-    void oric_to_team_update(vector<vector<impalib_type>> &, vector<impalib_type> &); ///< calculate messages from team ORIC to team equality constraint
+    static void oric_to_team_update(const vector<vector<impalib_type>> &, vector<impalib_type> &); ///< calculate messages from team ORIC to team equality constraint
 
-    OrInequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS); ///< constructor
+    OrInequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS); ///< constructor
 };
 
 /**
@@ -53,11 +53,11 @@ OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const in
  * 
  */
 
-void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<impalib_type>> &rEqConstraint2OricM,
-                                                                  vector<impalib_type>         &mTeam2ORIC,
+void OrInequalityConstraint::oric_to_project_eq_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2OricM,
+                                                                  const vector<impalib_type>         &mTeam2ORIC,
                                                                   vector<vector<impalib_type>> &rOric2EqConstraintM,
                                                                   vector<vector<impalib_type>> &rEqConstraint2ProjectM,
-                                                                  vector<vector<impalib_type>> &rRewardProject)
+                                                                  const vector<vector<impalib_type>> &rRewardProject) const
 {
     vector<vector<impalib_type>> stage_forward_messages_ORIC_project(numProjects_ + 1,
                                                                      vector<impalib_type>(maxStateIc_ + 1, zero_value));
@@ -117,7 +117,7 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(vector<vector<
  * 
  */
 
-void OrInequalityConstraint::oric_to_team_update(vector<vector<impalib_type>> &rEqConstraint2OricM,
+void OrInequalityConstraint::oric_to_team_update(const vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                  vector<impalib_type>         &rOric2TeamM)
 {
     for (int team_index = 0; team_index < rOric2TeamM.size(); team_index++)

@@ -24,12 +24,12 @@ private:
 
 public:
     vector<vector<impalib_type>> subtourConstraints2EdgeEcOld_; ///< messages from subtour constraints to edge equality constraint before filtering
-    void subtour_constraints_to_edge_ec_update(vector<vector<impalib_type>> &, vector<vector<int>> &,
-                                               vector<vector<impalib_type>> &); ///< calculate messages from subtour to edge equality constraints
-    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, vector<vector<int>> &); ///< perform filtering on messages from subtour to edge equality constraints
+    void subtour_constraints_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
+                                               vector<vector<impalib_type>> &) const; ///< calculate messages from subtour to edge equality constraints
+    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &); ///< perform filtering on messages from subtour to edge equality constraints
 
-    SubtourEliminationConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
-                                 const impalib_type ALPHA); ///< constructor
+    SubtourEliminationConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
+                                 impalib_type ALPHA); ///< constructor
 };
 
 /**
@@ -56,8 +56,8 @@ SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, 
  */
 
 void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
-    vector<vector<impalib_type>> &rEdgeEc2SubtourConstraintsM, vector<vector<int>> &rDeltaSIndicesList,
-    vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM)
+    const vector<vector<impalib_type>> &rEdgeEc2SubtourConstraintsM, const vector<vector<int>> &rDeltaSIndicesList,
+    vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM) const
 {
     vector<impalib_type> stage_forward_messages(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> stage_backward_messages(numEdgeVariables_ + 1, zero_value);
@@ -114,10 +114,10 @@ void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
  * 
  */
 
-void SubtourEliminationConstraint::process_filtering(int                           iter,
+void SubtourEliminationConstraint::process_filtering(const int                           iter,
                                                      vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcDummyM,
                                                      vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM,
-                                                     vector<vector<int>>          &rDeltaSIndicesList)
+                                                     const vector<vector<int>>          &rDeltaSIndicesList)
 {
 
     for (int index_subtour_constraint = 0; index_subtour_constraint < rDeltaSIndicesList.size();
@@ -131,9 +131,9 @@ void SubtourEliminationConstraint::process_filtering(int                        
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(),
-                      [w_2](impalib_type &c) { return c * w_2; });
+                      [w_2](const impalib_type &c) { return c * w_2; });
             transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(),
-                      [w_1](impalib_type &c) { return c * w_1; });
+                      [w_1](const impalib_type &c) { return c * w_1; });
 
             if (iter == 0)
             {
