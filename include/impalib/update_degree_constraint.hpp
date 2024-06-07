@@ -42,7 +42,7 @@ public:
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
  */
 
-DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
+inline DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
                                    const impalib_type ALPHA)
     : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES)
 {
@@ -67,7 +67,7 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
  * 
  */
 
-void DegreeConstraint::degree_constraint_to_edge_ec_update(
+inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
     const vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM, const vector<vector<int>> &rEdgeConnections,
     vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM) const
 {
@@ -163,7 +163,7 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
  * 
  */
 
-void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
+inline void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
                                          vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
     for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)

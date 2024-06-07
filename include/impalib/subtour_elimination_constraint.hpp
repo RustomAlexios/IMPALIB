@@ -40,7 +40,7 @@ public:
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
  */
-SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
+inline SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
                                                            const bool FILTERING_FLAG, const impalib_type ALPHA)
     : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES),
       initial_forward_message_(value_inf), initial_backward_message_(value_inf){
@@ -55,7 +55,7 @@ SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, 
  * 
  */
 
-void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
+inline void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
     const vector<vector<impalib_type>> &rEdgeEc2SubtourConstraintsM, const vector<vector<int>> &rDeltaSIndicesList,
     vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM) const
 {
@@ -114,7 +114,7 @@ void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
  * 
  */
 
-void SubtourEliminationConstraint::process_filtering(const int                           iter,
+inline void SubtourEliminationConstraint::process_filtering(const int                           iter,
                                                      vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcDummyM,
                                                      vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM,
                                                      const vector<vector<int>>          &rDeltaSIndicesList)

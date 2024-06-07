@@ -38,7 +38,7 @@ public:
  * 
  */
 
-OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
+inline OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
     : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){
                                                     };
 
@@ -53,7 +53,7 @@ OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const in
  * 
  */
 
-void OrInequalityConstraint::oric_to_project_eq_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2OricM,
+inline void OrInequalityConstraint::oric_to_project_eq_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                                   const vector<impalib_type>         &mTeam2ORIC,
                                                                   vector<vector<impalib_type>> &rOric2EqConstraintM,
                                                                   vector<vector<impalib_type>> &rEqConstraint2ProjectM,
@@ -117,7 +117,7 @@ void OrInequalityConstraint::oric_to_project_eq_constraint_update(const vector<v
  * 
  */
 
-void OrInequalityConstraint::oric_to_team_update(const vector<vector<impalib_type>> &rEqConstraint2OricM,
+inline void OrInequalityConstraint::oric_to_team_update(const vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                  vector<impalib_type>         &rOric2TeamM)
 {
     for (int team_index = 0; team_index < rOric2TeamM.size(); team_index++)

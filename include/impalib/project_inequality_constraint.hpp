@@ -30,7 +30,7 @@ public:
  * 
  */
 
-InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
+inline InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
     : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){
                                                     };
 
@@ -42,7 +42,7 @@ InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_
  * 
  */
 
-void InequalityConstraint::project_inequality_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2ProjectM,
+inline void InequalityConstraint::project_inequality_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2ProjectM,
                                                                 vector<vector<impalib_type>> &rProject2EqConstraintM) const
 {
 

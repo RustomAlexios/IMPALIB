@@ -71,7 +71,7 @@ public:
  * @param[in] rewardTeam: rewards of teams
  */
 
-void EqualityConstraint::team_eq_constraint_to_oric_update(
+inline void EqualityConstraint::team_eq_constraint_to_oric_update(
     vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rTeam2OricM,
     vector<impalib_type> &rewardTeam) const
 {
@@ -95,7 +95,7 @@ void EqualityConstraint::team_eq_constraint_to_oric_update(
  * @param[in] rewardProject: rewards of teams-projects combinations
  */
 
-void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
+inline void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
                                                                    vector<vector<impalib_type>> &rEqConstraint2OricM,
                                                                    vector<vector<impalib_type>> &rewardProject)
 {
@@ -117,7 +117,7 @@ void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impa
  * 
  */
 
-void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_update(
+inline void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_update(
     const vector<vector<int>> &rEdgeConnections, vector<vector<impalib_type>> &rEdgeDegreeConstraintCost,
     const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
     vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM) const
@@ -148,7 +148,7 @@ void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_update(
  * 
  */
 
-vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_constraints_update(
+inline vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_constraints_update(
     const vector<vector<int>> &rDeltaSIndicesList, const vector<impalib_type> &rCostEdgeVaribale,
     const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
     const vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, const vector<vector<int>> &rEdgeConnections) const
@@ -226,7 +226,7 @@ vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_constraints_
  * 
  */
 
-void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_update(
+inline void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_update(
     const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
     const vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, const vector<vector<int>> &rEdgeConnections,
     const vector<vector<impalib_type>> &rEdgeDegreeConstraintCost, vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM) const
@@ -263,7 +263,7 @@ void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_update(
  * 
  */
 
-void EqualityConstraint::flip_matrix(const vector<vector<impalib_type>> &rMatrix, const vector<vector<int>> &rEdgeConnections,
+inline void EqualityConstraint::flip_matrix(const vector<vector<impalib_type>> &rMatrix, const vector<vector<int>> &rEdgeConnections,
                                         vector<vector<impalib_type>> &rFlippedMatrix)
 {
     // Iterate over each edge connection
@@ -288,7 +288,7 @@ void EqualityConstraint::flip_matrix(const vector<vector<impalib_type>> &rMatrix
  *
  */
 
-void EqualityConstraint::variable_ec_to_ksat_constraint_update(const vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_, vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<int> &rUsedVariables, const vector<impalib_type> &rIncomingMetricsCost, const vector<vector<int>> &rVariablesConnections) const
+inline void EqualityConstraint::variable_ec_to_ksat_constraint_update(const vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_, vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<int> &rUsedVariables, const vector<impalib_type> &rIncomingMetricsCost, const vector<vector<int>> &rVariablesConnections) const
 {
 
     for(auto& row : rVariableEc2KsatConstraintM) {

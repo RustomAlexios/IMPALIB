@@ -42,7 +42,7 @@ class KsatConstraint {
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
  */
 
-KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA)
+inline KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA)
     : filteringFlag_(FILTERING_FLAG),
       alpha_(ALPHA),
       numVariables_(NUM_VARIABLES),
@@ -60,7 +60,7 @@ KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VAR
  *
  */
 
-void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_,
+inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_,
                                                            const vector<vector<int>> &rConstraintsConnections, const vector<vector<int>> &rConstraintsConnectionsType) const {
 
     for(auto& row : rKsatConstraint2EqConstraintDummyM_) {
@@ -136,7 +136,7 @@ void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<vector<i
  *
  */
 
-void KsatConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_) {
+inline void KsatConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_) {
     for (int c = 0; c < numConstraints_; c++) {
         if ((filteringFlag_) and (alpha_ != zero_value)) {
             vector<impalib_type> intermediate_dummy(rKsatConstraint2EqConstraintDummyM_[c]), intermediate_old(ksatConstraint2EqConstraintOld[c]), intermediate_extrinsic;

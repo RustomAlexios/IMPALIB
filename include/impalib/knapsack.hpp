@@ -48,7 +48,7 @@ public:
  * 
  */
 
-Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA)
+inline Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA)
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), filteringFlag_(FILT_FLAG), alpha_(ALPHA)
 {
 
@@ -73,7 +73,7 @@ Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_F
  * 
  */
 
-void Knapsack::forward(const int department_index, vector<vector<impalib_type>> &rStageForwardMessages,
+inline void Knapsack::forward(const int department_index, vector<vector<impalib_type>> &rStageForwardMessages,
                        const int max_state_department, vector<vector<int>> &rNonZeroWeightIndices,
                        const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const vector<vector<int>> &rTeamsWeightsPerDepartment,
                        const vector<vector<impalib_type>> &rTeam2KnapsackM) const
@@ -160,7 +160,7 @@ void Knapsack::forward(const int department_index, vector<vector<impalib_type>> 
  * 
  */
 
-void Knapsack::backward(const int department_index, vector<vector<impalib_type>> &rStageBackwardMessages,
+inline void Knapsack::backward(const int department_index, vector<vector<impalib_type>> &rStageBackwardMessages,
                         const int max_state_department, vector<vector<int>> &rNonZeroWeightIndices,
                         const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const vector<vector<int>> &rTeamsWeightsPerDepartment,
                         const vector<vector<impalib_type>> &rTeam2KnapsackM) const
@@ -248,7 +248,7 @@ void Knapsack::backward(const int department_index, vector<vector<impalib_type>>
  * 
  */
 
-void Knapsack::extrinsic_output_department_lhs(const vector<vector<int>>          &rTeamsWeightsPerDepartment,
+inline void Knapsack::extrinsic_output_department_lhs(const vector<vector<int>>          &rTeamsWeightsPerDepartment,
                                                const vector<vector<impalib_type>> &rStageForwardMessages,
                                                const vector<vector<impalib_type>> &rTeam2KnapsackM, const int department_index,
                                                const vector<vector<impalib_type>> &rStageBackwardMessages,
@@ -317,7 +317,7 @@ void Knapsack::extrinsic_output_department_lhs(const vector<vector<int>>        
  * 
  */
 
-void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWeightIndices,
+inline void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWeightIndices,
                                        vector<vector<impalib_type>> &rTeam2KnapsackM, const vector<impalib_type> &rRewardTeam,
                                        const vector<vector<impalib_type>> &rExtrinsicOutputDepartment,
                                        const vector<impalib_type>         &mORIC2Team) const
@@ -374,7 +374,7 @@ void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNonZeroWei
  * 
  */
 
-void Knapsack::process_extrinsic_output_department(int department_index, int iter,
+inline void Knapsack::process_extrinsic_output_department(int department_index, int iter,
                                                    vector<vector<impalib_type>> &rExtrinsicOutputDepartmentDummy,
                                                    vector<vector<impalib_type>> &rExtrinsicOutputDepartment)
 {
