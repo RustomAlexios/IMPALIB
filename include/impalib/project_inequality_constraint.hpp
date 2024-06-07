@@ -49,13 +49,11 @@ void InequalityConstraint::project_inequality_constraint_update(vector<vector<im
                                                                 vector<vector<impalib_type>> &rProject2EqConstraintM)
 {
 
-    // Define containers for forward and backward messages
     vector<vector<impalib_type>> stage_forward_messages_project_EC(numTeams_ + 1,
                                                                    vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> stage_backward_messages_project_EC(numTeams_ + 1,
                                                                     vector<impalib_type>(maxStateIc_ + 1, zero_value));
 
-    // Iterate over projects
     for (int project_index = 0; project_index < rProject2EqConstraintM.size(); project_index++)
     {
         // Initialize forward messages
@@ -63,7 +61,6 @@ void InequalityConstraint::project_inequality_constraint_update(vector<vector<im
             initial_backward_messages(maxStateIc_ + 1, zero_value);
         fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
 
-        // Calculate forward messages
         stage_forward_messages_project_EC[0] = initial_forward_messages;
         
         for (int stage = 0; stage < numTeams_; stage++)
@@ -74,7 +71,6 @@ void InequalityConstraint::project_inequality_constraint_update(vector<vector<im
                     stage_forward_messages_project_EC[stage][0] + rEqConstraint2ProjectM[project_index][stage]);
         }
 
-        // Calculate backward messages
         stage_backward_messages_project_EC[numTeams_] = initial_backward_messages;
 
         for (int stage = numTeams_ - 1; stage >= 0; stage--)

@@ -65,11 +65,9 @@ void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
     vector<vector<impalib_type>> &rEdgeEc2SubtourConstraintsM, vector<vector<int>> &rDeltaSIndicesList,
     vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM)
 {
-    // Define containers for forward and backward messages
     vector<impalib_type> stage_forward_messages(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> stage_backward_messages(numEdgeVariables_ + 1, zero_value);
 
-    // Iterate over subtour constraints
     for (size_t index_subtour_constraint = 0; index_subtour_constraint < rDeltaSIndicesList.size();
          index_subtour_constraint++)
     {
@@ -128,15 +126,12 @@ void SubtourEliminationConstraint::process_filtering(int                        
                                                      vector<vector<int>>          &rDeltaSIndicesList)
 {
 
-    // Iterate over subtour constraints
     for (int index_subtour_constraint = 0; index_subtour_constraint < rDeltaSIndicesList.size();
          index_subtour_constraint++)
     {
 
-        // Apply filtering if enabled and alpha is not zero
         if ((filteringFlag_) and (alpha_ != zero_value))
         {
-            // Calculate intermediate values based on alpha
             vector<impalib_type> intermediate_dummy(rSubtourConstraints2EdgeEcDummyM[index_subtour_constraint]),
                 intermediate_old(subtourConstraints2EdgeEcOld_[index_subtour_constraint]), intermediate_extrinsic;
 
@@ -145,8 +140,7 @@ void SubtourEliminationConstraint::process_filtering(int                        
                       [w_2](impalib_type &c) { return c * w_2; });
             transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(),
                       [w_1](impalib_type &c) { return c * w_1; });
-            
-            // Update the messages based on iteration
+
             if (iter == 0)
             {
                 copy(intermediate_dummy.begin(), intermediate_dummy.end(),
@@ -160,13 +154,11 @@ void SubtourEliminationConstraint::process_filtering(int                        
                      rSubtourConstraints2EdgeEcM[index_subtour_constraint].begin());
             }
 
-            // Update the old messages for the next iteration
             copy(rSubtourConstraints2EdgeEcM[index_subtour_constraint].begin(),
                  rSubtourConstraints2EdgeEcM[index_subtour_constraint].end(),
                  subtourConstraints2EdgeEcOld_[index_subtour_constraint].begin());
         }
 
-        // If filtering is not enabled or alpha is zero, simply copy the dummy values
         else
         {
             copy(rSubtourConstraints2EdgeEcDummyM[index_subtour_constraint].begin(),

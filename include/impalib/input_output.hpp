@@ -65,19 +65,15 @@ class OutputsKcMwm {
 
 InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS)
     : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), numProjects_(N_PROJECTS), maxSizeNonzeroWeights_(MAX_SIZE_NON_ZERO_WEIGHTS) {
-    // Reserve memory for vectors based on provided sizes
     TeamsWeightsPerDepartment.reserve(numDepartments_);
     NonZeroWeightIndices.reserve(numDepartments_);
     RewardProject.reserve(numProjects_);
     Team2KnapsackM.reserve(numDepartments_);
 
-    // Initialize Team2KnapsackM and TeamsWeightsPerDepartment vectors
     for (int department_index = 0; department_index < numDepartments_; department_index++) {
         Team2KnapsackM.push_back(vector<impalib_type>(numTeams_, zero_value));
         TeamsWeightsPerDepartment.push_back(vector<int>(numTeams_, 0));
     }
-
-    // Initialize RewardProject vector
     for (int project_index = 0; project_index < numProjects_; project_index++) {
         RewardProject.push_back(vector<impalib_type>(numTeams_, zero_value));
     }
@@ -98,24 +94,17 @@ InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N
 
 void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY, const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                  const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
-    // Copy reward values for each team and maximum states per department
     copy(pREWARD_TEAM_PY, pREWARD_TEAM_PY + numTeams_, back_inserter(RewardTeam));
     copy(pMAX_STATE_PY, pMAX_STATE_PY + numDepartments_, back_inserter(MaxState));
 
-    // Iterate over each department
     for (int department_index = 0; department_index < numDepartments_; department_index++) {
-        // Populate NonZeroWeightIndices for the department
         NonZeroWeightIndices.push_back(vector<int>(pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index], 0));
-        // Copy transition model values for the department
         copy(pTransition_model_py + numTeams_ * department_index, pTransition_model_py + numTeams_ * (department_index + 1), Team2KnapsackM[department_index].begin());
-        // Copy teams weights per department
         copy(pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * department_index, pTEAMS_WEIGHTS_PER_DEPARTMENT_PY + numTeams_ * (department_index + 1),
              TeamsWeightsPerDepartment[department_index].begin());
-        // Copy NonZeroWeightIndices for the department
         copy(p_NON_ZERO_WEIGHT_INDICES_PY + maxSizeNonzeroWeights_ * department_index,
              p_NON_ZERO_WEIGHT_INDICES_PY + pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index] + maxSizeNonzeroWeights_ * department_index, NonZeroWeightIndices[department_index].begin());
     }
-    // Iterate over each project
     for (int project_index = 0; project_index < numProjects_; project_index++) {
         // Copy reward values for each project-team combination
         copy(pREWARD_PROJECT_PY + numTeams_ * project_index, pREWARD_PROJECT_PY + numTeams_ * (project_index + 1), RewardProject[project_index].begin());
@@ -135,12 +124,10 @@ void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_ty
  */
 
 OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), numProjects_(N_PROJECTS) {
-    // Reserve memory for extrinsic output per team and initialize with zero values
     ExtrinsicOutputTeam.reserve(numTeams_);
     ExtrinsicOutputTeam.resize(numTeams_);
     fill(ExtrinsicOutputTeam.begin(), ExtrinsicOutputTeam.begin() + numTeams_, zero_value);
 
-    // Reserve memory for intrinsic output per project-team combination and initialize with zero values
     IntrinsicOutMwm.reserve(numProjects_ * numTeams_);
     IntrinsicOutMwm.resize(numProjects_ * numTeams_);
     fill(IntrinsicOutMwm.begin(), IntrinsicOutMwm.begin() + numProjects_ * numTeams_, zero_value);
@@ -156,11 +143,8 @@ OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int
  */
 
 void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2EqConstraintM, vector<vector<impalib_type>> &rProject2EqConstraintM, vector<vector<impalib_type>> &rRewardProject) {
-    // Iterate over projects
     for (int project_index = 0; project_index < rRewardProject.size(); project_index++) {
-        // Iterate over teams
         for (int team_index = 0; team_index < rRewardProject[project_index].size(); team_index++) {
-            // Calculate the intrinsic output for the project-team combination
             IntrinsicOutMwm[project_index + team_index + project_index * (numTeams_ - 1)] =
                 rOric2EqConstraintM[project_index][team_index] + rProject2EqConstraintM[project_index][team_index] + rRewardProject[project_index][team_index];
         }
@@ -176,12 +160,9 @@ void OutputsKcMwm::intrinsic_out_mwm_update(vector<vector<impalib_type>> &rOric2
  */
 
 void OutputsKcMwm::extrinsic_output_team_update(vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rOric2TeamM) {
-    // Copy the values from rOric2TeamM to ExtrinsicOutputTeam
     copy(rOric2TeamM.begin(), rOric2TeamM.end(), ExtrinsicOutputTeam.begin());
 
-    // Iterate over departments
     for (int department_index = 0; department_index < rExtrinsicOutputDepartment.size(); department_index++) {
-        // Calculate rExtrinsicOutputDepartment by adding rOric2TeamM
         transform(rExtrinsicOutputDepartment[department_index].begin(), rExtrinsicOutputDepartment[department_index].end(), ExtrinsicOutputTeam.begin(), ExtrinsicOutputTeam.begin(),
                   std::plus<impalib_type>());
     }
@@ -249,7 +230,6 @@ class OutputsTsp {
  */
 
 OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES) {
-    // Reserve and initialize memory for extrinsic and intrinsic edge equality constraints outputs
     ExtrinsicOutputEdgeEc.reserve(numEdgeVariables_);
     ExtrinsicOutputEdgeEc.resize(numEdgeVariables_);
     IntrinsicOutputEdgeEc.reserve(numEdgeVariables_);
@@ -272,25 +252,21 @@ OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : numN
 
 void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, impalib_type *pEdge_ec_to_degree_constraint_m_py,
                                const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
-    // Copy cost edge variable data
     copy(pCOST_EDGE_VARIABLE_PY, pCOST_EDGE_VARIABLE_PY + numEdgeVariables_, back_inserter(CostEdgeVariable));
 
-    // Process input variables
     for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++) {
-        // Copy edge connections
         EdgeConnections.push_back(vector<int>(numNodesPerEdge_, 0));
         copy(pEDGE_CONNECTIONS_PY + numNodesPerEdge_ * edge_variable_index, pEDGE_CONNECTIONS_PY + numNodesPerEdge_ * (edge_variable_index + 1), EdgeConnections[edge_variable_index].begin());
-        // Copy edge ec to degree constraint messages
+
         EdgeEc2DegreeConstraintM.push_back(vector<impalib_type>(numNodes_, zero_value));
         copy(pEdge_ec_to_degree_constraint_m_py + numNodes_ * edge_variable_index, pEdge_ec_to_degree_constraint_m_py + numNodes_ * (edge_variable_index + 1),
              EdgeEc2DegreeConstraintM[edge_variable_index].begin());
-        // Copy edge degree constraint cost
+
         EdgeDegreeConstraintCost.push_back(vector<impalib_type>(numNodes_, zero_value));
         copy(pEDGE_DEGREE_CONSTRAINT_COST_PY + numNodes_ * edge_variable_index, pEDGE_DEGREE_CONSTRAINT_COST_PY + numNodes_ * (edge_variable_index + 1),
              EdgeDegreeConstraintCost[edge_variable_index].begin());
     }
 
-    // Process cost matrix
     for (int node_index = 0; node_index < numNodes_; node_index++) {
         CostMatrix.push_back(vector<impalib_type>(numNodes_, zero_value));
         copy(pCOST_MATRIX_PY + numNodes_ * node_index, pCOST_MATRIX_PY + numNodes_ * (node_index + 1), CostMatrix[node_index].begin());
@@ -305,9 +281,7 @@ void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_ty
  */
 
 void OutputsTsp::extrinsic_output_edge_ec_relaxed_graph_update(vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM) {
-    // Iterate over each edge variable index
     for (int edge_variable_index = 0; edge_variable_index < rDegreeConstraint2EqConstraintM.size(); edge_variable_index++) {
-        // Calculate extrinsic output for the edge equality constraints
         ExtrinsicOutputEdgeEc[edge_variable_index] = accumulate(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(), rDegreeConstraint2EqConstraintM[edge_variable_index].end(), zero_value);
     }
 }
@@ -321,12 +295,10 @@ void OutputsTsp::extrinsic_output_edge_ec_relaxed_graph_update(vector<vector<imp
  */
 
 void OutputsTsp::extrinsic_output_edge_ec_augmented_graph_update(vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM, vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM) {
-    // Update extrinsic output for edge equality constraints based on messages from degree constraints to equality constraints
     for (int edge_variable_index = 0; edge_variable_index < rDegreeConstraint2EqConstraintM.size(); edge_variable_index++) {
         ExtrinsicOutputEdgeEc[edge_variable_index] = accumulate(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(), rDegreeConstraint2EqConstraintM[edge_variable_index].end(), zero_value);
     }
 
-    // Update extrinsic output for edge equality constraints based on messages from subtour elimination constraints
     for (int subtour_constraint_index = 0; subtour_constraint_index < rSubtourConstraints2EdgeEcM.size(); subtour_constraint_index++) {
         transform(rSubtourConstraints2EdgeEcM[subtour_constraint_index].begin(), rSubtourConstraints2EdgeEcM[subtour_constraint_index].end(), ExtrinsicOutputEdgeEc.begin(),
                   ExtrinsicOutputEdgeEc.begin(), plus<impalib_type>());
@@ -341,7 +313,6 @@ void OutputsTsp::extrinsic_output_edge_ec_augmented_graph_update(vector<vector<i
  */
 
 void OutputsTsp::intrinsic_output_edge_ec_update(vector<impalib_type> &rCostEdgeVariable) {
-    // Calculate intrinsic output for edge equality constraints by adding extrinsic output for edge equality constraints to cost edge variable
     transform(ExtrinsicOutputEdgeEc.begin(), ExtrinsicOutputEdgeEc.end(), rCostEdgeVariable.begin(), IntrinsicOutputEdgeEc.begin(), plus<impalib_type>());
 }
 
@@ -459,7 +430,6 @@ void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIA
     int conx_size_old = 0;
 
     for (int j = 0; j < numVariables_; j++) {
-        // If the variable is used
         if (find(UsedVariables.begin(), UsedVariables.end(), j) != UsedVariables.end()) {
             int conx_size = VariablesConnectionsSizes[j];
 
@@ -483,7 +453,8 @@ void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIA
  */
 
 void OutputsKsat::update_extrinsic(vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM) {
-    // sum all messages coming into equality constraint except the incoming message on the edge of interest
+    // Sum all messages coming into equality constraint except the
+    // incoming message on the edge of interest
     for (int i = 0; i < numVariables_; i++) {
         for (int j = 0; j < numConstraints_; j++) {
             ExtrinsicOutputVariableEc[i] += rKsatConstraint2EqConstraintM[j][i];
