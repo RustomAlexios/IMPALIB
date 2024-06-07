@@ -27,7 +27,7 @@ public:
     void backward(int, vector<vector<impalib_type>> &, int, vector<vector<int>> &, const int *, const vector<vector<int>> &,
                   const vector<vector<impalib_type>> &) const; ///< backward pass of forward-backward algorithm
 
-    static void extrinsic_output_department_lhs(const vector<vector<int>> &, const vector<vector<impalib_type>> &,
+    void extrinsic_output_department_lhs(const vector<vector<int>> &, const vector<vector<impalib_type>> &,
                                          const vector<vector<impalib_type>> &, int, const vector<vector<impalib_type>> &, int,
                                          vector<vector<impalib_type>> &); ///< extrinsic output of department constraint
 
