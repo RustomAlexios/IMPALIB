@@ -45,10 +45,6 @@ public:
  * @param[in] N_TEAMS: number of teams
  * @param[in] FILT_FLAG: filtering flag
  * @param[in] ALPHA: filtering parameter (between 0 and 1)
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] filteringFlag_: FILT_FLAG
- * @param[out] alpha_: ALPHA
  * 
  */
 

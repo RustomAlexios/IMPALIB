@@ -27,9 +27,6 @@ public:
 /**
  * Construct InequalityConstraint object for the Knapsack-MWM problem
  *
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
  * 
  */
 

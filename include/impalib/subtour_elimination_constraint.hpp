@@ -39,12 +39,6 @@ public:
  * @param[in] NUM_EDGE_VARIABLES: number of connections between nodes
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
- * @param[out] initial_forward_message_: set to infinity
- * @param[out] initial_backward_message_: set to infinity
  */
 SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
                                                            const bool FILTERING_FLAG, const impalib_type ALPHA)

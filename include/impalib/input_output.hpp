@@ -56,10 +56,6 @@ class OutputsKcMwm {
  * @param[in] N_TEAMS: number of teams
  * @param[in] N_PROJECTS: number of projects
  * @param[in] MAX_SIZE_NON_ZERO_WEIGHTS: maximum number of connections between teams and departments
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] maxSizeNonzeroWeights_: MAX_SIZE_NON_ZERO_WEIGHTS
  *
  */
 
@@ -117,9 +113,6 @@ void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_ty
  * @param[in] N_DEPARTMENTS: number of departments
  * @param[in] N_TEAMS: number of teams
  * @param[in] N_PROJECTS: number of projects
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numProjects_: N_PROJECTS
  *
  */
 
@@ -194,8 +187,6 @@ class InputsTsp {
  *
  * @param[in] NUM_NODES: number of nodes
  * @param[in] NUM_EDGE_VARIABLES: number of edge variables (edge connections)
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
  *
  */
 
@@ -224,8 +215,6 @@ class OutputsTsp {
  *
  * @param[in] NUM_NODES: number of nodes
  * @param[in] NUM_EDGE_VARIABLES: number of edge variables (edge connections)
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
  *
  */
 
@@ -347,10 +336,6 @@ class InputsKsat {
  * @param[in] NUM_CONSTRAINTS: number of constraints
  * @param[in] K_VARIABLE: ///< number of variables per constraint
  * @param[in] NUM_USED_VARIABLES: number of variables used to construct the formula
- * @param[out] numVariables_: NUM_VARIABLES
- * @param[out] numConstraints_: NUM_CONSTRAINTS
- * @param[out] kVariable_: K_VARIABLE'
- * @param[out] numUsedVariables_: NUM_USED_VARIABLES
  *
  */
 
@@ -383,9 +368,6 @@ class OutputsKsat {
  * @param[in] NUM_VARIABLES: total number of variables
  * @param[in] NUM_CONSTRAINTS: number of constraints
  * @param[in] K_VARIABLE: ///< number of variables per constraint
- * @param[out] numVariables_: NUM_VARIABLES
- * @param[out] numConstraints_: NUM_CONSTRAINTS
- * @param[out] kVariable_: K_VARIABLE'
  *
  */
 

@@ -56,20 +56,6 @@ class GraphicalModelKcMwm {
  * @param[in] N_ITERATIONS: number of iterations for running IMPA
  * @param[in] FILT_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] modelInputs_: object of type InputsKcMwm: inputs of graphical
- * model
- * @param[out] outputs: object of type OutputsKcMwm: outputs of graphical model
- * @param[out] projectIneqConstraint_: object of type InequalityConstraint:
- * object associated with inequality constraint operations
- * @param[out] modelEqConstraint_: object of type EqualityConstraintKcMwm:
- * object associated with equality constraint operations
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
- * @param[out] maxSizeNonZeroWeights_: MAX_SIZE_NON_ZERO_WEIGHTS
- * @param[out] numIterations_: N_ITERATIONS
- * @param[out] filteringFlag_: FILT_FLAG
- * @param[out] alpha_: ALPHA
  *
  */
 
@@ -256,26 +242,6 @@ class GraphicalModelTsp {
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
  * @param[in] THRESHOLD: threshold for hard decision on intrinsic messages
  * @param[in] MAX_COUNT: maximum count of failure cases before exiting the code
- * @param[out] modelDegreeConstraint_: object of type DegreeConstraint: object
- * associated with degree constraint operations
- * @param[out] modelEqConstraint_: object of type EqualityConstraintTsp: object
- * associated with equality constraint operations
- * @param[out] modelSubtourEliminationConstraint_: object of type
- * SubtourEliminationConstraint: object associated with subtour elimination
- * constraint operations
- * @param[out] modelInputs_: object of type InputsTsp: object associated with
- * inputs of tsp
- * @param[out] outputs: object of type OutputsTsp: object associated with
- * outputs of tsp
- * @param[out] numIterations_: NUM_ITERATIONS
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numNodes_: NUM_NODES
- * @param[out] augmentationFlag_: AUGMENTATION_FLAG
- * @param[out] resetFlag_: RESET_FLAG
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
- * @param[out] threshold_: THRESHOLD
- * @param[out] maxCount_: MAX_COUNT
  *
  */
 
@@ -742,9 +708,9 @@ void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<i
  * @return new_loops_list: list of detected loops in rGraph
  *
  */
-vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &rGraph, vector<vector<int>> &rSelectedEgdes) {
+vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &rGraph, vector<vector<int>> &rSelectedEdges) {
     // Update the graph based on selected edges
-    for (const auto &connection : rSelectedEgdes) {
+    for (const auto &connection : rSelectedEdges) {
         if (rGraph.find(connection[0]) != rGraph.end()) {
             rGraph[connection[0]].push_back(connection[1]);
         } else {
@@ -924,17 +890,6 @@ class GraphicalModelKsat {
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
  * @param[in] NUM_USED_VARIABLES: number of variables used to construct the formula
- * @param[out] modelInputs_: object of type InputsKsat
- * @param[out] modelEqConstraint_: object of type EqualityConstraint
- * @param[out] modelKsatConstraint_: object of type KsatConstraint
- * @param[out] outputs: object of type OutputsKsat
- * @param[out] numIterations_: N_ITERATIONS
- * @param[out] numVariables_: NUM_VARIABLES
- * @param[out] numConstraints_: NUM_CONSTRAINTS
- * @param[out] kVariable_: K_VARIABLE
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numUsedVariables_: NUM_USED_VARIABLES
  *
  */
 

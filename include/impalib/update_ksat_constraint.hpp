@@ -40,11 +40,6 @@ class KsatConstraint {
  * @param[in] K_VARIABLE: number of variables per constraint
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numVariables_: NUM_VARIABLES
- * @param[out] numConstraints_: NUM_CONSTRAINTS
- * @param[out] kVariable_: K_VARIABLE
  */
 
 KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA)

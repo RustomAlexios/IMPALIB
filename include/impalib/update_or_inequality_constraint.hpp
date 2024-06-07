@@ -35,9 +35,6 @@ public:
  * @param[in] N_DEPARTMENTS: number of departments
  * @param[in] N_TEAMS: number of teams
  * @param[in] N_PROJECTS: number of projects
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
  * 
  */
 
