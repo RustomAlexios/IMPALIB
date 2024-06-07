@@ -823,7 +823,7 @@ inline bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vecto
  * between the nodes (if a tour is found, )
  *
  */
-inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> &rGraph, int start_node, int current, unordered_set<int> visited, vector<int> path, vector<int> &visited_nodes) {
+inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> &rGraph, const int start_node, const int current, unordered_set<int> visited, vector<int> path, vector<int> &visited_nodes) {
     visited.insert(current);
     path.push_back(current);
 
@@ -893,8 +893,8 @@ class GraphicalModelKsat {
  *
  */
 
-inline GraphicalModelKsat::GraphicalModelKsat(int NUM_ITERATIONS, int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA,
-                                       int NUM_USED_VARIABLES)
+inline GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA,
+                                       const int NUM_USED_VARIABLES)
     : modelInputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, numUsedVariables_),
       modelEqConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
       modelKsatConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),

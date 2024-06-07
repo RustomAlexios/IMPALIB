@@ -339,7 +339,7 @@ class InputsKsat {
  *
  */
 
-inline InputsKsat::InputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, int NUM_USED_VARIABLES)
+inline InputsKsat::InputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const int NUM_USED_VARIABLES)
     : numVariables_(NUM_VARIABLES),
       numConstraints_(NUM_CONSTRAINTS),
       kVariable_(K_VARIABLE),

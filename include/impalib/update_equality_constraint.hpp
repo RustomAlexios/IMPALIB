@@ -23,7 +23,7 @@ private:
     int kvariable_;
 public:
 
-    EqualityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS)
+    EqualityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
     : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS), 
         filteringFlag_(false), alpha_(zero_value), numNodes_(0), numEdgeVariables_(0),
         numVariables_(0), numConstraints_(0), kvariable_(0){};

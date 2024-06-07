@@ -42,7 +42,7 @@ class KsatConstraint {
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
  */
 
-inline KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA)
+inline KsatConstraint::KsatConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA)
     : filteringFlag_(FILTERING_FLAG),
       alpha_(ALPHA),
       numVariables_(NUM_VARIABLES),
@@ -136,7 +136,7 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
  *
  */
 
-inline void KsatConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_) {
+inline void KsatConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_) {
     for (int c = 0; c < numConstraints_; c++) {
         if ((filteringFlag_) and (alpha_ != zero_value)) {
             vector<impalib_type> intermediate_dummy(rKsatConstraint2EqConstraintDummyM_[c]), intermediate_old(ksatConstraint2EqConstraintOld[c]), intermediate_extrinsic;

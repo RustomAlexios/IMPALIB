@@ -374,7 +374,7 @@ inline void Knapsack::team_to_knapsack_update(vector<vector<int>>          &rNon
  * 
  */
 
-inline void Knapsack::process_extrinsic_output_department(int department_index, int iter,
+inline void Knapsack::process_extrinsic_output_department(const int department_index, const int iter,
                                                    vector<vector<impalib_type>> &rExtrinsicOutputDepartmentDummy,
                                                    vector<vector<impalib_type>> &rExtrinsicOutputDepartment)
 {

@@ -163,7 +163,7 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
  * 
  */
 
-inline void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
+inline void DegreeConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
                                          vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
     for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
