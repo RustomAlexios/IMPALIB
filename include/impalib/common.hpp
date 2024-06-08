@@ -6,25 +6,23 @@
 
 #pragma once
 
-#include <limits>
-#include <string>
-//#include <bits/stdc++.h>
 #include <algorithm>
+#include <array>
 #include <chrono>
+#include <cmath>
 #include <fstream>
 #include <functional>
-#include <iostream>
-#include <numeric>
-#include <typeinfo>
-#include <vector>
-
-#include <array>
-#include <cmath>
 #include <iomanip>
+#include <iostream>
 #include <iterator>
+#include <limits>
+#include <numeric>
 #include <set>
+#include <string>
+#include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 using namespace std;
 
@@ -38,4 +36,4 @@ typedef float impalib_type;
 #endif
 
 const impalib_type zero_value = 0.0;
-const impalib_type value_inf  = std::numeric_limits<impalib_type>::infinity();
+const impalib_type value_inf = std::numeric_limits<impalib_type>::infinity();
