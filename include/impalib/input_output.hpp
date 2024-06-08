@@ -304,19 +304,19 @@ inline void OutputsTsp::intrinsic_output_edge_ec_update(vector<impalib_type> &co
  */
 class InputsKsat {
    private:
-    int numVariables_;      ///< total number of variables
-    int numConstraints_;    ///< number of constraints
-    int kVariable_;         ///< number of variables per constraint
-    int numUsedVariables_;  ///< number of variables used to construct the formula
+    int nVars_;         ///< total number of variables
+    int nConstraints_;  ///< number of constraints
+    int k_;             ///< number of variables per constraint
+    int nUsed_;         ///< number of variables used to construct the formula
 
    public:
-    vector<int> UsedVariables;                                ///< used variables to construct the formula
-    vector<impalib_type> IncomingMetricsCost;                 ///< incoming metrics for varibales
-    vector<vector<int>> ConstraintsConnections;               ///< connections to variables for each constraint
-    vector<vector<int>> ConstraintsConnectionsType;           ///< types of connections to variables for each constraint
-    vector<vector<int>> VariablesConnections;                 ///< connections to constraints for each variable
-    vector<int> VariablesConnectionsSizes;                    ///< sizes of connections to constraints for each variable
-    vector<vector<impalib_type>> VariableEc2KsatConstraintM;  ///< messages from variables equality constraints to k-sat constraints
+    vector<int> used_;                          ///< used variables to construct the formula
+    vector<impalib_type> metrics_;              ///< incoming metrics for varibales
+    vector<vector<int>> connectionsToVars_;     ///< connections to variables for each constraint
+    vector<vector<int>> types_;                 ///< types of connections to variables for each constraint
+    vector<vector<int>> connectionsFromVars_;   ///< connections to constraints for each variable
+    vector<int> sizes_;                         ///< sizes of connections to constraints for each variable
+    vector<vector<impalib_type>> varEq2KsatM_;  ///< messages from variables equality constraints to k-sat constraints
 
     void process_inputs(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);  ///< process inputs from python
 
@@ -334,10 +334,10 @@ class InputsKsat {
  */
 
 inline InputsKsat::InputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const int NUM_USED_VARIABLES)
-    : numVariables_(NUM_VARIABLES),
-      numConstraints_(NUM_CONSTRAINTS),
-      kVariable_(K_VARIABLE),
-      numUsedVariables_(NUM_USED_VARIABLES){
+    : nVars_(NUM_VARIABLES),
+      nConstraints_(NUM_CONSTRAINTS),
+      k_(K_VARIABLE),
+      nUsed_(NUM_USED_VARIABLES){
 
       };
 
@@ -382,40 +382,40 @@ inline OutputsKsat::OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VA
 
 inline void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
                                        const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
-    copy(pUSED_VARIABLES_PY, pUSED_VARIABLES_PY + numUsedVariables_, back_inserter(UsedVariables));
+    copy(pUSED_VARIABLES_PY, pUSED_VARIABLES_PY + nUsed_, back_inserter(used_));
 
-    copy(pINCOMING_METRICS_COST, pINCOMING_METRICS_COST + numVariables_, back_inserter(IncomingMetricsCost));
+    copy(pINCOMING_METRICS_COST, pINCOMING_METRICS_COST + nVars_, back_inserter(metrics_));
 
-    copy(pVARIABLES_CONNECTIONS_SIZES, pVARIABLES_CONNECTIONS_SIZES + numVariables_, back_inserter(VariablesConnectionsSizes));
+    copy(pVARIABLES_CONNECTIONS_SIZES, pVARIABLES_CONNECTIONS_SIZES + nVars_, back_inserter(sizes_));
 
-    for (int i = 0; i < numConstraints_; i++) {
-        ConstraintsConnections.push_back(vector<int>(kVariable_, 0));
+    for (int i = 0; i < nConstraints_; i++) {
+        connectionsToVars_.push_back(vector<int>(k_, 0));
 
-        copy(pCONSTRAINTS_CONNECTIONS + kVariable_ * i, pCONSTRAINTS_CONNECTIONS + kVariable_ * (i + 1), ConstraintsConnections[i].begin());
+        copy(pCONSTRAINTS_CONNECTIONS + k_ * i, pCONSTRAINTS_CONNECTIONS + k_ * (i + 1), connectionsToVars_[i].begin());
 
-        ConstraintsConnectionsType.push_back(vector<int>(kVariable_, 0));
+        types_.push_back(vector<int>(k_, 0));
 
-        copy(pCONSTRAINTS_CONNECTIONS_TYPE + kVariable_ * i, pCONSTRAINTS_CONNECTIONS_TYPE + kVariable_ * (i + 1), ConstraintsConnectionsType[i].begin());
+        copy(pCONSTRAINTS_CONNECTIONS_TYPE + k_ * i, pCONSTRAINTS_CONNECTIONS_TYPE + k_ * (i + 1), types_[i].begin());
 
-        VariableEc2KsatConstraintM.push_back(vector<impalib_type>(numVariables_, zero_value));
+        varEq2KsatM_.push_back(vector<impalib_type>(nVars_, zero_value));
 
-        copy(pVariable_ec_to_ksat_constraint_m_py + numVariables_ * i, pVariable_ec_to_ksat_constraint_m_py + numVariables_ * (i + 1), VariableEc2KsatConstraintM[i].begin());
+        copy(pVariable_ec_to_ksat_constraint_m_py + nVars_ * i, pVariable_ec_to_ksat_constraint_m_py + nVars_ * (i + 1), varEq2KsatM_[i].begin());
     }
 
     int conx_size_old = 0;
 
-    for (int j = 0; j < numVariables_; j++) {
-        if (find(UsedVariables.begin(), UsedVariables.end(), j) != UsedVariables.end()) {
-            int conx_size = VariablesConnectionsSizes[j];
+    for (int j = 0; j < nVars_; j++) {
+        if (find(used_.begin(), used_.end(), j) != used_.end()) {
+            int conx_size = sizes_[j];
 
-            VariablesConnections.push_back(vector<int>(conx_size, 0));
+            connectionsFromVars_.push_back(vector<int>(conx_size, 0));
 
-            copy(pVARIABLES_CONNECTIONS_PY + conx_size_old, pVARIABLES_CONNECTIONS_PY + conx_size_old + conx_size, VariablesConnections[j].begin());
+            copy(pVARIABLES_CONNECTIONS_PY + conx_size_old, pVARIABLES_CONNECTIONS_PY + conx_size_old + conx_size, connectionsFromVars_[j].begin());
 
             conx_size_old += conx_size;
 
         } else {
-            VariablesConnections.push_back(vector<int>());
+            connectionsFromVars_.push_back(vector<int>());
         }
     }
 }

@@ -934,11 +934,11 @@ inline void GraphicalModelKsat::initialize(const int *pUSED_VARIABLES_PY, const 
 inline void GraphicalModelKsat::iterate() {
     for (int iter = 0; iter < nIter_; iter++) {
         /// update messages from k-sat constraints to variable equality constraints
-        ksats_.ksat_constraint_to_variable_ec_update(inputs_.VariableEc2KsatConstraintM, ksat2EqPreM_, inputs_.ConstraintsConnections, inputs_.ConstraintsConnectionsType);
+        ksats_.ksat_constraint_to_variable_ec_update(inputs_.varEq2KsatM_, ksat2EqPreM_, inputs_.connectionsToVars_, inputs_.types_);
         /// perform filtering on messages from k-sat constraints to variable equality constraints
         ksats_.process_filtering(iter, ksat2EqPreM_, ksat2EqM_);
         /// update messages from variable equality constraints to k-sat constraints
-        eqs_.variable_ec_to_ksat_constraint_update(ksat2EqM_, inputs_.VariableEc2KsatConstraintM, inputs_.UsedVariables, inputs_.IncomingMetricsCost, inputs_.VariablesConnections);
+        eqs_.variable_ec_to_ksat_constraint_update(ksat2EqM_, inputs_.varEq2KsatM_, inputs_.used_, inputs_.metrics_, inputs_.connectionsFromVars_);
     }
     /// process outputs of k-sat problem
     outputs_.update_extrinsic(ksat2EqM_);
