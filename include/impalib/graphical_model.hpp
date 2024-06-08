@@ -86,7 +86,7 @@ inline GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const i
     eqConstraint2ProjectM_.reserve(numProjects_);
     project2EqConstraintM_.reserve(numProjects_);
 
-    for (int project_index = 0; project_index < numProjects_; project_index++) {
+    for (int project = 0; project < numProjects_; project++) {
         eqConstraint2OricM_.push_back(vector<impalib_type>(numTeams_, zero_value));
         oric2EqConstraintM_.push_back(vector<impalib_type>(numTeams_, zero_value));
         eqConstraint2ProjectM_.push_back(vector<impalib_type>(numTeams_, zero_value));
@@ -99,7 +99,7 @@ inline GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const i
 
     /// initializes and populates nested vectors for mapping relationships
     /// between departments and teams
-    for (int department_index = 0; department_index < numDepartments_; department_index++) {
+    for (int department = 0; department < numDepartments_; department++) {
         extrinsicOutputDepartment_.push_back(vector<impalib_type>(numTeams_, zero_value));
         extrinsicOutputDepartmentDummy_.push_back(vector<impalib_type>(numTeams_, zero_value));
     }
@@ -141,21 +141,21 @@ inline void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY,
 
 inline void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) {
     for (int iter = 0; iter < numIterations_; iter++) {
-        for (int department_index = 0; department_index < numDepartments_; department_index++) {
-            int max_state_department = modelInputs_.MaxState[department_index];
+        for (int department = 0; department < numDepartments_; department++) {
+            int capacity = modelInputs_.MaxState[department];
 
             // Initialize forward and backward message vectors
-            vector<vector<impalib_type>> stage_forward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
-            vector<vector<impalib_type>> stage_backward_messages(numTeams_ + 1, vector<impalib_type>(max_state_department + 1, zero_value));
+            vector<vector<impalib_type>> stage_forward_messages(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
+            vector<vector<impalib_type>> stage_backward_messages(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
 
-            modelKnapsacks_.forward(department_index, stage_forward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+            modelKnapsacks_.forward(department, stage_forward_messages, capacity, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                     modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
-            modelKnapsacks_.backward(department_index, stage_backward_messages, max_state_department, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+            modelKnapsacks_.backward(department, stage_backward_messages, capacity, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                      modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
 
-            modelKnapsacks_.extrinsic_output_department_lhs(modelInputs_.TeamsWeightsPerDepartment, stage_forward_messages, modelInputs_.Team2KnapsackM, department_index, stage_backward_messages,
-                                                            max_state_department, extrinsicOutputDepartmentDummy_);
-            modelKnapsacks_.process_extrinsic_output_department(department_index, iter, extrinsicOutputDepartmentDummy_, extrinsicOutputDepartment_);
+            modelKnapsacks_.extrinsic_output_department_lhs(modelInputs_.TeamsWeightsPerDepartment, stage_forward_messages, modelInputs_.Team2KnapsackM, department, stage_backward_messages,
+                                                            capacity, extrinsicOutputDepartmentDummy_);
+            modelKnapsacks_.process_extrinsic_output_department(department, iter, extrinsicOutputDepartmentDummy_, extrinsicOutputDepartment_);
         }
 
         modelEqConstraint_.team_eq_constraint_to_oric_update(extrinsicOutputDepartment_, team2OricM_, modelInputs_.RewardTeam);
@@ -265,7 +265,7 @@ inline GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int 
     DegreeConstraint2EqConstraintM_.reserve(numEdgeVariables_);
 
     // Populate degree constraint to equality constraint messages
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++) {
+    for (int edge = 0; edge < numEdgeVariables_; edge++) {
         DegreeConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numNodes_, zero_value));
         DegreeConstraint2EqConstraintM_.push_back(vector<impalib_type>(numNodes_, zero_value));
     }
@@ -469,7 +469,7 @@ inline void GraphicalModelTsp::iterate_augmented_graph() {
     modelSubtourEliminationConstraint_.subtourConstraints2EdgeEcOld_.reserve(delta_S_indices_list.size());
 
     // Initialize old subtour constraints
-    for (int index_subtour_constraint = 0; index_subtour_constraint < delta_S_indices_list.size(); index_subtour_constraint++) {
+    for (int subtour = 0; subtour < delta_S_indices_list.size(); subtour++) {
         modelSubtourEliminationConstraint_.subtourConstraints2EdgeEcOld_.push_back(vector<impalib_type>(numEdgeVariables_, zero_value));
     }
 
@@ -551,10 +551,10 @@ inline void GraphicalModelTsp::iterate_augmented_graph() {
 /**
  * This will get the hard decision on edges by investigating the sign
  * IntrinsicOutputEdgeEc
- * @param[out] rSelectedEdges: activated edges after running IMPA
+ * @param[out] selected: activated edges after running IMPA
  *
  */
-inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSelectedEdges) {
+inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &selected) {
     hard_decision.resize(numEdgeVariables_);
     fill(hard_decision.begin(), hard_decision.begin() + numEdgeVariables_, numeric_limits<int>::max());
 
@@ -562,9 +562,9 @@ inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSele
     transform(outputs.IntrinsicOutputEdgeEc.begin(), outputs.IntrinsicOutputEdgeEc.end(), hard_decision.begin(), [&](impalib_type value) { return value > threshold_ ? zero_value : 1; });
 
     // Select edges based on hard decision
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++) {
-        if (hard_decision[edge_variable_index] == 1) {
-            rSelectedEdges.push_back(modelInputs_.EdgeConnections[edge_variable_index]);
+    for (int edge = 0; edge < numEdgeVariables_; edge++) {
+        if (hard_decision[edge] == 1) {
+            selected.push_back(modelInputs_.EdgeConnections[edge]);
         }
     }
 
@@ -572,7 +572,7 @@ inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSele
     set<int> uniqueNodes;
 
     cout << "selected_edges: [";
-    for (const vector<int> &edge : rSelectedEdges) {
+    for (const vector<int> &edge : selected) {
         for (int node : edge) {
             if (uniqueNodes.find(node) == uniqueNodes.end()) {
                 uniqueNodes.insert(node);
@@ -588,7 +588,7 @@ inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSele
 
         cout << "]";
 
-        if (&edge != &rSelectedEdges.back()) {
+        if (&edge != &selected.back()) {
             cout << ", ";
         }
     }
@@ -610,17 +610,17 @@ inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &rSele
 /**
  * Analyze the activated edges. If tour found, return tour. If tour not found,
  * detect subtours. Count failure cases if present
- * @param[in] rSelectedEdges: activated edges in the graphical model
- * @param[out] rGraph: graphical model of activated egdes. Defines connections
+ * @param[in] selected: activated edges in the graphical model
+ * @param[out] G: graphical model of activated egdes. Defines connections
  * between nodes
  *
  */
 
-inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
+inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &G, const vector<vector<int>> &selected) {
     closedPathsSize_.clear();  // just store it at the end if applicable
 
     // Get closed loops from the graph
-    vector<vector<int>> loops_list = get_closed_loops(rGraph, rSelectedEdges);
+    vector<vector<int>> loops_list = get_closed_loops(G, selected);
     subtourPaths_.clear();
     subtourPaths_ = loops_list;
 
@@ -702,26 +702,26 @@ inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordere
 /**
  * Get closed loops. Function for building the graphical model of activated
  * edges and obtain loops
- * @param[in] rSelectedEdges: activated edges in the graphical model
- * @param[out] rGraph: graphical model of activated egdes. Defines connections
+ * @param[in] selected: activated edges in the graphical model
+ * @param[out] G: graphical model of activated egdes. Defines connections
  * between nodes. Will be used for detecting of subtours
  * @return new_loops_list: list of detected loops in rGraph
  *
  */
-inline vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &rGraph, const vector<vector<int>> &rSelectedEdges) {
+inline vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int, vector<int>> &G, const vector<vector<int>> &selected) {
     // Update the graph based on selected edges
-    for (const auto &connection : rSelectedEdges) {
-        if (rGraph.find(connection[0]) != rGraph.end()) {
-            rGraph[connection[0]].push_back(connection[1]);
+    for (const auto &connection : selected) {
+        if (G.find(connection[0]) != G.end()) {
+            G[connection[0]].push_back(connection[1]);
         } else {
-            rGraph[connection[0]] = {connection[1]};
+            G[connection[0]] = {connection[1]};
         }
     }
 
     vector<vector<int>> loops_list;
     vector<int> visited_nodes;
 
-    for (const auto &connection : rGraph) {
+    for (const auto &connection : G) {
         int start_node = connection.first;
         const vector<int> &end_nodes = connection.second;
         // Skip if node is already visited
@@ -732,7 +732,7 @@ inline vector<vector<int>> GraphicalModelTsp::get_closed_loops(unordered_map<int
                 unordered_set<int> visited_set;
                 vector<int> path;
 
-                vector<int> closed_loop = find_closed_loop(rGraph, start_node, end_nodes[j], visited_set, path, visited_nodes);
+                vector<int> closed_loop = find_closed_loop(G, start_node, end_nodes[j], visited_set, path, visited_nodes);
                 if (!closed_loop.empty()) {
                     loops_list.push_back(closed_loop);
                 }
@@ -809,10 +809,10 @@ inline bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vecto
  * This function will be called to find closed loops. This is called multiple
  * times as shown in get_closed_loops function. It will find path between nodes.
  * Will return any path (which could be a tour)
- * @param[in] rGraph: graph of activated edges. Mapping between nodes and their
+ * @param[in] G: graph of activated edges. Mapping between nodes and their
  * neighboring nodes
- * @param[in] start_node: node the path is starting from
- * @param[in] current: current node under investigation in the path
+ * @param[in] start: node the path is starting from
+ * @param[in] cur: current node under investigation in the path
  * @param[in] visited_nodes: This includes all visited nodes. This can help in
  * skipping the investigation of nodes that are already in the path to avoid
  * processing of loops list in get_closed_loops. This was deactivated in this
@@ -823,26 +823,26 @@ inline bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vecto
  * between the nodes (if a tour is found, )
  *
  */
-inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> &rGraph, const int start_node, const int current, unordered_set<int> visited, vector<int> path, vector<int> &visited_nodes) {
-    visited.insert(current);
-    path.push_back(current);
+inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> &G, const int start, const int cur, unordered_set<int> visited, vector<int> path, vector<int> &visited_nodes) {
+    visited.insert(cur);
+    path.push_back(cur);
 
     // Check if loop is found
-    if (current == start_node) {
+    if (cur == start) {
         return path;
     }
 
     // If current node has no outgoing connections
-    if (rGraph.find(current) == rGraph.end()) {
-        vector<int> new_path = {start_node};
+    if (G.find(cur) == G.end()) {
+        vector<int> new_path = {start};
         new_path.insert(new_path.end(), path.begin(), path.end());
         return vector<int>();
     }
 
-    for (int node : rGraph.at(current)) {
+    for (int node : G.at(cur)) {
         // If node is not visited, continue search
         if (visited.find(node) == visited.end()) {
-            vector<int> new_path = find_closed_loop(rGraph, start_node, node, visited, path, visited_nodes);
+            vector<int> new_path = find_closed_loop(G, start, node, visited, path, visited_nodes);
             // Return new path if loop is found
             if (!new_path.empty()) {
                 return new_path;

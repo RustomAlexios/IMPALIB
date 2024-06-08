@@ -24,7 +24,7 @@ private:
 public:
 
     EqualityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
-    : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS), 
+    : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS),
         filteringFlag_(false), alpha_(zero_value), numNodes_(0), numEdgeVariables_(0),
         numVariables_(0), numConstraints_(0), kvariable_(0){};
 
@@ -33,7 +33,7 @@ public:
     : numProjects_(0), numTeams_(0), numDepartments_(0),
       filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES),
       numEdgeVariables_(NUM_EDGE_VARIABLES), numVariables_(0), numConstraints_(0), kvariable_(0){};
-    
+
     EqualityConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE,
                                              const bool FILTERING_FLAG, const impalib_type ALPHA)
     : numProjects_(0), numTeams_(0), numDepartments_(0),
@@ -49,7 +49,7 @@ public:
     void edge_ec_to_degree_constraint_relaxed_graph_update(const vector<vector<int>> &, vector<vector<impalib_type>> &,
                                                            const vector<vector<impalib_type>> &,
                                                            vector<vector<impalib_type>> &) const; ///< calculate messages from edge to degree constraints for relaxed TSP
-    
+
     static void flip_matrix(const vector<vector<impalib_type>> &, const vector<vector<int>> &, vector<vector<impalib_type>> &); ///< flip matrix
     vector<vector<impalib_type>> edge_ec_to_subtour_constraints_update(const vector<vector<int>> &, const vector<impalib_type> &,
                                                                        const vector<vector<impalib_type>> &,
@@ -66,43 +66,43 @@ public:
 /**
  * Calculate messages from team equality constraint to ORIC for the Knapsack-MWM problem
  *
- * @param[in] rExtrinsicOutputDepartment: messages from departments to teams
- * @param[out] rTeam2OricM: messages from team equality constraint to ORIC
- * @param[in] rewardTeam: rewards of teams
+ * @param[in] extrinsicOut: messages from departments to teams
+ * @param[out] team2OricM: messages from team equality constraint to ORIC
+ * @param[in] rewards: rewards of teams
  */
 
 inline void EqualityConstraint::team_eq_constraint_to_oric_update(
-    vector<vector<impalib_type>> &rExtrinsicOutputDepartment, vector<impalib_type> &rTeam2OricM,
-    vector<impalib_type> &rewardTeam) const
+    vector<vector<impalib_type>> &extrinsicOut, vector<impalib_type> &team2OricM,
+    vector<impalib_type> &rewards) const
 {
     vector<impalib_type> intermediate_team_to_oric_m(numTeams_, 0);
 
-    for (int department_index = 0; department_index < rExtrinsicOutputDepartment.size(); department_index++)
+    for (int department = 0; department < extrinsicOut.size(); department++)
     {
-        transform(rExtrinsicOutputDepartment[department_index].begin(),
-                  rExtrinsicOutputDepartment[department_index].end(), intermediate_team_to_oric_m.begin(),
+        transform(extrinsicOut[department].begin(),
+                  extrinsicOut[department].end(), intermediate_team_to_oric_m.begin(),
                   intermediate_team_to_oric_m.begin(), std::plus<impalib_type>());
     }
-    transform(intermediate_team_to_oric_m.begin(), intermediate_team_to_oric_m.end(), rewardTeam.begin(),
-              rTeam2OricM.begin(), std::plus<impalib_type>());
+    transform(intermediate_team_to_oric_m.begin(), intermediate_team_to_oric_m.end(), rewards.begin(),
+              team2OricM.begin(), std::plus<impalib_type>());
 }
 
 /**
  * Calculate messages from project equality constraint to ORIC for the Knapsack-MWM problem
  *
- * @param[in] rProject2EqConstraintM: messages from projects inequality constraints to project equality constraint
- * @param[out] rEqConstraint2OricM: messages from project equality constraints to ORIC
- * @param[in] rewardProject: rewards of teams-projects combinations
+ * @param[in] project2EqM: messages from projects inequality constraints to project equality constraint
+ * @param[out] eq2OricM: messages from project equality constraints to ORIC
+ * @param[in] rewards: rewards of teams-projects combinations
  */
 
-inline void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &rProject2EqConstraintM,
-                                                                   vector<vector<impalib_type>> &rEqConstraint2OricM,
-                                                                   vector<vector<impalib_type>> &rewardProject)
+inline void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &project2EqM,
+                                                                   vector<vector<impalib_type>> &eq2OricM,
+                                                                   vector<vector<impalib_type>> &rewards)
 {
-    for (int project_index = 0; project_index < rProject2EqConstraintM.size(); project_index++)
+    for (int project = 0; project < project2EqM.size(); project++)
     {
-        transform(rProject2EqConstraintM[project_index].begin(), rProject2EqConstraintM[project_index].end(),
-                  rewardProject[project_index].begin(), rEqConstraint2OricM[project_index].begin(),
+        transform(project2EqM[project].begin(), project2EqM[project].end(),
+                  rewards[project].begin(), eq2OricM[project].begin(),
                   std::plus<impalib_type>());
     }
 }
@@ -110,28 +110,28 @@ inline void EqualityConstraint::project_eq_constraint_to_oric_update(vector<vect
 /**
  * Calculate messages from edge equality constraints to degree constraints for the relaxed TSP
  *
- * @param[in] rEdgeConnections: list of connections for each edge equality constraint
- * @param[in] rEdgeDegreeConstraintCost: cost matrix of edges that has size function of number of edges and number of nodes
- * @param[in] rDegreeConstraint2EqConstraintM: messages from degree constraints to equality constraints
- * @param[out] rEdgeEc2DegreeConstraintM: messages from edge equality constraints to degree constraints
- * 
+ * @param[in] connections: list of connections for each edge equality constraint
+ * @param[in] cost: cost matrix of edges that has size function of number of edges and number of nodes
+ * @param[in] deg2EqM: messages from degree constraints to equality constraints
+ * @param[out] eq2DegM: messages from edge equality constraints to degree constraints
+ *
  */
 
 inline void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_update(
-    const vector<vector<int>> &rEdgeConnections, vector<vector<impalib_type>> &rEdgeDegreeConstraintCost,
-    const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
-    vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM) const
+    const vector<vector<int>> &connections, vector<vector<impalib_type>> &cost,
+    const vector<vector<impalib_type>> &deg2EqM,
+    vector<vector<impalib_type>> &eq2DegM) const
 {
 
-    vector<vector<impalib_type>> flipped_degree_constraint_to_eq_constraint_m = rDegreeConstraint2EqConstraintM;
-    flip_matrix(rDegreeConstraint2EqConstraintM, rEdgeConnections, flipped_degree_constraint_to_eq_constraint_m);
+    vector<vector<impalib_type>> deg2EqM_flipped = deg2EqM;
+    flip_matrix(deg2EqM, connections, deg2EqM_flipped);
 
-    for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
+    for (int edge = 0; edge < numEdgeVariables_; edge++)
     {
-        transform(flipped_degree_constraint_to_eq_constraint_m[edge_variable_index].begin(),
-                  flipped_degree_constraint_to_eq_constraint_m[edge_variable_index].end(),
-                  rEdgeDegreeConstraintCost[edge_variable_index].begin(),
-                  rEdgeEc2DegreeConstraintM[edge_variable_index].begin(), plus<impalib_type>());
+        transform(deg2EqM_flipped[edge].begin(),
+                  deg2EqM_flipped[edge].end(),
+                  cost[edge].begin(),
+                  eq2DegM[edge].begin(), plus<impalib_type>());
     }
 }
 
@@ -139,48 +139,48 @@ inline void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_updat
 /**
  * Calculate messages from edge equality constraints to subtour elimination constraints for the TSP
  *
- * @param[in] rDeltaSIndicesList: list of edge indices forming the subtour elimination constraints
- * @param[in] rCostEdgeVaribale: costs of each edge variable
- * @param[in] rDegreeConstraint2EqConstraintM: messages from degree constraint to equality constraint
- * @param[in] rSubtourConstraints2EdgeEcM: messages from subtour constraints to edge equality constraints
- * @param[in] rEdgeConnections: list of connections for each edge equality constraint
+ * @param[in] deltaS: list of edge indices forming the subtour elimination constraints
+ * @param[in] costs: costs of each edge variable
+ * @param[in] deg2EqM: messages from degree constraint to equality constraint
+ * @param[in] subtour2EqM: messages from subtour constraints to edge equality constraints
+ * @param[in] connections: list of connections for each edge equality constraint
  * @return edge_ec_to_subtour_constraints_list: messages from edge equality constraint to subtour elimination constraints
- * 
+ *
  */
 
 inline vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_constraints_update(
-    const vector<vector<int>> &rDeltaSIndicesList, const vector<impalib_type> &rCostEdgeVaribale,
-    const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
-    const vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, const vector<vector<int>> &rEdgeConnections) const
+    const vector<vector<int>> &deltaS, const vector<impalib_type> &costs,
+    const vector<vector<impalib_type>> &deg2EqM,
+    const vector<vector<impalib_type>> &subtour2EqM, const vector<vector<int>> &connections) const
 {
 
-    vector<vector<impalib_type>> edge_ec_to_subtour_constraints_list;
+    vector<vector<impalib_type>> eq2SubtourM;
 
-    if (rDeltaSIndicesList.size() == 1)
+    if (deltaS.size() == 1)
     {
         vector<impalib_type> edge_ec_to_subtour_constraints_m(numEdgeVariables_, zero_value);
 
-        vector<impalib_type> combined_degree_constraint_to_eq_constraint_m(numEdgeVariables_, zero_value);
-        for (size_t index_edge_variable = 0; index_edge_variable < numEdgeVariables_; ++index_edge_variable)
+        vector<impalib_type> deg2EqM_sum(numEdgeVariables_, zero_value);
+        for (size_t edge = 0; edge < numEdgeVariables_; ++edge)
         {
-            combined_degree_constraint_to_eq_constraint_m[index_edge_variable] =
-                rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][0]]
-                + rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][1]];
+            deg2EqM_sum[edge] =
+                deg2EqM[edge][connections[edge][0]]
+                + deg2EqM[edge][connections[edge][1]];
         }
 
-        for (size_t i = 0; i < rDeltaSIndicesList[0].size(); i++)
+        for (size_t i = 0; i < deltaS[0].size(); i++)
         {
-            edge_ec_to_subtour_constraints_m[rDeltaSIndicesList[0][i]] =
-                combined_degree_constraint_to_eq_constraint_m[rDeltaSIndicesList[0][i]]
-                + rCostEdgeVaribale[rDeltaSIndicesList[0][i]];
+            edge_ec_to_subtour_constraints_m[deltaS[0][i]] =
+                deg2EqM_sum[deltaS[0][i]]
+                + costs[deltaS[0][i]];
         }
-        edge_ec_to_subtour_constraints_list.push_back(edge_ec_to_subtour_constraints_m);
+        eq2SubtourM.push_back(edge_ec_to_subtour_constraints_m);
     }
-    
+
     else
     {
         vector<impalib_type> combined_subtour_constraints_to_edge_ec_m(numEdgeVariables_, zero_value);
-        for (const auto &row : rSubtourConstraints2EdgeEcM)
+        for (const auto &row : subtour2EqM)
         {
             transform(combined_subtour_constraints_to_edge_ec_m.begin(),
                       combined_subtour_constraints_to_edge_ec_m.end(), row.begin(),
@@ -188,137 +188,137 @@ inline vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_const
         }
 
         vector<impalib_type> combined_degree_constraint_to_eq_constraint_m(numEdgeVariables_, zero_value);
-        for (size_t index_edge_variable = 0; index_edge_variable < numEdgeVariables_; ++index_edge_variable)
+        for (size_t edge = 0; edge < numEdgeVariables_; ++edge)
         {
-            combined_degree_constraint_to_eq_constraint_m[index_edge_variable] =
-                rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][0]]
-                + rDegreeConstraint2EqConstraintM[index_edge_variable][rEdgeConnections[index_edge_variable][1]];
+            combined_degree_constraint_to_eq_constraint_m[edge] =
+                deg2EqM[edge][connections[edge][0]]
+                + deg2EqM[edge][connections[edge][1]];
         }
 
-        for (size_t index_subtour_constraint = 0; index_subtour_constraint < rDeltaSIndicesList.size();
-             index_subtour_constraint++)
+        for (size_t subtour = 0; subtour < deltaS.size();
+             subtour++)
         {
             vector<impalib_type> edge_ec_to_subtour_constraints_m(numEdgeVariables_, zero_value);
 
-            for (size_t i = 0; i < rDeltaSIndicesList[index_subtour_constraint].size(); i++)
+            for (size_t i = 0; i < deltaS[subtour].size(); i++)
             {
-                edge_ec_to_subtour_constraints_m[rDeltaSIndicesList[index_subtour_constraint][i]] =
-                    combined_subtour_constraints_to_edge_ec_m[rDeltaSIndicesList[index_subtour_constraint][i]]
-                    + combined_degree_constraint_to_eq_constraint_m[rDeltaSIndicesList[index_subtour_constraint][i]]
-                    + rCostEdgeVaribale[rDeltaSIndicesList[index_subtour_constraint][i]]
-                    - rSubtourConstraints2EdgeEcM[index_subtour_constraint]
-                                                 [rDeltaSIndicesList[index_subtour_constraint][i]];
+                edge_ec_to_subtour_constraints_m[deltaS[subtour][i]] =
+                    combined_subtour_constraints_to_edge_ec_m[deltaS[subtour][i]]
+                    + combined_degree_constraint_to_eq_constraint_m[deltaS[subtour][i]]
+                    + costs[deltaS[subtour][i]]
+                    - subtour2EqM[subtour]
+                                                 [deltaS[subtour][i]];
             }
-            edge_ec_to_subtour_constraints_list.push_back(edge_ec_to_subtour_constraints_m);
+            eq2SubtourM.push_back(edge_ec_to_subtour_constraints_m);
         }
     }
-    return edge_ec_to_subtour_constraints_list;
+    return eq2SubtourM;
 }
 
 /**
  * Calculate messages from edge equality constraints to degree constraints for the augmented TSP
  *
- * @param[in] rDegreeConstraint2EqConstraintM: messages from degree constraints to equality constraints
- * @param[in] rSubtourConstraints2EdgeEcM: messages from subtour elimination constraints to edge equality constraints
- * @param[in] rEdgeConnections: list of connections for each edge equality constraint
- * @param[in] rEdgeDegreeConstraintCost: cost matrix of edges that has size function of number of edges and number of nodes
- * @param[out] rEdgeEc2DegreeConstraintM: messages from edge equality constraints to degree constraints
- * 
+ * @param[in] deg2EqM: messages from degree constraints to equality constraints
+ * @param[in] subtour2EqM: messages from subtour elimination constraints to edge equality constraints
+ * @param[in] connections: list of connections for each edge equality constraint
+ * @param[in] cost: cost matrix of edges that has size function of number of edges and number of nodes
+ * @param[out] eq2DegreeM: messages from edge equality constraints to degree constraints
+ *
  */
 
 inline void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_update(
-    const vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM,
-    const vector<vector<impalib_type>> &rSubtourConstraints2EdgeEcM, const vector<vector<int>> &rEdgeConnections,
-    const vector<vector<impalib_type>> &rEdgeDegreeConstraintCost, vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM) const
+    const vector<vector<impalib_type>> &deg2EqM,
+    const vector<vector<impalib_type>> &subtour2EqM, const vector<vector<int>> &connections,
+    const vector<vector<impalib_type>> &cost, vector<vector<impalib_type>> &eq2DegreeM) const
 {
 
-    vector<impalib_type> combined_subtour_constraints_to_edge_ec_m(numEdgeVariables_, zero_value);
-    for (const auto &row : rSubtourConstraints2EdgeEcM)
+    vector<impalib_type> subtour2EqM_sum(numEdgeVariables_, zero_value);
+    for (const auto &row : subtour2EqM)
     {
-        transform(combined_subtour_constraints_to_edge_ec_m.begin(), combined_subtour_constraints_to_edge_ec_m.end(),
-                  row.begin(), combined_subtour_constraints_to_edge_ec_m.begin(), std::plus<impalib_type>());
+        transform(subtour2EqM_sum.begin(), subtour2EqM_sum.end(),
+                  row.begin(), subtour2EqM_sum.begin(), std::plus<impalib_type>());
     }
 
-    for (size_t i = 0; i < rEdgeConnections.size(); i++)
+    for (size_t i = 0; i < connections.size(); i++)
     {
 
         // Update the message for the first node of the edge
-        rEdgeEc2DegreeConstraintM[i][rEdgeConnections[i][0]] =
-            combined_subtour_constraints_to_edge_ec_m[i] + rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][1]]
-            + rEdgeDegreeConstraintCost[i][rEdgeConnections[i][0]];
+        eq2DegreeM[i][connections[i][0]] =
+            subtour2EqM_sum[i] + deg2EqM[i][connections[i][1]]
+            + cost[i][connections[i][0]];
 
         // Update the message for the second node of the edge
-        rEdgeEc2DegreeConstraintM[i][rEdgeConnections[i][1]] =
-            combined_subtour_constraints_to_edge_ec_m[i] + rDegreeConstraint2EqConstraintM[i][rEdgeConnections[i][0]]
-            + rEdgeDegreeConstraintCost[i][rEdgeConnections[i][1]];
+        eq2DegreeM[i][connections[i][1]] =
+            subtour2EqM_sum[i] + deg2EqM[i][connections[i][0]]
+            + cost[i][connections[i][1]];
     }
 }
 
 /**
  * Flip a matrix to facilitate message updates for the TSP. Matrices will be in the same format during IMPA
  *
- * @param[in] rMatrix: matrix that requires flipping
- * @param[in] rEdgeConnections: list of connections for each edge equality constraint
- * @param[out] rFlippedMatrix: flipped matrix
- * 
+ * @param[in] mat: matrix that requires flipping
+ * @param[in] connections: list of connections for each edge equality constraint
+ * @param[out] out: flipped matrix
+ *
  */
 
-inline void EqualityConstraint::flip_matrix(const vector<vector<impalib_type>> &rMatrix, const vector<vector<int>> &rEdgeConnections,
-                                        vector<vector<impalib_type>> &rFlippedMatrix)
+inline void EqualityConstraint::flip_matrix(const vector<vector<impalib_type>> &mat, const vector<vector<int>> &connections,
+                                        vector<vector<impalib_type>> &out)
 {
     // Iterate over each edge connection
-    for (size_t l = 0; l < rEdgeConnections.size(); ++l)
+    for (size_t l = 0; l < connections.size(); ++l)
     {
         // Row index
-        int row                = rEdgeConnections[l][0];
+        int row                = connections[l][0];
         // Column index
-        int col                = rEdgeConnections[l][1];
-        rFlippedMatrix[l][row] = rMatrix[l][col];
-        rFlippedMatrix[l][col] = rMatrix[l][row];
+        int col                = connections[l][1];
+        out[l][row] = mat[l][col];
+        out[l][col] = mat[l][row];
     }
 }
 
 /**
  * Calculate messages from variable equality constraints to k-sat constraints for the K-SAT problem
  *
- * @param[in] rKsatConstraint2EqConstraintM_: messages from k-sat constraints to variable equality constraints
- * @param[out] rVariableEc2KsatConstraintM: messages variable equality constraints to from k-sat constraints
- * @param[in] rUsedVariables: used variables in creating the constraints
- * @param[in] rVariablesConnections: constraints connections for each variable
+ * @param[in] ksat2EqM: messages from k-sat constraints to variable equality constraints
+ * @param[out] var2KsatM: messages variable equality constraints to from k-sat constraints
+ * @param[in] used: used variables in creating the constraints
+ * @param[in] connections: constraints connections for each variable
  *
  */
 
-inline void EqualityConstraint::variable_ec_to_ksat_constraint_update(const vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_, vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<int> &rUsedVariables, const vector<impalib_type> &rIncomingMetricsCost, const vector<vector<int>> &rVariablesConnections) const
+inline void EqualityConstraint::variable_ec_to_ksat_constraint_update(const vector<vector<impalib_type>> &ksat2EqM, vector<vector<impalib_type>> &var2KsatM, vector<int> &used, const vector<impalib_type> &costs, const vector<vector<int>> &connections) const
 {
 
-    for(auto& row : rVariableEc2KsatConstraintM) {
+    for(auto& row : var2KsatM) {
         row.assign(row.size(), zero_value);
     }
 
     vector<impalib_type> used_incoming_metrics_cost(numVariables_, zero_value);
-    
-    for_each(rUsedVariables.begin(), rUsedVariables.end(), [&](int n) {
-        used_incoming_metrics_cost[n] = rIncomingMetricsCost[n];
+
+    for_each(used.begin(), used.end(), [&](int n) {
+        used_incoming_metrics_cost[n] = costs[n];
     });
 
     vector<impalib_type> sum_messages(numVariables_, zero_value);
 
     for (int i = 0; i < numVariables_; ++i) {
-        for (int j = 0; j < rVariablesConnections[i].size(); ++j) {
-            sum_messages[i] += rKsatConstraint2EqConstraintM_[rVariablesConnections[i][j]][i];
+        for (int j = 0; j < connections[i].size(); ++j) {
+            sum_messages[i] += ksat2EqM[connections[i][j]][i];
         }
         sum_messages[i] +=used_incoming_metrics_cost[i];
     }
 
-    for (int index_variable = 0; index_variable < rUsedVariables.size(); ++index_variable) {
-        int variable = rUsedVariables[index_variable];
-        for (int i = 0; i < rVariablesConnections[variable].size(); ++i) {
-            int constraint = rVariablesConnections[variable][i];
+    for (int index_variable = 0; index_variable < used.size(); ++index_variable) {
+        int variable = used[index_variable];
+        for (int i = 0; i < connections[variable].size(); ++i) {
+            int constraint = connections[variable][i];
             // This if statement check was added to account for the fact that a constraint can have the same variable more than once,
             // like in the benchmarks datasets. However, in practical cases, a variable cannot appear more than once in a constraint
             // and thus this if statement check can be dropped
-            if (abs(rVariableEc2KsatConstraintM[constraint][variable])<abs(sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable])){
-                rVariableEc2KsatConstraintM[constraint][variable] = sum_messages[variable] - rKsatConstraint2EqConstraintM_[constraint][variable];
+            if (abs(var2KsatM[constraint][variable])<abs(sum_messages[variable] - ksat2EqM[constraint][variable])){
+                var2KsatM[constraint][variable] = sum_messages[variable] - ksat2EqM[constraint][variable];
             }
         }
     }

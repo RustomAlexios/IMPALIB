@@ -53,53 +53,53 @@ inline KsatConstraint::KsatConstraint(const int NUM_VARIABLES, const int NUM_CON
 /**
  * Calculate messages from k-sat constraints to variable equality constraints for the K-SAT problem
  *
- * @param[in] rVariableEc2KsatConstraintM: messages from variable equality constraints to k-sat constraints
- * @param[out] rKsatConstraint2EqConstraintDummyM_: messages from k-sat constraints to variable equality constraints before filtering
- * @param[in] rConstraintsConnections: connections to variables for each constraint
- * @param[in] rConstraintsConnectionsType: types of connections to variables for each constraint
+ * @param[in] var2KsatM: messages from variable equality constraints to k-sat constraints
+ * @param[out] ksat2EqPreM: messages from k-sat constraints to variable equality constraints before filtering
+ * @param[in] connections: connections to variables for each constraint
+ * @param[in] types: types of connections to variables for each constraint
  *
  */
 
-inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_,
-                                                           const vector<vector<int>> &rConstraintsConnections, const vector<vector<int>> &rConstraintsConnectionsType) const {
+inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &var2KsatM, vector<vector<impalib_type>> &ksat2EqPreM,
+                                                           const vector<vector<int>> &connections, const vector<vector<int>> &types) const {
 
-    for(auto& row : rKsatConstraint2EqConstraintDummyM_) {
+    for(auto& row : ksat2EqPreM) {
         row.assign(row.size(), zero_value);
     }
 
-    vector<vector<impalib_type>> stage_forward_messages(kVariable_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
-    vector<vector<impalib_type>> stage_backward_messages(kVariable_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+    vector<vector<impalib_type>> forward(kVariable_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+    vector<vector<impalib_type>> backward(kVariable_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
 
     for (int c = 0; c < numConstraints_; ++c) {
 
-        auto &conx = rConstraintsConnections[c];
-        auto &conx_type = rConstraintsConnectionsType[c];
+        auto &conx = connections[c];
+        auto &conx_type = types[c];
 
-        vector<impalib_type> initial_forward_messages(maxState_ + 1, zero_value),
-            initial_backward_messages(maxState_ + 1, zero_value);
+        vector<impalib_type> forward0(maxState_ + 1, zero_value);
+        vector<impalib_type> backward0(maxState_ + 1, zero_value);
 
-        fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
+        fill(forward0.begin() + 1, forward0.end(), value_inf);
 
-        stage_forward_messages[0] = initial_forward_messages;
+        forward[0] = forward0;
 
         for (int stage = 0; stage < kVariable_; stage++)
         {
-            stage_forward_messages[stage + 1][0] = stage_forward_messages[stage][0];
-            stage_forward_messages[stage + 1][1] =
-                min(stage_forward_messages[stage][1] + min(zero_value,rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]), stage_forward_messages[stage][0]+rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]);
+            forward[stage + 1][0] = forward[stage][0];
+            forward[stage + 1][1] =
+                min(forward[stage][1] + min(zero_value,var2KsatM[c][conx[stage]]*conx_type[stage]), forward[stage][0]+var2KsatM[c][conx[stage]]*conx_type[stage]);
         }
 
-        stage_backward_messages[kVariable_] = initial_backward_messages;
+        backward[kVariable_] = backward0;
 
         for (int stage = kVariable_ - 1; stage >= 0; stage--)
         {
             if (stage == kVariable_ - 1){
-                stage_backward_messages[stage][0] = rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage];
+                backward[stage][0] = var2KsatM[c][conx[stage]]*conx_type[stage];
             }
             else{
-                stage_backward_messages[stage][0] = min(stage_backward_messages[stage + 1][0], stage_backward_messages[stage + 1][1]+rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]);
+                backward[stage][0] = min(backward[stage + 1][0], backward[stage + 1][1]+var2KsatM[c][conx[stage]]*conx_type[stage]);
             }
-            stage_backward_messages[stage][1] = min(stage_backward_messages[stage+1][1], stage_backward_messages[stage+1][1]+ rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]);
+            backward[stage][1] = min(backward[stage+1][1], backward[stage+1][1]+ var2KsatM[c][conx[stage]]*conx_type[stage]);
         }
 
         impalib_type min_dashed_edges = zero_value;
@@ -107,21 +107,21 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
 
         for (int stage = 0; stage < kVariable_; stage++)
         {
-            min_solid_edges = min(stage_forward_messages[stage][0] + stage_backward_messages[stage+1][1] + rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage], stage_forward_messages[stage][1] + rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage] + stage_backward_messages[stage+1][1]);
-            
+            min_solid_edges = min(forward[stage][0] + backward[stage+1][1] + var2KsatM[c][conx[stage]]*conx_type[stage], forward[stage][1] + var2KsatM[c][conx[stage]]*conx_type[stage] + backward[stage+1][1]);
+
             if (stage == kVariable_-1){
-                min_dashed_edges = stage_forward_messages[stage][1] + stage_backward_messages[stage+1][1];
+                min_dashed_edges = forward[stage][1] + backward[stage+1][1];
             }
             else {
-                min_dashed_edges = min(stage_forward_messages[stage][0] + stage_backward_messages[stage+1][0], stage_forward_messages[stage][1] + stage_backward_messages[stage+1][1]);
+                min_dashed_edges = min(forward[stage][0] + backward[stage+1][0], forward[stage][1] + backward[stage+1][1]);
             }
             
             // The if statements checks (abs(rKsatConstraint2EqConstraintDummyM_[c][conx[stage]])< abs(((min_solid_edges  - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage])))
             // were added to account for the fact that a variable could occur multiple times in a constraint,
             // like the case of benchmarks, but in practice, a constraint should not have the same variable appearing more than once
             // and thus these if statements checks can be removed
-            if (abs(rKsatConstraint2EqConstraintDummyM_[c][conx[stage]])< abs(((min_solid_edges  - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage]))){
-            rKsatConstraint2EqConstraintDummyM_[c][conx[stage]] = (min_solid_edges  - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage];
+            if (abs(ksat2EqPreM[c][conx[stage]])< abs(((min_solid_edges  - min_dashed_edges - var2KsatM[c][conx[stage]]*conx_type[stage])*conx_type[stage]))){
+            ksat2EqPreM[c][conx[stage]] = (min_solid_edges  - min_dashed_edges - var2KsatM[c][conx[stage]]*conx_type[stage])*conx_type[stage];
             }
         }
     }
@@ -131,31 +131,31 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
  * Perform filtering on messages from k-sat constraints to variable equality constraints for the K-SAT problem
  *
  * @param[in] iter: iteration index of IMPA
- * @param[in] rKsatConstraint2EqConstraintDummyM_: messages from k-sat constraints to variable equality constraints before filtering
- * @param[in] rKsatConstraint2EqConstraintM_: messages from k-sat constraints to variable equality constraints after filtering
+ * @param[in] ksat2EqPreM: messages from k-sat constraints to variable equality constraints before filtering
+ * @param[in] ksat2EqM: messages from k-sat constraints to variable equality constraints after filtering
  *
  */
 
-inline void KsatConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_) {
+inline void KsatConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &ksat2EqPreM, vector<vector<impalib_type>> &ksat2EqM) {
     for (int c = 0; c < numConstraints_; c++) {
         if ((filteringFlag_) and (alpha_ != zero_value)) {
-            vector<impalib_type> intermediate_dummy(rKsatConstraint2EqConstraintDummyM_[c]), intermediate_old(ksatConstraint2EqConstraintOld[c]), intermediate_extrinsic;
+            vector<impalib_type> intermediate_dummy(ksat2EqPreM[c]), intermediate_old(ksatConstraint2EqConstraintOld[c]), intermediate_extrinsic;
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(), [w_2](const impalib_type &c) { return c * w_2; });
             transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(), [w_1](const impalib_type &c) { return c * w_1; });
 
             if (iter == 0) {
-                copy(intermediate_dummy.begin(), intermediate_dummy.end(), rKsatConstraint2EqConstraintM_[c].begin());
+                copy(intermediate_dummy.begin(), intermediate_dummy.end(), ksat2EqM[c].begin());
             } else {
                 transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(), back_inserter(intermediate_extrinsic), plus<impalib_type>());
-                copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(), rKsatConstraint2EqConstraintM_[c].begin());
+                copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(), ksat2EqM[c].begin());
             }
-            copy(rKsatConstraint2EqConstraintM_[c].begin(), rKsatConstraint2EqConstraintM_[c].end(), ksatConstraint2EqConstraintOld[c].begin());
+            copy(ksat2EqM[c].begin(), ksat2EqM[c].end(), ksatConstraint2EqConstraintOld[c].begin());
         }
 
         else {
-            copy(rKsatConstraint2EqConstraintDummyM_[c].begin(), rKsatConstraint2EqConstraintDummyM_[c].end(), rKsatConstraint2EqConstraintM_[c].begin());
+            copy(ksat2EqPreM[c].begin(), ksat2EqPreM[c].end(), ksat2EqM[c].begin());
         }
     }
 }
