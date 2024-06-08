@@ -14,15 +14,15 @@
 class DegreeConstraint
 {
 private:
-    int                          numNodes_; ///< number of nodes of TSP
-    int                          numEdgeVariables_; ///< number of edge connections
-    bool                         filteringFlag_; ///< filtering flag
+    int                          nNodes_; ///< number of nodes of TSP
+    int                          nEdgeVars_; ///< number of edge connections
+    bool                         doFilter_; ///< filtering flag
     impalib_type                 alpha_; ///< filtering parameter
-    vector<vector<impalib_type>> degreeConstraint2EqConstraintOld; ///< messages from degree constraints to equality constraints before filtering
-    impalib_type                 initial_forward_message_; ///< initial forward message of forward-backward algorithm
-    impalib_type                 initial_backward_message_; ///< initial backward message of forward-backward algorithm
-    vector<vector<impalib_type>> stage_forward_messages; ///< forward messages of trellis representation
-    vector<vector<impalib_type>> stage_backward_messages; ///< backward messages of trellis representation
+    vector<vector<impalib_type>> deg2EqOldM_; ///< messages from degree constraints to equality constraints before filtering
+    impalib_type                 forward0_; ///< initial forward message of forward-backward algorithm
+    impalib_type                 backward0_; ///< initial backward message of forward-backward algorithm
+    vector<vector<impalib_type>> forward_; ///< forward messages of trellis representation
+    vector<vector<impalib_type>> backward_; ///< backward messages of trellis representation
 
 public:
     void degree_constraint_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
@@ -44,18 +44,18 @@ public:
 
 inline DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
                                    const impalib_type ALPHA)
-    : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES)
+    : doFilter_(FILTERING_FLAG), alpha_(ALPHA), nNodes_(NUM_NODES), nEdgeVars_(NUM_EDGE_VARIABLES)
 {
 
-    degreeConstraint2EqConstraintOld.reserve(numEdgeVariables_);
-    for (int edge = 0; edge < numEdgeVariables_; edge++)
+    deg2EqOldM_.reserve(nEdgeVars_);
+    for (int edge = 0; edge < nEdgeVars_; edge++)
     {
-        degreeConstraint2EqConstraintOld.push_back(vector<impalib_type>(numNodes_, zero_value));
+        deg2EqOldM_.push_back(vector<impalib_type>(nNodes_, zero_value));
     }
 
     // Set initial forward and backward messages to infinity
-    initial_forward_message_  = value_inf;
-    initial_backward_message_ = value_inf;
+    forward0_  = value_inf;
+    backward0_ = value_inf;
 };
 
 /**
@@ -71,10 +71,10 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
     const vector<vector<impalib_type>> &eq2DegM, const vector<vector<int>> &connections,
     vector<vector<impalib_type>> &deg2EqPreM) const
 {
-    vector<impalib_type> forward(numEdgeVariables_ + 1, zero_value);
-    vector<impalib_type> backward(numEdgeVariables_ + 1, zero_value);
+    vector<impalib_type> forward(nEdgeVars_ + 1, zero_value);
+    vector<impalib_type> backward(nEdgeVars_ + 1, zero_value);
 
-    for (int node = 0; node < numNodes_; node++)
+    for (int node = 0; node < nNodes_; node++)
     {
         vector<int> first, second;
 
@@ -92,7 +92,7 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
         }
 
         // Calculate forward messages for connections_first
-        forward[first[0]] = initial_forward_message_;
+        forward[first[0]] = forward0_;
 
         for (int stage = 1; stage < first.size(); stage++)
         {
@@ -103,7 +103,7 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
         }
 
         // Calculate backward messages for connections_first
-        backward[first[first.size() - 1] + 1] = initial_backward_message_;
+        backward[first[first.size() - 1] + 1] = backward0_;
 
         for (size_t stage = first.size() - 1; stage >= 1; stage--)
         {
@@ -124,7 +124,7 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
         fill(backward.begin(), backward.end(), zero_value);
 
         // Calculate forward messages
-        forward[second[0]] = initial_forward_message_;
+        forward[second[0]] = forward0_;
 
         for (int stage = 1; stage < second.size(); stage++)
         {
@@ -135,7 +135,7 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
         }
 
         // Calculate backward messages
-        backward[second[second.size() - 1] + 1] = initial_backward_message_;
+        backward[second[second.size() - 1] + 1] = backward0_;
 
         for (size_t stage = second.size() - 1; stage >= 1; stage--)
         {
@@ -166,13 +166,13 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
 inline void DegreeConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &deg2EqPreM,
                                          vector<vector<impalib_type>> &deg2EqM)
 {
-    for (int edge = 0; edge < numEdgeVariables_; edge++)
+    for (int edge = 0; edge < nEdgeVars_; edge++)
     {
-        if ((filteringFlag_) and (alpha_ != zero_value))
+        if ((doFilter_) and (alpha_ != zero_value))
         {
             // Calculate weighted values for current and old messages
             vector<impalib_type> intermediate_dummy(deg2EqPreM[edge]);
-            vector<impalib_type> intermediate_old(degreeConstraint2EqConstraintOld[edge]);
+            vector<impalib_type> intermediate_old(deg2EqOldM_[edge]);
             vector<impalib_type> intermediate_extrinsic;
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
@@ -195,7 +195,7 @@ inline void DegreeConstraint::process_filtering(const int iter, vector<vector<im
             }
             copy(deg2EqM[edge].begin(),
                  deg2EqM[edge].end(),
-                 degreeConstraint2EqConstraintOld[edge].begin());
+                 deg2EqOldM_[edge].begin());
         }
 
         else

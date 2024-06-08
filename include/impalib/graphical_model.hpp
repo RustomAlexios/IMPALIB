@@ -15,26 +15,26 @@
  */
 class GraphicalModelKcMwm {
    private:
-    int numProjects_;                                              ///< number of projects
-    int numTeams_;                                                 ///< number of teams
-    int numDepartments_;                                           ///< number of departments
+    int nProjects_;                                              ///< number of projects
+    int nTeams_;                                                 ///< number of teams
+    int nDepartments_;                                           ///< number of departments
     int maxSizeNonZeroWeights_;                                    ///< maximum size of non-zero weights per department
-    int numIterations_;                                            ///< number of iterations of IMPA
-    bool filteringFlag_;                                           ///< filtering flag of knapsack constraints
+    int nIter_;                                            ///< number of iterations of IMPA
+    bool doFilter_;                                           ///< filtering flag of knapsack constraints
     impalib_type alpha_;                                           ///< filtering parameter
-    vector<vector<impalib_type>> extrinsicOutputDepartmentDummy_;  ///< messages from departments to teams before filtering
-    vector<vector<impalib_type>> extrinsicOutputDepartment_;       ///< messages from departments to teams after filtering
+    vector<vector<impalib_type>> extrinsicOutPre_;  ///< messages from departments to teams before filtering
+    vector<vector<impalib_type>> extrinsicOut_;       ///< messages from departments to teams after filtering
     vector<impalib_type> oric2PackageM_;                           ///< messages from ORIC to packages
-    vector<vector<impalib_type>> eqConstraint2OricM_;              ///< messages from team equality constraint to ORIC
-    vector<vector<impalib_type>> oric2EqConstraintM_;              ///< messages from ORIC to team equality constraint
-    vector<vector<impalib_type>> eqConstraint2ProjectM_;           ///< messages from project equality constraint to project inequality constraint
-    vector<vector<impalib_type>> project2EqConstraintM_;           ///< messages from project inequality constraint to project equality constraint
+    vector<vector<impalib_type>> eq2OricM_;              ///< messages from team equality constraint to ORIC
+    vector<vector<impalib_type>> oric2EqM_;              ///< messages from ORIC to team equality constraint
+    vector<vector<impalib_type>> eq2ProjectM_;           ///< messages from project equality constraint to project inequality constraint
+    vector<vector<impalib_type>> project2EqM_;           ///< messages from project inequality constraint to project equality constraint
     vector<impalib_type> team2OricM_;                              ///< messages from team equality constraint to ORIC
-    Knapsack modelKnapsacks_;                                      ///< Knapsack object
-    InequalityConstraint projectIneqConstraint_;                   ///< Project Inequality constraint object
+    Knapsack knapsacks_;                                      ///< Knapsack object
+    InequalityConstraint ineqs_;                   ///< Project Inequality constraint object
     // EqualityConstraintKcMwm modelEqConstraint_; ///< Equality constraint object
-    EqualityConstraint modelEqConstraint_;  ///< Equality constraint object
-    OrInequalityConstraint modelOric_;      ///< ORIC object
+    EqualityConstraint eqs_;  ///< Equality constraint object
+    OrInequalityConstraint orics_;      ///< ORIC object
 
    public:
     OutputsKcMwm outputs;                                                                                                             ///< Graphical model outputs objects
@@ -63,45 +63,45 @@ inline GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const i
                                          const impalib_type ALPHA)
     : modelInputs_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS),
       outputs(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
-      modelKnapsacks_(N_DEPARTMENTS, N_TEAMS, FILT_FLAG, ALPHA),
-      projectIneqConstraint_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
-      modelEqConstraint_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
-      modelOric_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
-      numProjects_(N_PROJECTS),
-      numTeams_(N_TEAMS),
-      numDepartments_(N_DEPARTMENTS),
+      knapsacks_(N_DEPARTMENTS, N_TEAMS, FILT_FLAG, ALPHA),
+      ineqs_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
+      eqs_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
+      orics_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
+      nProjects_(N_PROJECTS),
+      nTeams_(N_TEAMS),
+      nDepartments_(N_DEPARTMENTS),
       maxSizeNonZeroWeights_(MAX_SIZE_NON_ZERO_WEIGHTS),
-      numIterations_(N_ITERATIONS),
-      filteringFlag_(FILT_FLAG),
+      nIter_(N_ITERATIONS),
+      doFilter_(FILT_FLAG),
       alpha_(ALPHA) {
     /// initializes and prepares data structures for mapping relationships
     /// between teams, projects, and constraints
-    oric2PackageM_.resize(numTeams_);
-    team2OricM_.resize(numTeams_);
-    fill(oric2PackageM_.begin(), oric2PackageM_.begin() + numTeams_, zero_value);
-    fill(team2OricM_.begin(), team2OricM_.begin() + numTeams_, zero_value);
+    oric2PackageM_.resize(nTeams_);
+    team2OricM_.resize(nTeams_);
+    fill(oric2PackageM_.begin(), oric2PackageM_.begin() + nTeams_, zero_value);
+    fill(team2OricM_.begin(), team2OricM_.begin() + nTeams_, zero_value);
 
-    eqConstraint2OricM_.reserve(numProjects_);
-    oric2EqConstraintM_.reserve(numProjects_);
-    eqConstraint2ProjectM_.reserve(numProjects_);
-    project2EqConstraintM_.reserve(numProjects_);
+    eq2OricM_.reserve(nProjects_);
+    oric2EqM_.reserve(nProjects_);
+    eq2ProjectM_.reserve(nProjects_);
+    project2EqM_.reserve(nProjects_);
 
-    for (int project = 0; project < numProjects_; project++) {
-        eqConstraint2OricM_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        oric2EqConstraintM_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        eqConstraint2ProjectM_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        project2EqConstraintM_.push_back(vector<impalib_type>(numTeams_, zero_value));
+    for (int project = 0; project < nProjects_; project++) {
+        eq2OricM_.push_back(vector<impalib_type>(nTeams_, zero_value));
+        oric2EqM_.push_back(vector<impalib_type>(nTeams_, zero_value));
+        eq2ProjectM_.push_back(vector<impalib_type>(nTeams_, zero_value));
+        project2EqM_.push_back(vector<impalib_type>(nTeams_, zero_value));
     }
 
     /// initializes and prepares data structures for messages from departments
-    extrinsicOutputDepartment_.reserve(numDepartments_);
-    extrinsicOutputDepartmentDummy_.reserve(numDepartments_);
+    extrinsicOut_.reserve(nDepartments_);
+    extrinsicOutPre_.reserve(nDepartments_);
 
     /// initializes and populates nested vectors for mapping relationships
     /// between departments and teams
-    for (int department = 0; department < numDepartments_; department++) {
-        extrinsicOutputDepartment_.push_back(vector<impalib_type>(numTeams_, zero_value));
-        extrinsicOutputDepartmentDummy_.push_back(vector<impalib_type>(numTeams_, zero_value));
+    for (int department = 0; department < nDepartments_; department++) {
+        extrinsicOut_.push_back(vector<impalib_type>(nTeams_, zero_value));
+        extrinsicOutPre_.push_back(vector<impalib_type>(nTeams_, zero_value));
     }
 };
 
@@ -140,34 +140,34 @@ inline void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY,
  */
 
 inline void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY) {
-    for (int iter = 0; iter < numIterations_; iter++) {
-        for (int department = 0; department < numDepartments_; department++) {
-            int capacity = modelInputs_.MaxState[department];
+    for (int iter = 0; iter < nIter_; iter++) {
+        for (int department = 0; department < nDepartments_; department++) {
+            int capacity = modelInputs_.capacities_[department];
 
             // Initialize forward and backward message vectors
-            vector<vector<impalib_type>> stage_forward_messages(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
-            vector<vector<impalib_type>> stage_backward_messages(numTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
+            vector<vector<impalib_type>> stage_forward_messages(nTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
+            vector<vector<impalib_type>> stage_backward_messages(nTeams_ + 1, vector<impalib_type>(capacity + 1, zero_value));
 
-            modelKnapsacks_.forward(department, stage_forward_messages, capacity, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
-                                    modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
-            modelKnapsacks_.backward(department, stage_backward_messages, capacity, modelInputs_.NonZeroWeightIndices, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
-                                     modelInputs_.TeamsWeightsPerDepartment, modelInputs_.Team2KnapsackM);
+            knapsacks_.forward(department, stage_forward_messages, capacity, modelInputs_.nonzero_, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+                                    modelInputs_.weights_, modelInputs_.team2KnapsackM_);
+            knapsacks_.backward(department, stage_backward_messages, capacity, modelInputs_.nonzero_, pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
+                                     modelInputs_.weights_, modelInputs_.team2KnapsackM_);
 
-            modelKnapsacks_.extrinsic_output_department_lhs(modelInputs_.TeamsWeightsPerDepartment, stage_forward_messages, modelInputs_.Team2KnapsackM, department, stage_backward_messages,
-                                                            capacity, extrinsicOutputDepartmentDummy_);
-            modelKnapsacks_.process_extrinsic_output_department(department, iter, extrinsicOutputDepartmentDummy_, extrinsicOutputDepartment_);
+            knapsacks_.extrinsic_output_department_lhs(modelInputs_.weights_, stage_forward_messages, modelInputs_.team2KnapsackM_, department, stage_backward_messages,
+                                                            capacity, extrinsicOutPre_);
+            knapsacks_.process_extrinsic_output_department(department, iter, extrinsicOutPre_, extrinsicOut_);
         }
 
-        modelEqConstraint_.team_eq_constraint_to_oric_update(extrinsicOutputDepartment_, team2OricM_, modelInputs_.RewardTeam);
-        modelOric_.oric_to_project_eq_constraint_update(eqConstraint2OricM_, team2OricM_, oric2EqConstraintM_, eqConstraint2ProjectM_, modelInputs_.RewardProject);
-        projectIneqConstraint_.project_inequality_constraint_update(eqConstraint2ProjectM_, project2EqConstraintM_);
-        modelEqConstraint_.project_eq_constraint_to_oric_update(project2EqConstraintM_, eqConstraint2OricM_, modelInputs_.RewardProject);
+        eqs_.team_eq_constraint_to_oric_update(extrinsicOut_, team2OricM_, modelInputs_.rewardsTeam_);
+        orics_.oric_to_project_eq_constraint_update(eq2OricM_, team2OricM_, oric2EqM_, eq2ProjectM_, modelInputs_.rewardsProj_);
+        ineqs_.project_inequality_constraint_update(eq2ProjectM_, project2EqM_);
+        eqs_.project_eq_constraint_to_oric_update(project2EqM_, eq2OricM_, modelInputs_.rewardsProj_);
 
-        modelOric_.oric_to_team_update(eqConstraint2OricM_, oric2PackageM_);
-        outputs.intrinsic_out_mwm_update(oric2EqConstraintM_, project2EqConstraintM_, modelInputs_.RewardProject);
-        modelKnapsacks_.team_to_knapsack_update(modelInputs_.NonZeroWeightIndices, modelInputs_.Team2KnapsackM, modelInputs_.RewardTeam, extrinsicOutputDepartment_, oric2PackageM_);
+        orics_.oric_to_team_update(eq2OricM_, oric2PackageM_);
+        outputs.intrinsic_out_mwm_update(oric2EqM_, project2EqM_, modelInputs_.rewardsProj_);
+        knapsacks_.team_to_knapsack_update(modelInputs_.nonzero_, modelInputs_.team2KnapsackM_, modelInputs_.rewardsTeam_, extrinsicOut_, oric2PackageM_);
     }
-    outputs.extrinsic_output_team_update(extrinsicOutputDepartment_, oric2PackageM_);
+    outputs.extrinsic_output_team_update(extrinsicOut_, oric2PackageM_);
 }
 
 /**
@@ -176,47 +176,47 @@ inline void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZ
  */
 class GraphicalModelTsp {
    private:
-    int numNodes_;                                                      ///< number of nodes of TSP
-    int numIterations_;                                                 ///< number of iterations of IMPA
-    int numEdgeVariables_;                                              ///< number of edges in TSP
-    bool resetFlag_;                                                    ///< flag for resetting messages after each augmentation step
-    bool filteringFlag_;                                                ///< flag for filtering messages from degree/subtour constraints to edge equality constraints
-    bool augmentationFlag_;                                             ///< whether to activate augmentation
+    int nNodes_;                                                      ///< number of nodes of TSP
+    int nIter_;                                                 ///< number of iterations of IMPA
+    int nEdgeVars_;                                              ///< number of edges in TSP
+    bool doReset_;                                                    ///< flag for resetting messages after each augmentation step
+    bool doFilter_;                                                ///< flag for filtering messages from degree/subtour constraints to edge equality constraints
+    bool doAugment_;                                             ///< whether to activate augmentation
     vector<int> hard_decision;                                          ///< hard decision vector of IMPA solution
     impalib_type alpha_;                                                ///< filtering parameter
     impalib_type threshold_;                                            ///< threshold on hard decision
-    EqualityConstraint modelEqConstraint_;                              ///< Equality Constraint object for TSP
-    DegreeConstraint modelDegreeConstraint_;                            ///< Degree Constraint object for TSP
-    SubtourEliminationConstraint modelSubtourEliminationConstraint_;    ///< Subtour constraint for TSP
-    vector<vector<impalib_type>> DegreeConstraint2EqConstraintDummyM_;  ///< messages from degree constraint to team equality constraint before filtering
-    vector<vector<impalib_type>> DegreeConstraint2EqConstraintM_;       ///< messages from degree constraint to team equality constraint afters filtering
-    vector<vector<int>> selected_edges_old_;                            ///< old list of selected edges (used for failure investigation)
-    vector<vector<int>> selected_edges_old_old_;                        ///< another old list of selected edges (used for failure investigation)
-    int maxCount_;                                                      ///< maximum count of failures
-    bool tourImpaFlag_ = false;                                         ///< set flag for detected tour to be false (will be updated later)
-    vector<vector<int>> delta_S_indices_list;                           ///< will contain indices of edges that contribute to each subtour constraint
-    vector<vector<impalib_type>> subtourConstraints2EdgeEcDummyM_;      ///< messages from subtour constraints to edge equality constraint before filtering
-    vector<vector<impalib_type>> edgeEc2SubtourConstraintsM_;           ///< messages from edge equality constraint to subtour constraints
+    EqualityConstraint eqs_;                              ///< Equality Constraint object for TSP
+    DegreeConstraint degrees_;                            ///< Degree Constraint object for TSP
+    SubtourEliminationConstraint subtours_;    ///< Subtour constraint for TSP
+    vector<vector<impalib_type>> deg2EqPreM_;  ///< messages from degree constraint to team equality constraint before filtering
+    vector<vector<impalib_type>> deg2EqM_;       ///< messages from degree constraint to team equality constraint afters filtering
+    vector<vector<int>> selectedOld_;                            ///< old list of selected edges (used for failure investigation)
+    vector<vector<int>> selectedOldOld_;                        ///< another old list of selected edges (used for failure investigation)
+    int maxFailures_;                                                      ///< maximum count of failures
+    bool isTour_ = false;                                         ///< set flag for detected tour to be false (will be updated later)
+    vector<vector<int>> deltaS_;                           ///< will contain indices of edges that contribute to each subtour constraint
+    vector<vector<impalib_type>> subtour2EqPreM_;      ///< messages from subtour constraints to edge equality constraint before filtering
+    vector<vector<impalib_type>> eq2SubtourM_;           ///< messages from edge equality constraint to subtour constraints
     void iterate_augmented_graph();                                     ///< function of IMPA on augmented graph
     void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                    ///< analysis of subtour constraints
     void hard_decision_analysis(vector<vector<int>> &);                                                                         ///< function for hard decision solution on IMPA solution
     static bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                          ///< function for post-processing loops
     vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                             ///< function for getting loops
     vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &);  ///< function for finding loops
-    InputsTsp modelInputs_;                                                                                                     ///< Graphical Model Input object
-    vector<vector<int>> selectedEdges_;                                                                                         ///< activated edges of IMPA
-    int numAugmentations_;                                                                                                      ///< number of performed augmentations in IMPA
-    int noConsClosedLoopsCount_;                                                                                                ///< count for failure case (no consecutive loop detection and no tour)
-    int solOscCount_;                                                                                                           ///< count for failure case (oscillation in the solution)
-    bool noConsClosedLoopsCountExcFlag_;                                                                                        ///< flag for failure case (no consecutive loop detection and no tour)
-    int noImprovSolCount_;                                                                                                      ///< count for failure case (no solution improvement)
-    bool noImprovSolCountExcFlag_;                                                                                              ///< flag for failure case (no solution improvement)
-    bool solOscCountExcFlag_;                                                                                                   ///< flag for failure case (oscillation in the solution)
-    vector<int> tourImpa_;                                                                                                      ///< list of nodes of tour (if detected)
+    InputsTsp inputs_;                                                                                                     ///< Graphical Model Input object
+    vector<vector<int>> selected_;                                                                                         ///< activated edges of IMPA
+    int nAugment_;                                                                                                      ///< number of performed augmentations in IMPA
+    int nLoop_;                                                                                                ///< count for failure case (no consecutive loop detection and no tour)
+    int nOsc_;                                                                                                           ///< count for failure case (oscillation in the solution)
+    bool isFailLoop_;                                                                                        ///< flag for failure case (no consecutive loop detection and no tour)
+    int nImprove_;                                                                                                      ///< count for failure case (no solution improvement)
+    bool isFailImprove_;                                                                                              ///< flag for failure case (no solution improvement)
+    bool isFailOsc_;                                                                                                   ///< flag for failure case (oscillation in the solution)
+    vector<int> tour_;                                                                                                      ///< list of nodes of tour (if detected)
     vector<vector<int>> subtourPaths_;                                                                                          ///< list of detected subtours (if detected)
-    vector<int> closedPathsSize_;                                                                                               ///< list of sizes of loops
-    impalib_type costImpa_;                                                                                                     ///< cost of IMPA solution
-    vector<vector<impalib_type>> subtourConstraints2EdgeEcM_;                                                                   ///< messages from subtour constraints to edge equality constraint
+    vector<int> loopsSize_;                                                                                               ///< list of sizes of loops
+    impalib_type tourCost_;                                                                                                     ///< cost of IMPA solution
+    vector<vector<impalib_type>> subtour2EqM_;                                                                   ///< messages from subtour constraints to edge equality constraint
 
    public:
     bool subtourConstraintsSatisfiedFlag = false;                                                                    ///< initially set this flag for satisfied subtour constraints to false
@@ -247,38 +247,38 @@ class GraphicalModelTsp {
 
 inline GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
                                      const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT)
-    : modelDegreeConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
-      modelEqConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
-      modelSubtourEliminationConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
-      modelInputs_(NUM_NODES, NUM_EDGE_VARIABLES),
+    : degrees_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
+      eqs_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
+      subtours_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
+      inputs_(NUM_NODES, NUM_EDGE_VARIABLES),
       outputs(NUM_NODES, NUM_EDGE_VARIABLES),
-      numIterations_(NUM_ITERATIONS),
-      filteringFlag_(FILTERING_FLAG),
+      nIter_(NUM_ITERATIONS),
+      doFilter_(FILTERING_FLAG),
       alpha_(ALPHA),
-      numNodes_(NUM_NODES),
-      augmentationFlag_(AUGMENTATION_FLAG),
-      resetFlag_(RESET_FLAG),
-      numEdgeVariables_(NUM_EDGE_VARIABLES),
+      nNodes_(NUM_NODES),
+      doAugment_(AUGMENTATION_FLAG),
+      doReset_(RESET_FLAG),
+      nEdgeVars_(NUM_EDGE_VARIABLES),
       threshold_(THRESHOLD),
-      maxCount_(MAX_COUNT) {
-    DegreeConstraint2EqConstraintDummyM_.reserve(numEdgeVariables_);
-    DegreeConstraint2EqConstraintM_.reserve(numEdgeVariables_);
+      maxFailures_(MAX_COUNT) {
+    deg2EqPreM_.reserve(nEdgeVars_);
+    deg2EqM_.reserve(nEdgeVars_);
 
     // Populate degree constraint to equality constraint messages
-    for (int edge = 0; edge < numEdgeVariables_; edge++) {
-        DegreeConstraint2EqConstraintDummyM_.push_back(vector<impalib_type>(numNodes_, zero_value));
-        DegreeConstraint2EqConstraintM_.push_back(vector<impalib_type>(numNodes_, zero_value));
+    for (int edge = 0; edge < nEdgeVars_; edge++) {
+        deg2EqPreM_.push_back(vector<impalib_type>(nNodes_, zero_value));
+        deg2EqM_.push_back(vector<impalib_type>(nNodes_, zero_value));
     }
 
-    numAugmentations_ = 0;
-    costImpa_ = zero_value;
-    noConsClosedLoopsCount_ = 0;
-    noImprovSolCount_ = 0;
-    solOscCount_ = 0;
+    nAugment_ = 0;
+    tourCost_ = zero_value;
+    nLoop_ = 0;
+    nImprove_ = 0;
+    nOsc_ = 0;
 
-    noConsClosedLoopsCountExcFlag_ = false;
-    noImprovSolCountExcFlag_ = false;
-    solOscCountExcFlag_ = false;
+    isFailLoop_ = false;
+    isFailImprove_ = false;
+    isFailOsc_ = false;
 };
 
 /**
@@ -303,7 +303,7 @@ inline GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int 
 inline void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, impalib_type *pEdge_ec_to_degree_constraint_m_py,
                                    const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
     // Populate model data
-    modelInputs_.process_inputs(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
+    inputs_.process_inputs(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
 }
 
 /**
@@ -314,14 +314,14 @@ inline void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const
  *
  */
 inline void GraphicalModelTsp::iterate_relaxed_graph() {
-    for (int iter = 0; iter < numIterations_; iter++) {
-        modelDegreeConstraint_.degree_constraint_to_edge_ec_update(modelInputs_.EdgeEc2DegreeConstraintM, modelInputs_.EdgeConnections, DegreeConstraint2EqConstraintDummyM_);
-        modelDegreeConstraint_.process_filtering(iter, DegreeConstraint2EqConstraintDummyM_, DegreeConstraint2EqConstraintM_);
-        modelEqConstraint_.edge_ec_to_degree_constraint_relaxed_graph_update(modelInputs_.EdgeConnections, modelInputs_.EdgeDegreeConstraintCost, DegreeConstraint2EqConstraintM_,
-                                                                             modelInputs_.EdgeEc2DegreeConstraintM);
+    for (int iter = 0; iter < nIter_; iter++) {
+        degrees_.degree_constraint_to_edge_ec_update(inputs_.eq2DegM_, inputs_.connections_, deg2EqPreM_);
+        degrees_.process_filtering(iter, deg2EqPreM_, deg2EqM_);
+        eqs_.edge_ec_to_degree_constraint_relaxed_graph_update(inputs_.connections_, inputs_.costMatUpdate_, deg2EqM_,
+                                                                             inputs_.eq2DegM_);
     }
-    outputs.extrinsic_output_edge_ec_relaxed_graph_update(DegreeConstraint2EqConstraintM_);
-    outputs.intrinsic_output_edge_ec_update(modelInputs_.CostEdgeVariable);
+    outputs.extrinsic_output_edge_ec_relaxed_graph_update(deg2EqM_);
+    outputs.intrinsic_output_edge_ec_update(inputs_.costs_);
 
     // Perform hard decision analysis to select edges
     vector<vector<int>> selected_edges;
@@ -331,7 +331,7 @@ inline void GraphicalModelTsp::iterate_relaxed_graph() {
     unordered_map<int, vector<int>> graph;
     subtour_elimination_constraints_analysis(graph, selected_edges);
 
-    selectedEdges_ = selected_edges;
+    selected_ = selected_edges;
 }
 
 /**
@@ -346,21 +346,21 @@ inline void GraphicalModelTsp::iterate_relaxed_graph() {
 
 inline void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
     // Add empty vectors to subtour constraints if needed
-    if (delta_S_indices_list.size() > 0) {
-        vector<vector<impalib_type>> temp(delta_S_indices_list.size(), vector<impalib_type>(numEdgeVariables_, zero_value));
-        subtourConstraints2EdgeEcM_.insert(subtourConstraints2EdgeEcM_.end(), temp.begin(), temp.end());
-        subtourConstraints2EdgeEcDummyM_ = subtourConstraints2EdgeEcM_;
+    if (deltaS_.size() > 0) {
+        vector<vector<impalib_type>> temp(deltaS_.size(), vector<impalib_type>(nEdgeVars_, zero_value));
+        subtour2EqM_.insert(subtour2EqM_.end(), temp.begin(), temp.end());
+        subtour2EqPreM_ = subtour2EqM_;
     }
 
     // Continue augmentation
-    while (!subtourConstraintsSatisfiedFlag && augmentationFlag_ && !tourImpaFlag_) {
-        if (noConsClosedLoopsCountExcFlag_ || noImprovSolCountExcFlag_ || solOscCountExcFlag_) {
-            cout << "noConsClosedLoopsCountExcFlag_: " << noConsClosedLoopsCountExcFlag_ << '\n';
-            cout << "noImprovSolCountExcFlag_: " << noImprovSolCountExcFlag_ << '\n';
-            cout << "solOscCountExcFlag_: " << solOscCountExcFlag_ << '\n';
+    while (!subtourConstraintsSatisfiedFlag && doAugment_ && !isTour_) {
+        if (isFailLoop_ || isFailImprove_ || isFailOsc_) {
+            cout << "noConsClosedLoopsCountExcFlag_: " << isFailLoop_ << '\n';
+            cout << "noImprovSolCountExcFlag_: " << isFailImprove_ << '\n';
+            cout << "solOscCountExcFlag_: " << isFailOsc_ << '\n';
             break;
         }
-        if (costImpa_ == zero_value) {
+        if (tourCost_ == zero_value) {
             cout << "Cost is zero" << '\n';
             cout << "Possibly Nan" << '\n';
             exit(0);
@@ -368,17 +368,17 @@ inline void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
 
         iterate_augmented_graph();
 
-        if (numAugmentations_ == MAX_AUGM_COUNT) {
+        if (nAugment_ == MAX_AUGM_COUNT) {
             cout << "MAX_AUGM_COUNT reached" << '\n';
             break;
         }
 
         // Add empty vectors to subtour constraints if needed
-        if (subtourConstraints2EdgeEcM_.size() != delta_S_indices_list.size()) {
-            size_t numLists2Add = delta_S_indices_list.size() - subtourConstraints2EdgeEcM_.size();
-            vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(numEdgeVariables_, zero_value));
-            subtourConstraints2EdgeEcM_.insert(subtourConstraints2EdgeEcM_.end(), temp.begin(), temp.end());
-            subtourConstraints2EdgeEcDummyM_ = subtourConstraints2EdgeEcM_;
+        if (subtour2EqM_.size() != deltaS_.size()) {
+            size_t numLists2Add = deltaS_.size() - subtour2EqM_.size();
+            vector<vector<impalib_type>> temp(numLists2Add, vector<impalib_type>(nEdgeVars_, zero_value));
+            subtour2EqM_.insert(subtour2EqM_.end(), temp.begin(), temp.end());
+            subtour2EqPreM_ = subtour2EqM_;
         }
     }
 }
@@ -412,19 +412,19 @@ inline void GraphicalModelTsp::process_ouputs(impalib_type *pExtrinsic_output_ed
                                        bool *pNo_improv_sol_count_exc_flag, bool *pNo_cons_loops_count_exc_flag, bool *pSol_osc_count_exc_flag, int *pSelected_edges, int *pSelected_edges_size,
                                        int *pSubtour_paths, int *pSubtour_paths_size) {
     // Copy extrinsic output for edge equality constraints
-    copy(outputs.ExtrinsicOutputEdgeEc.begin(), outputs.ExtrinsicOutputEdgeEc.begin() + numEdgeVariables_, pExtrinsic_output_edge_ec);
-    *pNum_augmentations = numAugmentations_;
-    *pNum_added_constraints = static_cast<int>(subtourConstraints2EdgeEcM_.size());
+    copy(outputs.extrinsicOut_.begin(), outputs.extrinsicOut_.begin() + nEdgeVars_, pExtrinsic_output_edge_ec);
+    *pNum_augmentations = nAugment_;
+    *pNum_added_constraints = static_cast<int>(subtour2EqM_.size());
 
-    copy(tourImpa_.begin(), tourImpa_.begin() + static_cast<int>(tourImpa_.size()), pTour_impa);
-    *pCost_impa = costImpa_;
+    copy(tour_.begin(), tour_.begin() + static_cast<int>(tour_.size()), pTour_impa);
+    *pCost_impa = tourCost_;
 
-    *pNo_improv_sol_count_exc_flag = noImprovSolCountExcFlag_;
-    *pNo_cons_loops_count_exc_flag = noConsClosedLoopsCountExcFlag_;
-    *pSol_osc_count_exc_flag = solOscCountExcFlag_;
+    *pNo_improv_sol_count_exc_flag = isFailImprove_;
+    *pNo_cons_loops_count_exc_flag = isFailLoop_;
+    *pSol_osc_count_exc_flag = isFailOsc_;
 
     // Copy selected edges
-    vector<int> flattened_selected_edges = accumulate(selectedEdges_.begin(), selectedEdges_.end(), vector<int>{}, [](vector<int> &acc, const vector<int> &inner) {
+    vector<int> flattened_selected_edges = accumulate(selected_.begin(), selected_.end(), vector<int>{}, [](vector<int> &acc, const vector<int> &inner) {
         acc.insert(acc.end(), inner.begin(), inner.end());
         return acc;
     });
@@ -438,7 +438,7 @@ inline void GraphicalModelTsp::process_ouputs(impalib_type *pExtrinsic_output_ed
         return acc;
     });
     copy(flattened_closed_paths.begin(), flattened_closed_paths.begin() + static_cast<int>(flattened_closed_paths.size()), pSubtour_paths);
-    copy(closedPathsSize_.begin(), closedPathsSize_.begin() + static_cast<int>(closedPathsSize_.size()), pSubtour_paths_size);
+    copy(loopsSize_.begin(), loopsSize_.begin() + static_cast<int>(loopsSize_.size()), pSubtour_paths_size);
 }
 
 /**
@@ -447,12 +447,12 @@ inline void GraphicalModelTsp::process_ouputs(impalib_type *pExtrinsic_output_ed
  */
 inline void GraphicalModelTsp::iterate_augmented_graph() {
     // Reset messages if flag is set
-    if (resetFlag_) {
-        for (size_t i = 0; i < modelInputs_.EdgeConnections.size(); i++) {
-            auto connection = modelInputs_.EdgeConnections[i];
-            impalib_type cost = modelInputs_.CostMatrix[connection[0]][connection[1]];
-            modelInputs_.EdgeEc2DegreeConstraintM[i][connection[0]] = cost;
-            modelInputs_.EdgeEc2DegreeConstraintM[i][connection[1]] = cost;
+    if (doReset_) {
+        for (size_t i = 0; i < inputs_.connections_.size(); i++) {
+            auto connection = inputs_.connections_[i];
+            impalib_type cost = inputs_.costMat_[connection[0]][connection[1]];
+            inputs_.eq2DegM_[i][connection[0]] = cost;
+            inputs_.eq2DegM_[i][connection[1]] = cost;
         }
     }
 
@@ -461,35 +461,35 @@ inline void GraphicalModelTsp::iterate_augmented_graph() {
     cout << "-----------------------" << '\n';
 
     // Increment augmentation count
-    numAugmentations_ += 1;
-    cout << "Augmentation count: " << numAugmentations_ << '\n';
-    cout << "delta_S_indices_list.size(): " << delta_S_indices_list.size() << '\n';
+    nAugment_ += 1;
+    cout << "Augmentation count: " << nAugment_ << '\n';
+    cout << "delta_S_indices_list.size(): " << deltaS_.size() << '\n';
 
     // Reserve memory for old subtour constraints
-    modelSubtourEliminationConstraint_.subtourConstraints2EdgeEcOld_.reserve(delta_S_indices_list.size());
+    subtours_.subtour2EqOldM_.reserve(deltaS_.size());
 
     // Initialize old subtour constraints
-    for (int subtour = 0; subtour < delta_S_indices_list.size(); subtour++) {
-        modelSubtourEliminationConstraint_.subtourConstraints2EdgeEcOld_.push_back(vector<impalib_type>(numEdgeVariables_, zero_value));
+    for (int subtour = 0; subtour < deltaS_.size(); subtour++) {
+        subtours_.subtour2EqOldM_.push_back(vector<impalib_type>(nEdgeVars_, zero_value));
     }
 
-    for (int iter = 0; iter < numIterations_; iter++) {
-        modelDegreeConstraint_.degree_constraint_to_edge_ec_update(modelInputs_.EdgeEc2DegreeConstraintM, modelInputs_.EdgeConnections, DegreeConstraint2EqConstraintDummyM_);
-        modelDegreeConstraint_.process_filtering(iter, DegreeConstraint2EqConstraintDummyM_, DegreeConstraint2EqConstraintM_);
+    for (int iter = 0; iter < nIter_; iter++) {
+        degrees_.degree_constraint_to_edge_ec_update(inputs_.eq2DegM_, inputs_.connections_, deg2EqPreM_);
+        degrees_.process_filtering(iter, deg2EqPreM_, deg2EqM_);
 
-        edgeEc2SubtourConstraintsM_ = modelEqConstraint_.edge_ec_to_subtour_constraints_update(delta_S_indices_list, modelInputs_.CostEdgeVariable, DegreeConstraint2EqConstraintM_,
-                                                                                               subtourConstraints2EdgeEcM_, modelInputs_.EdgeConnections);
-        modelSubtourEliminationConstraint_.subtour_constraints_to_edge_ec_update(edgeEc2SubtourConstraintsM_, delta_S_indices_list, subtourConstraints2EdgeEcDummyM_);
-        modelSubtourEliminationConstraint_.process_filtering(iter, subtourConstraints2EdgeEcDummyM_, subtourConstraints2EdgeEcM_, delta_S_indices_list);
-        modelEqConstraint_.edge_ec_to_degree_constraint_augmented_graph_update(DegreeConstraint2EqConstraintM_, subtourConstraints2EdgeEcM_, modelInputs_.EdgeConnections,
-                                                                               modelInputs_.EdgeDegreeConstraintCost, modelInputs_.EdgeEc2DegreeConstraintM);
+        eq2SubtourM_ = eqs_.edge_ec_to_subtour_constraints_update(deltaS_, inputs_.costs_, deg2EqM_,
+                                                                                               subtour2EqM_, inputs_.connections_);
+        subtours_.subtour_constraints_to_edge_ec_update(eq2SubtourM_, deltaS_, subtour2EqPreM_);
+        subtours_.process_filtering(iter, subtour2EqPreM_, subtour2EqM_, deltaS_);
+        eqs_.edge_ec_to_degree_constraint_augmented_graph_update(deg2EqM_, subtour2EqM_, inputs_.connections_,
+                                                                               inputs_.costMatUpdate_, inputs_.eq2DegM_);
     }
 
     // Check for NaN values
     bool flag_nan = false;
-    for (int i = 0; i < modelInputs_.EdgeEc2DegreeConstraintM.size(); i++) {
-        for (int j = 0; j < modelInputs_.EdgeEc2DegreeConstraintM[i].size(); j++) {
-            if (isnan(modelInputs_.EdgeEc2DegreeConstraintM[i][j])) {
+    for (int i = 0; i < inputs_.eq2DegM_.size(); i++) {
+        for (int j = 0; j < inputs_.eq2DegM_[i].size(); j++) {
+            if (isnan(inputs_.eq2DegM_[i][j])) {
                 flag_nan = true;
             }
         }
@@ -500,50 +500,50 @@ inline void GraphicalModelTsp::iterate_augmented_graph() {
         exit(0);
     }
 
-    outputs.extrinsic_output_edge_ec_augmented_graph_update(DegreeConstraint2EqConstraintM_, subtourConstraints2EdgeEcM_);
-    outputs.intrinsic_output_edge_ec_update(modelInputs_.CostEdgeVariable);
+    outputs.extrinsic_output_edge_ec_augmented_graph_update(deg2EqM_, subtour2EqM_);
+    outputs.intrinsic_output_edge_ec_update(inputs_.costs_);
 
-    selectedEdges_.clear();
+    selected_.clear();
     vector<vector<int>> selected_edges;
     hard_decision_analysis(selected_edges);
 
     // Check for solution improvement
-    if (!selected_edges_old_.empty()) {
-        bool areEqual = (selected_edges == selected_edges_old_);
+    if (!selectedOld_.empty()) {
+        bool areEqual = (selected_edges == selectedOld_);
         if (areEqual) {
             cout << "Exited: No Improvement of IMPA Solution" << '\n';
-            noImprovSolCount_ += 1;
-            if (noImprovSolCount_ > maxCount_) {
+            nImprove_ += 1;
+            if (nImprove_ > maxFailures_) {
                 cout << "Exited: noImprovSolCount_ Exceeded maximum allowable "
                         "number "
-                     << maxCount_ << '\n';
-                noImprovSolCountExcFlag_ = true;
+                     << maxFailures_ << '\n';
+                isFailImprove_ = true;
             }
         } else {
-            noImprovSolCount_ = 0;
+            nImprove_ = 0;
         }
     }
 
     // Check for solution oscillation
-    if (!selected_edges_old_old_.empty()) {
-        bool oscillation_flag = ((selected_edges == selected_edges_old_old_) && (selected_edges_old_old_ != selected_edges_old_));
+    if (!selectedOldOld_.empty()) {
+        bool oscillation_flag = ((selected_edges == selectedOldOld_) && (selectedOldOld_ != selectedOld_));
         if (oscillation_flag) {
             cout << "Exited: Solution is oscillating" << '\n';
-            solOscCount_ += 1;
-            if (solOscCount_ > maxCount_) {
-                cout << "Exited: solOscCount_ Exceeded maximum allowable number " << maxCount_ << '\n';
-                solOscCountExcFlag_ = true;
+            nOsc_ += 1;
+            if (nOsc_ > maxFailures_) {
+                cout << "Exited: solOscCount_ Exceeded maximum allowable number " << maxFailures_ << '\n';
+                isFailOsc_ = true;
             }
         } else {
-            solOscCount_ = 0;
+            nOsc_ = 0;
         }
     }
 
-    if (!selected_edges_old_.empty()) {
-        selected_edges_old_old_ = selected_edges_old_;
+    if (!selectedOld_.empty()) {
+        selectedOldOld_ = selectedOld_;
     }
-    selected_edges_old_ = selected_edges;
-    selectedEdges_ = selected_edges;
+    selectedOld_ = selected_edges;
+    selected_ = selected_edges;
     unordered_map<int, vector<int>> graph;
     subtour_elimination_constraints_analysis(graph, selected_edges);
 }
@@ -555,16 +555,16 @@ inline void GraphicalModelTsp::iterate_augmented_graph() {
  *
  */
 inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &selected) {
-    hard_decision.resize(numEdgeVariables_);
-    fill(hard_decision.begin(), hard_decision.begin() + numEdgeVariables_, numeric_limits<int>::max());
+    hard_decision.resize(nEdgeVars_);
+    fill(hard_decision.begin(), hard_decision.begin() + nEdgeVars_, numeric_limits<int>::max());
 
     // Apply threshold to intrinsic output to determine hard decision
-    transform(outputs.IntrinsicOutputEdgeEc.begin(), outputs.IntrinsicOutputEdgeEc.end(), hard_decision.begin(), [&](impalib_type value) { return value > threshold_ ? zero_value : 1; });
+    transform(outputs.intrinsicOut_.begin(), outputs.intrinsicOut_.end(), hard_decision.begin(), [&](impalib_type value) { return value > threshold_ ? zero_value : 1; });
 
     // Select edges based on hard decision
-    for (int edge = 0; edge < numEdgeVariables_; edge++) {
+    for (int edge = 0; edge < nEdgeVars_; edge++) {
         if (hard_decision[edge] == 1) {
-            selected.push_back(modelInputs_.EdgeConnections[edge]);
+            selected.push_back(inputs_.connections_[edge]);
         }
     }
 
@@ -599,12 +599,12 @@ inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &selec
     impalib_type cost_impa = zero_value;
     for (size_t i = 0; i < hard_decision.size(); ++i) {
         if (hard_decision[i] == 1) {
-            cost_impa += modelInputs_.CostEdgeVariable[i];
+            cost_impa += inputs_.costs_[i];
         }
     }
 
     cout << "C++ cost_impa: " << cost_impa << '\n';
-    costImpa_ = cost_impa;
+    tourCost_ = cost_impa;
 }
 
 /**
@@ -617,7 +617,7 @@ inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &selec
  */
 
 inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &G, const vector<vector<int>> &selected) {
-    closedPathsSize_.clear();  // just store it at the end if applicable
+    loopsSize_.clear();  // just store it at the end if applicable
 
     // Get closed loops from the graph
     vector<vector<int>> loops_list = get_closed_loops(G, selected);
@@ -626,26 +626,26 @@ inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordere
 
     if (loops_list.empty()) {
         cout << "Exited: Cannot find tours using get_closed_loops()" << '\n';
-        noConsClosedLoopsCount_ += 1;
-        if (noConsClosedLoopsCount_ > maxCount_) {
+        nLoop_ += 1;
+        if (nLoop_ > maxFailures_) {
             cout << "Exited: noConsClosedLoopsCount_ Exceeded maximum allowable "
                     "number: "
-                 << maxCount_ << '\n';
-            noConsClosedLoopsCountExcFlag_ = true;
+                 << maxFailures_ << '\n';
+            isFailLoop_ = true;
         }
     }
 
-    else if (loops_list.size() == 1 && loops_list[0].size() == numNodes_) {
-        tourImpaFlag_ = true;
+    else if (loops_list.size() == 1 && loops_list[0].size() == nNodes_) {
+        isTour_ = true;
         subtourConstraintsSatisfiedFlag = true;
-        tourImpa_ = loops_list[0];
-        tourImpa_.push_back(loops_list[0][0]);
+        tour_ = loops_list[0];
+        tour_.push_back(loops_list[0][0]);
         cout << "Tour found" << '\n';
 
         cout << "tour_impa: [";
-        for (size_t i = 0; i < tourImpa_.size(); ++i) {
-            cout << tourImpa_[i];
-            if (i != tourImpa_.size() - 1) {
+        for (size_t i = 0; i < tour_.size(); ++i) {
+            cout << tour_[i];
+            if (i != tour_.size() - 1) {
                 cout << ", ";
             }
         }
@@ -653,10 +653,10 @@ inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordere
     }
     // If multiple subtours are found
     else {
-        noConsClosedLoopsCount_ = 0;
+        nLoop_ = 0;
         for (const auto &loop : loops_list) {
             // Store the size of each subtour
-            closedPathsSize_.push_back(static_cast<int>(loop.size()));
+            loopsSize_.push_back(static_cast<int>(loop.size()));
             cout << "Subtour of size " << loop.size() << " detected @: ";
             cout << "[";
             for (size_t i = 0; i < loop.size(); ++i) {
@@ -669,21 +669,21 @@ inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordere
 
             // Find delta S indices for each subtour
             vector<int> delta_S_indices;
-            for (size_t i = 0; i < modelInputs_.EdgeConnections.size(); ++i) {
-                const auto &connection = modelInputs_.EdgeConnections[i];
+            for (size_t i = 0; i < inputs_.connections_.size(); ++i) {
+                const auto &connection = inputs_.connections_[i];
                 if (find(loop.begin(), loop.end(), connection[0]) != loop.end() && find(loop.begin(), loop.end(), connection[1]) == loop.end()) {
                     delta_S_indices.push_back(static_cast<int>(i));
                 }
             }
             // Add delta S indices to delta_S_indices_list
-            if (delta_S_indices_list.empty() && !delta_S_indices.empty()) {  // added !delta_S_indices.empty() to make
+            if (deltaS_.empty() && !delta_S_indices.empty()) {  // added !delta_S_indices.empty() to make
                                                                              // sure if a full tour was detected so it
                                                                              // is not be added with subtours
-                delta_S_indices_list.push_back(delta_S_indices);
+                deltaS_.push_back(delta_S_indices);
             } else {
                 // Add delta S indices if not already present
                 bool found = false;
-                for (const auto &existing_indices : delta_S_indices_list) {
+                for (const auto &existing_indices : deltaS_) {
                     if (existing_indices == delta_S_indices) {
                         found = true;
                         break;
@@ -692,7 +692,7 @@ inline void GraphicalModelTsp::subtour_elimination_constraints_analysis(unordere
                 if (!found && !delta_S_indices.empty()) {  // added !delta_S_indices.empty() to
                                                            // make sure if a full tour was detected
                                                            // so it is not be added with subtours
-                    delta_S_indices_list.push_back(delta_S_indices);
+                    deltaS_.push_back(delta_S_indices);
                 }
             }
         }
@@ -859,21 +859,21 @@ inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector
  */
 class GraphicalModelKsat {
    private:
-    int numIterations_;                     ///< number of iterations
-    int numVariables_;                      ///< total number of variables
-    int numConstraints_;                    ///< number of constraints
-    int kVariable_;                         ///< number of variables per constraint
+    int nIter_;                     ///< number of iterations
+    int nVar_;                      ///< total number of variables
+    int nConstraints_;                    ///< number of constraints
+    int k_;                         ///< number of variables per constraint
     bool filteringFlag_;                    ///< whether to apply filtering or not
     impalib_type alpha_;                    ///< filtering parameter
-    int numUsedVariables_;                  ///< number of used variables to build a formula
-    EqualityConstraint modelEqConstraint_;  ///< Equality constraint object
-    KsatConstraint modelKsatConstraint_;    ///< ksat constraint object
+    int nUsed_;                  ///< number of used variables to build a formula
+    EqualityConstraint eqs_;  ///< Equality constraint object
+    KsatConstraint ksats_;    ///< ksat constraint object
 
    public:
-    InputsKsat modelInputs_;                ///< input object
-    vector<vector<impalib_type>> KsatConstraint2EqConstraintDummyM_;  ///< messages from ksat constraints to equality constraints before filtering
-    vector<vector<impalib_type>> KsatConstraint2EqConstraintM_;       ///< messages from ksat constraints to equality constraints after filtering
-    OutputsKsat outputs;                                              ///< output object
+    InputsKsat inputs_;                ///< input object
+    vector<vector<impalib_type>> ksat2EqPreM_;  ///< messages from ksat constraints to equality constraints before filtering
+    vector<vector<impalib_type>> ksat2EqM_;       ///< messages from ksat constraints to equality constraints after filtering
+    OutputsKsat outputs_;                                              ///< output object
     void initialize(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);  ///< initialize graphical model
     void iterate();                                                                                                          ///< iterate function
     GraphicalModelKsat(int NUM_ITERATIONS, int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA,
@@ -895,19 +895,19 @@ class GraphicalModelKsat {
 
 inline GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA,
                                        const int NUM_USED_VARIABLES)
-    : modelInputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, numUsedVariables_),
-      modelEqConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
-      modelKsatConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
-      outputs(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE),
-      numIterations_(NUM_ITERATIONS),
-      numVariables_(NUM_VARIABLES),
-      numConstraints_(NUM_CONSTRAINTS),
-      kVariable_(K_VARIABLE),
+    : inputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, nUsed_),
+      eqs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
+      ksats_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
+      outputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE),
+      nIter_(NUM_ITERATIONS),
+      nVar_(NUM_VARIABLES),
+      nConstraints_(NUM_CONSTRAINTS),
+      k_(K_VARIABLE),
       filteringFlag_(FILTERING_FLAG),
       alpha_(ALPHA),
-      numUsedVariables_(NUM_USED_VARIABLES),
-      KsatConstraint2EqConstraintDummyM_(numConstraints_, vector<impalib_type>(numVariables_, zero_value)),
-      KsatConstraint2EqConstraintM_(numConstraints_, vector<impalib_type>(numVariables_, zero_value)){};
+      nUsed_(NUM_USED_VARIABLES),
+      ksat2EqPreM_(nConstraints_, vector<impalib_type>(nVar_, zero_value)),
+      ksat2EqM_(nConstraints_, vector<impalib_type>(nVar_, zero_value)){};
 
 /**
  * Initialize Graphical Model inputs for the k-sat problem. The inputs
@@ -927,7 +927,7 @@ inline void GraphicalModelKsat::initialize(const int *pUSED_VARIABLES_PY, const 
                                     const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
     /// calls a method process_inputs() on an object modelInputs_, passing
     /// several pointers to Python objects as arguments
-    modelInputs_.process_inputs(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST,
+    inputs_.process_inputs(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST,
                                 pVariable_ec_to_ksat_constraint_m_py);
 }
 
@@ -938,16 +938,16 @@ inline void GraphicalModelKsat::initialize(const int *pUSED_VARIABLES_PY, const 
  */
 
 inline void GraphicalModelKsat::iterate() {
-    for (int iter = 0; iter < numIterations_; iter++) {
+    for (int iter = 0; iter < nIter_; iter++) {
         /// update messages from k-sat constraints to variable equality constraints
-        modelKsatConstraint_.ksat_constraint_to_variable_ec_update(modelInputs_.VariableEc2KsatConstraintM, KsatConstraint2EqConstraintDummyM_, modelInputs_.ConstraintsConnections,
-                                                                   modelInputs_.ConstraintsConnectionsType);
+        ksats_.ksat_constraint_to_variable_ec_update(inputs_.VariableEc2KsatConstraintM, ksat2EqPreM_, inputs_.ConstraintsConnections,
+                                                                   inputs_.ConstraintsConnectionsType);
         /// perform filtering on messages from k-sat constraints to variable equality constraints
-        modelKsatConstraint_.process_filtering(iter, KsatConstraint2EqConstraintDummyM_, KsatConstraint2EqConstraintM_);
+        ksats_.process_filtering(iter, ksat2EqPreM_, ksat2EqM_);
         /// update messages from variable equality constraints to k-sat constraints
-        modelEqConstraint_.variable_ec_to_ksat_constraint_update(KsatConstraint2EqConstraintM_, modelInputs_.VariableEc2KsatConstraintM, modelInputs_.UsedVariables, modelInputs_.IncomingMetricsCost,
-                                                                 modelInputs_.VariablesConnections);
+        eqs_.variable_ec_to_ksat_constraint_update(ksat2EqM_, inputs_.VariableEc2KsatConstraintM, inputs_.UsedVariables, inputs_.IncomingMetricsCost,
+                                                                 inputs_.VariablesConnections);
     }
     /// process outputs of k-sat problem
-    outputs.update_extrinsic(KsatConstraint2EqConstraintM_);
+    outputs_.update_extrinsic(ksat2EqM_);
 }

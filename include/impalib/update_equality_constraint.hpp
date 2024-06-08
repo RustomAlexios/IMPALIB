@@ -11,34 +11,34 @@
 class EqualityConstraint
 {
 private:
-    int numTeams_; ///< number of teams
-    int numProjects_; ///< number of projects
-    int numDepartments_; ///< number of departments
-    int          numNodes_; ///< number of nodes
-    int          numEdgeVariables_; ///< number of edge connections
-    bool         filteringFlag_; ///< filtering flag
+    int nTeams_; ///< number of teams
+    int nProj_; ///< number of projects
+    int nDept_; ///< number of departments
+    int          nNodes_; ///< number of nodes
+    int          nEdgeVars_; ///< number of edge connections
+    bool         doFilter_; ///< filtering flag
     impalib_type alpha_; ///< filtering parameter
-    int numVariables_;
-    int numConstraints_;
-    int kvariable_;
+    int nVars_;
+    int nConstraints_;
+    int k_;
 public:
 
     EqualityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
-    : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS),
-        filteringFlag_(false), alpha_(zero_value), numNodes_(0), numEdgeVariables_(0),
-        numVariables_(0), numConstraints_(0), kvariable_(0){};
+    : nProj_(N_PROJECTS), nTeams_(N_TEAMS), nDept_(N_DEPARTMENTS),
+        doFilter_(false), alpha_(zero_value), nNodes_(0), nEdgeVars_(0),
+        nVars_(0), nConstraints_(0), k_(0){};
 
     EqualityConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
                                              const bool FILTERING_FLAG, const impalib_type ALPHA)
-    : numProjects_(0), numTeams_(0), numDepartments_(0),
-      filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES),
-      numEdgeVariables_(NUM_EDGE_VARIABLES), numVariables_(0), numConstraints_(0), kvariable_(0){};
+    : nProj_(0), nTeams_(0), nDept_(0),
+      doFilter_(FILTERING_FLAG), alpha_(ALPHA), nNodes_(NUM_NODES),
+      nEdgeVars_(NUM_EDGE_VARIABLES), nVars_(0), nConstraints_(0), k_(0){};
 
     EqualityConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE,
                                              const bool FILTERING_FLAG, const impalib_type ALPHA)
-    : numProjects_(0), numTeams_(0), numDepartments_(0),
-      filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(0),
-      numEdgeVariables_(0), numVariables_(NUM_VARIABLES), numConstraints_(NUM_CONSTRAINTS), kvariable_(K_VARIABLE){};
+    : nProj_(0), nTeams_(0), nDept_(0),
+      doFilter_(FILTERING_FLAG), alpha_(ALPHA), nNodes_(0),
+      nEdgeVars_(0), nVars_(NUM_VARIABLES), nConstraints_(NUM_CONSTRAINTS), k_(K_VARIABLE){};
 
     void team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<impalib_type> &,
                                            vector<impalib_type> &) const; ///< calculate messages from team equality constraint to ORIC
@@ -75,7 +75,7 @@ inline void EqualityConstraint::team_eq_constraint_to_oric_update(
     vector<vector<impalib_type>> &extrinsicOut, vector<impalib_type> &team2OricM,
     vector<impalib_type> &rewards) const
 {
-    vector<impalib_type> intermediate_team_to_oric_m(numTeams_, 0);
+    vector<impalib_type> intermediate_team_to_oric_m(nTeams_, 0);
 
     for (int department = 0; department < extrinsicOut.size(); department++)
     {
@@ -126,7 +126,7 @@ inline void EqualityConstraint::edge_ec_to_degree_constraint_relaxed_graph_updat
     vector<vector<impalib_type>> deg2EqM_flipped = deg2EqM;
     flip_matrix(deg2EqM, connections, deg2EqM_flipped);
 
-    for (int edge = 0; edge < numEdgeVariables_; edge++)
+    for (int edge = 0; edge < nEdgeVars_; edge++)
     {
         transform(deg2EqM_flipped[edge].begin(),
                   deg2EqM_flipped[edge].end(),
@@ -158,10 +158,10 @@ inline vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_const
 
     if (deltaS.size() == 1)
     {
-        vector<impalib_type> edge_ec_to_subtour_constraints_m(numEdgeVariables_, zero_value);
+        vector<impalib_type> edge_ec_to_subtour_constraints_m(nEdgeVars_, zero_value);
 
-        vector<impalib_type> deg2EqM_sum(numEdgeVariables_, zero_value);
-        for (size_t edge = 0; edge < numEdgeVariables_; ++edge)
+        vector<impalib_type> deg2EqM_sum(nEdgeVars_, zero_value);
+        for (size_t edge = 0; edge < nEdgeVars_; ++edge)
         {
             deg2EqM_sum[edge] =
                 deg2EqM[edge][connections[edge][0]]
@@ -179,7 +179,7 @@ inline vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_const
 
     else
     {
-        vector<impalib_type> combined_subtour_constraints_to_edge_ec_m(numEdgeVariables_, zero_value);
+        vector<impalib_type> combined_subtour_constraints_to_edge_ec_m(nEdgeVars_, zero_value);
         for (const auto &row : subtour2EqM)
         {
             transform(combined_subtour_constraints_to_edge_ec_m.begin(),
@@ -187,8 +187,8 @@ inline vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_const
                       combined_subtour_constraints_to_edge_ec_m.begin(), std::plus<impalib_type>());
         }
 
-        vector<impalib_type> combined_degree_constraint_to_eq_constraint_m(numEdgeVariables_, zero_value);
-        for (size_t edge = 0; edge < numEdgeVariables_; ++edge)
+        vector<impalib_type> combined_degree_constraint_to_eq_constraint_m(nEdgeVars_, zero_value);
+        for (size_t edge = 0; edge < nEdgeVars_; ++edge)
         {
             combined_degree_constraint_to_eq_constraint_m[edge] =
                 deg2EqM[edge][connections[edge][0]]
@@ -198,7 +198,7 @@ inline vector<vector<impalib_type>> EqualityConstraint::edge_ec_to_subtour_const
         for (size_t subtour = 0; subtour < deltaS.size();
              subtour++)
         {
-            vector<impalib_type> edge_ec_to_subtour_constraints_m(numEdgeVariables_, zero_value);
+            vector<impalib_type> edge_ec_to_subtour_constraints_m(nEdgeVars_, zero_value);
 
             for (size_t i = 0; i < deltaS[subtour].size(); i++)
             {
@@ -232,7 +232,7 @@ inline void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_upd
     const vector<vector<impalib_type>> &cost, vector<vector<impalib_type>> &eq2DegreeM) const
 {
 
-    vector<impalib_type> subtour2EqM_sum(numEdgeVariables_, zero_value);
+    vector<impalib_type> subtour2EqM_sum(nEdgeVars_, zero_value);
     for (const auto &row : subtour2EqM)
     {
         transform(subtour2EqM_sum.begin(), subtour2EqM_sum.end(),
@@ -295,15 +295,15 @@ inline void EqualityConstraint::variable_ec_to_ksat_constraint_update(const vect
         row.assign(row.size(), zero_value);
     }
 
-    vector<impalib_type> used_incoming_metrics_cost(numVariables_, zero_value);
+    vector<impalib_type> used_incoming_metrics_cost(nVars_, zero_value);
 
     for_each(used.begin(), used.end(), [&](int n) {
         used_incoming_metrics_cost[n] = costs[n];
     });
 
-    vector<impalib_type> sum_messages(numVariables_, zero_value);
+    vector<impalib_type> sum_messages(nVars_, zero_value);
 
-    for (int i = 0; i < numVariables_; ++i) {
+    for (int i = 0; i < nVars_; ++i) {
         for (int j = 0; j < connections[i].size(); ++j) {
             sum_messages[i] += ksat2EqM[connections[i][j]][i];
         }

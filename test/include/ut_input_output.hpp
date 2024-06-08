@@ -58,7 +58,7 @@ void ut_input_output_kc_mwm(string& ut_name){
         fstream file_output("../ut_results/extrinsic_output_team_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
                     for (int i=0; i<N_TEAMS; i++){
-                        file_output.write((char*)(&outputs.ExtrinsicOutputTeam[i]), sizeof(outputs.ExtrinsicOutputTeam[i]));}
+                        file_output.write((char*)(&outputs.extrinsicOut_[i]), sizeof(outputs.extrinsicOut_[i]));}
                         file_output.close();}
                 else {cout << "Error! File cannot be opened!" << "\n";}
     
@@ -87,7 +87,7 @@ void ut_input_output_kc_mwm(string& ut_name){
         fstream file_output("../ut_results/intrinsic_out_mwm_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_PROJECTS*N_TEAMS; i++){
-                        file_output.write((char*)(&outputs.IntrinsicOutMwm[i]), sizeof(outputs.IntrinsicOutMwm[i]));}
+                        file_output.write((char*)(&outputs.intrinsicOut_[i]), sizeof(outputs.intrinsicOut_[i]));}
                         file_output.close();}
                 else {cout << "Error! File cannot be opened!" << "\n";}
 
@@ -129,7 +129,7 @@ void ut_input_output_tsp(string& ut_name){
         fstream file_output("../ut_results/extrinsic_output_edge_ec_relaxed_graph_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
                     for (int i=0; i<N_EDGE_VARIABLES; i++){
-                        file_output.write((char*)(&outputs.ExtrinsicOutputEdgeEc[i]), sizeof(outputs.ExtrinsicOutputEdgeEc[i]));}
+                        file_output.write((char*)(&outputs.extrinsicOut_[i]), sizeof(outputs.extrinsicOut_[i]));}
                         file_output.close();}
                 else {cout << "Error! File cannot be opened!" << "\n";}
     
@@ -150,7 +150,7 @@ void ut_input_output_tsp(string& ut_name){
         fstream file_output("../ut_results/extrinsic_output_edge_ec_augmented_graph_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
                 for (int i=0; i<N_EDGE_VARIABLES; i++){
-                        file_output.write((char*)(&outputs.ExtrinsicOutputEdgeEc[i]), sizeof(outputs.ExtrinsicOutputEdgeEc[i]));}
+                        file_output.write((char*)(&outputs.extrinsicOut_[i]), sizeof(outputs.extrinsicOut_[i]));}
                         file_output.close();}
                 else {cout << "Error! File cannot be opened!" << "\n";}
     }
@@ -195,7 +195,7 @@ void ut_input_output_ksat(string& ut_name){
         fstream file_output("../ut_results/extrinsic_output_variable_ec_wrapper", ios::out | ios::binary | ios:: trunc);
                 if (file_output.is_open()) {
                     for (int i=0; i<NUM_VARIABLES; i++){
-                        file_output.write((char*)(&outputs.ExtrinsicOutputVariableEc[i]), sizeof(outputs.ExtrinsicOutputVariableEc[i]));}
+                        file_output.write((char*)(&outputs.extrinsicOut_[i]), sizeof(outputs.extrinsicOut_[i]));}
                         file_output.close();}
                 else {cout << "Error! File cannot be opened!" << "\n";}
     

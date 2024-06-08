@@ -41,10 +41,10 @@ extern "C" void WrapperKcMwm(const int NUM_ITERATIONS, const int NUM_DEPARTMENTS
     model_graph.iterate(pNON_ZERO_WEIGHT_INDICES_SIZES_PY);
 
     // Copy the extrinsic output for each team to the provided variable
-    copy(model_graph.outputs.ExtrinsicOutputTeam.begin(), model_graph.outputs.ExtrinsicOutputTeam.begin() + NUM_TEAMS, pExtrinsic_output_team);
+    copy(model_graph.outputs.extrinsicOut_.begin(), model_graph.outputs.extrinsicOut_.begin() + NUM_TEAMS, pExtrinsic_output_team);
 
     // Copy the intrinsic output for each team-project pair to the provided variable
-    copy(model_graph.outputs.IntrinsicOutMwm.begin(), model_graph.outputs.IntrinsicOutMwm.begin() + NUM_TEAMS * NUM_PROJECTS, pIntrinsic_out_mwm);
+    copy(model_graph.outputs.intrinsicOut_.begin(), model_graph.outputs.intrinsicOut_.begin() + NUM_TEAMS * NUM_PROJECTS, pIntrinsic_out_mwm);
 }
 
 /**
@@ -140,5 +140,5 @@ extern "C" void WrapperKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, c
     model_graph.iterate();
 
     // Process the outputs of the model
-    copy(model_graph.outputs.ExtrinsicOutputVariableEc.begin(), model_graph.outputs.ExtrinsicOutputVariableEc.begin() + NUM_VARIABLES, pExtrinsic_output_variable_ec);
+    copy(model_graph.outputs_.extrinsicOut_.begin(), model_graph.outputs_.extrinsicOut_.begin() + NUM_VARIABLES, pExtrinsic_output_variable_ec);
 }

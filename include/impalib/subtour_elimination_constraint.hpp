@@ -15,15 +15,15 @@
 class SubtourEliminationConstraint
 {
 private:
-    int          numNodes_; ///< number of nodes
-    int          numEdgeVariables_; ///< number of edges
-    bool         filteringFlag_; ///< filtering flag
+    int          nNodes_; ///< number of nodes
+    int          nEdgeVars_; ///< number of edges
+    bool         doFilter_; ///< filtering flag
     impalib_type alpha_; ///< filtering parameter
-    impalib_type initial_forward_message_; ///< initial value of forward message using forward-backward algorithm
-    impalib_type initial_backward_message_; ///< initial value of backward message using forward-backward algorithm
+    impalib_type forward0_; ///< initial value of forward message using forward-backward algorithm
+    impalib_type backward0_; ///< initial value of backward message using forward-backward algorithm
 
 public:
-    vector<vector<impalib_type>> subtourConstraints2EdgeEcOld_; ///< messages from subtour constraints to edge equality constraint before filtering
+    vector<vector<impalib_type>> subtour2EqOldM_; ///< messages from subtour constraints to edge equality constraint before filtering
     void subtour_constraints_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
                                                vector<vector<impalib_type>> &) const; ///< calculate messages from subtour to edge equality constraints
     void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &); ///< perform filtering on messages from subtour to edge equality constraints
@@ -42,8 +42,8 @@ public:
  */
 inline SubtourEliminationConstraint::SubtourEliminationConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES,
                                                            const bool FILTERING_FLAG, const impalib_type ALPHA)
-    : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES),
-      initial_forward_message_(value_inf), initial_backward_message_(value_inf){
+    : doFilter_(FILTERING_FLAG), alpha_(ALPHA), nNodes_(NUM_NODES), nEdgeVars_(NUM_EDGE_VARIABLES),
+      forward0_(value_inf), backward0_(value_inf){
                                            };
 
 /**
@@ -59,14 +59,14 @@ inline void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
     const vector<vector<impalib_type>> &eq2SubtourM, const vector<vector<int>> &deltaS,
     vector<vector<impalib_type>> &subtour2EqM) const
 {
-    vector<impalib_type> forward(numEdgeVariables_ + 1, zero_value);
-    vector<impalib_type> backward(numEdgeVariables_ + 1, zero_value);
+    vector<impalib_type> forward(nEdgeVars_ + 1, zero_value);
+    vector<impalib_type> backward(nEdgeVars_ + 1, zero_value);
 
     for (size_t subtour = 0; subtour < deltaS.size();
          subtour++)
     {
         // Initialize and calculate forward messages
-        forward[deltaS[subtour][0]] = initial_forward_message_;
+        forward[deltaS[subtour][0]] = forward0_;
         for (int stage = 1; stage < deltaS[subtour].size(); stage++)
         {
             forward[deltaS[subtour][stage]] =
@@ -78,7 +78,7 @@ inline void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
         // Initialize and calculate backward messages
         backward[deltaS[subtour]
                                                   [deltaS[subtour].size() - 1]
-                                + 1] = initial_backward_message_;
+                                + 1] = backward0_;
 
         for (size_t stage = deltaS[subtour].size() - 1; stage >= 1; stage--)
         {
@@ -124,10 +124,10 @@ inline void SubtourEliminationConstraint::process_filtering(const int           
          subtour++)
     {
 
-        if ((filteringFlag_) and (alpha_ != zero_value))
+        if ((doFilter_) and (alpha_ != zero_value))
         {
             vector<impalib_type> intermediate_dummy(subtour2EqPreM[subtour]),
-                intermediate_old(subtourConstraints2EdgeEcOld_[subtour]), intermediate_extrinsic;
+                intermediate_old(subtour2EqOldM_[subtour]), intermediate_extrinsic;
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(),
@@ -150,7 +150,7 @@ inline void SubtourEliminationConstraint::process_filtering(const int           
 
             copy(subtour2EqM[subtour].begin(),
                  subtour2EqM[subtour].end(),
-                 subtourConstraints2EdgeEcOld_[subtour].begin());
+                 subtour2EqOldM_[subtour].begin());
         }
 
         else

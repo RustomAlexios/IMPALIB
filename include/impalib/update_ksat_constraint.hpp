@@ -13,12 +13,12 @@
  */
 class KsatConstraint {
    private:
-    int numVariables_;                                            ///< total number of variables
-    int numConstraints_;                                          ///< number of constraints
-    int kVariable_;                                               ///< number of variables per constraint
-    bool filteringFlag_;                                          ///< filtering flag
+    int nVars_;                                            ///< total number of variables
+    int nConstraints_;                                          ///< number of constraints
+    int k_;                                               ///< number of variables per constraint
+    bool doFilter_;                                          ///< filtering flag
     impalib_type alpha_;                                          ///< filtering parameter
-    vector<vector<impalib_type>> ksatConstraint2EqConstraintOld;  ///< messages from k-sat constraints to equality constraints before filtering
+    vector<vector<impalib_type>> ksat2EqOldM_;  ///< messages from k-sat constraints to equality constraints before filtering
     //impalib_type                 initial_forward_message_ = value_inf; ///< initial forward message of forward-backward algorithm
     //impalib_type                 initial_backward_message_ = zero_value; ///< initial backward message of forward-backward algorithm
     int maxState_ = 1; 
@@ -43,12 +43,12 @@ class KsatConstraint {
  */
 
 inline KsatConstraint::KsatConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA)
-    : filteringFlag_(FILTERING_FLAG),
+    : doFilter_(FILTERING_FLAG),
       alpha_(ALPHA),
-      numVariables_(NUM_VARIABLES),
-      numConstraints_(NUM_CONSTRAINTS),
-      kVariable_(K_VARIABLE),
-      ksatConstraint2EqConstraintOld(numConstraints_, vector<impalib_type>(numVariables_, zero_value)){};
+      nVars_(NUM_VARIABLES),
+      nConstraints_(NUM_CONSTRAINTS),
+      k_(K_VARIABLE),
+      ksat2EqOldM_(nConstraints_, vector<impalib_type>(nVars_, zero_value)){};
 
 /**
  * Calculate messages from k-sat constraints to variable equality constraints for the K-SAT problem
@@ -67,10 +67,10 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
         row.assign(row.size(), zero_value);
     }
 
-    vector<vector<impalib_type>> forward(kVariable_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
-    vector<vector<impalib_type>> backward(kVariable_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+    vector<vector<impalib_type>> forward(k_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+    vector<vector<impalib_type>> backward(k_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
 
-    for (int c = 0; c < numConstraints_; ++c) {
+    for (int c = 0; c < nConstraints_; ++c) {
 
         auto &conx = connections[c];
         auto &conx_type = types[c];
@@ -82,18 +82,18 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
 
         forward[0] = forward0;
 
-        for (int stage = 0; stage < kVariable_; stage++)
+        for (int stage = 0; stage < k_; stage++)
         {
             forward[stage + 1][0] = forward[stage][0];
             forward[stage + 1][1] =
                 min(forward[stage][1] + min(zero_value,var2KsatM[c][conx[stage]]*conx_type[stage]), forward[stage][0]+var2KsatM[c][conx[stage]]*conx_type[stage]);
         }
 
-        backward[kVariable_] = backward0;
+        backward[k_] = backward0;
 
-        for (int stage = kVariable_ - 1; stage >= 0; stage--)
+        for (int stage = k_ - 1; stage >= 0; stage--)
         {
-            if (stage == kVariable_ - 1){
+            if (stage == k_ - 1){
                 backward[stage][0] = var2KsatM[c][conx[stage]]*conx_type[stage];
             }
             else{
@@ -105,11 +105,11 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
         impalib_type min_dashed_edges = zero_value;
         impalib_type min_solid_edges = zero_value;
 
-        for (int stage = 0; stage < kVariable_; stage++)
+        for (int stage = 0; stage < k_; stage++)
         {
             min_solid_edges = min(forward[stage][0] + backward[stage+1][1] + var2KsatM[c][conx[stage]]*conx_type[stage], forward[stage][1] + var2KsatM[c][conx[stage]]*conx_type[stage] + backward[stage+1][1]);
 
-            if (stage == kVariable_-1){
+            if (stage == k_-1){
                 min_dashed_edges = forward[stage][1] + backward[stage+1][1];
             }
             else {
@@ -137,9 +137,9 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
  */
 
 inline void KsatConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &ksat2EqPreM, vector<vector<impalib_type>> &ksat2EqM) {
-    for (int c = 0; c < numConstraints_; c++) {
-        if ((filteringFlag_) and (alpha_ != zero_value)) {
-            vector<impalib_type> intermediate_dummy(ksat2EqPreM[c]), intermediate_old(ksatConstraint2EqConstraintOld[c]), intermediate_extrinsic;
+    for (int c = 0; c < nConstraints_; c++) {
+        if ((doFilter_) and (alpha_ != zero_value)) {
+            vector<impalib_type> intermediate_dummy(ksat2EqPreM[c]), intermediate_old(ksat2EqOldM_[c]), intermediate_extrinsic;
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(), [w_2](const impalib_type &c) { return c * w_2; });
@@ -151,7 +151,7 @@ inline void KsatConstraint::process_filtering(const int iter, vector<vector<impa
                 transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(), back_inserter(intermediate_extrinsic), plus<impalib_type>());
                 copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(), ksat2EqM[c].begin());
             }
-            copy(ksat2EqM[c].begin(), ksat2EqM[c].end(), ksatConstraint2EqConstraintOld[c].begin());
+            copy(ksat2EqM[c].begin(), ksat2EqM[c].end(), ksat2EqOldM_[c].begin());
         }
 
         else {

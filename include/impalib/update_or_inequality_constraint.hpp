@@ -14,9 +14,9 @@
 class OrInequalityConstraint
 {
 private:
-    int numTeams_; ///< number of teams
-    int numDepartments_; ///< number of departments
-    int numProjects_; ///< number of projects
+    int nTeams_; ///< number of teams
+    int nDept_; ///< number of departments
+    int nProj_; ///< number of projects
     int maxStateIc_ = 1; ///< maximum state of inequality constraint (>=1)
 
 public:
@@ -39,7 +39,7 @@ public:
  */
 
 inline OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
-    : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){
+    : nProj_(N_PROJECTS), nTeams_(N_TEAMS), nDept_(N_DEPARTMENTS){
                                                     };
 
 /**
@@ -59,12 +59,12 @@ inline void OrInequalityConstraint::oric_to_project_eq_constraint_update(const v
                                                                   vector<vector<impalib_type>> &eq2ProjectM,
                                                                   const vector<vector<impalib_type>> &rewards) const
 {
-    vector<vector<impalib_type>> forward(numProjects_ + 1,
+    vector<vector<impalib_type>> forward(nProj_ + 1,
         vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> backward(
-        numProjects_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
+        nProj_ + 1, vector<impalib_type>(maxStateIc_ + 1, zero_value));
 
-    for (int team = 0; team < numTeams_; team++)
+    for (int team = 0; team < nTeams_; team++)
     {
 
         vector<impalib_type> forward0(maxStateIc_ + 1, zero_value);
@@ -74,7 +74,7 @@ inline void OrInequalityConstraint::oric_to_project_eq_constraint_update(const v
         forward[0] = forward0;
 
         // Calculate forward messages
-        for (int stage = 0; stage < numProjects_; stage++)
+        for (int stage = 0; stage < nProj_; stage++)
         {
             forward[stage + 1][0] = forward[stage][0];
             forward[stage + 1][1] =
@@ -84,10 +84,10 @@ inline void OrInequalityConstraint::oric_to_project_eq_constraint_update(const v
         }
 
         // Set initial backward messages
-        backward[numProjects_] = backward0;
+        backward[nProj_] = backward0;
 
         // Calculate backward messages
-        for (int stage = numProjects_ - 1; stage >= 0; stage--)
+        for (int stage = nProj_ - 1; stage >= 0; stage--)
         {
             backward[stage][0] =
                 min(backward[stage + 1][0],
@@ -96,7 +96,7 @@ inline void OrInequalityConstraint::oric_to_project_eq_constraint_update(const v
             backward[stage][1] = backward[stage + 1][1];
         }
 
-        for (int project = 0; project < numProjects_; project++)
+        for (int project = 0; project < nProj_; project++)
         {
             impalib_type minimumValue                      = zero_value;
             minimumValue                                   = min(forward[project][1],

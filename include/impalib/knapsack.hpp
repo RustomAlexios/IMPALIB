@@ -14,11 +14,11 @@
 class Knapsack
 {
 private:
-    int                          numDepartments_; ///< number of departments
-    int                          numTeams_; ///< number of teams
-    bool                         filteringFlag_; ///< filtering flag
+    int                          nDept_; ///< number of departments
+    int                          nTeams_; ///< number of teams
+    bool                         doFilter_; ///< filtering flag
     impalib_type                 alpha_; ///< filtering parameter
-    vector<vector<impalib_type>> extrinsicOutputDepartmentOld_; ///< messages from departments to teams equality constraint before filtering
+    vector<vector<impalib_type>> extrinsicOutOld_; ///< messages from departments to teams equality constraint before filtering
 
 public:
     void forward(int, vector<vector<impalib_type>> &, int, vector<vector<int>> &, const int *, const vector<vector<int>> &,
@@ -49,14 +49,14 @@ public:
  */
 
 inline Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA)
-    : numDepartments_(N_DEPARTMENTS), numTeams_(N_TEAMS), filteringFlag_(FILT_FLAG), alpha_(ALPHA)
+    : nDept_(N_DEPARTMENTS), nTeams_(N_TEAMS), doFilter_(FILT_FLAG), alpha_(ALPHA)
 {
 
     // Initialize extrinsic output department
-    extrinsicOutputDepartmentOld_.reserve(numDepartments_);
-    for (int department = 0; department < numDepartments_; department++)
+    extrinsicOutOld_.reserve(nDept_);
+    for (int department = 0; department < nDept_; department++)
     {
-        extrinsicOutputDepartmentOld_.push_back(vector<impalib_type>(numTeams_, zero_value));
+        extrinsicOutOld_.push_back(vector<impalib_type>(nTeams_, zero_value));
     }
 };
 
@@ -120,14 +120,14 @@ inline void Knapsack::forward(const int department, vector<vector<impalib_type>>
         forward0 = forward[t + 1];
 
         // Handle the case when non-zero weight indices are not equal to the number of teams
-        if (nonzeroWeights[department].size() != numTeams_)
+        if (nonzeroWeights[department].size() != nTeams_)
         {
             if (!binary_search(nonzeroWeights[department].begin(),
                                nonzeroWeights[department].end(), t + 1))
             {
-                if (t + 1 >= nonzeroWeights[department].back() && t + 1 < numTeams_)
+                if (t + 1 >= nonzeroWeights[department].back() && t + 1 < nTeams_)
                 {
-                    for (int j = t + 1; j < numTeams_; j++)
+                    for (int j = t + 1; j < nTeams_; j++)
                     {
                         forward[j + 1] = forward0;
                     }
@@ -172,13 +172,13 @@ inline void Knapsack::backward(const int department, vector<vector<impalib_type>
     vector<impalib_type>  backward0(capacity + 1, zero_value);
 
     // Assign initial backward messages to the last stage
-    backward[numTeams_] = backward0;
+    backward[nTeams_] = backward0;
 
     // If the last non-zero weight index is not numTeams_ - 1, assign initial messages to previous stages
     if (nonzeroWeights[department][pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department] - 1]
-        != numTeams_ - 1)
+        != nTeams_ - 1)
     {
-        for (int j = numTeams_ - 1; j > nonzeroWeights[department][0]; j--)
+        for (int j = nTeams_ - 1; j > nonzeroWeights[department][0]; j--)
         {
             backward[j] = backward0;
         }
@@ -208,7 +208,7 @@ inline void Knapsack::backward(const int department, vector<vector<impalib_type>
         backward0 = backward[t];
 
         // Handle the case when non-zero weight indices are not equal to the number of teams
-        if (pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department] - 1 != numTeams_)
+        if (pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department] - 1 != nTeams_)
         {
             if (!binary_search(nonzeroWeights[department].begin(),
                                nonzeroWeights[department].end(), t - 1))
@@ -325,7 +325,7 @@ inline void Knapsack::team_to_knapsack_update(vector<vector<int>>          &nonz
     for (int department = 0; department < extrisicOut.size(); department++)
     {
         // Create a list of remaining departments
-        vector<int> remaining_departments(numDepartments_);
+        vector<int> remaining_departments(nDept_);
         iota(remaining_departments.begin(), remaining_departments.end(), 0);
 
         // Get unique edge indices for the current department
@@ -335,7 +335,7 @@ inline void Knapsack::team_to_knapsack_update(vector<vector<int>>          &nonz
         for (auto t : remaining_departments)
         {
             // Calculate intersection of non-zero weight indices between the current department and other departments
-            vector<int>           intersection(numTeams_);
+            vector<int>           intersection(nTeams_);
             vector<int>::iterator it;
             it = set_intersection(nonzeroWeights[department].begin(),
                                   nonzeroWeights[department].end(), nonzeroWeights[t].begin(),
@@ -379,11 +379,11 @@ inline void Knapsack::process_extrinsic_output_department(const int department, 
                                                    vector<vector<impalib_type>> &extrinsicOut)
 {
 
-    if ((filteringFlag_) and (alpha_ != zero_value))
+    if ((doFilter_) and (alpha_ != zero_value))
     {
 
         vector<impalib_type> intermediate_dummy(extrinsicOutPre[department]),
-            intermediate_old(extrinsicOutputDepartmentOld_[department]), intermediate_extrinsic;
+            intermediate_old(extrinsicOutOld_[department]), intermediate_extrinsic;
 
         impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
 
@@ -407,7 +407,7 @@ inline void Knapsack::process_extrinsic_output_department(const int department, 
         }
         
         copy(extrinsicOut[department].begin(), extrinsicOut[department].end(),
-             extrinsicOutputDepartmentOld_[department].begin());
+             extrinsicOutOld_[department].begin());
     }
 
     else
