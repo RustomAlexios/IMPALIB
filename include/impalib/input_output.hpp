@@ -60,19 +60,12 @@ class OutputsKcMwm {
  */
 
 inline InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS)
-    : nDept_(N_DEPARTMENTS), nTeams_(N_TEAMS), nProj_(N_PROJECTS), nNonzero_(MAX_SIZE_NON_ZERO_WEIGHTS) {
-    weights_.reserve(nDept_);
+    : nDept_(N_DEPARTMENTS), nTeams_(N_TEAMS), nProj_(N_PROJECTS), nNonzero_(MAX_SIZE_NON_ZERO_WEIGHTS),
+      weights_(N_DEPARTMENTS, vector<int>(N_TEAMS, 0)),
+      rewardsProj_(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value)),
+      team2KnapsackM_(N_DEPARTMENTS, vector<impalib_type>(N_TEAMS, zero_value))
+{
     nonzero_.reserve(nDept_);
-    rewardsProj_.reserve(nProj_);
-    team2KnapsackM_.reserve(nDept_);
-
-    for (int department = 0; department < nDept_; department++) {
-        team2KnapsackM_.push_back(vector<impalib_type>(nTeams_, zero_value));
-        weights_.push_back(vector<int>(nTeams_, 0));
-    }
-    for (int project = 0; project < nProj_; project++) {
-        rewardsProj_.push_back(vector<impalib_type>(nTeams_, zero_value));
-    }
 };
 
 /**
@@ -215,13 +208,11 @@ class OutputsTsp {
  *
  */
 
-inline OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) : nNodes_(NUM_NODES), nEdges_(NUM_EDGE_VARIABLES) {
-    extrinsicOut_.reserve(nEdges_);
-    extrinsicOut_.resize(nEdges_);
-    intrinsicOut_.reserve(nEdges_);
-    intrinsicOut_.resize(nEdges_);
-    fill(extrinsicOut_.begin(), extrinsicOut_.begin() + nEdges_, zero_value);
-    fill(intrinsicOut_.begin(), intrinsicOut_.begin() + nEdges_, zero_value);
+inline OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES)
+  : nNodes_(NUM_NODES), nEdges_(NUM_EDGE_VARIABLES),
+    extrinsicOut_(NUM_EDGE_VARIABLES, zero_value),
+    intrinsicOut_(NUM_EDGE_VARIABLES, zero_value)
+{
 };
 
 /**

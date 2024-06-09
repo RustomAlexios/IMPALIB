@@ -73,36 +73,16 @@ inline GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const i
       maxSizeNonZeroWeights_(MAX_SIZE_NON_ZERO_WEIGHTS),
       nIter_(N_ITERATIONS),
       doFilter_(FILT_FLAG),
-      alpha_(ALPHA) {
-    /// initializes and prepares data structures for mapping relationships
-    /// between teams, projects, and constraints
-    oric2PackageM_.resize(nTeams_);
-    team2OricM_.resize(nTeams_);
-    fill(oric2PackageM_.begin(), oric2PackageM_.begin() + nTeams_, zero_value);
-    fill(team2OricM_.begin(), team2OricM_.begin() + nTeams_, zero_value);
-
-    eq2OricM_.reserve(nProjects_);
-    oric2EqM_.reserve(nProjects_);
-    eq2ProjectM_.reserve(nProjects_);
-    project2EqM_.reserve(nProjects_);
-
-    for (int project = 0; project < nProjects_; project++) {
-        eq2OricM_.push_back(vector<impalib_type>(nTeams_, zero_value));
-        oric2EqM_.push_back(vector<impalib_type>(nTeams_, zero_value));
-        eq2ProjectM_.push_back(vector<impalib_type>(nTeams_, zero_value));
-        project2EqM_.push_back(vector<impalib_type>(nTeams_, zero_value));
-    }
-
-    /// initializes and prepares data structures for messages from departments
-    extrinsicOut_.reserve(nDepartments_);
-    extrinsicOutPre_.reserve(nDepartments_);
-
-    /// initializes and populates nested vectors for mapping relationships
-    /// between departments and teams
-    for (int department = 0; department < nDepartments_; department++) {
-        extrinsicOut_.push_back(vector<impalib_type>(nTeams_, zero_value));
-        extrinsicOutPre_.push_back(vector<impalib_type>(nTeams_, zero_value));
-    }
+      alpha_(ALPHA),
+      oric2PackageM_(N_TEAMS, zero_value),
+      team2OricM_(N_TEAMS, zero_value),
+      eq2OricM_(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value)),
+      oric2EqM_(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value)),
+      eq2ProjectM_(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value)),
+      project2EqM_(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value)),
+      extrinsicOut_(N_DEPARTMENTS, vector<impalib_type>(N_TEAMS, zero_value)),
+      extrinsicOutPre_(N_DEPARTMENTS, vector<impalib_type>(N_TEAMS, zero_value))
+{
 };
 
 /**
@@ -202,17 +182,17 @@ class GraphicalModelTsp {
     vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &);  ///< function for finding loops
     InputsTsp inputs_;                                                                                                          ///< Graphical Model Input object
     vector<vector<int>> selected_;                                                                                              ///< activated edges of IMPA
-    int nAugment_;                                                                                                              ///< number of performed augmentations in IMPA
-    int nLoop_;                                                                                                                 ///< count for failure case (no consecutive loop detection and no tour)
-    int nOsc_;                                                                                                                  ///< count for failure case (oscillation in the solution)
-    bool isFailLoop_;                                                                                                           ///< flag for failure case (no consecutive loop detection and no tour)
-    int nImprove_;                                                                                                              ///< count for failure case (no solution improvement)
-    bool isFailImprove_;                                                                                                        ///< flag for failure case (no solution improvement)
-    bool isFailOsc_;                                                                                                            ///< flag for failure case (oscillation in the solution)
+    int nAugment_ = 0;                                                                                                              ///< number of performed augmentations in IMPA
+    int nLoop_ = 0;                                                                                                                 ///< count for failure case (no consecutive loop detection and no tour)
+    int nOsc_ = 0;                                                                                                                  ///< count for failure case (oscillation in the solution)
+    bool isFailLoop_ = false;                                                                                                           ///< flag for failure case (no consecutive loop detection and no tour)
+    int nImprove_ = 0;                                                                                                              ///< count for failure case (no solution improvement)
+    bool isFailImprove_ = false;                                                                                                        ///< flag for failure case (no solution improvement)
+    bool isFailOsc_ = false;                                                                                                            ///< flag for failure case (oscillation in the solution)
     vector<int> tour_;                                                                                                          ///< list of nodes of tour (if detected)
     vector<vector<int>> subtourPaths_;                                                                                          ///< list of detected subtours (if detected)
     vector<int> loopsSize_;                                                                                                     ///< list of sizes of loops
-    impalib_type tourCost_;                                                                                                     ///< cost of IMPA solution
+    impalib_type tourCost_ = zero_value;                                                                                                     ///< cost of IMPA solution
     vector<vector<impalib_type>> subtour2EqM_;                                                                                  ///< messages from subtour constraints to edge equality constraint
 
    public:
@@ -257,25 +237,10 @@ inline GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int 
       doReset_(RESET_FLAG),
       nEdgeVars_(NUM_EDGE_VARIABLES),
       threshold_(THRESHOLD),
-      maxFailures_(MAX_COUNT) {
-    deg2EqPreM_.reserve(nEdgeVars_);
-    deg2EqM_.reserve(nEdgeVars_);
-
-    // Populate degree constraint to equality constraint messages
-    for (int edge = 0; edge < nEdgeVars_; edge++) {
-        deg2EqPreM_.push_back(vector<impalib_type>(nNodes_, zero_value));
-        deg2EqM_.push_back(vector<impalib_type>(nNodes_, zero_value));
-    }
-
-    nAugment_ = 0;
-    tourCost_ = zero_value;
-    nLoop_ = 0;
-    nImprove_ = 0;
-    nOsc_ = 0;
-
-    isFailLoop_ = false;
-    isFailImprove_ = false;
-    isFailOsc_ = false;
+      maxFailures_(MAX_COUNT),
+      deg2EqPreM_(NUM_EDGE_VARIABLES, vector<impalib_type>(NUM_NODES, zero_value)),
+      deg2EqM_(NUM_EDGE_VARIABLES, vector<impalib_type>(NUM_NODES, zero_value))
+{
 };
 
 /**

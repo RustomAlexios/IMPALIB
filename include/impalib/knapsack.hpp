@@ -46,13 +46,11 @@ class Knapsack {
  *
  */
 
-inline Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA) : nDept_(N_DEPARTMENTS), nTeams_(N_TEAMS), doFilter_(FILT_FLAG), alpha_(ALPHA) {
-    // Initialize extrinsic output department
-    extrinsicOutOld_.reserve(nDept_);
-    for (int department = 0; department < nDept_; department++) {
-        extrinsicOutOld_.push_back(vector<impalib_type>(nTeams_, zero_value));
-    }
-};
+inline Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool FILT_FLAG, const impalib_type ALPHA)
+    : nDept_(N_DEPARTMENTS), nTeams_(N_TEAMS), doFilter_(FILT_FLAG), alpha_(ALPHA),
+      extrinsicOutOld_(N_DEPARTMENTS, vector<impalib_type>(N_TEAMS, zero_value))
+{
+}
 
 /**
  * Perform forward pass for a department (trellis of knapsack) in Forward-Backward algorithm for the Knapsack-MWM problem
