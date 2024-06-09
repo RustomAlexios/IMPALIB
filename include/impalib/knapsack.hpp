@@ -242,8 +242,7 @@ inline void Knapsack::team_to_knapsack_update(vector<vector<int>> &nonzeroWeight
         for (auto t : remaining_departments) {
             // Calculate intersection of non-zero weight indices between the current department and other departments
             vector<int> intersection(nTeams_);
-            vector<int>::iterator it;
-            it = set_intersection(nonzeroWeights[department].begin(), nonzeroWeights[department].end(), nonzeroWeights[t].begin(), nonzeroWeights[t].end(), intersection.begin());
+            auto it = set_intersection(nonzeroWeights[department].begin(), nonzeroWeights[department].end(), nonzeroWeights[t].begin(), nonzeroWeights[t].end(), intersection.begin());
             intersection.resize(it - intersection.begin());
 
             // Update team to knapsack constraint messages
@@ -251,7 +250,7 @@ inline void Knapsack::team_to_knapsack_update(vector<vector<int>> &nonzeroWeight
                 team2KnapsackM[department][l] = rewards[l] + extrisicOut[t][l] + oric2TeamM[l];
 
                 // Remove the edge index from the unique list
-                vector<int>::iterator position = std::find(unique_edge_department.begin(), unique_edge_department.end(), l);
+                auto position = std::find(unique_edge_department.begin(), unique_edge_department.end(), l);
                 unique_edge_department.erase(position);
             }
         }
