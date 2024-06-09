@@ -124,25 +124,22 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
  */
 
 inline void KsatConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &ksat2EqPreM, vector<vector<impalib_type>> &ksat2EqM) {
+    if (!doFilter_) {
+        ksat2EqM = ksat2EqPreM;
+        return;
+    }
+
+    // Calculate weighted values for current and old messages
     for (int c = 0; c < nConstraints_; c++) {
-        if ((doFilter_) and (alpha_ != zero_value)) {
-            vector<impalib_type> intermediate_dummy(ksat2EqPreM[c]), intermediate_old(ksat2EqOldM_[c]), intermediate_extrinsic;
-
-            impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-            transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(), [w_2](const impalib_type &c) { return c * w_2; });
-            transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(), [w_1](const impalib_type &c) { return c * w_1; });
-
-            if (iter == 0) {
-                copy(intermediate_dummy.begin(), intermediate_dummy.end(), ksat2EqM[c].begin());
-            } else {
-                transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(), back_inserter(intermediate_extrinsic), plus<impalib_type>());
-                copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(), ksat2EqM[c].begin());
+        if (iter == 0) {
+            ksat2EqM[c] = ksat2EqPreM[c];
+        } else {
+            vector<impalib_type> weighted(ksat2EqPreM[c].size());
+            for (int i=0; i<weighted.size(); ++i) {
+                weighted[i] = alpha_*ksat2EqOldM_[c][i] + (1-alpha_)*ksat2EqPreM[c][i];
             }
-            copy(ksat2EqM[c].begin(), ksat2EqM[c].end(), ksat2EqOldM_[c].begin());
+            ksat2EqM[c] = weighted;
         }
-
-        else {
-            copy(ksat2EqPreM[c].begin(), ksat2EqPreM[c].end(), ksat2EqM[c].begin());
-        }
+        ksat2EqOldM_[c] = ksat2EqM[c];
     }
 }
