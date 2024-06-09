@@ -26,7 +26,7 @@ class DegreeConstraint {
    public:
     void degree_constraint_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
                                              vector<vector<impalib_type>> &) const;               ///< calculate messages from degree constraint to edge equality constraint
-    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< process filtering on messages from degree constraint to edge equality constraint
+    void process_filtering(int, const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< process filtering on messages from degree constraint to edge equality constraint
 
     DegreeConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
                      impalib_type ALPHA);  ///< constructor
@@ -126,29 +126,23 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(const vector<v
  *
  */
 
-inline void DegreeConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &deg2EqPreM, vector<vector<impalib_type>> &deg2EqM) {
+inline void DegreeConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &deg2EqPreM, vector<vector<impalib_type>> &deg2EqM) {
+    if (!doFilter_) {
+        deg2EqM = deg2EqPreM;
+        return;
+    }
+
+    // Calculate weighted values for current and old messages
     for (int edge = 0; edge < nEdgeVars_; edge++) {
-        if ((doFilter_) and (alpha_ != zero_value)) {
-            // Calculate weighted values for current and old messages
-            vector<impalib_type> intermediate_dummy(deg2EqPreM[edge]);
-            vector<impalib_type> intermediate_old(deg2EqOldM_[edge]);
-            vector<impalib_type> intermediate_extrinsic;
-
-            impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-            transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(), [w_2](const impalib_type &c) { return c * w_2; });
-            transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(), [w_1](const impalib_type &c) { return c * w_1; });
-
-            if (iter == 0) {
-                copy(intermediate_dummy.begin(), intermediate_dummy.end(), deg2EqM[edge].begin());
-            } else {
-                transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(), back_inserter(intermediate_extrinsic), plus<impalib_type>());
-                copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(), deg2EqM[edge].begin());
+        if (iter == 0) {
+            deg2EqM[edge] = deg2EqPreM[edge];
+        } else {
+            vector<impalib_type> weighted(deg2EqPreM[edge].size());
+            for (int i=0; i<weighted.size(); ++i) {
+                weighted[i] = alpha_*deg2EqOldM_[edge][i] + (1-alpha_)*deg2EqPreM[edge][i];
             }
-            copy(deg2EqM[edge].begin(), deg2EqM[edge].end(), deg2EqOldM_[edge].begin());
+            deg2EqM[edge] = weighted;
         }
-
-        else {
-            copy(deg2EqPreM[edge].begin(), deg2EqPreM[edge].end(), deg2EqM[edge].begin());
-        }
+        deg2EqOldM_[edge] = deg2EqM[edge];
     }
 }
