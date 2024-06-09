@@ -119,45 +119,22 @@ inline void SubtourEliminationConstraint::process_filtering(const int           
                                                      vector<vector<impalib_type>> &subtour2EqM,
                                                      const vector<vector<int>>          &deltaS)
 {
+    if (!doFilter_) {
+        subtour2EqM = subtour2EqPreM;
+        return;
+    }
 
-    for (int subtour = 0; subtour < deltaS.size();
-         subtour++)
-    {
-
-        if ((doFilter_) and (alpha_ != zero_value))
-        {
-            vector<impalib_type> intermediate_dummy(subtour2EqPreM[subtour]),
-                intermediate_old(subtour2EqOldM_[subtour]), intermediate_extrinsic;
-
-            impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-            transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(),
-                      [w_2](const impalib_type &c) { return c * w_2; });
-            transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(),
-                      [w_1](const impalib_type &c) { return c * w_1; });
-
-            if (iter == 0)
-            {
-                copy(intermediate_dummy.begin(), intermediate_dummy.end(),
-                     subtour2EqM[subtour].begin());
+    // Calculate weighted values for current and old messages
+    for (int subtour = 0; subtour < deltaS.size(); subtour++) {
+        if (iter == 0) {
+            subtour2EqM[subtour] = subtour2EqPreM[subtour];
+        } else {
+            vector<impalib_type> weighted(subtour2EqPreM[subtour].size());
+            for (int i=0; i<weighted.size(); ++i) {
+                weighted[i] = alpha_*subtour2EqOldM_[subtour][i] + (1-alpha_)*subtour2EqPreM[subtour][i];
             }
-            else
-            {
-                transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(),
-                          back_inserter(intermediate_extrinsic), plus<impalib_type>());
-                copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(),
-                     subtour2EqM[subtour].begin());
-            }
-
-            copy(subtour2EqM[subtour].begin(),
-                 subtour2EqM[subtour].end(),
-                 subtour2EqOldM_[subtour].begin());
+            subtour2EqM[subtour] = weighted;
         }
-
-        else
-        {
-            copy(subtour2EqPreM[subtour].begin(),
-                 subtour2EqPreM[subtour].end(),
-                 subtour2EqM[subtour].begin());
-        }
+        subtour2EqOldM_[subtour] = subtour2EqM[subtour];
     }
 }
