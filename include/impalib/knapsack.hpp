@@ -274,26 +274,20 @@ inline void Knapsack::team_to_knapsack_update(vector<vector<int>> &nonzeroWeight
  */
 
 inline void Knapsack::process_extrinsic_output_department(const int department, const int iter, vector<vector<impalib_type>> &extrinsicOutPre, vector<vector<impalib_type>> &extrinsicOut) {
-    if ((doFilter_) and (alpha_ != zero_value)) {
-        vector<impalib_type> intermediate_dummy(extrinsicOutPre[department]), intermediate_old(extrinsicOutOld_[department]), intermediate_extrinsic;
+    if (!doFilter_) {
+        extrinsicOut[department] = extrinsicOutPre[department];
+        return;
+    }
 
-        impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-
-        // Calculate weighted extrinsic outputs
-        transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(), [w_2](const impalib_type &c) { return c * w_2; });
-        transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(), [w_1](const impalib_type &c) { return c * w_1; });
-
+    // Calculate weighted values for current and old messages
         if (iter == 0) {
-            copy(intermediate_dummy.begin(), intermediate_dummy.end(), extrinsicOut[department].begin());
+            extrinsicOut[department] = extrinsicOutPre[department];
         } else {
-            transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_old.begin(), std::back_inserter(intermediate_extrinsic), std::plus<impalib_type>());
-            copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(), extrinsicOut[department].begin());
+            vector<impalib_type> weighted(extrinsicOutPre[department].size());
+            for (int i=0; i<weighted.size(); ++i) {
+                weighted[i] = alpha_*extrinsicOutOld_[department][i] + (1-alpha_)*extrinsicOutPre[department][i];
+            }
+            extrinsicOut[department] = weighted;
         }
-
-        copy(extrinsicOut[department].begin(), extrinsicOut[department].end(), extrinsicOutOld_[department].begin());
-    }
-
-    else {
-        copy(extrinsicOutPre[department].begin(), extrinsicOutPre[department].end(), extrinsicOut[department].begin());
-    }
+        extrinsicOutOld_[department] = extrinsicOut[department];
 }
