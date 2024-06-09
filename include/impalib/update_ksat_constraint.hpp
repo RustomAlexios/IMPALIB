@@ -19,8 +19,6 @@ class KsatConstraint {
     bool doFilter_;                             ///< filtering flag
     impalib_type alpha_;                        ///< filtering parameter
     vector<vector<impalib_type>> ksat2EqOldM_;  ///< messages from k-sat constraints to equality constraints before filtering
-    // impalib_type                 initial_forward_message_ = value_inf; ///< initial forward message of forward-backward algorithm
-    // impalib_type                 initial_backward_message_ = zero_value; ///< initial backward message of forward-backward algorithm
     int maxState_ = 1;
 
    public:

@@ -81,8 +81,7 @@ inline void InequalityConstraint::project_inequality_constraint_update(const vec
         // Update project to equality constraint messages
         for (int team = 0; team < nTeams_; team++)
         {
-            impalib_type minimumValue                         = zero_value;
-            minimumValue                                      = min(forward[team][1],
+            impalib_type minimumValue                                      = min(forward[team][1],
                                                                     backward[team + 1][0]);
             project2EqM[project_index][team] = -min(minimumValue, zero_value);
         }

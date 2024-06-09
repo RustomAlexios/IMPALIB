@@ -76,8 +76,7 @@ inline void OrInequalityConstraint::oric_to_project_eq_constraint_update(const v
         }
 
         for (int project = 0; project < nProj_; project++) {
-            impalib_type minimumValue = zero_value;
-            minimumValue = min(forward[project][1], backward[project + 1][0]);
+            impalib_type minimumValue = min(forward[project][1], backward[project + 1][0]);
             minimumValue = min(minimumValue, zero_value);
             oric2EqM[project][team] = team2OricM[team] - minimumValue;
             eq2ProjectM[project][team] = oric2EqM[project][team] + rewards[project][team];

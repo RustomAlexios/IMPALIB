@@ -199,9 +199,7 @@ inline void EqualityConstraint::edge_ec_to_degree_constraint_augmented_graph_upd
 inline void EqualityConstraint::flip_matrix(const vector<vector<impalib_type>> &mat, const vector<vector<int>> &connections, vector<vector<impalib_type>> &out) {
     // Iterate over each edge connection
     for (size_t l = 0; l < connections.size(); ++l) {
-        // Row index
         int row = connections[l][0];
-        // Column index
         int col = connections[l][1];
         out[l][row] = mat[l][col];
         out[l][col] = mat[l][row];

@@ -110,8 +110,7 @@ inline void DegreeConstraint::degree_constraint_to_edge_ec_update(const vector<v
         }
 
         for (int edge = 0; edge < second.size(); edge++) {
-            impalib_type minimumValue = zero_value;
-            minimumValue = min(forward[second[edge]], backward[second[edge] + 1]);
+            impalib_type minimumValue = min(forward[second[edge]], backward[second[edge] + 1]);
             deg2EqPreM[second[edge]][node] = -minimumValue;
         }
     }

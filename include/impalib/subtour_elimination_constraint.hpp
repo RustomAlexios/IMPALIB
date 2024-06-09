@@ -92,8 +92,7 @@ inline void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
         for (int edge = 0; edge < deltaS[subtour].size();
              edge++)
         {
-            impalib_type minimumValue = zero_value;
-            minimumValue =
+            impalib_type minimumValue =
                 min(forward[deltaS[subtour][edge]],
                     backward[deltaS[subtour][edge] + 1]);
             minimumValue = min(-minimumValue, zero_value);
