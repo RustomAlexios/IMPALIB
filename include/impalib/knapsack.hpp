@@ -31,7 +31,7 @@ class Knapsack {
 
     void team_to_knapsack_update(vector<vector<int>> &, vector<vector<impalib_type>> &, const vector<impalib_type> &, const vector<vector<impalib_type>> &,
                                  const vector<impalib_type> &) const;                                                    ///< calculate messages from teams to knapsack constraints
-    void process_extrinsic_output_department(int, int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering (if needed) on messages from departments to teams
+    void process_extrinsic_output_department(int, int, const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering (if needed) on messages from departments to teams
 
     Knapsack(int N_DEPARTMENTS, int N_TEAMS, bool FILT_FLAG, impalib_type ALPHA);  ///< constructor
 };
@@ -273,7 +273,7 @@ inline void Knapsack::team_to_knapsack_update(vector<vector<int>> &nonzeroWeight
  *
  */
 
-inline void Knapsack::process_extrinsic_output_department(const int department, const int iter, vector<vector<impalib_type>> &extrinsicOutPre, vector<vector<impalib_type>> &extrinsicOut) {
+inline void Knapsack::process_extrinsic_output_department(const int department, const int iter, const vector<vector<impalib_type>> &extrinsicOutPre, vector<vector<impalib_type>> &extrinsicOut) {
     if (!doFilter_) {
         extrinsicOut[department] = extrinsicOutPre[department];
         return;

@@ -26,7 +26,7 @@ class KsatConstraint {
    public:
     void ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &,
                                                const vector<vector<int>> &) const;                ///< update messages from k-sat constraints to equality constraints
-    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering
+    void process_filtering(int, const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering
 
     KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG,
                    impalib_type ALPHA);  ///< constructor
@@ -123,7 +123,7 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
  *
  */
 
-inline void KsatConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &ksat2EqPreM, vector<vector<impalib_type>> &ksat2EqM) {
+inline void KsatConstraint::process_filtering(const int iter, const vector<vector<impalib_type>> &ksat2EqPreM, vector<vector<impalib_type>> &ksat2EqM) {
     if (!doFilter_) {
         ksat2EqM = ksat2EqPreM;
         return;

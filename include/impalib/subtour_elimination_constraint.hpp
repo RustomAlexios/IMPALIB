@@ -26,7 +26,7 @@ public:
     vector<vector<impalib_type>> subtour2EqOldM_; ///< messages from subtour constraints to edge equality constraint before filtering
     void subtour_constraints_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
                                                vector<vector<impalib_type>> &) const; ///< calculate messages from subtour to edge equality constraints
-    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &); ///< perform filtering on messages from subtour to edge equality constraints
+    void process_filtering(int, const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &); ///< perform filtering on messages from subtour to edge equality constraints
 
     SubtourEliminationConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
                                  impalib_type ALPHA); ///< constructor
@@ -115,7 +115,7 @@ inline void SubtourEliminationConstraint::subtour_constraints_to_edge_ec_update(
  */
 
 inline void SubtourEliminationConstraint::process_filtering(const int                           iter,
-                                                     vector<vector<impalib_type>> &subtour2EqPreM,
+                                                     const vector<vector<impalib_type>> &subtour2EqPreM,
                                                      vector<vector<impalib_type>> &subtour2EqM,
                                                      const vector<vector<int>>          &deltaS)
 {
