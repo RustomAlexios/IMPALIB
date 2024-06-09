@@ -108,14 +108,11 @@ inline void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, imp
  *
  */
 
-inline OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : nDept_(N_DEPARTMENTS), nTeams_(N_TEAMS), nProj_(N_PROJECTS) {
-    extrinsicOut_.reserve(nTeams_);
-    extrinsicOut_.resize(nTeams_);
-    fill(extrinsicOut_.begin(), extrinsicOut_.begin() + nTeams_, zero_value);
-
-    intrinsicOut_.reserve(nProj_ * nTeams_);
-    intrinsicOut_.resize(nProj_ * nTeams_);
-    fill(intrinsicOut_.begin(), intrinsicOut_.begin() + nProj_ * nTeams_, zero_value);
+inline OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
+  : nDept_(N_DEPARTMENTS), nTeams_(N_TEAMS), nProj_(N_PROJECTS),
+    extrinsicOut_(N_TEAMS, zero_value),
+    intrinsicOut_(N_TEAMS*N_PROJECTS, zero_value)
+{
 };
 
 /**
