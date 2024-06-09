@@ -12,19 +12,18 @@
  * Represents a class for the ORIC for Knapsack-MWM problem
  */
 class OrInequalityConstraint {
-   private:
-    int nTeams_;          ///< number of teams
-    int nDept_;           ///< number of departments
-    int nProj_;           ///< number of projects
-    int maxStateIc_ = 1;  ///< maximum state of inequality constraint (>=1)
-
    public:
+    OrInequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  ///< constructor
     void oric_to_project_eq_constraint_update(const vector<vector<impalib_type>> &, const vector<impalib_type> &, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
                                               const vector<vector<impalib_type>> &) const;  ///< update messages from ORIC to project equality constraint
 
     static void oric_to_team_update(const vector<vector<impalib_type>> &, vector<impalib_type> &);  ///< calculate messages from team ORIC to team equality constraint
 
-    OrInequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  ///< constructor
+   private:
+    int nTeams_;          ///< number of teams
+    int nDept_;           ///< number of departments
+    int nProj_;           ///< number of projects
+    int maxStateIc_ = 1;  ///< maximum state of inequality constraint (>=1)
 };
 
 /**
