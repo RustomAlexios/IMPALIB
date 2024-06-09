@@ -67,8 +67,6 @@ inline Knapsack::Knapsack(const int N_DEPARTMENTS, const int N_TEAMS, const bool
 
 inline void Knapsack::forward(const int department, vector<vector<impalib_type>> &forward, const int capacity, vector<vector<int>> &nonzeroWeights, const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                               const vector<vector<int>> &weights, const vector<vector<impalib_type>> &team2KnapsackM) const {
-    vector<int>::iterator upper;
-
     // Initialize initial forward messages
     vector<impalib_type> forward0(capacity + 1, zero_value);
     fill(forward0.begin() + 1, forward0.end(), value_inf);
@@ -105,7 +103,7 @@ inline void Knapsack::forward(const int department, vector<vector<impalib_type>>
                         forward[j + 1] = forward0;
                     }
                 } else if (t + 1 < nonzeroWeights[department].back()) {
-                    upper = upper_bound(nonzeroWeights[department].begin(), nonzeroWeights[department].end(), t);
+                    auto upper = upper_bound(nonzeroWeights[department].begin(), nonzeroWeights[department].end(), t);
                     size_t next_index = upper - nonzeroWeights[department].begin();
                     for (int j = t + 1; j < nonzeroWeights[department][next_index]; j++) {
                         forward[j + 1] = forward0;
@@ -131,8 +129,6 @@ inline void Knapsack::forward(const int department, vector<vector<impalib_type>>
 
 inline void Knapsack::backward(const int department, vector<vector<impalib_type>> &backward, const int capacity, vector<vector<int>> &nonzeroWeights, const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
                                const vector<vector<int>> &weights, const vector<vector<impalib_type>> &team2KnapsackM) const {
-    vector<int>::iterator upper;
-
     // Initialize initial backward messages
     vector<impalib_type> backward0(capacity + 1, zero_value);
 
@@ -168,7 +164,7 @@ inline void Knapsack::backward(const int department, vector<vector<impalib_type>
                         backward[j] = backward0;
                     }
                 } else if (t - 1 > nonzeroWeights[department][0]) {
-                    upper = upper_bound(nonzeroWeights[department].begin(), nonzeroWeights[department].end(), t - 1);
+                    auto upper = upper_bound(nonzeroWeights[department].begin(), nonzeroWeights[department].end(), t - 1);
                     size_t next_index = upper - nonzeroWeights[department].begin();
                     for (int j = t - 1; j > nonzeroWeights[department][next_index - 1]; j--) {
                         backward[j] = backward0;
@@ -194,12 +190,9 @@ inline void Knapsack::backward(const int department, vector<vector<impalib_type>
 
 inline void Knapsack::extrinsic_output_department_lhs(const vector<vector<int>> &weights, const vector<vector<impalib_type>> &forward, const vector<vector<impalib_type>> &team2KnapsackM,
                                                       const int department, const vector<vector<impalib_type>> &backward, const int capacity, vector<vector<impalib_type>> &extrinsicOut) {
-    // Initialize metric paths
-    vector<impalib_type> metric_path_solid, metric_path_dash;
-
     for (int team = 0; team < weights[department].size(); team++) {
-        metric_path_dash.clear();
-        metric_path_solid.clear();
+        vector<impalib_type> metric_path_solid;
+        vector<impalib_type> metric_path_dash;
 
         // Check if the team has non-zero weight with the department
         if (weights[department][team] != 0) {
