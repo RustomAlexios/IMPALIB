@@ -176,7 +176,7 @@ class GraphicalModelTsp {
     vector<vector<impalib_type>> eq2SubtourM_;     ///< messages from edge equality constraint to subtour constraints
     void iterate_augmented_graph();                ///< function of IMPA on augmented graph
     void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);              ///< analysis of subtour constraints
-    void hard_decision_analysis(vector<vector<int>> &);                                                                         ///< function for hard decision solution on IMPA solution
+    vector<vector<int>> hard_decision_analysis();                                                                         ///< function for hard decision solution on IMPA solution
     static bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                   ///< function for post-processing loops
     vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                       ///< function for getting loops
     vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &);  ///< function for finding loops
@@ -283,10 +283,7 @@ inline void GraphicalModelTsp::iterate_relaxed_graph() {
     }
     outputs.extrinsic_output_edge_ec_relaxed_graph_update(deg2EqM_);
     outputs.intrinsic_output_edge_ec_update(inputs_.costs_);
-
-    // Perform hard decision analysis to select edges
-    vector<vector<int>> selected_edges;
-    hard_decision_analysis(selected_edges);
+    auto selected_edges = hard_decision_analysis();
 
     // Initialize graph for subtour elimination constraints analysis
     unordered_map<int, vector<int>> graph;
@@ -463,8 +460,7 @@ inline void GraphicalModelTsp::iterate_augmented_graph() {
     outputs.intrinsic_output_edge_ec_update(inputs_.costs_);
 
     selected_.clear();
-    vector<vector<int>> selected_edges;
-    hard_decision_analysis(selected_edges);
+    auto selected_edges = hard_decision_analysis();
 
     // Check for solution improvement
     if (!selectedOld_.empty()) {
@@ -510,10 +506,11 @@ inline void GraphicalModelTsp::iterate_augmented_graph() {
 /**
  * This will get the hard decision on edges by investigating the sign
  * IntrinsicOutputEdgeEc
- * @param[out] selected: activated edges after running IMPA
+ * @returns activated edges after running IMPA
  *
  */
-inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &selected) {
+inline vector<vector<int>> GraphicalModelTsp::hard_decision_analysis() {
+    vector<vector<int>> selected;
     hard_decision.resize(nEdgeVars_);
     fill(hard_decision.begin(), hard_decision.begin() + nEdgeVars_, numeric_limits<int>::max());
 
@@ -564,6 +561,7 @@ inline void GraphicalModelTsp::hard_decision_analysis(vector<vector<int>> &selec
 
     cout << "C++ cost_impa: " << cost_impa << '\n';
     tourCost_ = cost_impa;
+    return selected;
 }
 
 /**
@@ -809,7 +807,7 @@ inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector
         }
     }
 
-    return vector<int>();
+    return {};
 }
 
 /**
