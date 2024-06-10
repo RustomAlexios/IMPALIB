@@ -9,13 +9,12 @@
 #include "common.hpp"
 
 /**
- * Represents a class for the inequality constraint for the Knapsack-MWM problem
+ * Represents an inequality constraint for the Knapsack-MWM problem.
  */
 class InequalityConstraint {
    public:
-    InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  ///< constructor
-    vector<vector<impalib_type>> project_inequality_constraint_update(
-        const vector<vector<impalib_type>> &) const;                       ///< calculate messages from project inequality constraint to project equality constraint
+    InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);
+    vector<vector<impalib_type>> project_inequality_constraint_update(const vector<vector<impalib_type>> &) const;
 
    private:
     int nProj_;           ///< number of projects
@@ -24,16 +23,10 @@ class InequalityConstraint {
     int maxStateIc_ = 1;  ///< maximum value of project inequality constraint (<=1)
 };
 
-/**
- * Construct InequalityConstraint object for the Knapsack-MWM problem
- *
- *
- */
-
 inline InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS) : nProj_(N_PROJECTS), nTeams_(N_TEAMS), nDept_(N_DEPARTMENTS){};
 
 /**
- * Calculate messages from project inequality constraint to project equality constraint for the Knapsack-MWM problem
+ * Calculate messages from project inequality constraint to project equality constraint.
  *
  * @param[in] eq2ProjectM: messages from project equality constraint to project inequality constraint
  * @returns: messages from project inequality constraint to project equality constraint
