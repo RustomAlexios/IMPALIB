@@ -5,7 +5,19 @@ set(CMAKE_CXX_STANDARD 11)
 
 include(GNUInstallDirs)
 
-add_library(impalib INTERFACE)
+add_library(impalib INTERFACE
+        include/impalib/common.hpp
+        include/impalib/graphical_model.hpp
+        include/impalib/impalib.hpp
+        include/impalib/input_output.hpp
+        include/impalib/knapsack.hpp
+        include/impalib/project_inequality_constraint.hpp
+        include/impalib/subtour_elimination_constraint.hpp
+        include/impalib/update_degree_constraint.hpp
+        include/impalib/update_equality_constraint.hpp
+        include/impalib/update_ksat_constraint.hpp
+        include/impalib/update_or_inequality_constraint.hpp
+)
 target_include_directories(
         impalib INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
