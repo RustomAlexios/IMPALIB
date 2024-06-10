@@ -137,7 +137,7 @@ inline void GraphicalModelKcMwm::iterate(const int *pNON_ZERO_WEIGHT_INDICES_SIZ
 
         eqs_.team_eq_constraint_to_oric_update(extrinsicOut_, team2OricM_, modelInputs_.rewardsTeam_);
         orics_.oric_to_project_eq_constraint_update(eq2OricM_, team2OricM_, oric2EqM_, eq2ProjectM_, modelInputs_.rewardsProj_);
-        ineqs_.project_inequality_constraint_update(eq2ProjectM_, project2EqM_);
+        project2EqM_ = ineqs_.project_inequality_constraint_update(eq2ProjectM_);
         eqs_.project_eq_constraint_to_oric_update(project2EqM_, eq2OricM_, modelInputs_.rewardsProj_);
 
         orics_.oric_to_team_update(eq2OricM_, oric2PackageM_);

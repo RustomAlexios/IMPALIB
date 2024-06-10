@@ -39,7 +39,7 @@ void ut_project_ineq_constraint(string& ut_name){
             
             vector<vector<impalib_type>> project_to_eq_constraint_m(N_PROJECTS, vector<impalib_type>(N_TEAMS, zero_value));
 
-            projectIneqConstraint.project_inequality_constraint_update(eq_constraint_to_project_m, project_to_eq_constraint_m);
+            project_to_eq_constraint_m = projectIneqConstraint.project_inequality_constraint_update(eq_constraint_to_project_m);
 
             fstream file_output("../ut_results/project_to_eq_constraint_m_wrapper", ios::out | ios::binary | ios:: trunc);
             if (file_output.is_open()) {
