@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "impalib/impalib.hpp"
+#include "common.hpp"
 
 /**
  * Represents a class for the inequality constraint for the Knapsack-MWM problem
