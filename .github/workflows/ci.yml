@@ -10,10 +10,8 @@ jobs:
     name: Impalib Build Job
     runs-on: ubuntu-latest
     steps:
-      - name: Test
+      - name: Build Python Wrapper
         uses: actions/checkout@v4
       - run: |
             python3 -m pip install . -v
             echo "Project built successfully."
-          
-
