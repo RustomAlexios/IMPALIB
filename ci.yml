@@ -1,0 +1,14 @@
+# Simple Impalib Build Stage GitHub Workflow
+# Version: 0.1.0
+
+name: Impalib Build
+
+on: push
+
+jobs:
+  build:
+    name: Impalib Build Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        run: echo "Hello World"
