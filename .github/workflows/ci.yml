@@ -11,4 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test
-        run: echo "Hello World"
+        uses: actions/checkout@v4
+      - run: |
+            python3 -m pip install . -v
+            echo "Project built successfully."
+          
+
