@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.18...3.22)
 
 project(impalib VERSION "0.1.0" LANGUAGES CXX)
-
-#add_compile_options(-std=c++11) #added for Mac recognition
+set(CMAKE_CXX_STANDARD 11)
 
 include(GNUInstallDirs)
 

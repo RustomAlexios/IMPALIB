@@ -25,12 +25,12 @@ private:
     vector<vector<impalib_type>> stage_backward_messages; ///< backward messages of trellis representation
 
 public:
-    void degree_constraint_to_edge_ec_update(vector<vector<impalib_type>> &, vector<vector<int>> &,
-                                             vector<vector<impalib_type>> &); ///< calculate messages from degree constraint to edge equality constraint
+    void degree_constraint_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
+                                             vector<vector<impalib_type>> &) const; ///< calculate messages from degree constraint to edge equality constraint
     void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< process filtering on messages from degree constraint to edge equality constraint
 
-    DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
-                     const impalib_type ALPHA); ///< constructor
+    DegreeConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
+                     impalib_type ALPHA); ///< constructor
 };
 
 /**
@@ -40,21 +40,14 @@ public:
  * @param[in] NUM_EDGE_VARIABLES: number of connections between nodes
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numNodes_: NUM_NODES
- * @param[out] numEdgeVariables_: NUM_EDGE_VARIABLES
  */
 
-DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
+inline DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool FILTERING_FLAG,
                                    const impalib_type ALPHA)
     : filteringFlag_(FILTERING_FLAG), alpha_(ALPHA), numNodes_(NUM_NODES), numEdgeVariables_(NUM_EDGE_VARIABLES)
 {
 
-    // Reserve space for old degree constraint to equality constraint messages
     degreeConstraint2EqConstraintOld.reserve(numEdgeVariables_);
-
-    // Initialize old degree constraint to equality constraint messages
     for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
     {
         degreeConstraint2EqConstraintOld.push_back(vector<impalib_type>(numNodes_, zero_value));
@@ -74,21 +67,18 @@ DegreeConstraint::DegreeConstraint(const int NUM_NODES, const int NUM_EDGE_VARIA
  * 
  */
 
-void DegreeConstraint::degree_constraint_to_edge_ec_update(
-    vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM, vector<vector<int>> &rEdgeConnections,
-    vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM)
+inline void DegreeConstraint::degree_constraint_to_edge_ec_update(
+    const vector<vector<impalib_type>> &rEdgeEc2DegreeConstraintM, const vector<vector<int>> &rEdgeConnections,
+    vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM) const
 {
-    // Initialize vectors to store forward and backward messages
     vector<impalib_type> stage_forward_messages(numEdgeVariables_ + 1, zero_value);
     vector<impalib_type> stage_backward_messages(numEdgeVariables_ + 1, zero_value);
 
-    // Iterate over each node
     for (int node_index = 0; node_index < numNodes_; node_index++)
     {
-        // Initialize vectors to store connections of the current node
         vector<int> connections_first, connections_second;
 
-        // Populate connections_first and connections_second with edge indices based on the current node
+        // Populate connections_first and connections_second with edge indices
         for (int i = 0; i < rEdgeConnections.size(); i++)
         {
             if (node_index == rEdgeConnections[i][0])
@@ -122,7 +112,6 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
                     rEdgeEc2DegreeConstraintM[connections_first[stage]][node_index]);
         }
 
-        // Update rDegreeConstraint2EqConstraintDummyM for connections_first
         for (int index_edge_variable = 0; index_edge_variable < connections_first.size(); index_edge_variable++)
         {
             impalib_type minimumValue = zero_value;
@@ -131,11 +120,9 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
             rDegreeConstraint2EqConstraintDummyM[connections_first[index_edge_variable]][node_index] = -minimumValue;
         }
 
-        // Reset stage_forward_messages and stage_backward_messages
         fill(stage_forward_messages.begin(), stage_forward_messages.end(), zero_value);
         fill(stage_backward_messages.begin(), stage_backward_messages.end(), zero_value);
 
-        // Similar calculations for connections_second
         // Calculate forward messages
         stage_forward_messages[connections_second[0]] = initial_forward_message_;
 
@@ -157,7 +144,6 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
                     rEdgeEc2DegreeConstraintM[connections_second[stage]][node_index]);
         }
 
-        // Update rDegreeConstraint2EqConstraintDummyM for connections_second
         for (int index_edge_variable = 0; index_edge_variable < connections_second.size(); index_edge_variable++)
         {
             impalib_type minimumValue = zero_value;
@@ -177,13 +163,11 @@ void DegreeConstraint::degree_constraint_to_edge_ec_update(
  * 
  */
 
-void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
+inline void DegreeConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintDummyM,
                                          vector<vector<impalib_type>> &rDegreeConstraint2EqConstraintM)
 {
-    // Iterate over each edge variable
     for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++)
     {
-        // Check if filtering is enabled and alpha is not zero
         if ((filteringFlag_) and (alpha_ != zero_value))
         {
             // Calculate weighted values for current and old messages
@@ -192,10 +176,10 @@ void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> 
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
             transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(),
-                      [w_2](impalib_type &c) { return c * w_2; });
+                      [w_2](const impalib_type &c) { return c * w_2; });
             transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(),
-                      [w_1](impalib_type &c) { return c * w_1; });
-            // Update messages based on iteration
+                      [w_1](const impalib_type &c) { return c * w_1; });
+
             if (iter == 0)
             {
                 copy(intermediate_dummy.begin(), intermediate_dummy.end(),
@@ -208,13 +192,11 @@ void DegreeConstraint::process_filtering(int iter, vector<vector<impalib_type>> 
                 copy(intermediate_extrinsic.begin(), intermediate_extrinsic.end(),
                      rDegreeConstraint2EqConstraintM[edge_variable_index].begin());
             }
-            // Update old messages with current messages
             copy(rDegreeConstraint2EqConstraintM[edge_variable_index].begin(),
                  rDegreeConstraint2EqConstraintM[edge_variable_index].end(),
                  degreeConstraint2EqConstraintOld[edge_variable_index].begin());
         }
 
-        // If filtering is not enabled or alpha is zero, copy dummy messages to current messages
         else
         {
             copy(rDegreeConstraint2EqConstraintDummyM[edge_variable_index].begin(),
