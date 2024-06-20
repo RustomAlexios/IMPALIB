@@ -24,8 +24,8 @@ class KsatConstraint {
     int maxState_ = 1; 
 
    public:
-    void ksat_constraint_to_variable_ec_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, vector<vector<int>> &,
-                                               vector<vector<int>> &);                            ///< update messages from k-sat constraints to equality constraints
+    void ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &,
+                                               const vector<vector<int>> &) const;                            ///< update messages from k-sat constraints to equality constraints
     void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering
 
     KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG,
@@ -40,14 +40,9 @@ class KsatConstraint {
  * @param[in] K_VARIABLE: number of variables per constraint
  * @param[in] FILTERING_FLAG: filtering on or off
  * @param[in] ALPHA: filtering parameter value (between 0 and 1)
- * @param[out] filteringFlag_: FILTERING_FLAG
- * @param[out] alpha_: ALPHA
- * @param[out] numVariables_: NUM_VARIABLES
- * @param[out] numConstraints_: NUM_CONSTRAINTS
- * @param[out] kVariable_: K_VARIABLE
  */
 
-KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG, impalib_type ALPHA)
+inline KsatConstraint::KsatConstraint(const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA)
     : filteringFlag_(FILTERING_FLAG),
       alpha_(ALPHA),
       numVariables_(NUM_VARIABLES),
@@ -65,8 +60,8 @@ KsatConstraint::KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VAR
  *
  */
 
-void KsatConstraint::ksat_constraint_to_variable_ec_update(vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_,
-                                                           vector<vector<int>> &rConstraintsConnections, vector<vector<int>> &rConstraintsConnectionsType) {
+inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_,
+                                                           const vector<vector<int>> &rConstraintsConnections, const vector<vector<int>> &rConstraintsConnectionsType) const {
 
     for(auto& row : rKsatConstraint2EqConstraintDummyM_) {
         row.assign(row.size(), zero_value);
@@ -141,14 +136,14 @@ void KsatConstraint::ksat_constraint_to_variable_ec_update(vector<vector<impalib
  *
  */
 
-void KsatConstraint::process_filtering(int iter, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_) {
+inline void KsatConstraint::process_filtering(const int iter, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintM_) {
     for (int c = 0; c < numConstraints_; c++) {
         if ((filteringFlag_) and (alpha_ != zero_value)) {
             vector<impalib_type> intermediate_dummy(rKsatConstraint2EqConstraintDummyM_[c]), intermediate_old(ksatConstraint2EqConstraintOld[c]), intermediate_extrinsic;
 
             impalib_type w_1 = alpha_, w_2 = 1 - alpha_;
-            transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(), [w_2](impalib_type &c) { return c * w_2; });
-            transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(), [w_1](impalib_type &c) { return c * w_1; });
+            transform(intermediate_dummy.begin(), intermediate_dummy.end(), intermediate_dummy.begin(), [w_2](const impalib_type &c) { return c * w_2; });
+            transform(intermediate_old.begin(), intermediate_old.end(), intermediate_old.begin(), [w_1](const impalib_type &c) { return c * w_1; });
 
             if (iter == 0) {
                 copy(intermediate_dummy.begin(), intermediate_dummy.end(), rKsatConstraint2EqConstraintM_[c].begin());

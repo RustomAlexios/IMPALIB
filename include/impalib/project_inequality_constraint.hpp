@@ -20,20 +20,17 @@ private:
     int maxStateIc_ = 1; ///< maximum value of project inequality constraint (<=1)
 
 public:
-    void project_inequality_constraint_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &); ///< calculate messages from project inequality constraint to project equality constraint
-    InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS); ///< constructor
+    void project_inequality_constraint_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &) const; ///< calculate messages from project inequality constraint to project equality constraint
+    InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS); ///< constructor
 };
 
 /**
  * Construct InequalityConstraint object for the Knapsack-MWM problem
  *
- * @param[out] numProjects_: N_PROJECTS
- * @param[out] numTeams_: N_TEAMS
- * @param[out] numDepartments_: N_DEPARTMENTS
  * 
  */
 
-InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
+inline InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
     : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){
                                                     };
 
@@ -45,17 +42,15 @@ InequalityConstraint::InequalityConstraint(const int N_DEPARTMENTS, const int N_
  * 
  */
 
-void InequalityConstraint::project_inequality_constraint_update(vector<vector<impalib_type>> &rEqConstraint2ProjectM,
-                                                                vector<vector<impalib_type>> &rProject2EqConstraintM)
+inline void InequalityConstraint::project_inequality_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2ProjectM,
+                                                                vector<vector<impalib_type>> &rProject2EqConstraintM) const
 {
 
-    // Define containers for forward and backward messages
     vector<vector<impalib_type>> stage_forward_messages_project_EC(numTeams_ + 1,
                                                                    vector<impalib_type>(maxStateIc_ + 1, zero_value));
     vector<vector<impalib_type>> stage_backward_messages_project_EC(numTeams_ + 1,
                                                                     vector<impalib_type>(maxStateIc_ + 1, zero_value));
 
-    // Iterate over projects
     for (int project_index = 0; project_index < rProject2EqConstraintM.size(); project_index++)
     {
         // Initialize forward messages
@@ -63,7 +58,6 @@ void InequalityConstraint::project_inequality_constraint_update(vector<vector<im
             initial_backward_messages(maxStateIc_ + 1, zero_value);
         fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
 
-        // Calculate forward messages
         stage_forward_messages_project_EC[0] = initial_forward_messages;
         
         for (int stage = 0; stage < numTeams_; stage++)
@@ -74,7 +68,6 @@ void InequalityConstraint::project_inequality_constraint_update(vector<vector<im
                     stage_forward_messages_project_EC[stage][0] + rEqConstraint2ProjectM[project_index][stage]);
         }
 
-        // Calculate backward messages
         stage_backward_messages_project_EC[numTeams_] = initial_backward_messages;
 
         for (int stage = numTeams_ - 1; stage >= 0; stage--)
