@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.18...3.22)
 
 project(impalib VERSION "0.1.0" LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 11)
 
 include(GNUInstallDirs)
 
@@ -9,6 +8,7 @@ add_library(impalib INTERFACE)
 target_include_directories(
         impalib INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_compile_features(impalib INTERFACE cxx_std_11)
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
