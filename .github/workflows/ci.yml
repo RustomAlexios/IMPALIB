@@ -8,10 +8,17 @@ on: push
 jobs:
   build:
     name: Impalib Build Job
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
     steps:
-      - name: Build Python Wrapper
-        uses: actions/checkout@v4
-      - run: |
-            python3 -m pip install . -v
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.10'
+    - name: Build Python Wrapper
+      run: |
+            python3 -m pip install --user . -v
             echo "Project built successfully."
