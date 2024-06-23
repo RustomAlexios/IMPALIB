@@ -69,11 +69,11 @@ Various constraints are implemented:
    * `augmFlag`: whether to solve the augmented TSP or relaxed one
    * `lkhSolFlag`: Run LKH algorithm to find a tour
    * `resetFlag`: whether to reset messages at each augmentation step or not
-   * `randomTestFlag`: whether to run IMPA on a graphical model with random cost values or from a pre-generated input files
+   * `randomTestFlag`: whether to run IMPA on a graphical model with random cost values or from a pre-generated input file
    * `inputPath`: If randomTestFlag is not set to True, specify the inputs path
    * `maxCount`: Maximum count of invalid configurations before stopping the IMPA. This will allow IMPA to exit when singular solutions are encountered consecutively
    * `maxAugmCount`: Maximum number of augmentation steps. This will allow IMPA to exit when no tour was found up to a certain number of augmentation steps
-   * `KOPTFlag`: whether to perform K-opt algorithm on the obtained tour (only $2$-opt and $3$-opt are investigated to avoid the curse of dimensionality)
+   * `KOPTFlag`: whether to perform $K$-opt algorithm on the obtained tour (only $2$-opt and $3$-opt are investigated to avoid the curse of dimensionality)
 4. Variables related to *Application 3*:
    * `nVariables`: Number of variables to select from to build the constraints
    * `nConstraints`: Number of constraints in the formula
@@ -116,7 +116,7 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 ![graphicalModel](./img/demoGraphicalModel.png)-->
 
 * To run any of the above demos:
-  * Navigate to: ``IMPALIB/examples/KcMwm`` or ``IMPALIB/examples/Tsp``
+  * Navigate to: ``IMPALIB/examples/KcMwm`` or ``IMPALIB/examples/Tsp`` or ``IMPALIB/examples/Ksat``
   * Run: ``cmake -B build``
   * Run: ``cmake --build build``
   * Run: ``cd build``
