@@ -104,9 +104,9 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
   ```
 
 * Demo code for each of the applications can be found in the following files:
-  * [Application $1$](examples/KcMwm/demo.cpp)
-  * [Application $2$](examples/Tsp/demo.cpp)
-  * [Application $3$](examples/Ksat/demo.cpp)
+  * [Application 1](examples/KcMwm/demo.cpp)
+  * [Application 2](examples/Tsp/demo.cpp)
+  * [Application 3](examples/Ksat/demo.cpp)
 
 <!--Graphical Model of Application $1$:
 
@@ -126,7 +126,7 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 
 To run pure code using sample datasets:
 
-* *Application $1$*:
+* *Application 1*:
   * Navigate to ``IMPALIB/test/python_kc_mwm/src``
   * Run:
 
@@ -134,7 +134,7 @@ To run pure code using sample datasets:
         python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
     ```
 
-* *Application $2$*:
+* *Application 2*:
   * Navigate to ``IMPALIB/test/python_tsp/src``
   * Run:
 
@@ -142,7 +142,7 @@ To run pure code using sample datasets:
         python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True
     ```
 
-* *Application $3$*:
+* *Application 3*:
   * Navigate to ``IMPALIB/test/python_ksat/src``
   * Run:
 
@@ -159,14 +159,14 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
   ```
 
 * Navigate to ``IMPALIB/src/impa``
-* For *Application $1$*:
+* For *Application 1*:
   * To run wrapper code using sample datasets, Run:
   
     ```bash
         python3 main_kc_mwm.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001
     ```
 
-* For *Application $2$*:
+* For *Application 2*:
   * To run wrapper code using sample datasets:
 
     ```bash
@@ -179,7 +179,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
         python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True --lkhSolFlag=True --maxAugmCount=20
     ```
 
-* For *Application $3$*:
+* For *Application 3*:
   * To run wrapper code using sample datasets:
 
     ```bash
