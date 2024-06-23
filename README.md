@@ -22,7 +22,7 @@ Would you like to solve optimization problems using message-passing algorithms? 
   2. Pure Python code
   3. C++ code with a Python wrapper
 * Is easy to use and integrate with existing code
-* Is self-contained and depends only [cnpy](https://github.com/rogersce/cnpy) library for unit testing - another header-only library which is used for reading and writing `numpy` files
+* Is self-contained and depends only on [cnpy](https://github.com/rogersce/cnpy) library for unit testing - another header-only library which is used for reading and writing `numpy` files
 * Supports inference for optimization problems with various possible constraints
 
 ## **Applications**
