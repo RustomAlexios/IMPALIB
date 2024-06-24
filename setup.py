@@ -15,7 +15,7 @@ setup(
     license="MIT",
     package_dir={"": "src"},
     packages=['impa'],
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     install_requires=["bitstring", "tqdm"],
     scripts=["src/impa/main_kc_mwm.py"]
 )
