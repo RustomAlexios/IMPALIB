@@ -6,7 +6,10 @@ name: Impalib Build
 on:
   pull_request:
     types:
-      - opened 
+      - opened
+      - synchronize
+      - reopened
+      - closed
 
 jobs:
   build:
