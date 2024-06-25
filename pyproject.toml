@@ -47,7 +47,7 @@ target-version = "py39"
 # Ruff doesn't enable pycodestyle warnings (`W`) or McCabe complexity (`C901`) by default.
 # NOTE: Ignored lint settings should be removed in the future
 select = ["E4", "E7", "E9", "F"]
-ignore = ["E402", "E741", "F401", "F403", "F405", "F841", "F811"]
+ignore = ["E402", "F401", "F403", "F405", "F841"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
