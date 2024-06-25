@@ -456,8 +456,7 @@ class GraphicalModel:
                 delta_S_indices = [
                     i
                     for i, connection in enumerate(self.edge_connections)
-                    if not tuple(connection)
-                    in list(
+                    if tuple(connection) not in list(
                         itertools.permutations(
                             sublist,
                             2,

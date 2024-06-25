@@ -5,7 +5,6 @@
 #  https://opensource.org/licenses/MIT)
           
 import numpy as np
-import random
 import os
 import pickle as pkl
 from pysat.solvers import Minisat22

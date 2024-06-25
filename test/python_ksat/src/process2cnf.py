@@ -1,7 +1,4 @@
-import numpy as np
 import pickle as pkl
-import matplotlib.pyplot as plt
-import re
 
 def create_cnf_file(constraints_connections, constraints_connections_type, num_variables, num_constraints, cnf_file):
     

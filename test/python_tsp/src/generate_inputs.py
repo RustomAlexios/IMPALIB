@@ -6,7 +6,6 @@
 
 # from environmentModule import *
 import numpy as np
-import random
 import os
 import pickle as pkl
 
