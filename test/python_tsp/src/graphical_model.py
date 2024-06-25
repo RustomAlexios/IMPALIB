@@ -381,7 +381,7 @@ class GraphicalModel:
             ):
                 if list_2 is None:
                     list_indices_to_remove.append(j)
-                elif any(double_list_1[l : l + len(list_2)] == list_2 for l in range(len(list_1))):
+                elif any(double_list_1[ele : ele + len(list_2)] == list_2 for ele in range(len(list_1))):
                     list_indices_to_remove.append(j)
 
         new_loops_list = [element for i, element in enumerate(loops_list) if i not in list_indices_to_remove]
@@ -404,7 +404,7 @@ class GraphicalModel:
             ) in enumerate(open_paths_dummy):
                 size = len(element)
                 for (
-                    l,
+                    ele,
                     other_element,
                 ) in enumerate(open_paths_dummy[:index] + open_paths_dummy[index + 1 :]):
                     if len(other_element) > size and element in [other_element[i : i + size] for i in range(len(other_element) - size + 1)]:
