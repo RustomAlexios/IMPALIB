@@ -1,6 +1,6 @@
 # **IMPALIB**
 
-## Table of Contents
+## *Table of Contents*
 
 * [Introduction](#introduction)
 * [Applications](#applications)
@@ -53,7 +53,7 @@ Various constraints are implemented:
 6. Subtour Elimination constraints prevent the existence of smaller loops or subtours within potential solutions
 7. K-SAT constraint ensures that a constraints is satisfied by the constituent variables (solid or dashed connections)
 
-### **Code Parameters**
+### Code Parameters
 
 1. Common variables to *Applications 1, 2, & 3*:
    * `nITER`: Number of iterations of the IMPA
@@ -91,7 +91,7 @@ There are three different means of implementing **IMPALIB**:
   2. Using pure Python code (relatively slow)
   3. Using C++ code with a Python wrapper (relatively fast)
 
-### **1. Header-Only C++ Library**
+### *1. Header-Only C++ Library*
 
 The headers in the `include` directory can be directly copied to your project.
 We assume in the code samples below you've copied them to an `impalib` subdirectory of one of your project's include directories
@@ -124,7 +124,7 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
       ./demo
     ```
 
-### **2. Pure Python code**
+### *2. Pure Python code*
 
 To run pure code using sample datasets:
 
@@ -149,7 +149,7 @@ To run pure code using sample datasets:
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
     ```
 
-### **3. C++ Code with a Python wrapper**
+### *3. C++ Code with a Python wrapper*
 
 To compile the C++ library and install the Python wrapper, navigate to the project root and use:
 
@@ -191,8 +191,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
     ```
 
-**Note**: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory.
-This will be fixed in a future version.
+**Note**: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory. This will be fixed in a future version.
 
 ## **Requirements and Installation**
 
