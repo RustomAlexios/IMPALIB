@@ -57,10 +57,10 @@ jobs:
       with: 
         python-version: '3.9'
         cache: 'pip'
+        cache-dependency-path: setup.py
     - name: Run Header-Only Demos
       run: |
             pip install -e .
-            #python3 -m pip install . -v
             cd src/impa && python3 main_kc_mwm.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001
           # cd include/examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo 
           # cd test/python_kc_mwm/src && python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
