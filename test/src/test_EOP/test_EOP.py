@@ -1,5 +1,4 @@
 import numpy as np
-import os
 np.set_printoptions(threshold=1)
 np.set_printoptions(linewidth=np.inf)
 

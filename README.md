@@ -1,11 +1,10 @@
 # **IMPALIB**
 
-## Table of Contents
+## *Table of Contents*
 
 * [Introduction](#introduction)
 * [Applications](#applications)
 * [Supported Constraints](#supported-constraints)
-* [Code Parameters](#code-parameters)
 * [Usage](#usage)
 * [Requirements and Installation](#requirements-and-installation)
 * [Unit Testing](#unit-testing)
@@ -54,7 +53,7 @@ Various constraints are implemented:
 6. Subtour Elimination constraints prevent the existence of smaller loops or subtours within potential solutions
 7. K-SAT constraint ensures that a constraints is satisfied by the constituent variables (solid or dashed connections)
 
-### **Code Parameters**
+### Code Parameters
 
 1. Common variables to *Applications 1, 2, & 3*:
    * `nITER`: Number of iterations of the IMPA
@@ -86,13 +85,13 @@ Various constraints are implemented:
 
 ## **Usage**
 
-There are three different ways for implementing **IMPALIB**:
+There are three different means of implementing **IMPALIB**:
 
   1. Using a header-only C++ library
-  2. Using a pure Python code which is relatively slow
-  3. Using a C++ code with a Python wrapper which is relatively fast
+  2. Using pure Python code (relatively slow)
+  3. Using C++ code with a Python wrapper (relatively fast)
 
-### **1. Header-Only C++ Library**
+### *1. Header-Only C++ Library*
 
 The headers in the `include` directory can be directly copied to your project.
 We assume in the code samples below you've copied them to an `impalib` subdirectory of one of your project's include directories
@@ -116,41 +115,41 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 ![graphicalModel](./img/demoGraphicalModel.png)-->
 
 * To run any of the above demos:
-  * Navigate to: ``IMPALIB/examples/KcMwm`` or ``IMPALIB/examples/Tsp`` or ``IMPALIB/examples/Ksat``
-  * Run: ``cmake -B build``
-  * Run: ``cmake --build build``
-  * Run: ``cd build``
-  * Run: ``./demo``
+  * Navigate to: [`/examples/KcMwm`](/examples/KcMwm) or [`/examples/Tsp`](/examples/Tsp) or [`/examples/Ksat`](/examples/Ksat)
+  
+    ```bash
+      cmake -B build
+      cmake --build build
+      cd build
+      ./demo
+    ```
 
-### **2. Pure Python code**
+### *2. Pure Python code*
 
 To run pure code using sample datasets:
 
 * *Application 1*:
-  * Navigate to ``IMPALIB/test/python_kc_mwm/src``
-  * Run:
+  * Navigate to [`test/python_kc_mwm/src`](test/python_kc_mwm/src) and run:
 
     ```bash
         python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
     ```
 
 * *Application 2*:
-  * Navigate to ``IMPALIB/test/python_tsp/src``
-  * Run:
+  * Navigate to [`test/python_tsp/src`](test/python_tsp/src) and run:
 
     ```bash
         python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True
     ```
 
 * *Application 3*:
-  * Navigate to ``IMPALIB/test/python_ksat/src``
-  * Run:
+  * Navigate to [`test/python_ksat/src`](test/python_ksat/src) and run:
 
     ```bash
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
     ```
 
-### **3. C++ Code with a Python wrapper**
+### *3. C++ Code with a Python wrapper*
 
 To compile the C++ library and install the Python wrapper, navigate to the project root and use:
 
@@ -192,8 +191,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
     ```
 
-**Note**: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory.
-This will be fixed in a future version.
+**Note**: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory. This will be fixed in a future version.
 
 ## **Requirements and Installation**
 
