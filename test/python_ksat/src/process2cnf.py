@@ -1,7 +1,4 @@
-import numpy as np
 import pickle as pkl
-import matplotlib.pyplot as plt
-import re
 
 def create_cnf_file(constraints_connections, constraints_connections_type, num_variables, num_constraints, cnf_file):
     
@@ -23,7 +20,7 @@ if __name__ == "__main__":
     n_samples = 500
     var = 10
 
-    folder_inputs = f"../../../data/inputs_ksat_{type}_var_{var}_samples_{n_samples}"
+    folder_inputs = f"../../../src/data/inputs_ksat_{type}_var_{var}_samples_{n_samples}"
     
     for test_file in range(n_samples):
         

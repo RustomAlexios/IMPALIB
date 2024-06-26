@@ -16,7 +16,7 @@ from ut_utils import *
 def ut_model_graph(ut_name, n_variables, n_constraints, filt_flag, alpha, threshold, n_iter, k_variable):
     
     print("-------")
-    print("Python Pure");
+    print("Python Pure")
     
     NUM_VARIABLES = n_variables
     NUM_CONSTRAINTS = n_constraints
