@@ -107,13 +107,6 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
   * [Application 2](examples/Tsp/demo.cpp)
   * [Application 3](examples/Ksat/demo.cpp)
 
-<!--Graphical Model of Application $1$:
-
-- reward_team and reward_project are represented by arrows on the left and right equality constraints, respectively.
-- teams_weights_per_department are represented by red (weight $=2$) or blue (weight $=1$) edges.
-
-![graphicalModel](./img/demoGraphicalModel.png)-->
-
 * To run any of the above demos:
   * Navigate to: [`/examples/KcMwm`](/examples/KcMwm) or [`/examples/Tsp`](/examples/Tsp) or [`/examples/Ksat`](/examples/Ksat)
   
