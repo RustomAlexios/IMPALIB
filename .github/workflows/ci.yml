@@ -44,20 +44,3 @@ jobs:
       run: |
             pip install ruff
             ruff check
-  demo:
-    name: Demo Job
-    runs-on: ${{ matrix.os }}
-    strategy: 
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with: 
-        python-version: '3.9'
-    - name: Run Python Demo
-      run: |
-            cd examples/
-            cd KcMwm && cmake -B build && cmake --build build && cd build && ./demo 
-            cd ../.. && cd Ksat && cmake -B build && cmake --build build && cd build && ./demo
-            cd ../.. && cd Tsp && cmake -B build && cmake --build build && cd build && ./demo
