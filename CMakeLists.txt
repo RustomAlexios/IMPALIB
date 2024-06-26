@@ -57,5 +57,5 @@ else()
         target_include_directories(impalib_unit_tests_ksat PRIVATE test/include test/external/cnpy)
 
         file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-        file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+        file(COPY src/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
