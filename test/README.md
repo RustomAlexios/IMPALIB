@@ -25,7 +25,7 @@
   - Step $3$:
     - Navigate to `test/include/`:
 
-    - If class $C$ file exists, open `ut_class.hpp`. If class $C$ file does not exist, create a new file `ut_class.hpp`, and make sure to add `#include "impalib/ut_class.hpp` in `impalib_unit_tests.hpp`.
+    - If class $C$ file exists, open `ut_class.hpp`. If class $C$ file does not exist, create a new file `ut_class.hpp`, and make sure to add `#include "impalib/ut_class.hpp"` in `impalib_unit_tests.hpp`.
 
     - Add a unit test function `ut_function()` in `ut_class.hpp`. Note that `ut_function()` takes specific arguments, and will generate C++ output files.
 
