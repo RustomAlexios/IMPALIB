@@ -103,19 +103,20 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
   ```
 
 * Demo code for each of the applications can be found in the following files:
-  * [Application 1](examples/KcMwm/demo.cpp)
-  * [Application 2](examples/Tsp/demo.cpp)
-  * [Application 3](examples/Ksat/demo.cpp)
+  * [Application 1](include/examples/KcMwm/demo.cpp)
+  * [Application 2](include/examples/Tsp/demo.cpp)
+  * [Application 3](include/examples/Ksat/demo.cpp)
 
 * To run any of the above demos:
-  * Navigate to: [`/examples/KcMwm`](/examples/KcMwm) or [`/examples/Tsp`](/examples/Tsp) or [`/examples/Ksat`](/examples/Ksat)
   
-    ```bash
-      cmake -B build
-      cmake --build build
-      cd build
-      ./demo
-    ```
+  ```bash
+    cd include/examples
+    cd KcMwm (OR) cd Tsp (OR) cd Ksat
+    cmake -B build
+    cmake --build build
+    cd build
+    ./demo
+  ```
 
 ### *2. Pure Python code*
 
@@ -183,7 +184,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
     ```
 
-    > ***NOTE***: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory. This will be fixed in a future version.
+    > ***NOTE***: Currently this option looks for a relevant sample dataset in the [`data`](src/data/) directory, inside the `src` directory. This will be fixed in a future version.
 
 ## **Requirements and Installation**
 
