@@ -44,3 +44,17 @@ jobs:
       run: |
             pip install ruff
             ruff check
+
+  demo:
+    name: Demo Job
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run Header-Only Demos
+      run: |
+            cd include/examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo 
+          # cd ../.. && cd Ksat && cmake -B build && cmake --build build && cd build && ./demo
+          # cd ../.. && cd Tsp && cmake -B build && cmake --build build && cd build && ./demo
