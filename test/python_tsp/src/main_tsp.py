@@ -136,8 +136,8 @@ if __name__ == "__main__":
         THRESHOLD,
         RANDOM_TEST_FLAG,
     )
-    folder_inputs = "../../../data/inputs_fixed_1000_nNodes15"
-    ModelIMPA.folder_outputs = f"../../../data/outputs_fixed_1000_alpha{formatted_alpha}"
+    folder_inputs = "../../../src/data/inputs_fixed_1000_nNodes15"
+    ModelIMPA.folder_outputs = f"../../../src/data/outputs_fixed_1000_alpha{formatted_alpha}"
     ModelIMPA.save_flag = SAVE_FLAG
 
     if not (os.path.exists(f"{ModelIMPA.folder_outputs}")) and ModelIMPA.save_flag:
