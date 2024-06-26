@@ -63,18 +63,18 @@ for i in range(0, samples):
         edge_connections,
     ]
 
-    # if not(os.path.isdir(f'../../../data/inputs_{type}_{samples}_nNodes{num_nodes}')):
-    #        os.makedirs(f'../../../data/inputs_{type}_{samples}_nNodes{num_nodes}')
+    # if not(os.path.isdir(f'../../../src/data/inputs_{type}_{samples}_nNodes{num_nodes}')):
+    #        os.makedirs(f'../../../src/data/inputs_{type}_{samples}_nNodes{num_nodes}')
 
-    # with open(f'../../../data/inputs_{type}_{samples}_nNodes{num_nodes}/inputs_set{str(i)}.pkl', 'wb') as f:
+    # with open(f'../../../src/data/inputs_{type}_{samples}_nNodes{num_nodes}/inputs_set{str(i)}.pkl', 'wb') as f:
     #    print(f'Test file: {i} & Symmetric Flag: {symmetric_flag}')
     #    pkl.dump(input, f)
 
-    if not (os.path.isdir(f"../../../data/inputs_{type}_{samples}")):
-        os.makedirs(f"../../../data/inputs_{type}_{samples}")
+    if not (os.path.isdir(f"../../../src/data/inputs_{type}_{samples}")):
+        os.makedirs(f"../../../src/data/inputs_{type}_{samples}")
 
     with open(
-        f"../../../data/inputs_{type}_{samples}/inputs_set{str(i)}.pkl",
+        f"../../../src/data/inputs_{type}_{samples}/inputs_set{str(i)}.pkl",
         "wb",
     ) as f:
         print(f"Test file: {i} & num_nodes: {num_nodes} & Symmetric Flag: {symmetric_flag}")

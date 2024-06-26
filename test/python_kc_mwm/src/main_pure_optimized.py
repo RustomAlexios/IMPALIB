@@ -19,8 +19,8 @@ if __name__ == "__main__":
 
     targs = 500
     # folder_inputs = '../targ_vary/inputs_targs_'+str(targs)
-    # folder_inputs = '../../../data/inputs_random_params_1000'
-    folder_inputs = "../../../data/inputs_1000"
+    # folder_inputs = '../../../src/data/inputs_random_params_1000'
+    folder_inputs = "../../../src/data/inputs_1000"
 
     index_file = 0
     end_file = index_file + 1

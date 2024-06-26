@@ -32,14 +32,14 @@ parser.add_argument(
 parser.add_argument(
     "--inputPath",
     metavar="path",
-    default="../../data/impa_input",
+    default="../data/impa_input",
     type=str,
     help="path to output directory",
 )
 parser.add_argument(
     "--outputPath",
     metavar="path",
-    default="../../data/impa_output",
+    default="../data/impa_output",
     type=str,
     help="path to output directory",
 )
@@ -92,14 +92,14 @@ if __name__ == "__main__":
     )
     
     # Set folder paths for inputs and outputs
-    folder_inputs = "../../data/" + input_path
+    folder_inputs = "../data/" + input_path
 
     print(f"folder_inputs: {folder_inputs}")
 
     if FILTERING_FLAG:
-        ModelIMPA.folder_outputs = "../../data/" + output_path + f"_alpha{formatted_alpha}"
+        ModelIMPA.folder_outputs = "../data/" + output_path + f"_alpha{formatted_alpha}"
     else:
-        ModelIMPA.folder_outputs = "../../data/" + output_path
+        ModelIMPA.folder_outputs = "../data/" + output_path
 
     if POST_PROCESS_FLAG:
         ModelIMPA.folder_outputs += "_pp"

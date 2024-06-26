@@ -120,8 +120,8 @@ def ut_iterate(
 
 def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, threshold):
     setfile = np.random.randint(0, 2)
-    # folder_inputs = '../../data/inputs_1000'
-    folder_inputs = "../../data/inputs_random_params_1000"
+    # folder_inputs = '../data/inputs_1000'
+    folder_inputs = "../data/inputs_random_params_1000"
     print("Graphical Model of Test Set: ", setfile)
     with open(str(folder_inputs) + "/inputs_set" + str(setfile) + ".pkl", "rb") as f:
         input_load = pkl.load(f)

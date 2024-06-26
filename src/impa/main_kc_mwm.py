@@ -51,7 +51,7 @@ if __name__ == "__main__":
     targs = 500  # Example value
     # folder_inputs = '../data/targ_vary/inputs_targs_'+str(targs)
     # folder_inputs = '../data/inputs_random_params_1000'
-    folder_inputs = "../../data/inputs_1000"
+    folder_inputs = "../data/inputs_1000"
 
     for setfile in range(index_file, end_file):
         print("SetFile: ", setfile)

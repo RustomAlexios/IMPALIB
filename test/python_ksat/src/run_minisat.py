@@ -85,10 +85,10 @@ if __name__ == "__main__":
         type = "zeromean"
     
     file_name = "aim" #uf.50.218.1000 #uf125.538.100 #aim
-    folder_path = f"../../../data/inputs_{type}_var{normal_variance}_{file_name}"
-    folder_outputs = f"../../../data/outputs_{type}_var{normal_variance}_{file_name}_minisat"
-    #folder_path = f"../../../data/inputs_ksat_{type}_var_{normal_variance}_samples_{n_samples}"
-    #folder_outputs = f"../../../data/outputs_ksat_{type}_var_{normal_variance}_samples_{n_samples}_minisat"
+    folder_path = f"../../../src/data/inputs_{type}_var{normal_variance}_{file_name}"
+    folder_outputs = f"../../../src/data/outputs_{type}_var{normal_variance}_{file_name}_minisat"
+    #folder_path = f"../../../src/data/inputs_ksat_{type}_var_{normal_variance}_samples_{n_samples}"
+    #folder_outputs = f"../../../src/data/outputs_ksat_{type}_var_{normal_variance}_samples_{n_samples}_minisat"
     all_files = os.listdir(folder_path)
 
     files = [os.path.join(folder_path, file) for file in all_files if os.path.isfile(os.path.join(folder_path, file)) if file.endswith('.cnf')]

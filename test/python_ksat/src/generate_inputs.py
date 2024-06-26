@@ -129,11 +129,11 @@ if __name__ == "__main__":
                     print("ERROR")
                     exit()
                     
-        if not (os.path.isdir(f"../../../data/inputs_ksat_{type}_var_{normal_variance}_samples_{samples}")):
-            os.makedirs(f"../../../data/inputs_ksat_{type}_var_{normal_variance}_samples_{samples}")
+        if not (os.path.isdir(f"../../../src/data/inputs_ksat_{type}_var_{normal_variance}_samples_{samples}")):
+            os.makedirs(f"../../../src/data/inputs_ksat_{type}_var_{normal_variance}_samples_{samples}")
 
         with open(
-            f"../../../data/inputs_ksat_{type}_var_{normal_variance}_samples_{samples}/inputs_set{str(index_sample)}.pkl",
+            f"../../../src/data/inputs_ksat_{type}_var_{normal_variance}_samples_{samples}/inputs_set{str(index_sample)}.pkl",
             "wb",
         ) as f:
             print(f"Test file: {index_sample} & num_variables: {num_variables} & num_constraints: {num_constraints} & k_variable: {k_variable}")
