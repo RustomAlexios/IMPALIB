@@ -53,8 +53,12 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.9'
     - name: Run Header-Only Demos
       run: |
-            cd include/examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo 
+            cd test/python_kc_mwm/src && python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
+          # cd include/examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo 
           # cd ../.. && cd Ksat && cmake -B build && cmake --build build && cd build && ./demo
           # cd ../.. && cd Tsp && cmake -B build && cmake --build build && cd build && ./demo
