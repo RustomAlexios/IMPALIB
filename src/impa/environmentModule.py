@@ -24,8 +24,6 @@ import copy
 import random
 import sys
 from itertools import combinations, permutations, chain, product
-from python_tsp.exact import solve_tsp_dynamic_programming, solve_tsp_brute_force
-from python_tsp.heuristics import solve_tsp_simulated_annealing
 from itertools import islice
 from tqdm import tqdm
 from ctypes import Structure, c_double

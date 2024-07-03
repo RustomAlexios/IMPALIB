@@ -25,13 +25,6 @@ from multiprocessing.sharedctypes import (
     Value,
     Array,
 )
-from python_tsp.heuristics import (
-    solve_tsp_simulated_annealing,
-)
-from python_tsp.exact import (
-    solve_tsp_dynamic_programming,
-    solve_tsp_brute_force,
-)
 from multiprocessing import (
     Process,
     Manager,

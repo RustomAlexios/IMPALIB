@@ -6,7 +6,6 @@
 
 from skbuild import setup
 
-
 setup(
     name="pyimpa",
     version="1.0.0",
