@@ -4,36 +4,36 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from copy import deepcopy
-from cmath import inf
-
-# import bitstring
-import argparse
-import time
-import numpy as np
-import math
-import itertools
-import pickle as pkl
-import pdb
-import statistics
-import os
-import shutil
-import re
-import elkai
-import copy
-import random
-import sys
 from itertools import combinations, permutations, chain, product
-from itertools import islice
-from tqdm import tqdm
 from ctypes import Structure, c_double
-from statistics import mean
 from collections import defaultdict
+from itertools import islice
+from statistics import mean
+from copy import deepcopy
+from tqdm import tqdm
+from cmath import inf
+import pickle as pkl
+import numpy as np
+import statistics
+import itertools
+import argparse
+import random
+import shutil
+import elkai
+import time
+import math
+import copy
+import pdb
+import sys
+import re
+import os
+# import bitstring
 
 np.set_printoptions(linewidth=np.inf)
 np.set_printoptions(threshold=1)
 np.set_printoptions(threshold=np.inf)
 np.set_printoptions(suppress=True)
+
 # np_impa_lib = np.float32
 np_impa_lib = np.float64
 zero_value = np_impa_lib(0)

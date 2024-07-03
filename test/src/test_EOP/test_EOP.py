@@ -1,4 +1,5 @@
 import numpy as np
+
 np.set_printoptions(threshold=1)
 np.set_printoptions(linewidth=np.inf)
 
@@ -28,6 +29,7 @@ np.save(output_file_python_pure, extrinsic_output_package, allow_pickle=True)
 output_file_python_pure.close()
 
 extrinsic_output_package_dummy = np.zeros(N_ITEMS, dtype=np_impa_lib)
+
 for bin_index in range(0,N_BINS):
     for item_index in range(0,N_ITEMS):
         extrinsic_output_package_dummy[item_index] = extrinsic_output_package_dummy[item_index] + extrinsic_output_bin[bin_index][item_index]

@@ -4,8 +4,6 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-
-# import bitstring
 import numpy as np
 import multiprocessing as mp
 import pickle as pkl
@@ -20,6 +18,7 @@ import math
 import pdb
 import os
 import re
+# import bitstring
 
 from multiprocessing.sharedctypes import (
     Value,

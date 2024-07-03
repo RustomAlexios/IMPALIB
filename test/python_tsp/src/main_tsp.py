@@ -155,6 +155,7 @@ if __name__ == "__main__":
     print(f"Reset Flag: {RESET_FLAG}")
 
     ModelIMPA.input_load = []
+    
     if not RANDOM_TEST_FLAG:
         ModelIMPA.test_file = test_file
         with open(

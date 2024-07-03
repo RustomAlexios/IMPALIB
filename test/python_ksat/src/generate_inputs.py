@@ -21,6 +21,7 @@ def create_incoming_metrics_cost(num_variables, num_constraints, k_variable, typ
     valid_sol = np.random.randint(2, size=num_variables, dtype=int)
     
     #normal_variance = 3
+    
     for i, truth_value in enumerate(valid_sol):
         if (type_metrics == 1): # correctly biased
             mean = -normal_variance/2 if truth_value == 1 else normal_variance/2
@@ -31,13 +32,13 @@ def create_incoming_metrics_cost(num_variables, num_constraints, k_variable, typ
             incoming_metrics_cost[i] = np.random.normal(mean, np.sqrt(normal_variance))
         elif (type_metrics == 2): #normal(0,sigma^2)
             incoming_metrics_cost[i] = np.random.normal(0, np.sqrt(normal_variance))
-    #exit()
+    
     index_constraint = 0
+    
     for constraint_idx in range(num_constraints):
         
         connections = []
         connections_types = []
-        
         satisfying_variable_index = random.randint(0, num_variables - 1)
         satisfying_variable_value = valid_sol[satisfying_variable_index]
         connection_type = -1 if satisfying_variable_value == 0 else 1
@@ -101,15 +102,10 @@ if __name__ == "__main__":
     for index_sample in range(0, samples):
         
         normal_variance = 10
-        
         num_variables = np.random.randint(5, N_VARIABLES_MAX+1)
-        
         num_constraints = np.random.randint(2, N_CONSTRAINTS_MAX+1)
-        
         k_variable = np.random.randint(K_VARIABLE_MIN, num_variables)
-
         constraints_connections, constraints_connections_type, incoming_metrics_cost, used_variables, variables_connections, variables_connections_type, valid_sol = create_incoming_metrics_cost(num_variables, num_constraints, k_variable, type_metrics, normal_variance)
-
         num_constraints = len(constraints_connections)
         input = [
             num_variables,
@@ -124,8 +120,8 @@ if __name__ == "__main__":
             type_metrics,
             valid_sol
         ]
-
         similar_elements = []
+        
         for i, sublist_i in enumerate(constraints_connections):
             for j, sublist_j in enumerate(constraints_connections):
                 if i<j and set(sublist_i) == set(sublist_j):
@@ -141,6 +137,4 @@ if __name__ == "__main__":
             "wb",
         ) as f:
             print(f"Test file: {index_sample} & num_variables: {num_variables} & num_constraints: {num_constraints} & k_variable: {k_variable}")
-            #print(input)
             pkl.dump(input, f)
-            #exit()

@@ -67,8 +67,6 @@ Attributes:
     K_OPT_FLAG: run k-opt on post-processed solution
     MAX_AUGM_COUNT: maximum number of augmentations
 """
-
-
 class GraphicalModelTsp:
     def __init__(
         self,
@@ -1136,8 +1134,6 @@ Attributes:
     THRESHOLD: threshold for hard-decision of IMPA (usually a negative value close to zero)
     PP_OPTION: perform post-processing on teams or on departments
 """
-
-
 class ImpaKcMwm:
     def __init__(
         self,
@@ -2360,8 +2356,7 @@ class GraphicalModelKsat:
         
         self.num_used_variables = len(self.used_variables)
         
-        self.variables_connections_sizes = np.array([len(connection) for connection in self.variables_connections])
-        
+        self.variables_connections_sizes = np.array([len(connection) for connection in self.variables_connections])    
 
     def generate_incoming_metrics(self, valid_sol):
         incoming_metrics_cost = np.zeros(self.num_variables)
@@ -2445,7 +2440,6 @@ class GraphicalModelKsat:
         constraints_connections_type = [sublist for sublist in constraints_connections_type if sublist]
         return constraints_connections, constraints_connections_type, incoming_metrics_cost, used_variables, variables_connections, variables_connections_type, valid_sol
     
-
     def run_impa(self):
         
         print("--------------")
@@ -2618,9 +2612,7 @@ class GraphicalModelKsat:
         
         unsatisfied_constraints = [constraint for constraint in range(self.num_constraints) if constraint not in satisfied_constraints]
         self.unsatisfied_constraints = unsatisfied_constraints
-        
-        
-            
+                  
     def print_summary(self, unsatisfied_constraints):
         
         if (len(unsatisfied_constraints)):
@@ -2775,8 +2767,7 @@ class GraphicalModelKsat:
                     if (not len(self.unsatisfied_constraints)):
                         break          
         self.get_summary(self.hard_decision)
-        
-        
+             
     def save_outputs(self):
         """
         This function will save results_composed (a dictionary containing variables of interest)

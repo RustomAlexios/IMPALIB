@@ -6,7 +6,6 @@
 
 from environmentModule import zero_value, np, np_impa_lib, inf, deepcopy
 
-
 class Knapsack:
     def __init__(self, NUM_DEPARTMENTS, NUM_TEAMS, FILTERING_FLAG, ALPHA, reward_team):
         self.num_departments = NUM_DEPARTMENTS

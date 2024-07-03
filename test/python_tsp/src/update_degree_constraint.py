@@ -8,7 +8,6 @@ from environmentModule import *
 
 
 class DegreeConstraint:
-    # def __init__(self, NUM_NODES, num_edge_variables, edge_connections, SYMMETRIC_FLAG, FILTERING_FLAG, ALPHA):
     def __init__(
         self,
         NUM_NODES,
@@ -35,6 +34,7 @@ class DegreeConstraint:
             ),
             dtype=np_impa_lib,
         )
+        
         for index_node in range(self.num_nodes):
             # if (self.symmetric_flag):
             #    connections = [i for i, pair in enumerate(self.edge_connections) if index_node in pair]

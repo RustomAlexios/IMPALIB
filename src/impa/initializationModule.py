@@ -31,12 +31,10 @@ distance_metric = rho * np.array(
     )
 )
 
-
 K_2 = 5
 K_3 = 10
 alpha = 2
 beta = 2
-
 
 rendezvouz_points = ["CV", "RR"]
 

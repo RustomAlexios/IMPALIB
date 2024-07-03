@@ -5,10 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
-sys.path.append(sys.path[0] + "/../src")
 from ut_utils import check_agreement, check_forward_backward_results
 from environmentModule import argparse, np, np_impa_lib
+
+sys.path.append(sys.path[0] + "/../src")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--sub_test_num", type=int, default=1, help="Sub-Test of Unit Test")
@@ -27,9 +27,9 @@ if __name__ == "__main__":
     ut_name = args.ut_name
     rtol = 5e-02
     atol = 1e-08  # user will specify these tolerances
+    
     if ut_name == "KnapsackForward" or ut_name == "KnapsackBackward":
         check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=rtol, atol=atol)
-
     elif ut_name == "ExtrinsicOutputDepartment":
         f_path_pure = "../ut_results/extrinsic_output_department_pure"
         f_path_wrapper = "../ut_results/extrinsic_output_department_wrapper"

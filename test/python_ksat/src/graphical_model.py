@@ -127,6 +127,7 @@ class GraphicalModel:
         truth_vector = np.random.randint(2, size=num_variables, dtype=int)
         
         normal_variance = 3
+       
         for i, truth_value in enumerate(truth_vector):
             mean = -normal_variance/2 if truth_value == 1 else normal_variance/2
             incoming_metrics_cost[i] = np.random.normal(loc=mean, scale=np.sqrt(normal_variance))
@@ -158,9 +159,9 @@ class GraphicalModel:
             constraints_connections_type[constraint_idx] = connections_types 
 
         used_variables = list(set(used_variables))
+        
         return constraints_connections, constraints_connections_type, incoming_metrics_cost, used_variables, variables_connections, variables_connections_type, truth_vector
     
-
     def run_impa(self):
         
         extrinsic_output_variable_ec = np.zeros(self.num_variables, dtype = np_impa_lib)
@@ -191,7 +192,6 @@ class GraphicalModel:
         
         self.hard_decision_analysis()
         
-
     def hard_decision_analysis(self,):
         
         intrinsic_out_variable_ec = self.intrinsic_out_variable_ec

@@ -5,13 +5,11 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
-sys.path.append(sys.path[0] + "/../src")
-
 import graphical_model as model_graph
 from ut_utils import prune_teams, team_reward_generation
 from environmentModule import np, os, np_impa_lib, pkl
 
+sys.path.append(sys.path[0] + "/../src")
 
 def ut_iterate(
     ut_name,
@@ -33,6 +31,7 @@ def ut_iterate(
     N_TEAMS = len(teams_types)
 
     non_zero_weight_indices = []
+    
     for department_index in range(0, N_DEPARTMENTS):
         indices = [i for i, e in enumerate(teams_weights_per_department[department_index]) if e != 0]
         non_zero_weight_indices = non_zero_weight_indices + [indices]
@@ -75,6 +74,7 @@ def ut_iterate(
     # print('reward_project: \n', reward_project)
 
     team_to_knapsack_m = np.zeros((N_DEPARTMENTS, N_TEAMS), dtype=np_impa_lib)
+    
     for i in range(0, N_DEPARTMENTS):
         for j in range(0, N_TEAMS):
             if teams_weights_per_department[i][j] != 0:
@@ -118,7 +118,6 @@ def ut_iterate(
     np.save(output_file_python2, ModelIMPA.intrinsic_out_mwm.flatten(), allow_pickle=True)
     output_file_python2.close()
 
-
 def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, threshold):
     setfile = np.random.randint(0, 2)
     # folder_inputs = '../../data/inputs_1000'
@@ -137,6 +136,7 @@ def ut_iterate_sample_graph(ut_name, filtering_flag, alpha, N_ITER, ppFlag, thre
     teams_weights_per_department = ModelIMPA.teams_weights_per_department
 
     non_zero_weight_indices = []
+    
     for department_index in range(0, N_DEPARTMENTS):
         indices = [i for i, e in enumerate(teams_weights_per_department[department_index]) if e != 0]
         non_zero_weight_indices = non_zero_weight_indices + [indices]

@@ -4,10 +4,9 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-# from environmentModule import *
+import pickle as pkl
 import numpy as np
 import os
-import pickle as pkl
 
 np_impa_lib = np.float32
 # np_impa_lib = np.float64

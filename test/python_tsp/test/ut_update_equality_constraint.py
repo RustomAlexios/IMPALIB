@@ -5,13 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
-sys.path.append(sys.path[0] + "/../src")
-
 import update_equality_constraint as equality_constraint
-
 from ut_utils import *
 
+sys.path.append(sys.path[0] + "/../src")
 
 def ut_equality_constraint(
     ut_name,
@@ -67,7 +64,6 @@ def ut_equality_constraint(
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, edge_ec_to_degree_constraint_m_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
-
     elif ut_name == "EdgeEc2SubtourConstraintsUpdate":
         f_input4 = os.getcwd() + "/../ut_inputs/delta_S_indices_list_pure.npy"
         np.save(f_input4, np.array(delta_S_indices_list_flattened, dtype=np.int32).flatten())
@@ -99,7 +95,6 @@ def ut_equality_constraint(
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, edge_ec_to_subtour_constraints_m_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
-
     elif ut_name == "EdgeEc2DegreeConstraintAugmentedGraphUpdate":
         f_input8 = os.getcwd() + "/../ut_inputs/subtour_constraints_to_edge_ec_m_pure.npy"
         subtour_constraints_to_edge_ec_m_pure = np.random.uniform(10, 500, size=(N_SUBTOURS, N_EDGE_VARIABLES))

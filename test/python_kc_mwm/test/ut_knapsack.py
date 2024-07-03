@@ -4,13 +4,12 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-import sys
-
-sys.path.append(sys.path[0] + "/../src")
 import knapsack as knapsack_methods
+import sys
 from ut_utils import team_reward_generation, prune_teams
 from environmentModule import np, os, np_impa_lib
 
+sys.path.append(sys.path[0] + "/../src")
 
 def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
     N_DEPARTMENTS = N_u.size
@@ -23,6 +22,7 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
     N_TEAMS = len(teams_types)
 
     non_zero_weight_indices = []
+    
     for department_index in range(0, N_DEPARTMENTS):
         indices = [i for i, e in enumerate(teams_weights_per_department[department_index]) if e != 0]
         non_zero_weight_indices = non_zero_weight_indices + [indices]
@@ -95,7 +95,6 @@ def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
             )
             output_file_python_pure.close()
 
-
 def ut_extrinsic_output_department(ut_name, N_u, team_types, filtering_flag, alpha):
     N_DEPARTMENTS = N_u.size
     available_combinations = prune_teams(N_u)
@@ -157,7 +156,6 @@ def ut_extrinsic_output_department(ut_name, N_u, team_types, filtering_flag, alp
     )
     output_file_python_pure.close()
 
-
 def ut_team_to_knapsack_update(ut_name, N_u, team_types, filtering_flag, alpha):
     N_DEPARTMENTS = N_u.size
     available_combinations = prune_teams(N_u)
@@ -172,6 +170,7 @@ def ut_team_to_knapsack_update(ut_name, N_u, team_types, filtering_flag, alpha):
     np.save(f_input_alpha, alpha)
 
     non_zero_weight_indices = []
+    
     for department_index in range(0, N_DEPARTMENTS):
         indices = [i for i, e in enumerate(teams_weights_per_department[department_index]) if e != 0]
         non_zero_weight_indices = non_zero_weight_indices + [indices]
@@ -226,7 +225,6 @@ def ut_team_to_knapsack_update(ut_name, N_u, team_types, filtering_flag, alpha):
     np.save(output_file_python_pure, team_to_knapsack_m, allow_pickle=True)
     output_file_python_pure.close()
 
-
 def ut_process_extrinsic_output_department(ut_name, N_u, team_types, filtering_flag, alpha, N_ITER):
     N_DEPARTMENTS = N_u.size
     available_combinations = prune_teams(N_u)
@@ -251,6 +249,7 @@ def ut_process_extrinsic_output_department(ut_name, N_u, team_types, filtering_f
 
     model_knapsacks = knapsack_methods.Knapsack(N_DEPARTMENTS, N_TEAMS, filtering_flag, alpha, reward_team)
     model_knapsacks.extrinsic_output_department_dummy = extrinsic_output_department_dummy
+    
     for iter in range(0, N_ITER):
         model_knapsacks.process_extrinsic_output_department(iter)
 

@@ -5,12 +5,11 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+import update_ksat_constraint as ksat_constraint
+from ut_utils import *
 
 sys.path.append(sys.path[0] + "/../src")
 
-from ut_utils import *
-import update_ksat_constraint as ksat_constraint
-            
 def ut_ksat_constraint(ut_name, n_variables, n_constraints, filt_flag, alpha, constraints_connections, constraint_connections_type, k_variable):
     
     NUM_VARIABLES = n_variables
@@ -38,6 +37,7 @@ def ut_ksat_constraint(ut_name, n_variables, n_constraints, filt_flag, alpha, co
 
     f_input2 = os.getcwd() + "/../ut_inputs/variable_ec_to_ksat_constraint_m_pure.npy"
     variable_ec_to_ksat_constraint_m_pure = np.random.uniform(-500, 500, size=(NUM_CONSTRAINTS, NUM_VARIABLES))
+    
     for row_idx, connections in enumerate(CONSTRAINTS_CONNECTIONS):
         for col_idx in range(k_variable):
             if col_idx not in connections:

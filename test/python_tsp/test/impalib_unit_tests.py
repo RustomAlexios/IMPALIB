@@ -11,7 +11,6 @@ import ut_update_equality_constraint
 import ut_graphical_model
 from environmentModule import *
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--sub_test_num", type=int, default=1, help="Sub-Test of Unit Test")
 parser.add_argument("--sub_tests_total", type=int, default=1, help="Total Number of Sub-Tests of Unit Test")
@@ -42,6 +41,7 @@ if __name__ == "__main__":
     N_EDGE_VARIABLES = N_NODES**2 - N_NODES
 
     upper_triangle = np.random.uniform(1, 1000, size=(N_NODES, N_NODES))
+    
     if SYM_FLAG:
         matrix = np.triu(upper_triangle) + np.triu(upper_triangle, k=1).T
         np.fill_diagonal(matrix, zero_value)

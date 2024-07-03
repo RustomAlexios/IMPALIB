@@ -8,7 +8,6 @@ from environmentModule import *
 
 
 class SubtourEliminationConstraint:
-    # def __init__(self, NUM_NODES, num_edge_variables, SYMMETRIC_FLAG, FILTERING_FLAG, ALPHA):
     def __init__(
         self,
         NUM_NODES,

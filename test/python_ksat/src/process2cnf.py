@@ -1,12 +1,14 @@
 import pickle as pkl
 
-def create_cnf_file(constraints_connections, constraints_connections_type, num_variables, num_constraints, cnf_file):
+def create_cnf_file(constraints_connections, constraints_connections_type, 
+                    num_variables, num_constraints, cnf_file):
     
     with open(cnf_file, 'w') as f:
         f.write(f"p cnf {num_variables} {num_constraints}\n")
         
         for i, clause_type in enumerate(constraints_connections_type):
             clause = constraints_connections[i]
+            
             for j, var_type in enumerate(clause_type):
                 if var_type == -1:
                     f.write('-')

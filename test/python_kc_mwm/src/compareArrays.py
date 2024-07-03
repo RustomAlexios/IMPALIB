@@ -25,10 +25,8 @@ metric = "IO"
 # output_file_pythonPureOriginal = open('binaryPythonPure'+ file_name+ str(setfile) +'_Niter'+str(number_of_iterations)+'_Original', 'rb')
 # data_pythonPureOriginal = np.load(output_file_pythonPureOriginal)
 
-
 # output_file_pythonPureIndustry = open('binaryPythonPure'+ file_name+ str(setfile) +'_Niter'+str(number_of_iterations)+'_Industry', 'rb')
 # data_pythonPureIndustry = np.load(output_file_pythonPureIndustry)
-
 
 # with open('binaryPythonPure' + file_name + str(setfile) +'_Niter'+str(number_of_iterations), mode='rb') as file: # b is important -> binary
 #    fileContentPure = file.read()
@@ -56,7 +54,6 @@ optimized_wrapper_io  = './binaryPythonWrapperOptimized/binaryPythonWrapperOptIO
 optimized_wrapper_iomwm  = './binaryPythonWrapperOptimized/binaryPythonWrapperOptIOMWM'+ str(setfile) +'_Niter'+str(number_of_iterations)
 """
 
-
 # original_pure_iomwm = 'binaryPythonPureIOMWM'+ str(setfile) +'_Niter'+str(number_of_iterations)
 
 optimized_pure_metric = "binaryPythonPureOpt" + metric + str(setfile) + "_Niter" + str(number_of_iterations)
@@ -68,7 +65,6 @@ optimized_pure_metric = "binaryPythonPureOpt" + metric + str(setfile) + "_Niter"
 optimized_wrapper_metric = "binaryPythonWrapperOpt" + metric + str(setfile) + "_Niter" + str(number_of_iterations)
 
 # data_original = np.fromfile(original, dtype=np.float64) #for opening in C++
-
 
 # f2 = bitstring.BitArray(float=data_pythonWrapper[52], length=64)
 # f2.hex
@@ -120,16 +116,19 @@ print("--------------------------")
 print("Pure: Pure vs. Optimized")
 print("--------------------------")
 """
+
 # equal_arrays_pure_io = np.array_equal(data_original_pure_io, data_optimized_pure_io)
 # print("equal_arrays_pure_io: ", equal_arrays_pure_io)
 
 # equal_arrays_pure_iomwm = np.array_equal(data_original_pure_iomwm, data_optimized_pure_iomwm)
 # print("equal_arrays_pure_iomwm: ", equal_arrays_pure_iomwm)
 # print("--------------------------")
+
 """
 print("Optimized: Pure vs. Wrapper")
 print("--------------------------")
 """
+
 # equal_arrays_io = np.array_equal(data_optimized_wrapper_io, data_optimized_pure_io)
 # print("equal_arrays_io: ", equal_arrays_io)
 
@@ -139,7 +138,6 @@ print("--------------------------")
 
 # if (not equal_arrays_pure_io or not equal_arrays_pure_iomwm):
 # exit('Pure: Pure vs. Optimized Violated')
-
 
 # if (not equal_arrays_io):
 #    #print("data_optimized_wrapper_io: ", data_optimized_wrapper_io)
