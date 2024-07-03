@@ -111,11 +111,8 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
   
   ```bash
     cd include/examples
-    cd KcMwm (OR) cd Tsp (OR) cd Ksat
-    cmake -B build
-    cmake --build build
-    cd build
-    ./demo
+    cd KcMwm "OR" cd Tsp "OR" cd Ksat
+    cmake -B build && cmake --build build && cd build && ./demo
   ```
 
 ### *2. Pure Python code*

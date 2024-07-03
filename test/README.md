@@ -43,10 +43,8 @@
 - To perform unit testing of Application $1$, $2$ or $3$, navigate to the root directory and run:
   
   ```bash
-    cmake -B build
-    cmake --build build
-    cd build/test/src
-    ./unit_test_kc_mwm.sh  OR  ./unit_test_tsp.sh  OR  ./unit_test_ksat.sh
+    cmake -B build && cmake --build build && cd build/test/src
+    ./unit_test_kc_mwm.sh  "OR"  ./unit_test_tsp.sh  "OR"  ./unit_test_ksat.sh
   ```
 
 > _**NOTE:**_ In unit testing, we loop over all unit tests names & multiple sub-tests could be performed depending on the value of the `total_sub_tests` variable.
