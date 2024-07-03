@@ -158,14 +158,14 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
   ```
 
 * Navigate to ``IMPALIB/src/impa``
-* For *Application 1*:
+* *Application 1*:
   * To run wrapper code using sample datasets, Run:
   
     ```bash
         python3 main_kc_mwm.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001
     ```
 
-* For *Application 2*:
+* *Application 2*:
   * To run wrapper code using sample datasets:
 
     ```bash
@@ -178,7 +178,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
         python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True --lkhSolFlag=True --maxAugmCount=20
     ```
 
-* For *Application 3*:
+* *Application 3*:
   * To run wrapper code using sample datasets:
 
     ```bash
@@ -191,17 +191,18 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
     ```
 
-**Note**: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory. This will be fixed in a future version.
+    > ***NOTE***: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory. This will be fixed in a future version.
 
 ## **Requirements and Installation**
 
 * A C++ $11$ - compatible compiler
 * Python $3.9.7$
-* To perform unit testing: randomized simulations using a pure Python code and a Python wrapper around a C++ code are carried out for both applications. A checking routine on the stored numpy files is executed to compare results. An external library called [cnpy](https://github.com/rogersce/cnpy) is used to save and load numpy arrays in C++
 
 ## **Unit Testing**
 
-Refer to the README file for the [Unit Testing](test/README.md) framework.
+Please refer to the README file for the [Unit Testing](test/README.md) framework.
+
+>***NOTE:*** To perform unit testing: randomized simulations using a pure Python code and a Python wrapper around a C++ code are carried out for both applications. A checking routine on the stored numpy files is executed to compare results. An external library called [cnpy](https://github.com/rogersce/cnpy) is used to save and load numpy arrays in C++
 
 ## **License**
 
