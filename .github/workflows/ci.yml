@@ -27,10 +27,6 @@ jobs:
       run: |
             python3 -m pip install --user . -v
             echo "Project built successfully."
-    - name: Lint Python Code
-      run: |
-            pip install ruff
-            ruff check
   
   lint:
     name: Lint Job
