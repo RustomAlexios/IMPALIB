@@ -120,24 +120,25 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 To run pure code using sample datasets:
 
 * *Application 1*:
-  * Navigate to [`test/python_kc_mwm/src`](test/python_kc_mwm/src) and run:
-    ```bash
-        python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
-    ```
+
+  ```bash
+      cd test/python_kc_mwm/src
+      python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
+  ```
 
 * *Application 2*:
-  * Navigate to [`test/python_tsp/src`](test/python_tsp/src) and run:
 
-    ```bash
-        python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True
-    ```
+  ```bash
+      cd test/python_tsp/src
+      python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True
+  ```
 
 * *Application 3*:
-  * Navigate to [`test/python_ksat/src`](test/python_ksat/src) and run:
 
-    ```bash
-        python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
-    ```
+  ```bash
+      cd test/python_ksat/src
+      python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
+  ```
 
 ### *3. C++ Code with a Python wrapper*
 
@@ -147,7 +148,7 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
       python3 -m pip install . -v
   ```
 
-* Navigate to ``IMPALIB/src/impa``
+* Navigate to [`IMPALIB/src/impa`](src/impa/)
 * *Application 1*:
   * To run wrapper code using sample datasets, Run:
   
