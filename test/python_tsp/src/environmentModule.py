@@ -4,7 +4,6 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-import multiprocessing as mp
 import pickle as pkl
 import numpy as np
 import statistics
