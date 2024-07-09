@@ -130,7 +130,6 @@ To run pure code using sample datasets:
 
 * *Application 1*:
   * Navigate to [`test/python_kc_mwm/src`](test/python_kc_mwm/src) and run:
-
     ```bash
         python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
     ```
