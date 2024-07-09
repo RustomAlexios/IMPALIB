@@ -42,8 +42,8 @@ jobs:
             ruff check
             echo "Linting completed successfully."
 
-  demo:
-    name: Demo Job
+  test:
+    name: Unit Test Job
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
@@ -55,9 +55,11 @@ jobs:
         python-version: '3.9'
         cache: 'pip'
         cache-dependency-path: setup.py
-    - name: Run Header-Only Demos
+    - name: Run Unit Tests
       run: |
-            pip install -e .
-            cd src/impa && python3 main_kc_mwm.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001
-          # cd include/examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo 
-          # cd test/python_kc_mwm/src && python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
+            python -m pip install --user . -v
+            cmake -B build && cmake --build build && cd build/test/src
+            ./unit_test_kc_mwm.sh
+            ./unit_test_tsp.sh
+            ./unit_test_ksat.sh
+            echo "Unit tests completed successfully."
