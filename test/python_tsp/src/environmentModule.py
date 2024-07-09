@@ -4,9 +4,9 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-import numpy as np
 import multiprocessing as mp
 import pickle as pkl
+import numpy as np
 import statistics
 import itertools
 import argparse
@@ -18,16 +18,7 @@ import math
 import pdb
 import os
 import re
-# import bitstring
 
-from multiprocessing.sharedctypes import (
-    Value,
-    Array,
-)
-from multiprocessing import (
-    Process,
-    Manager,
-)
 from collections import (
     defaultdict,
 )
