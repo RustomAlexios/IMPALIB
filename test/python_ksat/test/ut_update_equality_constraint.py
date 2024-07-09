@@ -5,10 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 import update_equality_constraint as equality_constraint
 from ut_utils import *
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_equality_constraint(
     ut_name,

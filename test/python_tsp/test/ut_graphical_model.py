@@ -5,10 +5,14 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-import graphical_model as model_graph
-from ut_utils import *
 
 sys.path.append(sys.path[0] + "/../src")
+
+import graphical_model as model_graph
+
+from ut_utils import *
+
+
 
 def ut_model_graph(ut_name, n_nodes, filt_flag, alpha, threshold, random_test_flag, n_iter, sym_flag):
     N_NODES = n_nodes

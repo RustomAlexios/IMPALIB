@@ -5,10 +5,13 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+
+sys.path.append(sys.path[0] + "/../src")
+
 import input_output
 from ut_utils import *
 
-sys.path.append(sys.path[0] + "/../src")
+
 
 def ut_io(ut_name, n_edge_variables, n_nodes, n_subtours, edge_connections):
     N_EDGE_VARIABLES = n_edge_variables

@@ -5,10 +5,9 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 from ut_utils import check_agreement, check_forward_backward_results
 from environmentModule import argparse, np, np_impa_lib
-
-sys.path.append(sys.path[0] + "/../src")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--sub_test_num", type=int, default=1, help="Sub-Test of Unit Test")

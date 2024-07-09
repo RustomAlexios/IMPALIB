@@ -5,10 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 import subtour_elimination_constraint as subtour_constraint
 from ut_utils import *
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_subtour_constraint(ut_name, n_edge_variables, n_nodes, filt_flag, alpha, n_subtours):
     N_EDGE_VARIABLES = n_edge_variables

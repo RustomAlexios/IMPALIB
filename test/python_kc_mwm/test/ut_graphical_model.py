@@ -5,11 +5,11 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 import graphical_model as model_graph
 from ut_utils import prune_teams, team_reward_generation
 from environmentModule import np, os, np_impa_lib, pkl
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_iterate(
     ut_name,

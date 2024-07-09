@@ -5,10 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 import input_output
 from environmentModule import np, os, np_impa_lib
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_io(ut_name, n_departments, n_teams, n_projects):
     N_DEPARTMENTS = n_departments

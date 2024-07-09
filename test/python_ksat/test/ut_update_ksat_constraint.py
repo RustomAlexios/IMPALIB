@@ -5,10 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 import update_ksat_constraint as ksat_constraint
 from ut_utils import *
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_ksat_constraint(ut_name, n_variables, n_constraints, filt_flag, alpha, constraints_connections, constraint_connections_type, k_variable):
     

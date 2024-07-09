@@ -4,12 +4,11 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-
-import update_or_inequality_constraint as oric
 import sys
+sys.path.append(sys.path[0] + "/../src")
+import update_or_inequality_constraint as oric
 from environmentModule import os, np, np_impa_lib
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_oric(ut_name, n_departments, n_teams, n_projects, unbalanced_flag):
     N_DEPARTMENTS = n_departments

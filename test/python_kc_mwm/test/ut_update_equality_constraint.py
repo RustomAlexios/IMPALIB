@@ -4,11 +4,11 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-import update_equality_constraint as eq_constraint
 import sys
+sys.path.append(sys.path[0] + "/../src")
+import update_equality_constraint as eq_constraint
 from environmentModule import np, os, np_impa_lib
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_eq_consraint(ut_name, n_departments, n_teams, n_projects):
     N_DEPARTMENTS = n_departments

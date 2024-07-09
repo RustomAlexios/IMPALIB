@@ -4,12 +4,11 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-import knapsack as knapsack_methods
 import sys
+sys.path.append(sys.path[0] + "/../src")
+import knapsack as knapsack_methods
 from ut_utils import team_reward_generation, prune_teams
 from environmentModule import np, os, np_impa_lib
-
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_forward_backward(ut_name, N_u, team_types, filtering_flag, alpha):
     N_DEPARTMENTS = N_u.size

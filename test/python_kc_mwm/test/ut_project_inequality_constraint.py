@@ -4,11 +4,11 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-import project_inequality_constraint as ineq_constraint_project
 import sys
+sys.path.append(sys.path[0] + "/../src")
+import project_inequality_constraint as ineq_constraint_project
 from environmentModule import np, os, np_impa_lib
 
-sys.path.append(sys.path[0] + "/../src")
 
 def ut_project_ineq_constraint(ut_name, n_departments, n_teams, n_projects, unbalanced_flag):
     N_DEPARTMENTS = n_departments

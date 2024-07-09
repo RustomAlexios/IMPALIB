@@ -5,9 +5,9 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 from ut_utils import *
 
-sys.path.append(sys.path[0] + "/../src")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--sub_test_num", type=int, default=1, help="Sub-Test of Unit Test")
