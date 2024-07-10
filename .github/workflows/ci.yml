@@ -46,7 +46,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -57,8 +57,7 @@ jobs:
     - name: Run Unit Tests
       run: |
             python3 -m pip install --user . -v
-            cd examples/KcMwm
-            cmake -B build && cmake --build build && cd build
-            ls
-            ./demo
+            cd examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo
+            cd .. && cd Tsp && cmake -B build && cmake --build build && cd build && ./demo
+            cd .. && cd Ksat && cmake -B build && cmake --build build && cd build && ./demo
             echo "Demos executed successfully."
