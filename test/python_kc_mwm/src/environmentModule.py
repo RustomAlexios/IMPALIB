@@ -4,6 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
+from itertools import combinations, permutations
 from copy import deepcopy
 from tqdm import tqdm
 from cmath import inf

@@ -4,7 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from itertools import combinations, permutations, chain, product
+from itertools import combinations, permutations, chain, product, islice
 from python_tsp.heuristics import solve_tsp_simulated_annealing
 from python_tsp.exact import solve_tsp_brute_force
 from copy import deepcopy
