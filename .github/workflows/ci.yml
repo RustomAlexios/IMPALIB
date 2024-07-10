@@ -54,10 +54,14 @@ jobs:
         python-version: '3.9'
         cache: 'pip'
         cache-dependency-path: setup.py
-    - name: Run Demos
+    - name: Run CPP Demos
       run: |
             python3 -m pip install --user . -v
             cd examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo
             cd .. && cd Tsp && cmake -B build && cmake --build build && cd build && ./demo
             cd .. && cd Ksat && cmake -B build && cmake --build build && cd build && ./demo
             echo "Demos executed successfully."
+    - name: Run Python Demos
+      run: |
+           python3 -m pip install --user . -v
+           python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
