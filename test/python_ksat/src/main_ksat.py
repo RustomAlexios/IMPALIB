@@ -15,7 +15,6 @@ parser.add_argument("--nConstraints", type=int, default=3, help="Number of const
 parser.add_argument("--kVariable", type=int, default=3, help="Number of variables per constraint")
 parser.add_argument("--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
 parser.add_argument("--exactSolFlag", type=bool, default=False, help="Run exact solver or not")
-
 parser.add_argument("--filteringFlag", type=bool, default=True, help="Activate Filtering or not")
 parser.add_argument("--alpha", type=np_impa_lib, default=0.5, help="Filtering Rate [0,1]")
 parser.add_argument("--testFile", type=int, default=9000, help="Test File Index")
@@ -40,7 +39,6 @@ parser.add_argument(
     type=str,
     help="path to output directory",
 )
-
 parser.add_argument("--PPFlag", type=bool, default=True, help="Activate Post-Processing or not")
 
 if __name__ == "__main__":
@@ -79,6 +77,7 @@ if __name__ == "__main__":
         RANDOM_TEST_FLAG,
         POST_PROCESS_FLAG
     )
+    
     # Set folder paths for inputs and outputs
     folder_inputs = "../../data/" + input_path
     

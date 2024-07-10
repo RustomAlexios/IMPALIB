@@ -5,11 +5,8 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
 sys.path.append(sys.path[0] + "/../src")
-
 import subtour_elimination_constraint as subtour_constraint
-
 from ut_utils import *
 
 

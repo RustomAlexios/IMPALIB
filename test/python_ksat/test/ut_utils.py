@@ -6,7 +6,6 @@
 
 from environmentModule import *
 
-
 def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, rtol=1e-05, atol=1e-08):
     ut_failed = True
     y_pure = deepcopy(y_pure.flatten())

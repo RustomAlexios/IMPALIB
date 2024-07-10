@@ -4,9 +4,9 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import *
-from graphical_model import *
+from subtour_elimination_constraint import *
 from update_equality_constraint import *
 from update_degree_constraint import *
+from environmentModule import *
+from graphical_model import *
 from input_output import *
-from subtour_elimination_constraint import *

@@ -106,8 +106,10 @@ if __name__ == "__main__":
         K_OPT_FLAG,
         MAX_AUGM_COUNT,
     )
+    
     # Set folder paths for inputs and outputs
     folder_inputs = "../../data/" + input_path
+    
     if FILTERING_FLAG:
         ModelIMPA.folder_outputs = "../../data/" + output_path + f"_alpha{formatted_alpha}"
     else:

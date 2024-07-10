@@ -5,7 +5,6 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
 sys.path.append(sys.path[0] + "/../src")
 import project_inequality_constraint as ineq_constraint_project
 from environmentModule import np, os, np_impa_lib

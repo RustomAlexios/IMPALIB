@@ -6,7 +6,6 @@
 
 from environmentModule import np
 
-
 class OutputsKcMwm:
     def __init__(self, N_DEPARTMENTS, N_TEAMS, N_PROJECTS, reward_project):
         self.num_departments = N_DEPARTMENTS

@@ -7,7 +7,6 @@
 from environmentModule import np, deepcopy, re, os, np_impa_lib, inf, math, itertools
 from initializationModule import fighters_count, weasels_count
 
-
 def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, rtol=1e-05, atol=1e-08):
     ut_failed = True
     y_pure = deepcopy(y_pure.flatten())
@@ -35,9 +34,9 @@ def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, r
         # print('y_p: ', y_pure)
         # print('y_w: ', y_wrapper)
 
-
 def check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=1e-05, atol=1e-08):
     regex = re.compile(r"\d+")
+    
     if ut_name == "KnapsackForward":
         file_names = [file_name for file_name in os.listdir("../ut_results") if file_name.startswith("forward_pure")]
     elif ut_name == "KnapsackBackward":
@@ -81,7 +80,6 @@ def check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=
     else:
         print(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}")
 
-
 def prune_teams(N_u):
     units = range(1, len(N_u) + 1)
 
@@ -108,7 +106,6 @@ def prune_teams(N_u):
     available_combinations = [x for x in permutations_units if x not in list_pruning]
 
     return available_combinations
-
 
 def team_reward_generation(available_combinations, N_u, team_types):
     teams_weights_per_department = []

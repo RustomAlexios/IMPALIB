@@ -63,6 +63,7 @@ if __name__ == "__main__":
         # Initialize model with loaded data
         ModelKcMwm.initialize(input_load)
         start_time = time.time()
+        
         # Perform iterations
         ModelKcMwm.iterate()
         runtime = time.time() - start_time
@@ -73,6 +74,7 @@ if __name__ == "__main__":
         # Perform post-analysis
         ModelKcMwm.post_analysis()
         # print(ModelKcMwm.intrinsic_output)
+        
         print(f"Time: {runtime}")
         # with open(f'../impa/{output_path}/outputs_set{setfile}.pkl', 'wb') as f:
         #    pkl.dump((ModelKcMwm.results_composed, runtime), f)

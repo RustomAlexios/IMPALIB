@@ -13,6 +13,7 @@ import graphical_model as model_graph
 from ut_utils import *
 
 
+
 def ut_model_graph(ut_name, n_nodes, filt_flag, alpha, threshold, random_test_flag, n_iter, sym_flag):
     N_NODES = n_nodes
     FILT_FLAG = filt_flag
@@ -83,7 +84,6 @@ def ut_model_graph(ut_name, n_nodes, filt_flag, alpha, threshold, random_test_fl
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, intrinsic_out_edge_ec_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
-
     elif ut_name == "IterateAugmentedGraph":
         print("-------")
         print("Python")

@@ -6,7 +6,6 @@
 
 from environmentModule import *
 from initializationModule import *
-
 from graphical_model import *
 from knapsack import *
 from project_inequality_constraint import *

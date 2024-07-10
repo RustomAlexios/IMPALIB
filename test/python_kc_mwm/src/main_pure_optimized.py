@@ -4,9 +4,8 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from graphical_model import GraphicalModelKcMwm
 from environmentModule import pkl, argparse, np_impa_lib
-# from impalib import *
+from graphical_model import GraphicalModelKcMwm
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--nITER", type=int, default=400, help="Number of Iterations of IMPA")

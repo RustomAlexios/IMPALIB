@@ -12,6 +12,7 @@ import input_output
 from ut_utils import *
 
 
+
 def ut_io(ut_name, n_edge_variables, n_nodes, n_subtours, edge_connections):
     N_EDGE_VARIABLES = n_edge_variables
     N_NODES = n_nodes
@@ -20,10 +21,12 @@ def ut_io(ut_name, n_edge_variables, n_nodes, n_subtours, edge_connections):
 
     f_input1 = os.getcwd() + "/../ut_inputs/degree_constraint_to_eq_constraint_m_pure.npy"
     degree_constraint_to_eq_constraint_m_pure = np.random.uniform(10, 500, size=(N_EDGE_VARIABLES, N_NODES))
+    
     for row_idx, edge_indices in enumerate(EDGE_CONNECTIONS):
         for col_idx in range(N_NODES):
             if col_idx not in edge_indices:
                 degree_constraint_to_eq_constraint_m_pure[row_idx, col_idx] = 0
+    
     degree_constraint_to_eq_constraint_m_pure = degree_constraint_to_eq_constraint_m_pure.astype(np_impa_lib)
     np.save(f_input1, degree_constraint_to_eq_constraint_m_pure.flatten())
 
@@ -35,7 +38,6 @@ def ut_io(ut_name, n_edge_variables, n_nodes, n_subtours, edge_connections):
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, extrinsic_output_edge_ec_relaxed_graph_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
-
     elif ut_name == "ExtrinsicOutputEdgeEcAugmentedGraphUpdate":
         delta_S_indices_list_length = N_SUBTOURS
         delta_S_indices_list = [random.sample(range(N_EDGE_VARIABLES), k=random.randint(2, N_NODES)) for _ in range(delta_S_indices_list_length)]

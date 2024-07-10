@@ -5,11 +5,9 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
+sys.path.append(sys.path[0] + "/../src")
 import input_output
 from environmentModule import np, os, np_impa_lib
-# from ut_utils import *
-
-sys.path.append(sys.path[0] + "/../src")
 
 
 def ut_io(ut_name, n_departments, n_teams, n_projects):
@@ -47,7 +45,6 @@ def ut_io(ut_name, n_departments, n_teams, n_projects):
             allow_pickle=True,
         )
         output_file_python_pure.close()
-
     elif ut_name == "IntrinsicOutMwmUpdate":
         oric_to_eq_constraint_m_pure = np.random.uniform(10, 500, size=(N_PROJECTS, N_TEAMS))
         oric_to_eq_constraint_m_pure = oric_to_eq_constraint_m_pure.astype(np_impa_lib)

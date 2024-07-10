@@ -4,14 +4,12 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-# from impalib import *
-from knapsack import Knapsack
-from update_equality_constraint import EqualityConstraintKcMwm
-from input_output import OutputsKcMwm
-from project_inequality_constraint import InequalityConstraint
-from update_or_inequality_constraint import OrInequalityConstraint
 from environmentModule import np, np_impa_lib, deepcopy, math, itertools, combinations
-
+from update_or_inequality_constraint import OrInequalityConstraint
+from update_equality_constraint import EqualityConstraintKcMwm
+from project_inequality_constraint import InequalityConstraint
+from input_output import OutputsKcMwm
+from knapsack import Knapsack
 from initializationModule import (
     fighters_count,
     weasels_count,

@@ -90,6 +90,7 @@ if __name__ == "__main__":
         IM_VARIANCE,
         OVERWRITE,
     )
+    
     # Set folder paths for inputs and outputs
     folder_inputs = "../../data/" + input_path
 

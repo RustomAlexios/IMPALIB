@@ -7,13 +7,13 @@ np_impa_lib = np.float64
 f_path_pure  = 'extrinsic_output_package_pure'
 f_path_wrapper  = 'extrinsic_output_package_wrapper'
 
-file_array_pure = open(f_path_pure, 'rb');
-y_pure = np.load(file_array_pure);
+file_array_pure = open(f_path_pure, 'rb')
+y_pure = np.load(file_array_pure)
 
 #file_array_wrapper = open(f_path_wrapper, 'rb');
 #y_wrapper = np.load(file_array_wrapper, allow_pickle=False);
 
-y_wrapper = np.fromfile(f_path_wrapper, dtype=np_impa_lib);
+y_wrapper = np.fromfile(f_path_wrapper, dtype=np_impa_lib)
 
 ut_failed = True
 y_pure = y_pure.flatten()

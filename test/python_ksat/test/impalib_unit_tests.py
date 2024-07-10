@@ -4,10 +4,10 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-import ut_input_output
 import ut_update_ksat_constraint
 import ut_update_equality_constraint
 import ut_graphical_model
+import ut_input_output
 from environmentModule import *
 
 def create_incoming_metrics_cost(num_variables, num_constraints, k_variable, var, type_metrics = 1):

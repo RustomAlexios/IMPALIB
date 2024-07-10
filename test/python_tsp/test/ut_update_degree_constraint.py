@@ -5,11 +5,8 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
 sys.path.append(sys.path[0] + "/../src")
-
 import update_degree_constraint as degree_constraint
-
 from ut_utils import *
 
 

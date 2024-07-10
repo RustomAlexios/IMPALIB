@@ -1,21 +1,23 @@
-# Simple Impalib Build Stage GitHub Workflow
-# Version: 0.1.0
+# Simple Impalib GitHub Action (CI Pipeline)
+# Version: 0.2.0
 
-name: Impalib Build
+name: Impalib CI
 
 on:
   pull_request:
     types:
-      - opened 
+      - opened
+      - synchronize
+      - reopened
+      - closed
 
 jobs:
   build:
-    name: Impalib Build Job
+    name: Build Job
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
         os: [ubuntu-latest, macos-latest]
-
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -25,6 +27,15 @@ jobs:
       run: |
             python3 -m pip install --user . -v
             echo "Project built successfully."
+  
+  lint:
+    name: Lint Job
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.9'
     - name: Lint Python Code
       run: |
             pip install ruff

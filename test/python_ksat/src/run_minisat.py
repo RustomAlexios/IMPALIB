@@ -4,12 +4,11 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
           
-import numpy as np
-import random
-import os
 import pickle as pkl
-from pysat.solvers import Minisat22
+import numpy as np
 import time
+import os
+from pysat.solvers import Minisat22
 
 def read_cnf_file(file_path, solver):
     constraints_connections = []
@@ -63,12 +62,10 @@ def read_cnf_file(file_path, solver):
                     k_variable = len(connections)
                 elif k_variable != len(connections):
                     raise ValueError("All constraints must have the same number of variables.")
-                
-                
+                            
     used_variables = list(set(used_variables))
     
     return num_variables, num_constraints, constraints_connections, constraints_connections_type, used_variables, variables_connections, k_variable, variables_connections_type, solver
-
 
 if __name__ == "__main__":
     np_impa_lib = np.float32

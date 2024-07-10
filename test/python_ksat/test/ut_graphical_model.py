@@ -5,18 +5,15 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
 sys.path.append(sys.path[0] + "/../src")
-
 import graphical_model as model_graph
-
 from ut_utils import *
 
 
 def ut_model_graph(ut_name, n_variables, n_constraints, filt_flag, alpha, threshold, n_iter, k_variable):
     
     print("-------")
-    print("Python Pure");
+    print("Python Pure")
     
     NUM_VARIABLES = n_variables
     NUM_CONSTRAINTS = n_constraints
@@ -100,4 +97,3 @@ def ut_model_graph(ut_name, n_variables, n_constraints, filt_flag, alpha, thresh
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, extrinsic_out_variable_ec_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
-

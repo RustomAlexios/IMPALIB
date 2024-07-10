@@ -5,13 +5,13 @@
 #  https://opensource.org/licenses/MIT)
 
 import ut_update_or_inequality_constraint
-import ut_update_equality_constraint
 import ut_project_inequality_constraint
+import ut_update_equality_constraint
+import ut_graphical_model
 import ut_input_output
 import ut_knapsack
-import ut_graphical_model
-from environmentModule import np, np_impa_lib, argparse
 
+from environmentModule import np, np_impa_lib, argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--sub_test_num", type=int, default=1, help="Sub-Test of Unit Test")
@@ -42,6 +42,7 @@ if __name__ == "__main__":
     N_TEAMS = args.nTeams
     N_PROJECTS = args.nProjects
     N_ITER = args.nIter
+    
     if N_TEAMS != N_PROJECTS:
         unbalanced_flag = True
     else:

@@ -5,7 +5,6 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
 sys.path.append(sys.path[0] + "/../src")
 import update_or_inequality_constraint as oric
 from environmentModule import os, np, np_impa_lib

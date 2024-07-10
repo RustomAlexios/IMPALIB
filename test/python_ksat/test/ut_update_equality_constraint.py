@@ -5,13 +5,10 @@
 #  https://opensource.org/licenses/MIT)
 
 import sys
-
 sys.path.append(sys.path[0] + "/../src")
-
 import update_equality_constraint as equality_constraint
-
 from ut_utils import *
-    
+
 
 def ut_equality_constraint(
     ut_name,
@@ -82,5 +79,3 @@ def ut_equality_constraint(
         output_file_python_pure = open(f_output_path, "wb")
         np.save(output_file_python_pure, variable_ec_to_ksat_constraint_m_pure.flatten(), allow_pickle=True)
         output_file_python_pure.close()
-
-
