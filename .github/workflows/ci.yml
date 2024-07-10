@@ -67,6 +67,11 @@ jobs:
             python3 -m pip install --user . -v
             cd src/impa
             python3 main_kc_mwm.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001
+            python3 main_tsp.py --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --inputPath=inputs_1000_nNodes_random --testFile=0 --lkhSolFlag=True --maxAugmCount=10
+            python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True --lkhSolFlag=True --maxAugmCount=20
+            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --inputPath=inputs_ksat_zeromean_var_10_samples_500 --outputPath=outputs_ksat_zeromean_var_10_samples_500 --PPElements=2 --testFile=112 --alpha=0.5 --var=8 --typeMetrics=2 --overwrite=1 --PPFlag=True
+            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
+            
             # cd test/python_ksat/src && echo "Ksat Python Demo:"
             # python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
             # cd ../.. && cd python_tsp/src && echo "Tsp Python Demo:"
