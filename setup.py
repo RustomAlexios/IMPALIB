@@ -15,6 +15,6 @@ setup(
     package_dir={"": "src", "": "test"},
     packages=['impa', 'python_tsp'],
     python_requires=">=3.9",
-    install_requires=["bitstring", "tqdm", "numpy", "elkai"],
+    install_requires=["bitstring", "tqdm", "numpy", "elkai", "python_tsp"],
     scripts=["src/impa/main_kc_mwm.py"]
 )
