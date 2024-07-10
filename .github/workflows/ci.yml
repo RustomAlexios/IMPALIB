@@ -1,5 +1,5 @@
 # Simple Impalib GitHub Action (CI Pipeline)
-# Version: 0.2.0
+# Version: 0.3.0
 
 name: Impalib CI
 
@@ -54,7 +54,7 @@ jobs:
         python-version: '3.9'
         cache: 'pip'
         cache-dependency-path: setup.py
-    - name: Run Unit Tests
+    - name: Run Demos
       run: |
             python3 -m pip install --user . -v
             cd examples/KcMwm && cmake -B build && cmake --build build && cd build && ./demo
