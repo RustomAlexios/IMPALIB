@@ -40,3 +40,25 @@ jobs:
       run: |
             pip install ruff
             ruff check
+
+  test:
+    name: Unit Test Job
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.9'
+        cache: 'pip'
+        cache-dependency-path: setup.py
+    - name: Run Unit Tests
+      run: |
+            python -m pip install --user . -v
+            cmake -B build && cmake --build build && cd build/test/src
+            ./unit_test_kc_mwm.sh
+            ./unit_test_tsp.sh
+            ./unit_test_ksat.sh
+            echo "Unit tests completed successfully."
