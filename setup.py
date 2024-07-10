@@ -12,8 +12,8 @@ setup(
     description="A package for MPA-based solvers to linear programs",
     author='BP-OPT Team',
     license="MIT",
-    package_dir={"": "src"},
-    packages=['impa'],
+    package_dir={"": "src", "": "test"},
+    packages=['impa', 'python_tsp'],
     python_requires=">=3.9",
     install_requires=["bitstring", "tqdm", "numpy", "elkai"],
     scripts=["src/impa/main_kc_mwm.py"]
