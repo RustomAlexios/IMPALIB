@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [macos-latest, ubuntu-latest]
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -39,67 +39,130 @@ jobs:
             pip install ruff
             ruff check
 
-  demo:
-    name: Demo Job
+  kcmwm-demo-job:
+    name: Kcmwm Job
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [macos-latest, ubuntu-latest]
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with: 
         python-version: '3.9'
-        cache: 'pip'
-        cache-dependency-path: setup.py
-    - name: Run CPP Demos
+    - name: CPP Header-Only Code
       run: |
-            python3 -m pip install --user . -v
-            cd examples/KcMwm && echo "KcMwm CPP Demo:"  
-            cmake -B build && cmake --build build && cd build 
-            ls 
-            # && ./demo
-            # cd ../.. && cd Tsp && echo "Tsp CPP Demo:"
-            # cmake -B build && cmake --build build && cd build && ./demo
-            # cd ../.. && cd Ksat && echo "Ksat CPP Demo:" 
-            # cmake -B build && cmake --build build && cd build && ./demo
-            # echo "CPP Demos executed successfully."
-    - name: Run Python Demos
+            python3 -m pip install --user .
+            cd examples/KcMwm
+            cmake -B build && cmake --build build && cd build && ./demo
+    - name: Pure Python Code
       run: |
-            python3 -m pip install --user . -v
+            cd test/python_kc_mwm/src
+            python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
+    - name: Python (CPP) Wrapper Code
+      run: |
             cd src/impa
-            echo "Python (CPP) Wrapper Demos:"
             python3 main_kc_mwm.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --PPOption=1 --threshold=-0.0001
+  
+  tsp-demo-job:
+    name: Tsp Job
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.9'
+    - name: CPP Header-Only Code
+      run: |
+            python3 -m pip install --user .
+            cd examples/Tsp
+            cmake -B build && cmake --build build && cd build && ./demo
+    - name: Pure Python Code
+      run: |
+            cd test/python_tsp/src
+            python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True
+    - name: Python (CPP) Wrapper Code
+      run: |
+            cd src/impa
             python3 main_tsp.py --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --inputPath=inputs_1000_nNodes_random --testFile=0 --lkhSolFlag=True --maxAugmCount=10
             python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True --lkhSolFlag=True --maxAugmCount=20
-            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --inputPath=inputs_ksat_zeromean_var_10_samples_500 --outputPath=outputs_ksat_zeromean_var_10_samples_500 --PPElements=2 --testFile=112 --alpha=0.5 --var=8 --typeMetrics=2 --overwrite=1 --PPFlag=True
-            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
-            cd ../.. && cd test/python_ksat/src && echo "Ksat Python Demo:"
-            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
-            cd ../.. && cd python_tsp/src && echo "Tsp Python Demo:"
-            python3 main_tsp.py --nNodes=10 --filteringFlag=True --alpha=0.5 --augmFlag=True --threshold=-0.0001 --nITER=200 --randomTestFlag=True
-            cd ../.. && cd python_kc_mwm/src && echo "KcMwm Python Demo:"
-            python3 main_pure_optimized.py --nITER=400 --filteringFlag=True --alpha=0.9 --PPFlag=True --threshold=-0.0001
-            echo "Python Demos executed successfully."
-
-  test:
-    name: Unit Test Job
+            
+  ksat-demo-job: 
+    name: Ksat Job
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [macos-latest, ubuntu-latest]
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with: 
         python-version: '3.9'
-        cache: 'pip'
-        cache-dependency-path: setup.py
-    - name: Run Unit Tests
+    - name: CPP Header-Only Code
       run: |
-            python3 -m pip install --user . -v
+            python3 -m pip install --user .
+            cd examples/Ksat
+            cmake -B build && cmake --build build && cd build && ./demo
+    - name: Pure Python Code
+      run: |
+            cd test/python_ksat/src
+            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
+    - name: Python (CPP) Wrapper Code
+      run: |
+            cd src/impa
+            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --inputPath=inputs_ksat_zeromean_var_10_samples_500 --outputPath=outputs_ksat_zeromean_var_10_samples_500 --PPElements=2 --testFile=112 --alpha=0.5 --var=8 --typeMetrics=2 --overwrite=1 --PPFlag=True
+            python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
+
+  ksat-test-job:
+    name: Ksat Unit Test Job
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.9'
+    - name: Run Ksat Unit Tests
+      run: |
+            python3 -m pip install --user .
+            cmake -B build && cmake --build build && cd build/test/src
+            ./unit_test_ksat.sh
+
+  tsp-test-job:
+    name: Tsp Unit Test Job
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.9'
+    - name: Run Tsp Unit Tests
+      run: |
+            python3 -m pip install --user .
+            cmake -B build && cmake --build build && cd build/test/src
+            ./unit_test_tsp.sh
+
+  kcmwm-test-job:
+    name: Kcmwm Unit Test Job
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with: 
+        python-version: '3.9'
+    - name: Run Kcmwm Unit Tests
+      run: |
+            python3 -m pip install --user .
             cmake -B build && cmake --build build && cd build/test/src
             ./unit_test_kc_mwm.sh
-            ./unit_test_tsp.sh
-            ./unit_test_ksat.sh
-            echo "Unit tests completed successfully."
