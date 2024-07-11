@@ -56,12 +56,14 @@ jobs:
       run: |
             python3 -m pip install --user . -v
             cd examples/KcMwm && echo "KcMwm CPP Demo:"  
-            cmake -B build && cmake --build build && cd build && ls # && ./demo
-            #cd ../.. && cd Tsp && echo "Tsp CPP Demo:"
-            #cmake -B build && cmake --build build && cd build && ./demo
-            #cd ../.. && cd Ksat && echo "Ksat CPP Demo:" 
-            #cmake -B build && cmake --build build && cd build && ./demo
-            #echo "CPP Demos executed successfully."
+            cmake -B build && cmake --build build && cd build 
+            ls 
+            # && ./demo
+            # cd ../.. && cd Tsp && echo "Tsp CPP Demo:"
+            # cmake -B build && cmake --build build && cd build && ./demo
+            # cd ../.. && cd Ksat && echo "Ksat CPP Demo:" 
+            # cmake -B build && cmake --build build && cd build && ./demo
+            # echo "CPP Demos executed successfully."
     - name: Run Python Demos
       run: |
             python3 -m pip install --user . -v
