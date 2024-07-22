@@ -25,14 +25,18 @@ def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, r
     else:
         ut_failed = False
 
-    if ut_failed:
-        print(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}")
-        # print('y_p: ', y_pure)
-        # print('y_w: ', y_wrapper)
-    else:
-        print(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}")
-        # print('y_p: ', y_pure)
-        # print('y_w: ', y_wrapper)
+    with open("kcmwm.txt", "a") as file:
+        if ut_failed:
+            print(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}")
+            file.write(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}\n")
+            # print("y_p: ", y_pure)
+            # print("y_w: ", y_wrapper)
+        else:
+            print(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}")
+            file.write(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}\n")
+            # print('y_p: ', y_pure)
+            # print('y_w: ', y_wrapper)
+    file.close()
 
 def check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=1e-05, atol=1e-08):
     regex = re.compile(r"\d+")
@@ -75,10 +79,14 @@ def check_forward_backward_results(sub_test_num, total_sub_tests, ut_name, rtol=
         # if (np.allclose(y_pure, y_wrapper, rtol=rtol, atol = atol)):
         #    flag_failed = False
 
-    if any(ut_failed):
-        print(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}")
-    else:
-        print(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}")
+    with open("kcmwm.txt", "a") as file:
+        if any(ut_failed):
+            print(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}")
+            file.write(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}\n")
+        else:
+            print(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}")
+            file.write(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {np.max(max_absolute_error):.4e}, Max. Rel. Error: {np.max(max_relative_error):.4e}\n")
+        file.close()
 
 def prune_teams(N_u):
     units = range(1, len(N_u) + 1)
