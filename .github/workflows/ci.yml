@@ -164,8 +164,9 @@ jobs:
     - name: Run Ksat Unit Tests
       run: |
             python3 -m pip install --user .
-            cmake -B build && cmake --build build && cd build/test/src
+            rm -rf build && cmake -B build && cmake --build build && cd build/test/src
             ./unit_test_ksat.sh
+            grep -q "FAILED" ksat.txt && exit 1 || exit 0
 
   tsp-test-job:
     name: Tsp Unit Test Job
@@ -181,8 +182,9 @@ jobs:
     - name: Run Tsp Unit Tests
       run: |
             python3 -m pip install --user .
-            cmake -B build && cmake --build build && cd build/test/src
+            rm -rf build && cmake -B build && cmake --build build && cd build/test/src
             ./unit_test_tsp.sh
+            grep -q "FAILED" tsp.txt && exit 1 || exit 0
 
   kcmwm-test-job:
     name: Kcmwm Unit Test Job
@@ -198,5 +200,6 @@ jobs:
     - name: Run Kcmwm Unit Tests
       run: |
             python3 -m pip install --user .
-            cmake -B build && cmake --build build && cd build/test/src
+            rm -rf build && cmake -B build && cmake --build build && cd build/test/src
             ./unit_test_kc_mwm.sh
+            grep -q "FAILED" kcmwm.txt && exit 1 || exit 0
