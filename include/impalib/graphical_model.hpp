@@ -60,7 +60,7 @@ class GraphicalModelKcMwm {
  */
 
 inline GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS, const int MAX_SIZE_NON_ZERO_WEIGHTS, const int N_ITERATIONS, const bool FILT_FLAG,
-                                         const impalib_type ALPHA)
+                                                const impalib_type ALPHA)
     : modelInputs_(N_DEPARTMENTS, N_TEAMS, N_PROJECTS, MAX_SIZE_NON_ZERO_WEIGHTS),
       outputs(N_DEPARTMENTS, N_TEAMS, N_PROJECTS),
       modelKnapsacks_(N_DEPARTMENTS, N_TEAMS, FILT_FLAG, ALPHA),
@@ -122,8 +122,8 @@ inline GraphicalModelKcMwm::GraphicalModelKcMwm(const int N_DEPARTMENTS, const i
  *
  */
 
-inline void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pITEMS_WEIGHTS_PER_DEPARTMENT_PY, const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
-                                     const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
+inline void GraphicalModelKcMwm::initialize(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pITEMS_WEIGHTS_PER_DEPARTMENT_PY,
+                                            const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
     /// calls a method process_inputs() on an object modelInputs_, passing
     /// several pointers to Python objects as arguments
     modelInputs_.process_inputs(pREWARD_TEAM_PY, pTransition_model_py, pITEMS_WEIGHTS_PER_DEPARTMENT_PY, pNON_ZERO_WEIGHT_INDICES_SIZES_PY, p_NON_ZERO_WEIGHT_INDICES_PY, pREWARD_PROJECT_PY,
@@ -198,10 +198,10 @@ class GraphicalModelTsp {
     vector<vector<impalib_type>> subtourConstraints2EdgeEcDummyM_;      ///< messages from subtour constraints to edge equality constraint before filtering
     vector<vector<impalib_type>> edgeEc2SubtourConstraintsM_;           ///< messages from edge equality constraint to subtour constraints
     void iterate_augmented_graph();                                     ///< function of IMPA on augmented graph
-    void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                    ///< analysis of subtour constraints
+    void subtour_elimination_constraints_analysis(unordered_map<int, vector<int>> &, const vector<vector<int>> &);              ///< analysis of subtour constraints
     void hard_decision_analysis(vector<vector<int>> &);                                                                         ///< function for hard decision solution on IMPA solution
-    static bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                          ///< function for post-processing loops
-    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                             ///< function for getting loops
+    static bool isSubsequence(const vector<int> &, const vector<int> &, int);                                                   ///< function for post-processing loops
+    vector<vector<int>> get_closed_loops(unordered_map<int, vector<int>> &, const vector<vector<int>> &);                       ///< function for getting loops
     vector<int> find_closed_loop(unordered_map<int, vector<int>> &, int, int, unordered_set<int>, vector<int>, vector<int> &);  ///< function for finding loops
     InputsTsp modelInputs_;                                                                                                     ///< Graphical Model Input object
     vector<vector<int>> selectedEdges_;                                                                                         ///< activated edges of IMPA
@@ -223,10 +223,10 @@ class GraphicalModelTsp {
     OutputsTsp outputs;                                                                                              ///< TSP graphical model outputs object
     void initialize(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *);  ///< initialize graphical model
     void iterate_relaxed_graph();                                                                                    ///< iterate over relaxed graphical model
-    void perform_augmentation(int);                                                                            ///< perform augmentation on graphical model
+    void perform_augmentation(int);                                                                                  ///< perform augmentation on graphical model
     void process_ouputs(impalib_type *, int *, int *, int *, impalib_type *, bool *, bool *, bool *, int *, int *, int *, int *);  ///< process outputs of Graphical Model
-    GraphicalModelTsp(int NUM_ITERATIONS, int NUM_NODES, int NUM_EDGE_VARIABLES, bool AUGMENTATION_FLAG, bool RESET_FLAG, bool FILTERING_FLAG,
-                       impalib_type ALPHA, impalib_type THRESHOLD, int MAX_COUNT);  ///< Constructor
+    GraphicalModelTsp(int NUM_ITERATIONS, int NUM_NODES, int NUM_EDGE_VARIABLES, bool AUGMENTATION_FLAG, bool RESET_FLAG, bool FILTERING_FLAG, impalib_type ALPHA, impalib_type THRESHOLD,
+                      int MAX_COUNT);  ///< Constructor
 };
 
 /**
@@ -246,7 +246,7 @@ class GraphicalModelTsp {
  */
 
 inline GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int NUM_NODES, const int NUM_EDGE_VARIABLES, const bool AUGMENTATION_FLAG, const bool RESET_FLAG, const bool FILTERING_FLAG,
-                                     const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT)
+                                            const impalib_type ALPHA, const impalib_type THRESHOLD, const int MAX_COUNT)
     : modelDegreeConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
       modelEqConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
       modelSubtourEliminationConstraint_(NUM_NODES, NUM_EDGE_VARIABLES, FILTERING_FLAG, ALPHA),
@@ -300,8 +300,8 @@ inline GraphicalModelTsp::GraphicalModelTsp(const int NUM_ITERATIONS, const int 
  *
  */
 
-inline void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, impalib_type *pEdge_ec_to_degree_constraint_m_py,
-                                   const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
+inline void GraphicalModelTsp::initialize(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY,
+                                          impalib_type *pEdge_ec_to_degree_constraint_m_py, const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
     // Populate model data
     modelInputs_.process_inputs(pEDGE_CONNECTIONS_PY, pCOST_EDGE_VARIABLE_PY, pCOST_MATRIX_PY, pEdge_ec_to_degree_constraint_m_py, pEDGE_DEGREE_CONSTRAINT_COST_PY);
 }
@@ -409,8 +409,8 @@ inline void GraphicalModelTsp::perform_augmentation(const int MAX_AUGM_COUNT) {
  */
 
 inline void GraphicalModelTsp::process_ouputs(impalib_type *pExtrinsic_output_edge_ec, int *pNum_augmentations, int *pNum_added_constraints, int *pTour_impa, impalib_type *pCost_impa,
-                                       bool *pNo_improv_sol_count_exc_flag, bool *pNo_cons_loops_count_exc_flag, bool *pSol_osc_count_exc_flag, int *pSelected_edges, int *pSelected_edges_size,
-                                       int *pSubtour_paths, int *pSubtour_paths_size) {
+                                              bool *pNo_improv_sol_count_exc_flag, bool *pNo_cons_loops_count_exc_flag, bool *pSol_osc_count_exc_flag, int *pSelected_edges, int *pSelected_edges_size,
+                                              int *pSubtour_paths, int *pSubtour_paths_size) {
     // Copy extrinsic output for edge equality constraints
     copy(outputs.ExtrinsicOutputEdgeEc.begin(), outputs.ExtrinsicOutputEdgeEc.begin() + numEdgeVariables_, pExtrinsic_output_edge_ec);
     *pNum_augmentations = numAugmentations_;
@@ -823,7 +823,8 @@ inline bool GraphicalModelTsp::isSubsequence(const vector<int> &seq, const vecto
  * between the nodes (if a tour is found, )
  *
  */
-inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> &rGraph, const int start_node, const int current, unordered_set<int> visited, vector<int> path, vector<int> &visited_nodes) {
+inline vector<int> GraphicalModelTsp::find_closed_loop(unordered_map<int, vector<int>> &rGraph, const int start_node, const int current, unordered_set<int> visited, vector<int> path,
+                                                       vector<int> &visited_nodes) {
     visited.insert(current);
     path.push_back(current);
 
@@ -870,7 +871,7 @@ class GraphicalModelKsat {
     KsatConstraint modelKsatConstraint_;    ///< ksat constraint object
 
    public:
-    InputsKsat modelInputs_;                ///< input object
+    InputsKsat modelInputs_;                                          ///< input object
     vector<vector<impalib_type>> KsatConstraint2EqConstraintDummyM_;  ///< messages from ksat constraints to equality constraints before filtering
     vector<vector<impalib_type>> KsatConstraint2EqConstraintM_;       ///< messages from ksat constraints to equality constraints after filtering
     OutputsKsat outputs;                                              ///< output object
@@ -894,7 +895,7 @@ class GraphicalModelKsat {
  */
 
 inline GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, const int NUM_CONSTRAINTS, const int K_VARIABLE, const bool FILTERING_FLAG, const impalib_type ALPHA,
-                                       const int NUM_USED_VARIABLES)
+                                              const int NUM_USED_VARIABLES)
     : modelInputs_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, numUsedVariables_),
       modelEqConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
       modelKsatConstraint_(NUM_VARIABLES, NUM_CONSTRAINTS, K_VARIABLE, FILTERING_FLAG, ALPHA),
@@ -924,7 +925,7 @@ inline GraphicalModelKsat::GraphicalModelKsat(const int NUM_ITERATIONS, const in
  */
 
 inline void GraphicalModelKsat::initialize(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
-                                    const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
+                                           const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
     /// calls a method process_inputs() on an object modelInputs_, passing
     /// several pointers to Python objects as arguments
     modelInputs_.process_inputs(pUSED_VARIABLES_PY, pVARIABLES_CONNECTIONS_PY, pVARIABLES_CONNECTIONS_SIZES, pCONSTRAINTS_CONNECTIONS, pCONSTRAINTS_CONNECTIONS_TYPE, pINCOMING_METRICS_COST,

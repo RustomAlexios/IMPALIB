@@ -15,7 +15,7 @@ vector<int> take_int(string& str) {
     vector<int> result;
     char ch = '\0';
     int tmp = 0;
-    while(ss >> tmp) {
+    while (ss >> tmp) {
         result.push_back(tmp);
         ss >> ch;
     }
