@@ -44,9 +44,9 @@ class OutputsKcMwm {
     vector<impalib_type> ExtrinsicOutputTeam;  ///< extrinsic output of team equality constraints
     vector<impalib_type> IntrinsicOutMwm;      ///< intrinsic outputs of project equality constraint
     void intrinsic_out_mwm_update(const vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &,
-                                  const vector<vector<impalib_type>> &);                              ///< calculate intrinsic outputs of project equality constraints
+                                  const vector<vector<impalib_type>> &);                        ///< calculate intrinsic outputs of project equality constraints
     void extrinsic_output_team_update(vector<vector<impalib_type>> &, vector<impalib_type> &);  ///< calculate extrinsic output of team equality constraints
-    OutputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);             ///< constructor
+    OutputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);                               ///< constructor
 };
 
 /**
@@ -88,8 +88,8 @@ inline InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, cons
  *
  */
 
-inline void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY, const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
-                                 const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
+inline void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
+                                        const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
     copy(pREWARD_TEAM_PY, pREWARD_TEAM_PY + numTeams_, back_inserter(RewardTeam));
     copy(pMAX_STATE_PY, pMAX_STATE_PY + numDepartments_, back_inserter(MaxState));
 
@@ -135,7 +135,8 @@ inline OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, co
  *
  */
 
-inline void OutputsKcMwm::intrinsic_out_mwm_update(const vector<vector<impalib_type>> &rOric2EqConstraintM, const vector<vector<impalib_type>> &rProject2EqConstraintM, const vector<vector<impalib_type>> &rRewardProject) {
+inline void OutputsKcMwm::intrinsic_out_mwm_update(const vector<vector<impalib_type>> &rOric2EqConstraintM, const vector<vector<impalib_type>> &rProject2EqConstraintM,
+                                                   const vector<vector<impalib_type>> &rRewardProject) {
     for (int project_index = 0; project_index < rRewardProject.size(); project_index++) {
         for (int team_index = 0; team_index < rRewardProject[project_index].size(); team_index++) {
             IntrinsicOutMwm[project_index + team_index + project_index * (numTeams_ - 1)] =
@@ -207,7 +208,7 @@ class OutputsTsp {
     void extrinsic_output_edge_ec_augmented_graph_update(vector<vector<impalib_type>> &,
                                                          vector<vector<impalib_type>> &);  ///< calculate extrinsic output of edge equality constraint for augmented TSP
     void intrinsic_output_edge_ec_update(vector<impalib_type> &);                          ///< calculate intrinsic output of edge equality constraint for augmented TSP
-    OutputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);                         ///< constructor
+    OutputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);                                     ///< constructor
 };
 
 /**
@@ -239,8 +240,8 @@ inline OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES)
  *
  */
 
-inline void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, impalib_type *pEdge_ec_to_degree_constraint_m_py,
-                               const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
+inline void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY,
+                                      impalib_type *pEdge_ec_to_degree_constraint_m_py, const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
     copy(pCOST_EDGE_VARIABLE_PY, pCOST_EDGE_VARIABLE_PY + numEdgeVariables_, back_inserter(CostEdgeVariable));
 
     for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++) {
@@ -357,9 +358,9 @@ class OutputsKsat {
     int kVariable_;       ///< number of variables per constraint
 
    public:
-    vector<impalib_type> ExtrinsicOutputVariableEc;                                         ///< extrinsic messages of variables equality constraints
+    vector<impalib_type> ExtrinsicOutputVariableEc;                       ///< extrinsic messages of variables equality constraints
     OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE);  ///< constructor
-    void update_extrinsic(const vector<vector<impalib_type>> &);                                  ///< calculate extrinsic messages of variables equality constraints
+    void update_extrinsic(const vector<vector<impalib_type>> &);          ///< calculate extrinsic messages of variables equality constraints
 };
 
 /**
@@ -388,7 +389,7 @@ inline OutputsKsat::OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VA
  */
 
 inline void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
-                                const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
+                                       const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
     copy(pUSED_VARIABLES_PY, pUSED_VARIABLES_PY + numUsedVariables_, back_inserter(UsedVariables));
 
     copy(pINCOMING_METRICS_COST, pINCOMING_METRICS_COST + numVariables_, back_inserter(IncomingMetricsCost));
