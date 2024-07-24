@@ -9,13 +9,12 @@
 #include <limits>
 #include <string>
 //#include <bits/stdc++.h>
-#include <typeinfo>
-#include <chrono>
-#include <iostream>
-#include <vector>
-#include<fstream>
 #include <algorithm>
-#include <numeric>
+#include <chrono>
+#include <fstream>
 #include <functional>
+#include <iostream>
+#include <numeric>
+#include <typeinfo>
+#include <vector>
 using namespace std;
-
