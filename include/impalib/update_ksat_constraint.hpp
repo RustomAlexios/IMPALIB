@@ -19,13 +19,13 @@ class KsatConstraint {
     bool filteringFlag_;                                          ///< filtering flag
     impalib_type alpha_;                                          ///< filtering parameter
     vector<vector<impalib_type>> ksatConstraint2EqConstraintOld;  ///< messages from k-sat constraints to equality constraints before filtering
-    //impalib_type                 initial_forward_message_ = value_inf; ///< initial forward message of forward-backward algorithm
-    //impalib_type                 initial_backward_message_ = zero_value; ///< initial backward message of forward-backward algorithm
-    int maxState_ = 1; 
+    // impalib_type                 initial_forward_message_ = value_inf; ///< initial forward message of forward-backward algorithm
+    // impalib_type                 initial_backward_message_ = zero_value; ///< initial backward message of forward-backward algorithm
+    int maxState_ = 1;
 
    public:
     void ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &,
-                                               const vector<vector<int>> &) const;                            ///< update messages from k-sat constraints to equality constraints
+                                               const vector<vector<int>> &) const;                ///< update messages from k-sat constraints to equality constraints
     void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering
 
     KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG,
@@ -61,9 +61,8 @@ inline KsatConstraint::KsatConstraint(const int NUM_VARIABLES, const int NUM_CON
  */
 
 inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &rVariableEc2KsatConstraintM, vector<vector<impalib_type>> &rKsatConstraint2EqConstraintDummyM_,
-                                                           const vector<vector<int>> &rConstraintsConnections, const vector<vector<int>> &rConstraintsConnectionsType) const {
-
-    for(auto& row : rKsatConstraint2EqConstraintDummyM_) {
+                                                                  const vector<vector<int>> &rConstraintsConnections, const vector<vector<int>> &rConstraintsConnectionsType) const {
+    for (auto &row : rKsatConstraint2EqConstraintDummyM_) {
         row.assign(row.size(), zero_value);
     }
 
@@ -71,57 +70,51 @@ inline void KsatConstraint::ksat_constraint_to_variable_ec_update(const vector<v
     vector<vector<impalib_type>> stage_backward_messages(kVariable_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
 
     for (int c = 0; c < numConstraints_; ++c) {
-
         auto &conx = rConstraintsConnections[c];
         auto &conx_type = rConstraintsConnectionsType[c];
 
-        vector<impalib_type> initial_forward_messages(maxState_ + 1, zero_value),
-            initial_backward_messages(maxState_ + 1, zero_value);
+        vector<impalib_type> initial_forward_messages(maxState_ + 1, zero_value), initial_backward_messages(maxState_ + 1, zero_value);
 
         fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
 
         stage_forward_messages[0] = initial_forward_messages;
 
-        for (int stage = 0; stage < kVariable_; stage++)
-        {
+        for (int stage = 0; stage < kVariable_; stage++) {
             stage_forward_messages[stage + 1][0] = stage_forward_messages[stage][0];
-            stage_forward_messages[stage + 1][1] =
-                min(stage_forward_messages[stage][1] + min(zero_value,rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]), stage_forward_messages[stage][0]+rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]);
+            stage_forward_messages[stage + 1][1] = min(stage_forward_messages[stage][1] + min(zero_value, rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage]),
+                                                       stage_forward_messages[stage][0] + rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage]);
         }
 
         stage_backward_messages[kVariable_] = initial_backward_messages;
 
-        for (int stage = kVariable_ - 1; stage >= 0; stage--)
-        {
-            if (stage == kVariable_ - 1){
-                stage_backward_messages[stage][0] = rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage];
+        for (int stage = kVariable_ - 1; stage >= 0; stage--) {
+            if (stage == kVariable_ - 1) {
+                stage_backward_messages[stage][0] = rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage];
+            } else {
+                stage_backward_messages[stage][0] = min(stage_backward_messages[stage + 1][0], stage_backward_messages[stage + 1][1] + rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage]);
             }
-            else{
-                stage_backward_messages[stage][0] = min(stage_backward_messages[stage + 1][0], stage_backward_messages[stage + 1][1]+rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]);
-            }
-            stage_backward_messages[stage][1] = min(stage_backward_messages[stage+1][1], stage_backward_messages[stage+1][1]+ rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage]);
+            stage_backward_messages[stage][1] = min(stage_backward_messages[stage + 1][1], stage_backward_messages[stage + 1][1] + rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage]);
         }
 
         impalib_type min_dashed_edges = zero_value;
         impalib_type min_solid_edges = zero_value;
 
-        for (int stage = 0; stage < kVariable_; stage++)
-        {
-            min_solid_edges = min(stage_forward_messages[stage][0] + stage_backward_messages[stage+1][1] + rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage], stage_forward_messages[stage][1] + rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage] + stage_backward_messages[stage+1][1]);
-            
-            if (stage == kVariable_-1){
-                min_dashed_edges = stage_forward_messages[stage][1] + stage_backward_messages[stage+1][1];
+        for (int stage = 0; stage < kVariable_; stage++) {
+            min_solid_edges = min(stage_forward_messages[stage][0] + stage_backward_messages[stage + 1][1] + rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage],
+                                  stage_forward_messages[stage][1] + rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage] + stage_backward_messages[stage + 1][1]);
+
+            if (stage == kVariable_ - 1) {
+                min_dashed_edges = stage_forward_messages[stage][1] + stage_backward_messages[stage + 1][1];
+            } else {
+                min_dashed_edges = min(stage_forward_messages[stage][0] + stage_backward_messages[stage + 1][0], stage_forward_messages[stage][1] + stage_backward_messages[stage + 1][1]);
             }
-            else {
-                min_dashed_edges = min(stage_forward_messages[stage][0] + stage_backward_messages[stage+1][0], stage_forward_messages[stage][1] + stage_backward_messages[stage+1][1]);
-            }
-            
-            // The if statements checks (abs(rKsatConstraint2EqConstraintDummyM_[c][conx[stage]])< abs(((min_solid_edges  - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage])))
-            // were added to account for the fact that a variable could occur multiple times in a constraint,
-            // like the case of benchmarks, but in practice, a constraint should not have the same variable appearing more than once
-            // and thus these if statements checks can be removed
-            if (abs(rKsatConstraint2EqConstraintDummyM_[c][conx[stage]])< abs(((min_solid_edges  - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage]))){
-            rKsatConstraint2EqConstraintDummyM_[c][conx[stage]] = (min_solid_edges  - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage];
+
+            // The if statements checks (abs(rKsatConstraint2EqConstraintDummyM_[c][conx[stage]])< abs(((min_solid_edges  - min_dashed_edges -
+            // rVariableEc2KsatConstraintM[c][conx[stage]]*conx_type[stage])*conx_type[stage]))) were added to account for the fact that a variable could occur multiple times in a constraint, like the
+            // case of benchmarks, but in practice, a constraint should not have the same variable appearing more than once and thus these if statements checks can be removed
+            if (abs(rKsatConstraint2EqConstraintDummyM_[c][conx[stage]]) <
+                abs(((min_solid_edges - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage]) * conx_type[stage]))) {
+                rKsatConstraint2EqConstraintDummyM_[c][conx[stage]] = (min_solid_edges - min_dashed_edges - rVariableEc2KsatConstraintM[c][conx[stage]] * conx_type[stage]) * conx_type[stage];
             }
         }
     }
