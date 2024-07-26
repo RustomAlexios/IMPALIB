@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 

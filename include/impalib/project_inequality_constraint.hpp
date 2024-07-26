@@ -13,15 +13,15 @@
  */
 class InequalityConstraint {
    private:
-    int numProjects_;     ///< number of projects
-    int numTeams_;        ///< number of teams
-    int numDepartments_;  ///< number of departments
-    int maxStateIc_ = 1;  ///< maximum value of project inequality constraint (<=1)
+    int numProjects_;     // number of projects
+    int numTeams_;        // number of teams
+    int numDepartments_;  // number of departments
+    int maxStateIc_ = 1;  // maximum value of project inequality constraint (<=1)
 
    public:
     void project_inequality_constraint_update(const vector<vector<impalib_type>> &,
-                                              vector<vector<impalib_type>> &) const;  ///< calculate messages from project inequality constraint to project equality constraint
-    InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);             ///< constructor
+                                              vector<vector<impalib_type>> &) const;  // calculate messages from project inequality constraint to project equality constraint
+    InequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);             // constructor
 };
 
 /**

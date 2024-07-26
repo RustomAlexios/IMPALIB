@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
@@ -10,13 +10,13 @@
 
 class EqualityConstraint {
    private:
-    int numTeams_;          ///< number of teams
-    int numProjects_;       ///< number of projects
-    int numDepartments_;    ///< number of departments
-    int numNodes_;          ///< number of nodes
-    int numEdgeVariables_;  ///< number of edge connections
-    bool filteringFlag_;    ///< filtering flag
-    impalib_type alpha_;    ///< filtering parameter
+    int numTeams_;          // number of teams
+    int numProjects_;       // number of projects
+    int numDepartments_;    // number of departments
+    int numNodes_;          // number of nodes
+    int numEdgeVariables_;  // number of edge connections
+    bool filteringFlag_;    // filtering flag
+    impalib_type alpha_;    // filtering parameter
     int numVariables_;
     int numConstraints_;
     int kvariable_;
@@ -59,21 +59,21 @@ class EqualityConstraint {
           kvariable_(K_VARIABLE){};
 
     void team_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<impalib_type> &,
-                                           vector<impalib_type> &) const;  ///< calculate messages from team equality constraint to ORIC
+                                           vector<impalib_type> &) const;  // calculate messages from team equality constraint to ORIC
 
     static void project_eq_constraint_to_oric_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                                                     vector<vector<impalib_type>> &);  ///< calculate messages from project equality constraint to ORIC
+                                                     vector<vector<impalib_type>> &);  // calculate messages from project equality constraint to ORIC
 
     void edge_ec_to_degree_constraint_relaxed_graph_update(const vector<vector<int>> &, vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &,
-                                                           vector<vector<impalib_type>> &) const;  ///< calculate messages from edge to degree constraints for relaxed TSP
+                                                           vector<vector<impalib_type>> &) const;  // calculate messages from edge to degree constraints for relaxed TSP
 
-    static void flip_matrix(const vector<vector<impalib_type>> &, const vector<vector<int>> &, vector<vector<impalib_type>> &);  ///< flip matrix
+    static void flip_matrix(const vector<vector<impalib_type>> &, const vector<vector<int>> &, vector<vector<impalib_type>> &);  // flip matrix
     vector<vector<impalib_type>> edge_ec_to_subtour_constraints_update(const vector<vector<int>> &, const vector<impalib_type> &, const vector<vector<impalib_type>> &,
                                                                        const vector<vector<impalib_type>> &,
-                                                                       const vector<vector<int>> &) const;  ///< calculate message from edge to subtour constraint
+                                                                       const vector<vector<int>> &) const;  // calculate message from edge to subtour constraint
     void edge_ec_to_degree_constraint_augmented_graph_update(const vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &, const vector<vector<int>> &,
                                                              const vector<vector<impalib_type>> &,
-                                                             vector<vector<impalib_type>> &) const;  ///< calculate messages from edge to degree constraints for augmented TSP
+                                                             vector<vector<impalib_type>> &) const;  // calculate messages from edge to degree constraints for augmented TSP
 
     void variable_ec_to_ksat_constraint_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, vector<int> &, const vector<impalib_type> &, const vector<vector<int>> &) const;
 };

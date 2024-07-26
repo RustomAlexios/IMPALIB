@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
@@ -14,22 +14,22 @@
 
 class SubtourEliminationConstraint {
    private:
-    int numNodes_;                           ///< number of nodes
-    int numEdgeVariables_;                   ///< number of edges
-    bool filteringFlag_;                     ///< filtering flag
-    impalib_type alpha_;                     ///< filtering parameter
-    impalib_type initial_forward_message_;   ///< initial value of forward message using forward-backward algorithm
-    impalib_type initial_backward_message_;  ///< initial value of backward message using forward-backward algorithm
+    int numNodes_;                           // number of nodes
+    int numEdgeVariables_;                   // number of edges
+    bool filteringFlag_;                     // filtering flag
+    impalib_type alpha_;                     // filtering parameter
+    impalib_type initial_forward_message_;   // initial value of forward message using forward-backward algorithm
+    impalib_type initial_backward_message_;  // initial value of backward message using forward-backward algorithm
 
    public:
-    vector<vector<impalib_type>> subtourConstraints2EdgeEcOld_;  ///< messages from subtour constraints to edge equality constraint before filtering
+    vector<vector<impalib_type>> subtourConstraints2EdgeEcOld_;  // messages from subtour constraints to edge equality constraint before filtering
     void subtour_constraints_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
-                                               vector<vector<impalib_type>> &) const;  ///< calculate messages from subtour to edge equality constraints
+                                               vector<vector<impalib_type>> &) const;  // calculate messages from subtour to edge equality constraints
     void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                           const vector<vector<int>> &);  ///< perform filtering on messages from subtour to edge equality constraints
+                           const vector<vector<int>> &);  // perform filtering on messages from subtour to edge equality constraints
 
     SubtourEliminationConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
-                                 impalib_type ALPHA);  ///< constructor
+                                 impalib_type ALPHA);  // constructor
 };
 
 /**

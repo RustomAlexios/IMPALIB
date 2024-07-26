@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
@@ -13,18 +13,18 @@
  */
 class OrInequalityConstraint {
    private:
-    int numTeams_;        ///< number of teams
-    int numDepartments_;  ///< number of departments
-    int numProjects_;     ///< number of projects
-    int maxStateIc_ = 1;  ///< maximum state of inequality constraint (>=1)
+    int numTeams_;        // number of teams
+    int numDepartments_;  // number of departments
+    int numProjects_;     // number of projects
+    int maxStateIc_ = 1;  // maximum state of inequality constraint (>=1)
 
    public:
     void oric_to_project_eq_constraint_update(const vector<vector<impalib_type>> &, const vector<impalib_type> &, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &,
-                                              const vector<vector<impalib_type>> &) const;  ///< update messages from ORIC to project equality constraint
+                                              const vector<vector<impalib_type>> &) const;  // update messages from ORIC to project equality constraint
 
-    static void oric_to_team_update(const vector<vector<impalib_type>> &, vector<impalib_type> &);  ///< calculate messages from team ORIC to team equality constraint
+    static void oric_to_team_update(const vector<vector<impalib_type>> &, vector<impalib_type> &);  // calculate messages from team ORIC to team equality constraint
 
-    OrInequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  ///< constructor
+    OrInequalityConstraint(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);  // constructor
 };
 
 /**
@@ -35,7 +35,6 @@ class OrInequalityConstraint {
  * @param[in] N_PROJECTS: number of projects
  *
  */
-
 inline OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, const int N_TEAMS, const int N_PROJECTS)
     : numProjects_(N_PROJECTS), numTeams_(N_TEAMS), numDepartments_(N_DEPARTMENTS){};
 
@@ -49,7 +48,6 @@ inline OrInequalityConstraint::OrInequalityConstraint(const int N_DEPARTMENTS, c
  * @param[in] rRewardProject: rewards for project equality constraints
  *
  */
-
 inline void OrInequalityConstraint::oric_to_project_eq_constraint_update(const vector<vector<impalib_type>> &rEqConstraint2OricM, const vector<impalib_type> &mTeam2ORIC,
                                                                          vector<vector<impalib_type>> &rOric2EqConstraintM, vector<vector<impalib_type>> &rEqConstraint2ProjectM,
                                                                          const vector<vector<impalib_type>> &rRewardProject) const {

@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
@@ -13,27 +13,27 @@
  */
 class Knapsack {
    private:
-    int numDepartments_;                                         ///< number of departments
-    int numTeams_;                                               ///< number of teams
-    bool filteringFlag_;                                         ///< filtering flag
-    impalib_type alpha_;                                         ///< filtering parameter
-    vector<vector<impalib_type>> extrinsicOutputDepartmentOld_;  ///< messages from departments to teams equality constraint before filtering
+    int numDepartments_;                                         // number of departments
+    int numTeams_;                                               // number of teams
+    bool filteringFlag_;                                         // filtering flag
+    impalib_type alpha_;                                         // filtering parameter
+    vector<vector<impalib_type>> extrinsicOutputDepartmentOld_;  // messages from departments to teams equality constraint before filtering
 
    public:
     void forward(int, vector<vector<impalib_type>> &, int, vector<vector<int>> &, const int *, const vector<vector<int>> &,
-                 const vector<vector<impalib_type>> &) const;  ///< forward pass of forward-backward algorithm
+                 const vector<vector<impalib_type>> &) const;  // forward pass of forward-backward algorithm
 
     void backward(int, vector<vector<impalib_type>> &, int, vector<vector<int>> &, const int *, const vector<vector<int>> &,
-                  const vector<vector<impalib_type>> &) const;  ///< backward pass of forward-backward algorithm
+                  const vector<vector<impalib_type>> &) const;  // backward pass of forward-backward algorithm
 
     void extrinsic_output_department_lhs(const vector<vector<int>> &, const vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &, int, const vector<vector<impalib_type>> &, int,
-                                         vector<vector<impalib_type>> &);  ///< extrinsic output of department constraint
+                                         vector<vector<impalib_type>> &);  // extrinsic output of department constraint
 
     void team_to_knapsack_update(vector<vector<int>> &, vector<vector<impalib_type>> &, const vector<impalib_type> &, const vector<vector<impalib_type>> &,
-                                 const vector<impalib_type> &) const;                                                    ///< calculate messages from teams to knapsack constraints
-    void process_extrinsic_output_department(int, int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering (if needed) on messages from departments to teams
+                                 const vector<impalib_type> &) const;                                                    //calculate messages from teams to knapsack constraints
+    void process_extrinsic_output_department(int, int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  //perform filtering (if needed) on messages from departments to teams
 
-    Knapsack(int N_DEPARTMENTS, int N_TEAMS, bool FILT_FLAG, impalib_type ALPHA);  ///< constructor
+    Knapsack(int N_DEPARTMENTS, int N_TEAMS, bool FILT_FLAG, impalib_type ALPHA);  // constructor
 };
 
 /**

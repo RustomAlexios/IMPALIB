@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
@@ -13,23 +13,23 @@
  */
 class KsatConstraint {
    private:
-    int numVariables_;                                            ///< total number of variables
-    int numConstraints_;                                          ///< number of constraints
-    int kVariable_;                                               ///< number of variables per constraint
-    bool filteringFlag_;                                          ///< filtering flag
-    impalib_type alpha_;                                          ///< filtering parameter
-    vector<vector<impalib_type>> ksatConstraint2EqConstraintOld;  ///< messages from k-sat constraints to equality constraints before filtering
-    // impalib_type                 initial_forward_message_ = value_inf; ///< initial forward message of forward-backward algorithm
-    // impalib_type                 initial_backward_message_ = zero_value; ///< initial backward message of forward-backward algorithm
+    int numVariables_;                                            // total number of variables
+    int numConstraints_;                                          // number of constraints
+    int kVariable_;                                               // number of variables per constraint
+    bool filteringFlag_;                                          // filtering flag
+    impalib_type alpha_;                                          // filtering parameter
+    vector<vector<impalib_type>> ksatConstraint2EqConstraintOld;  // messages from k-sat constraints to equality constraints before filtering
+    // impalib_type                 initial_forward_message_ = value_inf; // initial forward message of forward-backward algorithm
+    // impalib_type                 initial_backward_message_ = zero_value; // initial backward message of forward-backward algorithm
     int maxState_ = 1;
 
    public:
     void ksat_constraint_to_variable_ec_update(const vector<vector<impalib_type>> &, vector<vector<impalib_type>> &, const vector<vector<int>> &,
-                                               const vector<vector<int>> &) const;                ///< update messages from k-sat constraints to equality constraints
-    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< perform filtering
+                                               const vector<vector<int>> &) const;                // update messages from k-sat constraints to equality constraints
+    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  // perform filtering
 
     KsatConstraint(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, bool FILTERING_FLAG,
-                   impalib_type ALPHA);  ///< constructor
+                   impalib_type ALPHA);  // constructor
 };
 
 /**

@@ -2,22 +2,22 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #include "impalib/impalib.hpp"
 
 int main() {
-    const int N_NODES = 5;                                     ///< number of nodes
-    const bool FILT_FLAG = true;                               ///< whether filtering is activated or not
-    const int N_ITER = 200;                                    ///< number of iterations of IMPA
-    const int N_EDGE_VARIABLES = N_NODES * N_NODES - N_NODES;  ///< number of edge variables
-    const impalib_type ALPHA = 0.5;                            ///< filtering parameter
-    const bool SYM_FLAG = true;                                ///< symmetric flag
-    const bool RESET_FLAG = false;                             ///< reset flag
-    const impalib_type THRESHOLD = -0.0001;                    ///< threshold parameter
-    const bool AUGM_FLAG = true;                               ///< augmentation flag
-    const int MAX_AUGM_COUNT = 50;                             ///< maximum augmentation count
-    const int MAX_FAILURE_COUNT = 50;                          ///< maximum count for failure
+    const int N_NODES = 5;                                     // number of nodes
+    const bool FILT_FLAG = true;                               // whether filtering is activated or not
+    const int N_ITER = 200;                                    // number of iterations of IMPA
+    const int N_EDGE_VARIABLES = N_NODES * N_NODES - N_NODES;  // number of edge variables
+    const impalib_type ALPHA = 0.5;                            // filtering parameter
+    const bool SYM_FLAG = true;                                // symmetric flag
+    const bool RESET_FLAG = false;                             // reset flag
+    const impalib_type THRESHOLD = -0.0001;                    // threshold parameter
+    const bool AUGM_FLAG = true;                               // augmentation flag
+    const int MAX_AUGM_COUNT = 50;                             // maximum augmentation count
+    const int MAX_FAILURE_COUNT = 50;                          // maximum count for failure
 
     // connections between nodes for each edge variable
     array<array<int, 2>, N_EDGE_VARIABLES> edge_connections = {

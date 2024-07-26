@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
@@ -13,23 +13,23 @@
  */
 class DegreeConstraint {
    private:
-    int numNodes_;                                                  ///< number of nodes of TSP
-    int numEdgeVariables_;                                          ///< number of edge connections
-    bool filteringFlag_;                                            ///< filtering flag
-    impalib_type alpha_;                                            ///< filtering parameter
-    vector<vector<impalib_type>> degreeConstraint2EqConstraintOld;  ///< messages from degree constraints to equality constraints before filtering
-    impalib_type initial_forward_message_;                          ///< initial forward message of forward-backward algorithm
-    impalib_type initial_backward_message_;                         ///< initial backward message of forward-backward algorithm
-    vector<vector<impalib_type>> stage_forward_messages;            ///< forward messages of trellis representation
-    vector<vector<impalib_type>> stage_backward_messages;           ///< backward messages of trellis representation
+    int numNodes_;                                                  // number of nodes of TSP
+    int numEdgeVariables_;                                          // number of edge connections
+    bool filteringFlag_;                                            // filtering flag
+    impalib_type alpha_;                                            // filtering parameter
+    vector<vector<impalib_type>> degreeConstraint2EqConstraintOld;  // messages from degree constraints to equality constraints before filtering
+    impalib_type initial_forward_message_;                          // initial forward message of forward-backward algorithm
+    impalib_type initial_backward_message_;                         // initial backward message of forward-backward algorithm
+    vector<vector<impalib_type>> stage_forward_messages;            // forward messages of trellis representation
+    vector<vector<impalib_type>> stage_backward_messages;           // backward messages of trellis representation
 
    public:
     void degree_constraint_to_edge_ec_update(const vector<vector<impalib_type>> &, const vector<vector<int>> &,
-                                             vector<vector<impalib_type>> &) const;               ///< calculate messages from degree constraint to edge equality constraint
-    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  ///< process filtering on messages from degree constraint to edge equality constraint
+                                             vector<vector<impalib_type>> &) const;               // calculate messages from degree constraint to edge equality constraint
+    void process_filtering(int, vector<vector<impalib_type>> &, vector<vector<impalib_type>> &);  // process filtering on messages from degree constraint to edge equality constraint
 
     DegreeConstraint(int NUM_NODES, int NUM_EDGE_VARIABLES, bool FILTERING_FLAG,
-                     impalib_type ALPHA);  ///< constructor
+                     impalib_type ALPHA);  // constructor
 };
 
 /**
