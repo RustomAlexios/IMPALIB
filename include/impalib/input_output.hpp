@@ -2,7 +2,7 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
@@ -13,22 +13,22 @@
  */
 class InputsKcMwm {
    private:
-    int numTeams_;               ///< number of teams
-    int numDepartments_;         ///< number of departments
-    int numProjects_;            ///< number of projects
-    int maxSizeNonzeroWeights_;  ///< maximum # of non-zero weights over all departments
+    int numTeams_;               // number of teams
+    int numDepartments_;         // number of departments
+    int numProjects_;            // number of projects
+    int maxSizeNonzeroWeights_;  // maximum # of non-zero weights over all departments
 
    public:
-    vector<impalib_type> RewardTeam;                ///< rewards of team equality constraints
-    vector<vector<impalib_type>> Team2KnapsackM;    ///< messages from teams to knapsack constraints
-    vector<vector<int>> TeamsWeightsPerDepartment;  ///< weights of teams per each department
-    vector<vector<impalib_type>> RewardProject;     ///< reward of project equality constraint
-    vector<int> MaxState;                           ///< vector of capacities of departments
-    vector<vector<int>> NonZeroWeightIndices;       ///< indices of non-zero weights per each department
+    vector<impalib_type> RewardTeam;                // rewards of team equality constraints
+    vector<vector<impalib_type>> Team2KnapsackM;    // messages from teams to knapsack constraints
+    vector<vector<int>> TeamsWeightsPerDepartment;  // weights of teams per each department
+    vector<vector<impalib_type>> RewardProject;     // reward of project equality constraint
+    vector<int> MaxState;                           // vector of capacities of departments
+    vector<vector<int>> NonZeroWeightIndices;       // indices of non-zero weights per each department
 
-    void process_inputs(const impalib_type *, impalib_type *, const int *, const int *, const int *, const impalib_type *, const int *);  ///< process input of graphical model
+    void process_inputs(const impalib_type *, impalib_type *, const int *, const int *, const int *, const impalib_type *, const int *);  // process input of graphical model
 
-    InputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS, int MAX_SIZE_NON_ZERO_WEIGHTS);  ///< constructor
+    InputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS, int MAX_SIZE_NON_ZERO_WEIGHTS);  // constructor
 };
 
 /**
@@ -36,17 +36,17 @@ class InputsKcMwm {
  */
 class OutputsKcMwm {
    private:
-    int numTeams_;        ///< number of teams
-    int numDepartments_;  ///< number of departments
-    int numProjects_;     ///< number of projects
+    int numTeams_;        // number of teams
+    int numDepartments_;  // number of departments
+    int numProjects_;     // number of projects
 
    public:
-    vector<impalib_type> ExtrinsicOutputTeam;  ///< extrinsic output of team equality constraints
-    vector<impalib_type> IntrinsicOutMwm;      ///< intrinsic outputs of project equality constraint
+    vector<impalib_type> ExtrinsicOutputTeam;  // extrinsic output of team equality constraints
+    vector<impalib_type> IntrinsicOutMwm;      // intrinsic outputs of project equality constraint
     void intrinsic_out_mwm_update(const vector<vector<impalib_type>> &, const vector<vector<impalib_type>> &,
-                                  const vector<vector<impalib_type>> &);                              ///< calculate intrinsic outputs of project equality constraints
-    void extrinsic_output_team_update(vector<vector<impalib_type>> &, vector<impalib_type> &);  ///< calculate extrinsic output of team equality constraints
-    OutputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);             ///< constructor
+                                  const vector<vector<impalib_type>> &);                        // calculate intrinsic outputs of project equality constraints
+    void extrinsic_output_team_update(vector<vector<impalib_type>> &, vector<impalib_type> &);  // calculate extrinsic output of team equality constraints
+    OutputsKcMwm(int N_DEPARTMENTS, int N_TEAMS, int N_PROJECTS);                               // constructor
 };
 
 /**
@@ -88,8 +88,8 @@ inline InputsKcMwm::InputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, cons
  *
  */
 
-inline void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY, const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY,
-                                 const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
+inline void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, impalib_type *pTransition_model_py, const int *pTEAMS_WEIGHTS_PER_DEPARTMENT_PY,
+                                        const int *pNON_ZERO_WEIGHT_INDICES_SIZES_PY, const int *p_NON_ZERO_WEIGHT_INDICES_PY, const impalib_type *pREWARD_PROJECT_PY, const int *pMAX_STATE_PY) {
     copy(pREWARD_TEAM_PY, pREWARD_TEAM_PY + numTeams_, back_inserter(RewardTeam));
     copy(pMAX_STATE_PY, pMAX_STATE_PY + numDepartments_, back_inserter(MaxState));
 
@@ -102,7 +102,7 @@ inline void InputsKcMwm::process_inputs(const impalib_type *pREWARD_TEAM_PY, imp
              p_NON_ZERO_WEIGHT_INDICES_PY + pNON_ZERO_WEIGHT_INDICES_SIZES_PY[department_index] + maxSizeNonzeroWeights_ * department_index, NonZeroWeightIndices[department_index].begin());
     }
     for (int project_index = 0; project_index < numProjects_; project_index++) {
-        // Copy reward values for each project-team combination
+        //  Copy reward values for each project-team combination
         copy(pREWARD_PROJECT_PY + numTeams_ * project_index, pREWARD_PROJECT_PY + numTeams_ * (project_index + 1), RewardProject[project_index].begin());
     }
 }
@@ -135,7 +135,8 @@ inline OutputsKcMwm::OutputsKcMwm(const int N_DEPARTMENTS, const int N_TEAMS, co
  *
  */
 
-inline void OutputsKcMwm::intrinsic_out_mwm_update(const vector<vector<impalib_type>> &rOric2EqConstraintM, const vector<vector<impalib_type>> &rProject2EqConstraintM, const vector<vector<impalib_type>> &rRewardProject) {
+inline void OutputsKcMwm::intrinsic_out_mwm_update(const vector<vector<impalib_type>> &rOric2EqConstraintM, const vector<vector<impalib_type>> &rProject2EqConstraintM,
+                                                   const vector<vector<impalib_type>> &rRewardProject) {
     for (int project_index = 0; project_index < rRewardProject.size(); project_index++) {
         for (int team_index = 0; team_index < rRewardProject[project_index].size(); team_index++) {
             IntrinsicOutMwm[project_index + team_index + project_index * (numTeams_ - 1)] =
@@ -166,20 +167,20 @@ inline void OutputsKcMwm::extrinsic_output_team_update(vector<vector<impalib_typ
  */
 class InputsTsp {
    private:
-    int numNodes_;             ///< number of nodes of TSP
-    int numEdgeVariables_;     ///< number of edges of TSP
-    int numNodesPerEdge_ = 2;  ///< number of nodes per edge
+    int numNodes_;             // number of nodes of TSP
+    int numEdgeVariables_;     // number of edges of TSP
+    int numNodesPerEdge_ = 2;  // number of nodes per edge
 
    public:
-    vector<vector<int>> EdgeConnections;                    ///< constituent nodes per each edge
-    vector<impalib_type> CostEdgeVariable;                  ///< cost for each edge equality constraint
-    vector<vector<impalib_type>> CostMatrix;                ///< cost matrix (n_nodesxn_nodes)
-    vector<vector<impalib_type>> EdgeDegreeConstraintCost;  ///< cost matrix represented as num_edges x num_nodes to facilitate message updates
-    vector<vector<impalib_type>> EdgeEc2DegreeConstraintM;  ///< messages from edge equality constraint to degree constraint
+    vector<vector<int>> EdgeConnections;                    // constituent nodes per each edge
+    vector<impalib_type> CostEdgeVariable;                  // cost for each edge equality constraint
+    vector<vector<impalib_type>> CostMatrix;                // cost matrix (n_nodesxn_nodes)
+    vector<vector<impalib_type>> EdgeDegreeConstraintCost;  // cost matrix represented as num_edges x num_nodes to facilitate message updates
+    vector<vector<impalib_type>> EdgeEc2DegreeConstraintM;  // messages from edge equality constraint to degree constraint
 
-    void process_inputs(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *);  ///< process inputs of TSP graphical model
+    void process_inputs(const int *, const impalib_type *, const impalib_type *, impalib_type *, const impalib_type *);  // process inputs of TSP graphical model
 
-    InputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);  ///< constructor
+    InputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);  // constructor
 };
 
 /**
@@ -197,17 +198,17 @@ inline InputsTsp::InputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES) :
  */
 class OutputsTsp {
    private:
-    int numNodes_;          ///< number of nodes
-    int numEdgeVariables_;  ///< number of edges
+    int numNodes_;          // number of nodes
+    int numEdgeVariables_;  // number of edges
 
    public:
-    vector<impalib_type> ExtrinsicOutputEdgeEc;                                          ///< extrinsic output of edge equality constraint
-    vector<impalib_type> IntrinsicOutputEdgeEc;                                          ///< intrinsic output of edge equality constraint
-    void extrinsic_output_edge_ec_relaxed_graph_update(vector<vector<impalib_type>> &);  ///< calculate extrinsic output of edge equality constraint for a relaxed TSP
+    vector<impalib_type> ExtrinsicOutputEdgeEc;                                          // extrinsic output of edge equality constraint
+    vector<impalib_type> IntrinsicOutputEdgeEc;                                          // intrinsic output of edge equality constraint
+    void extrinsic_output_edge_ec_relaxed_graph_update(vector<vector<impalib_type>> &);  // calculate extrinsic output of edge equality constraint for a relaxed TSP
     void extrinsic_output_edge_ec_augmented_graph_update(vector<vector<impalib_type>> &,
-                                                         vector<vector<impalib_type>> &);  ///< calculate extrinsic output of edge equality constraint for augmented TSP
-    void intrinsic_output_edge_ec_update(vector<impalib_type> &);                          ///< calculate intrinsic output of edge equality constraint for augmented TSP
-    OutputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);                         ///< constructor
+                                                         vector<vector<impalib_type>> &);  // calculate extrinsic output of edge equality constraint for augmented TSP
+    void intrinsic_output_edge_ec_update(vector<impalib_type> &);                          // calculate intrinsic output of edge equality constraint for augmented TSP
+    OutputsTsp(int NUM_NODES, int NUM_EDGE_VARIABLES);                                     // constructor
 };
 
 /**
@@ -239,8 +240,8 @@ inline OutputsTsp::OutputsTsp(const int NUM_NODES, const int NUM_EDGE_VARIABLES)
  *
  */
 
-inline void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY, impalib_type *pEdge_ec_to_degree_constraint_m_py,
-                               const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
+inline void InputsTsp::process_inputs(const int *pEDGE_CONNECTIONS_PY, const impalib_type *pCOST_EDGE_VARIABLE_PY, const impalib_type *pCOST_MATRIX_PY,
+                                      impalib_type *pEdge_ec_to_degree_constraint_m_py, const impalib_type *pEDGE_DEGREE_CONSTRAINT_COST_PY) {
     copy(pCOST_EDGE_VARIABLE_PY, pCOST_EDGE_VARIABLE_PY + numEdgeVariables_, back_inserter(CostEdgeVariable));
 
     for (int edge_variable_index = 0; edge_variable_index < numEdgeVariables_; edge_variable_index++) {
@@ -310,23 +311,23 @@ inline void OutputsTsp::intrinsic_output_edge_ec_update(vector<impalib_type> &rC
  */
 class InputsKsat {
    private:
-    int numVariables_;      ///< total number of variables
-    int numConstraints_;    ///< number of constraints
-    int kVariable_;         ///< number of variables per constraint
-    int numUsedVariables_;  ///< number of variables used to construct the formula
+    int numVariables_;      // total number of variables
+    int numConstraints_;    // number of constraints
+    int kVariable_;         // number of variables per constraint
+    int numUsedVariables_;  // number of variables used to construct the formula
 
    public:
-    vector<int> UsedVariables;                                ///< used variables to construct the formula
-    vector<impalib_type> IncomingMetricsCost;                 ///< incoming metrics for varibales
-    vector<vector<int>> ConstraintsConnections;               ///< connections to variables for each constraint
-    vector<vector<int>> ConstraintsConnectionsType;           ///< types of connections to variables for each constraint
-    vector<vector<int>> VariablesConnections;                 ///< connections to constraints for each variable
-    vector<int> VariablesConnectionsSizes;                    ///< sizes of connections to constraints for each variable
-    vector<vector<impalib_type>> VariableEc2KsatConstraintM;  ///< messages from variables equality constraints to k-sat constraints
+    vector<int> UsedVariables;                                // used variables to construct the formula
+    vector<impalib_type> IncomingMetricsCost;                 // incoming metrics for varibales
+    vector<vector<int>> ConstraintsConnections;               // connections to variables for each constraint
+    vector<vector<int>> ConstraintsConnectionsType;           // types of connections to variables for each constraint
+    vector<vector<int>> VariablesConnections;                 // connections to constraints for each variable
+    vector<int> VariablesConnectionsSizes;                    // sizes of connections to constraints for each variable
+    vector<vector<impalib_type>> VariableEc2KsatConstraintM;  // messages from variables equality constraints to k-sat constraints
 
-    void process_inputs(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);  ///< process inputs from python
+    void process_inputs(const int *, const int *, const int *, const int *, const int *, const impalib_type *, impalib_type *);  // process inputs from python
 
-    InputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, int NUM_USED_VARIABLES);  ///< constructor
+    InputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE, int NUM_USED_VARIABLES);  // constructor
 };
 
 /**
@@ -334,7 +335,7 @@ class InputsKsat {
  *
  * @param[in] NUM_VARIABLES: total number of variables
  * @param[in] NUM_CONSTRAINTS: number of constraints
- * @param[in] K_VARIABLE: ///< number of variables per constraint
+ * @param[in] K_VARIABLE: // number of variables per constraint
  * @param[in] NUM_USED_VARIABLES: number of variables used to construct the formula
  *
  */
@@ -352,14 +353,14 @@ inline InputsKsat::InputsKsat(const int NUM_VARIABLES, const int NUM_CONSTRAINTS
  */
 class OutputsKsat {
    private:
-    int numVariables_;    ///< total number of variables
-    int numConstraints_;  ///< number of constraints
-    int kVariable_;       ///< number of variables per constraint
+    int numVariables_;    // total number of variables
+    int numConstraints_;  // number of constraints
+    int kVariable_;       // number of variables per constraint
 
    public:
-    vector<impalib_type> ExtrinsicOutputVariableEc;                                         ///< extrinsic messages of variables equality constraints
-    OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE);  ///< constructor
-    void update_extrinsic(const vector<vector<impalib_type>> &);                                  ///< calculate extrinsic messages of variables equality constraints
+    vector<impalib_type> ExtrinsicOutputVariableEc;                       // extrinsic messages of variables equality constraints
+    OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VARIABLE);  // constructor
+    void update_extrinsic(const vector<vector<impalib_type>> &);          // calculate extrinsic messages of variables equality constraints
 };
 
 /**
@@ -367,7 +368,7 @@ class OutputsKsat {
  *
  * @param[in] NUM_VARIABLES: total number of variables
  * @param[in] NUM_CONSTRAINTS: number of constraints
- * @param[in] K_VARIABLE: ///< number of variables per constraint
+ * @param[in] K_VARIABLE: // number of variables per constraint
  *
  */
 
@@ -388,7 +389,7 @@ inline OutputsKsat::OutputsKsat(int NUM_VARIABLES, int NUM_CONSTRAINTS, int K_VA
  */
 
 inline void InputsKsat::process_inputs(const int *pUSED_VARIABLES_PY, const int *pVARIABLES_CONNECTIONS_PY, const int *pVARIABLES_CONNECTIONS_SIZES, const int *pCONSTRAINTS_CONNECTIONS,
-                                const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
+                                       const int *pCONSTRAINTS_CONNECTIONS_TYPE, const impalib_type *pINCOMING_METRICS_COST, impalib_type *pVariable_ec_to_ksat_constraint_m_py) {
     copy(pUSED_VARIABLES_PY, pUSED_VARIABLES_PY + numUsedVariables_, back_inserter(UsedVariables));
 
     copy(pINCOMING_METRICS_COST, pINCOMING_METRICS_COST + numVariables_, back_inserter(IncomingMetricsCost));

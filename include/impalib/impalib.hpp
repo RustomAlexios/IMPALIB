@@ -2,13 +2,11 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
 #include "impalib/common.hpp"
-
-/// core
 #include "impalib/input_output.hpp"
 #include "impalib/knapsack.hpp"
 #include "impalib/update_equality_constraint.hpp"

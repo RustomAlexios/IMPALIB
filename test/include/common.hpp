@@ -2,20 +2,19 @@
 // https://github.com/RustomAlexios/IMPALIB
 // Distributed under the MIT License.
 // (See accompanying LICENSE file or at
-//  https://opensource.org/licenses/MIT)
+// https://opensource.org/licenses/MIT)
 
 #pragma once
 
 #include <limits>
 #include <string>
 //#include <bits/stdc++.h>
-#include <typeinfo>
-#include <chrono>
-#include <iostream>
-#include <vector>
-#include<fstream>
 #include <algorithm>
-#include <numeric>
+#include <chrono>
+#include <fstream>
 #include <functional>
+#include <iostream>
+#include <numeric>
+#include <typeinfo>
+#include <vector>
 using namespace std;
-
