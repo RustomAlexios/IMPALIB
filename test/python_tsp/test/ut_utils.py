@@ -24,7 +24,7 @@ def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, r
     else:
         ut_failed = False
 
-    with open("tsp.txt", "a") as file:
+    with open("tsp.txt", "w") as file:
         if ut_failed:
             print(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}")
             file.write(f"FAILED SUB-TEST {sub_test_num} out of {total_sub_tests}:: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}\n")
