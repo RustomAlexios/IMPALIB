@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "scikit-build>=0.13", "cmake>=3.18", "ninja", "ruff"]
+requires = ["setuptools>=42", "scikit-build>=0.13", "cmake>=3.18", "ninja", "ruff", "tdqm"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]

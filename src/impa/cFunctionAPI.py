@@ -6,10 +6,15 @@
 
 import ctypes
 from impa.environmentModule import os
+import platform
 
 # Load the C library
-c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so") # for linux OS
-# c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.dylib") #for Mac OS
+if platform.system() == "Linux":
+    c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
+elif platform.system() == "Darwin":
+    c_lib = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.dylib")
+else:
+    raise OSError("Unsupported operating system")
 # c_lib_kc_mwm = ctypes.CDLL(os.path.dirname(__file__) + "/lib_wrapper.so")
 
 # Define pointer types for C data types
