@@ -37,4 +37,3 @@ def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, r
             file.write(output + "\n")
             #print('y_p: ', y_pure)
             #print('y_w: ', y_wrapper)
-    file.close()

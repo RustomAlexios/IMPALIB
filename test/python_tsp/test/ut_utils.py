@@ -35,4 +35,4 @@ def check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, r
             file.write(f"PASSED SUB-TEST {sub_test_num} out of {total_sub_tests}:: Test Name: {ut_name}, Max. Abs. Error: {max_absolute_error:.4e}, Max. Rel. Error: {max_relative_error:.4e}\n")
             # print('y_p: ', y_pure)
             # print('y_w: ', y_wrapper)
-    file.close()
+            
