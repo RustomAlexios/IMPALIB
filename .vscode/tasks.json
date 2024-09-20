@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0",
+    "tasks": [
+      {
+        "label": "Format CPP Code",
+        "type": "shell",
+        "command": "bash",
+        "args": [
+          "-c",
+          "find include/ src/impa/ examples/ test/src/ test/include/ -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i"
+        ],
+      },
+    ]
+  }
+  
