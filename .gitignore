@@ -41,3 +41,4 @@ data/complexityAnalysis
 test/python_ksat/src/compare_impa_minisat.py
 test/python_ksat/src/generate_inputs_complexity.py
 .ruff_cache
+data/inputs_mobarp_*
