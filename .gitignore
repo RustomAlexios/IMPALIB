@@ -42,3 +42,9 @@ test/python_ksat/src/compare_impa_minisat.py
 test/python_ksat/src/generate_inputs_complexity.py
 .ruff_cache
 data/inputs_mobarp_*
+test/python_mobarp/logs
+test/python_mobarp/imgs
+test/python_mobarp/src/overwrite_cpsat_inputs.py
+test/python_mobarp/src/solver_multiplerelay.ipynb
+test/python_mobarp/src/compare_solutions.py
+test/python_mobarp/src/run_analysis.py

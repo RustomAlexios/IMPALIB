@@ -4,7 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import np, np_impa_lib, deepcopy, math, itertools, combinations, defaultdict, Counter, product, time, pkl
+from environmentModule import np, np_impa_lib, deepcopy, math, itertools, combinations, defaultdict, Counter, product, time, pkl, os
 from update_equality_constraint import EqualityConstraintMOBARP
 from update_inequality_constraint import InequalityConstraintMOBARP
 from input_output import OutputsMOBARP
@@ -13,7 +13,7 @@ from update_auxiliary_constraint import AuxiliaryConstraintMOBARP
 
 class GraphicalModelMOBARP:
     def __init__(self, NUM_ITERATIONS, NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_RX_LOCS, NUM_MOBILE_TX_LOCS, THRESHOLD, FILTERING_FLAG, ALPHA, RANDOM_TEST_FLAG, POST_PROCESS_FLAG, \
-                        OVER_WRITE_CAP_FLAG, OVER_WRITE_CAP_VAL, EXCLUDE_CAP_FLAG, GET_SOL_APPROACH):
+                        OVER_WRITE_CAP_FLAG, OVER_WRITE_CAP_VAL, EXCLUDE_CAP_FLAG, GET_SOL_APPROACH, CRITERIA_IM, PERCENTAGE_NEGATIVE_IM, OVERWRITE_IM):
         
         self.num_iterations = NUM_ITERATIONS
         self.num_fixed_tx = NUM_FIXED_TX
@@ -31,27 +31,33 @@ class GraphicalModelMOBARP:
         self.overwrite_cap_val = OVER_WRITE_CAP_VAL
         self.exclude_cap_flag = EXCLUDE_CAP_FLAG
         self.get_sol_approach = GET_SOL_APPROACH
+        self.criteria_im = CRITERIA_IM
+        self.percentage_neg_im = PERCENTAGE_NEGATIVE_IM
+        self.overwrite_im = OVERWRITE_IM
 
     def initialize(self):
 
         input_load = self.input_load
 
+        self.snr_threshold = -np.inf
         #retrieve parameters if not random
         if not self.random_test_flag:
             #read parameters
             print("Retrieving parameters")
 
-            if (input_load[10] != np.inf):
-                self.snr_threshold = input_load[10]
-                connectivity_fixed_tx = np.zeros(self.snr_fixed.shape, dtype=np.int64)
-                connectivity_fixed_tx = np.where((self.snr_fixed >= self.snr_threshold), 1, connectivity_fixed_tx)
-                connectivity_fixed_tx = np.transpose(connectivity_fixed_tx, (0, 3, 2, 1))
-                connectivity_mobile_tx = np.zeros(self.snr_mobile.shape, dtype=np.int64)
-                connectivity_mobile_tx = np.where((self.snr_mobile >= self.snr_threshold), 1, connectivity_mobile_tx)
-                connectivity_mobile_tx = np.transpose(connectivity_mobile_tx, (0, 3, 2, 1))
-            else:
-                connectivity_fixed_tx = input_load[8]
-                connectivity_mobile_tx = input_load[9]
+            # if (input_load[10] != np.inf):
+            #     self.snr_threshold = input_load[10]
+            #     connectivity_fixed_tx = np.zeros(self.snr_fixed.shape, dtype=np.int64)
+            #     connectivity_fixed_tx = np.where((self.snr_fixed >= self.snr_threshold), 1, connectivity_fixed_tx)
+            #     connectivity_fixed_tx = np.transpose(connectivity_fixed_tx, (0, 3, 2, 1))
+            #     connectivity_mobile_tx = np.zeros(self.snr_mobile.shape, dtype=np.int64)
+            #     connectivity_mobile_tx = np.where((self.snr_mobile >= self.snr_threshold), 1, connectivity_mobile_tx)
+            #     connectivity_mobile_tx = np.transpose(connectivity_mobile_tx, (0, 3, 2, 1))
+            #     exit()
+            # else:
+            connectivity_fixed_tx = input_load[8]
+            connectivity_mobile_tx = input_load[9]
+            self.snr_threshold = input_load[10]
             
             self.connectivity_fixed_tx = connectivity_fixed_tx
             self.connectivity_mobile_tx = connectivity_mobile_tx
@@ -74,14 +80,18 @@ class GraphicalModelMOBARP:
         
         if (not self.random_test_flag):
             self.exclude_cap_flag = input_load[11]
-
+            connectivity_fixed_tx = self.connectivity_fixed_tx
+            connectivity_mobile_tx = self.connectivity_mobile_tx
+        else:
+            self.connectivity_fixed_tx = connectivity_fixed_tx
+            self.connectivity_mobile_tx = connectivity_mobile_tx
+            
         #update some parameters if random or not
         #not random, include capacity
         if (not self.random_test_flag and not self.exclude_cap_flag):
             print("Reading Input, Including Capacity")
-            connectivity_fixed_tx = self.connectivity_fixed_tx
-            connectivity_mobile_tx = self.connectivity_mobile_tx
-
+            # connectivity_fixed_tx = self.connectivity_fixed_tx
+            # connectivity_mobile_tx = self.connectivity_mobile_tx
             fixed_capac_constraints = input_load[6]
             mobile_capac_constraints = input_load[7]
             assert len(fixed_capac_constraints) == self.num_fixed_tx, "Issue with Fixed Capacity Constraints."
@@ -103,11 +113,11 @@ class GraphicalModelMOBARP:
 
         self.fixed_capac_constraints = fixed_capac_constraints
         self.mobile_capac_constraints = mobile_capac_constraints
-
+        
         self.fixed_x_costs = fixed_x_costs
         self.mobile_x_costs = mobile_x_costs
-        self.connectivity_fixed_tx = connectivity_fixed_tx
-        self.connectivity_mobile_tx = connectivity_mobile_tx
+        # self.connectivity_fixed_tx = connectivity_fixed_tx
+        # self.connectivity_mobile_tx = connectivity_mobile_tx
         
         self.r_costs = r_costs
         self.z_costs = z_costs
@@ -134,6 +144,10 @@ class GraphicalModelMOBARP:
             print("alpha: ", self.formatted_alpha)
         print("exclude_cap_flag: ", self.exclude_cap_flag)
         print("get_sol_approach: ", self.get_sol_approach)
+        print("self.criteria_im: ", self.criteria_im)
+        print("self.percentage_neg_im: ", self.percentage_neg_im)
+        print("self.overwrite_im: ", self.overwrite_im)
+        print("self.snr_threshold: ", self.snr_threshold)
         
         #construct equality constraint object
         self.model_eq_constraint = EqualityConstraintMOBARP(
@@ -164,8 +178,8 @@ class GraphicalModelMOBARP:
             self.filtering_flag,
             self.num_mobile_tx_locs,
             self.num_rx_locs,
-            connectivity_mobile_tx, 
-            connectivity_fixed_tx
+            self.connectivity_mobile_tx, 
+            self.connectivity_fixed_tx
         )
         
         #construct outputs object
@@ -219,34 +233,42 @@ class GraphicalModelMOBARP:
         num_mobile_tx = self.num_mobile_tx
         num_rx_locs = self.num_rx_locs
         
-        #'''
-        fixed_x_costs = np.random.normal(normal_mean, normal_variance, size=(num_fixed_tx, num_bands, num_time_steps))
-        mobile_x_costs = np.random.normal(normal_mean, normal_variance, size=(num_mobile_tx, num_bands, num_time_steps))
-        r_costs = np.random.normal(normal_mean, normal_variance, size=(num_mobile_tx, num_mobile_tx_locs))
-        #'''
-
-        '''
-        fixed_x_costs = np.random.uniform(-2, 0, size=(num_fixed_tx, num_bands, num_time_steps))
-        mobile_x_costs = np.random.uniform(-2, 0, size=(num_mobile_tx, num_bands, num_time_steps))
-        r_costs = np.random.uniform(-2, 0, size=(num_mobile_tx, num_mobile_tx_locs))
-        '''
-
-        '''
-        fixed_x_costs = np.random.uniform(0, 2, size=(num_fixed_tx, num_bands, num_time_steps))
-        mobile_x_costs = np.random.uniform(0, 2, size=(num_mobile_tx, num_bands, num_time_steps))
-        r_costs = np.random.uniform(0, 2, size=(num_mobile_tx, num_mobile_tx_locs))
-        '''
-
-        '''
-        fixed_x_costs = np.ones((num_fixed_tx, num_bands, num_time_steps))
-        mobile_x_costs = np.ones((num_mobile_tx, num_bands, num_time_steps))
-        r_costs = np.ones((num_mobile_tx, num_mobile_tx_locs))
-        '''
-
-        #if (not self.random_test_flag):
-        #    fixed_x_costs = self.input_load[12]
-        #    mobile_x_costs = self.input_load[13]
-        #    r_costs = self.input_load[14]
+        if (not self.random_test_flag and not self.overwrite_im):
+            fixed_x_costs = self.input_load[12]
+            mobile_x_costs = self.input_load[13]
+            r_costs = self.input_load[14]
+            # print(f"np.min(fixed_x_costs): {np.min(fixed_x_costs)}, np.max(fixed_x_costs): {np.max(fixed_x_costs)}")
+            # print(f"np.min(mobile_x_costs): {np.min(mobile_x_costs)}, np.max(mobile_x_costs): {np.max(mobile_x_costs)}")
+        elif (self.criteria_im == 1): #normal
+            fixed_x_costs = np.random.normal(normal_mean, normal_variance, size=(num_fixed_tx, num_bands, num_time_steps))
+            mobile_x_costs = np.random.normal(normal_mean, normal_variance, size=(num_mobile_tx, num_bands, num_time_steps))
+            r_costs = np.random.normal(normal_mean, normal_variance, size=(num_mobile_tx, num_mobile_tx_locs))
+        elif (self.criteria_im == 2): #pos X, normal R
+            fixed_x_costs = np.random.uniform(10, 100, size=(num_fixed_tx, num_bands, num_time_steps))
+            mobile_x_costs = np.random.uniform(10, 100, size=(num_mobile_tx, num_bands, num_time_steps))
+            r_costs = np.random.normal(normal_mean, normal_variance, size=(num_mobile_tx, num_mobile_tx_locs))
+        
+        percentage_neg = self.percentage_neg_im
+        size_fixed = fixed_x_costs.size
+        num_fixed_negatives = int(size_fixed * ((percentage_neg) / 100))
+        num_fixed_positives = size_fixed - num_fixed_negatives
+        fixed_array_sign = np.array([1] * num_fixed_positives + [-1] * num_fixed_negatives)
+        np.random.shuffle(fixed_array_sign)
+        fixed_x_costs = fixed_x_costs*fixed_array_sign.reshape((num_fixed_tx, num_bands, num_time_steps))
+        
+        size_mobile = mobile_x_costs.size
+        num_mobile_negatives = int(size_mobile * ((percentage_neg) / 100))
+        num_mobile_positives = size_mobile - num_mobile_negatives
+        mobile_array_sign = np.array([1] * num_mobile_positives + [-1] * num_mobile_negatives)
+        np.random.shuffle(mobile_array_sign)
+        mobile_x_costs = mobile_x_costs*mobile_array_sign.reshape((num_mobile_tx, num_bands, num_time_steps))
+        
+        # size_r = r_costs.size
+        # num_r_negatives = int(size_r * ((percentage) / 100))
+        # num_r_positives = size_r - num_r_negatives
+        # r_array_sign = np.array([1] * num_r_positives + [-1] * num_r_negatives)
+        # np.random.shuffle(r_array_sign)
+        # r_costs = r_costs*r_array_sign.reshape((num_mobile_tx, num_mobile_tx_locs))
 
         z_costs = np.zeros((mobile_x_costs.size, num_mobile_tx_locs), dtype = np_impa_lib)
 
@@ -263,6 +285,10 @@ class GraphicalModelMOBARP:
         
     def run_impa(self):
         
+        prev_extrinsic_fixed_x = None
+        counter_wait = 0
+        hard_decision_data = []
+
         for iter in range(0, self.num_iterations,):
             
             #only run when capacity constraints are included
@@ -299,36 +325,120 @@ class GraphicalModelMOBARP:
                 #calculate messages from x equality constraint to capacity constraint
                 self.mobile_x_eq_const_to_mobile_capac_const_m, self.fixed_x_eq_const_to_fixed_capac_const_m = self.model_eq_constraint.x_eq_const_activation(self.model_auxiliary_constraint.auxiliary_const_to_mobile_x_eq_const_m, self.model_ineq_constraint.set_cover_ineq_const_to_fixed_x_eq_const_m)
         
-        #calculate extrinsic messages
-        extrinsic_fixed_x, extrinsic_mobile_x, extrinsic_r, extrinsic_z = self.outputs.extrinsic_update(self.model_ineq_constraint.fixed_capac_const_to_fixed_x_eq_const_m, self.model_ineq_constraint.mobile_capac_const_to_mobile_x_eq_const_m, 
-                                                                                            self.model_auxiliary_constraint.auxiliary_const_to_mobile_x_eq_const_m, self.model_ineq_constraint.set_cover_ineq_const_to_fixed_x_eq_const_m, 
-                                                                                            self.model_auxiliary_constraint.auxiliary_const_to_r_eq_const_m, self.model_ineq_constraint.mobile_loc_eq_const_to_r_eq_const_m, 
-                                                                                            self.model_auxiliary_constraint.auxiliary_const_to_z_eq_const_m, self.model_ineq_constraint.set_cover_ineq_const_to_z_eq_const_m)
+            #calculate extrinsic messages
+            extrinsic_fixed_x, extrinsic_mobile_x, extrinsic_r, extrinsic_z = self.outputs.extrinsic_update(self.model_ineq_constraint.fixed_capac_const_to_fixed_x_eq_const_m, self.model_ineq_constraint.mobile_capac_const_to_mobile_x_eq_const_m, 
+                                                                                                self.model_auxiliary_constraint.auxiliary_const_to_mobile_x_eq_const_m, self.model_ineq_constraint.set_cover_ineq_const_to_fixed_x_eq_const_m, 
+                                                                                                self.model_auxiliary_constraint.auxiliary_const_to_r_eq_const_m, self.model_ineq_constraint.mobile_loc_eq_const_to_r_eq_const_m, 
+                                                                                     self.model_auxiliary_constraint.auxiliary_const_to_z_eq_const_m, self.model_ineq_constraint.set_cover_ineq_const_to_z_eq_const_m)
+            
+            if prev_extrinsic_fixed_x is not None:
+                changes_in_iteration = []
+                
+                if not np.allclose(prev_extrinsic_fixed_x, extrinsic_fixed_x, atol=1e-3):
+                    change_size = np.linalg.norm(extrinsic_fixed_x - prev_extrinsic_fixed_x)
+                    changes_in_iteration.append(f"extrinsic_fixed_x (change size: {change_size:.4f})")
+                    flag_changes_fixed_tx = True
+                else:
+                    flag_changes_fixed_tx = False
+                    
+                if not np.allclose(prev_extrinsic_mobile_x, extrinsic_mobile_x, atol=1e-3):
+                    change_size = np.linalg.norm(extrinsic_mobile_x - prev_extrinsic_mobile_x)
+                    changes_in_iteration.append(f"extrinsic_mobile_x (change size: {change_size:.4f})")
+                    flag_changes_mobile_tx = True
+                else:
+                    flag_changes_mobile_tx = False
+                    
+                if not np.allclose(prev_extrinsic_r, extrinsic_r, atol=1e-3):
+                    change_size = np.linalg.norm(extrinsic_r - prev_extrinsic_r)
+                    changes_in_iteration.append(f"extrinsic_r (change size: {change_size:.4f})")
+                    flag_changes_r = True
+                else:
+                    flag_changes_r = False
+                
+                if not np.allclose(prev_extrinsic_z, extrinsic_z, atol=1e-3):
+                    change_size = np.linalg.norm(extrinsic_z - prev_extrinsic_z)
+                    changes_in_iteration.append(f"extrinsic_z (change size: {change_size:.4f})")
+                    flag_changes_z = True
+                else:
+                    flag_changes_z = False
+                
+                if (flag_changes_fixed_tx or flag_changes_mobile_tx or flag_changes_r or flag_changes_z):
+                    counter_wait=0
+                else:
+                    counter_wait+=1
+            
+            prev_extrinsic_fixed_x, prev_extrinsic_mobile_x, prev_extrinsic_r, prev_extrinsic_z = extrinsic_fixed_x, extrinsic_mobile_x, extrinsic_r, extrinsic_z
         
-        self.end_time = time.time()
-        self.impa_runtime = self.end_time - self.start_time
-        print(f"IMPA run_time: {self.impa_runtime}")
+            self.end_time = time.time()
+            self.impa_runtime = self.end_time - self.start_time
+            # print(f"IMPA run_time: {self.impa_runtime}")
+            
+            self.extrinsic_fixed_x = extrinsic_fixed_x
+            self.extrinsic_mobile_x = extrinsic_mobile_x
+            self.extrinsic_r = extrinsic_r
+            self.extrinsic_z = extrinsic_z
+            
+            #calculate intrinsic messages
+            intrinsic_fixed_x = extrinsic_fixed_x + self.fixed_x_costs.flatten()
+            intrinsic_mobile_x = extrinsic_mobile_x + self.mobile_x_costs.flatten()   
+            intrinsic_r = extrinsic_r + self.r_costs.flatten()
+            intrinsic_z = extrinsic_z + self.z_costs  
+            
+            self.intrinsic_fixed_x = intrinsic_fixed_x
+            self.intrinsic_mobile_x = intrinsic_mobile_x
+            self.intrinsic_r = intrinsic_r
+            self.intrinsic_z = intrinsic_z
+            
+            #get hard decision on variables based on intrinsic messages
+            self.hard_decision_analysis()
+            
+            data_iter = {
+                    "iter": iter,
+                    "hard_decision_fixed_x": self.hard_decision_fixed_x,
+                    "hard_decision_mobile_x": self.hard_decision_mobile_x,
+                    "hard_decision_r": self.hard_decision_r,
+                    "hard_decision_z": self.hard_decision_z
+                }
+            
+            hard_decision_data.append(data_iter)
+            
+            self.stopping_at_iter = iter #last iteration that is done
+            if (counter_wait==5):
+                self.stopping_at_iter = iter-counter_wait+1
+                break
+                
+        self.hard_decision_data = hard_decision_data
         
-        self.extrinsic_fixed_x = extrinsic_fixed_x
-        self.extrinsic_mobile_x = extrinsic_mobile_x
-        self.extrinsic_r = extrinsic_r
-        self.extrinsic_z = extrinsic_z
+        data_iter_fixed_tx_hd = [data["hard_decision_fixed_x"].tolist() for data in hard_decision_data]
+        stable_fixed_tx_hd_iter = self.find_stable_hard_decision(data_iter_fixed_tx_hd)
         
-        #calculate intrinsic messages
-        intrinsic_fixed_x = extrinsic_fixed_x + self.fixed_x_costs.flatten()
-        intrinsic_mobile_x = extrinsic_mobile_x + self.mobile_x_costs.flatten()   
-        intrinsic_r = extrinsic_r + self.r_costs.flatten()
-        intrinsic_z = extrinsic_z + self.z_costs  
-        
-        self.intrinsic_fixed_x = intrinsic_fixed_x
-        self.intrinsic_mobile_x = intrinsic_mobile_x
-        self.intrinsic_r = intrinsic_r
-        self.intrinsic_z = intrinsic_z
-        
-        #get hard decision on variables based on intrinsic messages
-        self.hard_decision_analysis()
+        data_iter_mobile_tx_hd = [data["hard_decision_mobile_x"].tolist() for data in hard_decision_data]
+        stable_mobile_tx_hd_iter = self.find_stable_hard_decision(data_iter_mobile_tx_hd)
 
+        data_iter_r_hd = [data["hard_decision_r"].tolist() for data in hard_decision_data]
+        stable_r_hd_iter = self.find_stable_hard_decision(data_iter_r_hd)
+        
+        data_iter_z_hd = [data["hard_decision_z"].tolist() for data in hard_decision_data]
+        stable_z_hd_iter = self.find_stable_hard_decision(data_iter_z_hd)
+        
+        print(f"Stopping at iteration: {self.stopping_at_iter}")
+        self.stable_hd_iter = {"hard_decision_fixed_x": stable_fixed_tx_hd_iter, "hard_decision_mobile_x": stable_mobile_tx_hd_iter, "hard_decision_r": stable_r_hd_iter, "hard_decision_z": stable_z_hd_iter}
+        print(f"Stable HD Iter: {self.stable_hd_iter}")
 
+    def find_stable_hard_decision(self,data_history):
+        if (data_history[0] == [-100]*len(data_history[0])):
+            return -100
+        stable_value = data_history[0]
+        stable_hard_decision_iter = 0
+        for i in range(1, len(data_history)):
+            if data_history[i] != stable_value:
+                stable_value = data_history[i]
+                stable_hard_decision_iter = i
+            elif all(val == stable_value for val in data_history[i:]):
+                return stable_hard_decision_iter
+        return self.num_iterations
+        # return None
+    
     def hard_decision_analysis(self,):
         
         intrinsic_fixed_x = self.intrinsic_fixed_x
@@ -345,8 +455,8 @@ class GraphicalModelMOBARP:
         #do not consider variables that have zero connectivity
         hard_decision_fixed_x[excluded_fixed_tx] = -100
 
-        if (len(excluded_fixed_tx) !=0):
-            print("Some Fixed TX have zero-connectivity.")
+        # if (len(excluded_fixed_tx) !=0):
+        #     print("Some Fixed TX have zero-connectivity.")
 
         hard_decision_mobile_x = np.array(deepcopy(intrinsic_mobile_x))
         hard_decision_mobile_x[intrinsic_mobile_x > self.threshold] = 0
@@ -355,15 +465,14 @@ class GraphicalModelMOBARP:
         excluded_mobile_tx = np.where(np.clip(np.sum(self.conx_mob_tx_per_num_mob_tx_locs, axis=1), 0,1) !=1)[0]
         #do not consider variables that have zero connectivity
         hard_decision_mobile_x[excluded_mobile_tx] = -100
-
-        if (len(excluded_mobile_tx) !=0):
-            print("Some Mobile TX have zero-connectivity.")
+        # if (len(excluded_mobile_tx) !=0):
+        #     print("Some Mobile TX have zero-connectivity.")
 
         conx_mob_tx_r = self.conx_mob_tx_per_num_mob_tx_locs.reshape(self.num_mobile_tx, -1, self.num_mobile_tx_locs).transpose(0, 2, 1).reshape(-1, self.num_bands*self.num_time_steps)
         excluded_r = np.where(np.sum(conx_mob_tx_r, axis=1) ==0)[0]
 
-        if (len(excluded_r) !=0):
-            print("Some r-eq. const. have zero-connectivity.")
+        # if (len(excluded_r) !=0):
+        #     print("Some r-eq. const. have zero-connectivity.")
             #not supposed to have this issue, if that is not the case, it is the issue with connectivity
 
         hard_decision_r = np.array(deepcopy(intrinsic_r))
@@ -382,9 +491,13 @@ class GraphicalModelMOBARP:
         
         self.hard_decision_r = hard_decision_r
         self.hard_decision_z = hard_decision_z
+        
+        # # print(self.mobile_x_costs[0,0])
 
-        #check fixed capacity constraints
-        self.reshaped_hard_decision_fixed_x = hard_decision_fixed_x.reshape(self.num_fixed_tx, self.num_bands, self.num_time_steps)
+    def run_analysis(self,):
+        
+        # check fixed capacity constraints
+        self.reshaped_hard_decision_fixed_x = self.hard_decision_fixed_x.reshape(self.num_fixed_tx, self.num_bands, self.num_time_steps)
         mask_fixed = self.reshaped_hard_decision_fixed_x !=-100
         used_fixed_tx_capacities = np.sum(self.reshaped_hard_decision_fixed_x , axis=1, where=mask_fixed ==1).astype(np.int64)
         reshaped_fixed_tx_capacities = np.concatenate([self.fixed_capac_constraints[..., np.newaxis]]*self.num_time_steps, axis=1)
@@ -403,7 +516,7 @@ class GraphicalModelMOBARP:
             print("{:<50}{}".format(str(row1),str(row2)))
 
         #check mobile capacity constraints
-        self.reshaped_hard_decision_mobile_x = hard_decision_mobile_x.reshape(self.num_mobile_tx, self.num_bands, self.num_time_steps)
+        self.reshaped_hard_decision_mobile_x = self.hard_decision_mobile_x.reshape(self.num_mobile_tx, self.num_bands, self.num_time_steps)
         mask_mobile = self.reshaped_hard_decision_mobile_x !=-100
         used_mobile_tx_capacities = np.sum(self.reshaped_hard_decision_mobile_x, axis=1, where = mask_mobile==1).astype(np.int64)
         reshaped_mobile_tx_capacities = np.concatenate([self.mobile_capac_constraints[..., np.newaxis]]*self.num_time_steps, axis=1)
@@ -422,7 +535,7 @@ class GraphicalModelMOBARP:
             print("{:<50}{}".format(str(row1), str(row2)))
 
         #check mobile-loc assignment constraints
-        self.reshaped_hard_decision_r = hard_decision_r.reshape(self.num_mobile_tx, self.num_mobile_tx_locs)
+        self.reshaped_hard_decision_r = self.hard_decision_r.reshape(self.num_mobile_tx, self.num_mobile_tx_locs)
         mask_r = self.reshaped_hard_decision_r !=-100
         sum_used_mobile_loc = np.sum(self.reshaped_hard_decision_r, axis=1, where=mask_r==1).astype(np.int64)
         flag_sum_used_mobile_loc = np.all(sum_used_mobile_loc==1)
@@ -437,7 +550,7 @@ class GraphicalModelMOBARP:
         self.sum_used_mobile_loc = sum_used_mobile_loc
         self.indices_violated_tx_loc_assignment = indices_violated_tx_loc_assignment
 
-        self.reshaped_hard_decision_z = hard_decision_z.reshape(self.num_mobile_tx, self.num_bands, self.num_time_steps, self.num_mobile_tx_locs).transpose(0,3,1,2)
+        self.reshaped_hard_decision_z = self.hard_decision_z.reshape(self.num_mobile_tx, self.num_bands, self.num_time_steps, self.num_mobile_tx_locs).transpose(0,3,1,2)
         
         indices_activated_r = np.where(self.reshaped_hard_decision_r == 1)
 
@@ -447,13 +560,15 @@ class GraphicalModelMOBARP:
         for (i_prime, n) in configurations_activated_r:
             results_r[i_prime].append(n)
 
+        self.configurations_activated_r = configurations_activated_r
+        
         for i_prime in range(self.num_mobile_tx):
             print(f"Mobile TX {i_prime} is at location {results_r[i_prime]}")
 
         missing_mobile_tx_to_loc_assignment = [key for key in range(self.num_mobile_tx) if not results_r[key]]
 
-        if missing_mobile_tx_to_loc_assignment:
-            print(f"Missing Assignments for Mobile TX: {missing_mobile_tx_to_loc_assignment}")
+        # if missing_mobile_tx_to_loc_assignment:
+        #     print(f"Missing Assignments for Mobile TX: {missing_mobile_tx_to_loc_assignment}")
         
         print('-----------')
         print("Set Cover Constraints")
@@ -490,7 +605,7 @@ class GraphicalModelMOBARP:
                     results_fixed_tx[index].append(fixed_config)
         results_fixed_tx = {key: results_fixed_tx[key] for key in sorted(results_fixed_tx)}
 
-        print('----')
+        # print('----')
         #get approach for finding solution, efficient one is 2 (default)
         approach = self.get_sol_approach
         counts_k_l = defaultdict(list)
@@ -511,12 +626,14 @@ class GraphicalModelMOBARP:
         self.results_mobile_tx = results_mobile_tx
         self.results_fixed_tx = results_fixed_tx
 
+        
         #get solution that minimizes the objective function
         if (approach==1):
             x_assignment, used_x_list = self.get_solution_approach_1(results_mobile_tx, results_fixed_tx)
         elif (approach==2):
             x_assignment, used_x_list = self.get_solution_approach_2(results_mobile_tx, results_fixed_tx)
-
+            
+        #exit()
         self.x_assignment = x_assignment
         self.used_x_list = used_x_list
 
@@ -548,33 +665,43 @@ class GraphicalModelMOBARP:
                 not_satisfied.append("Set Cover Constraints")
             print("Constraints not satisfied:", ", ".join(not_satisfied))
 
-
+        # print('-----------')
+        activated_x_before_pp = len(activated_x)
+        activated_x_after_pp = len(used_x_list)
+        print(f"Number of activated TX before post-processing: {activated_x_before_pp}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
+        print(f"Number of selected TX after post-processing: {activated_x_after_pp}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
+        print("self.used_x_list: \n", self.used_x_list)
+        
         if (self.save_flag):
             self.results_composed = [
-                    self.filtering_flag,
-                    self.alpha,
-                    self.impa_runtime,
-                    self.objective_cost,
-                    dict(self.activated_x),
-                    dict(self.sorted_activated_x),
-                    self.count_m,
-                    self.count_f,
-                    self.used_x_list,
-                    self.counts_k_l,
-                    self.violated_k_l,
-                    self.flag_fixed_tx_capacities,
-                    self.flag_mobile_tx_capacities,
-                    self.flag_sum_used_mobile_loc,
-                    self.flag_k_l,
-                    self.used_fixed_tx_capacities,
-                    self.used_mobile_tx_capacities,
-                    self.sum_used_mobile_loc,
-                    self.indices_violated_fixed_tx_capacities,
-                    self.indices_violated_mobile_tx_capacities,
-                    self.indices_violated_tx_loc_assignment,
-                    #self.fixed_x_costs,
-                    #self.mobile_x_costs,
-                    #self.r_costs
+                    self.filtering_flag, #0
+                    self.alpha, #1
+                    self.impa_runtime, #2
+                    self.objective_cost, #3
+                    dict(self.activated_x), #4
+                    dict(self.sorted_activated_x), #5
+                    self.count_m, #6
+                    self.count_f, #7
+                    self.used_x_list, #8
+                    self.configurations_activated_r, #9
+                    self.counts_k_l, #10
+                    self.violated_k_l, #11
+                    self.flag_fixed_tx_capacities, #12
+                    self.flag_mobile_tx_capacities, #13
+                    self.flag_sum_used_mobile_loc, #14
+                    self.flag_k_l, #15
+                    self.used_fixed_tx_capacities, #16
+                    self.used_mobile_tx_capacities, #17
+                    self.sum_used_mobile_loc, #18
+                    self.indices_violated_fixed_tx_capacities, #19
+                    self.indices_violated_mobile_tx_capacities, #20
+                    self.indices_violated_tx_loc_assignment, #21
+                    self.fixed_x_costs, #22
+                    self.mobile_x_costs, #23
+                    self.r_costs, #24
+                    self.stopping_at_iter, #25
+                    self.hard_decision_data, #26
+                    self.stable_hd_iter, #27
             ]
 
     def get_activations_x_approach_1(self, results, x, count_dict, is_mobile):
@@ -702,5 +829,7 @@ class GraphicalModelMOBARP:
 
     def save_outputs(self):
         #save outputs if save_flag is True
-        with open(f"{self.folder_outputs}/outputs_set{self.test_file}.pkl", "wb") as f:
+        output_file = os.path.join(self.folder_outputs, "outputs_set"+str(self.test_file)+".pkl")
+        with open(output_file, "wb") as f:
+        #with open(f"{self.folder_outputs}/outputs_set{self.test_file}.pkl", "wb") as f:
             pkl.dump(self.results_composed, f)

@@ -10,21 +10,24 @@ from graphical_model import *
 # Define command-line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--nITER", type=int, default=200, help="Number of Iterations of IMPA")
-parser.add_argument("--nFTX", type=int, default=5, help="Number of fixed TX")
-parser.add_argument("--nMTX", type=int, default=5, help="Number of mobile TX")
-parser.add_argument("--nBands", type=int, default=5, help="Number of bands")
-parser.add_argument("--nTimeSteps", type=int, default=5, help="Number of discrete time steps")
-parser.add_argument("--nRX", type=int, default=5, help="Number of RX")
-parser.add_argument("--nMTXLoc", type=int, default=5, help="Number of mobile TX locations")
+parser.add_argument("--nFTX", type=int, default=7, help="Number of fixed TX")
+parser.add_argument("--nMTX", type=int, default=7, help="Number of mobile TX")
+parser.add_argument("--nBands", type=int, default=7, help="Number of bands")
+parser.add_argument("--nTimeSteps", type=int, default=7, help="Number of discrete time steps")
+parser.add_argument("--nRX", type=int, default=7, help="Number of RX")
+parser.add_argument("--nMTXLoc", type=int, default=7, help="Number of mobile TX locations")
 parser.add_argument("--filteringFlag", type=bool, default=False, help="Activate Filtering or not")
 parser.add_argument("--overWriteCapFlag", type=bool, default=False, help="Over Write Max Capacity or not")
-parser.add_argument("--overWriteCapVal", type=int, default=3, help="Over Write Max Capacity Value")
+parser.add_argument("--overWriteCapVal", type=int, default=4, help="Over Write Max Capacity Value")
 parser.add_argument("--alpha", type=np_impa_lib, default=0.0, help="Filtering Rate [0,1]")
-parser.add_argument("--testFile", type=int, default=900000, help="Test File Index")
+parser.add_argument("--testFile", type=int, default=9000, help="Test File Index")
 parser.add_argument("--saveFlag", type=bool, default=False, help="Save Outputs or not")
 parser.add_argument("--excludeCapFlag", type=bool, default=False, help="Save Outputs or not")
 parser.add_argument("--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
 parser.add_argument("--getSolApproach", type=int, default=2, help="Approach for getting a solution")
+parser.add_argument("--criteriaIM", type=int, default=2, help="1: normal, 2: pos X, normal R")
+parser.add_argument("--percNegIM", type=np_impa_lib, default=0, help="Percentage of Negative samples in IM")
+parser.add_argument("--overWriteIM", type=bool, default=False, help="overwrite IM")
 parser.add_argument(
     "--randomTestFlag",
     type=bool,
@@ -34,14 +37,14 @@ parser.add_argument(
 parser.add_argument(
     "--inputPath",
     metavar="path",
-    default="../../data/impa_input",
+    default="inputs_mobarp_random_cpsat",
     type=str,
     help="path to output directory",
 )
 parser.add_argument(
     "--outputPath",
     metavar="path",
-    default="../../data/impa_output",
+    default="outputs_impa_default",
     type=str,
     help="path to output directory",
 )
@@ -72,6 +75,9 @@ if __name__ == "__main__":
     POST_PROCESS_FLAG = args.PPFlag # post processing flag
     EXCLUDE_CAP_FLAG = args.excludeCapFlag # exclude capacity constraints flag
     GET_SOL_APPROACH = args.getSolApproach # approach (for now, 1 or 2) to get solution with minimum objective (2 is more efficient)
+    CRITERIA_IM = args.criteriaIM
+    PERCENTAGE_NEGATIVE_IM = args.percNegIM
+    OVERWRITE_IM = args.overWriteIM
 
     if OVER_WRITE_CAP_FLAG and OVER_WRITE_CAP_VAL >= NUM_BANDS:
         raise ValueError(f"OVER_WRITE_CAP_VAL ({OVER_WRITE_CAP_VAL}) cannot be greater than or equal to NUM_BANDS ({NUM_BANDS})")
@@ -96,19 +102,28 @@ if __name__ == "__main__":
         OVER_WRITE_CAP_FLAG, 
         OVER_WRITE_CAP_VAL,
         EXCLUDE_CAP_FLAG,
-        GET_SOL_APPROACH
+        GET_SOL_APPROACH,
+        CRITERIA_IM,
+        PERCENTAGE_NEGATIVE_IM,
+        OVERWRITE_IM
     )
     
+    file_path = "main_mobarp"
+    current_directory = os.path.dirname(os.path.realpath(__file__))
+    data_path = os.path.join(current_directory, '..', '..', '..', 'data')
+    # print(data_path)
+    
     # Set folder paths for inputs and outputs
-    folder_inputs = "../../../data/" + input_path
+    folder_inputs = os.path.join(data_path, input_path) #"../../../data/" + input_path
+
     ModelIMPA.formatted_alpha = formatted_alpha
     if FILTERING_FLAG:
-        ModelIMPA.folder_outputs = "../../../data/" + output_path + f"_alpha{formatted_alpha}"
+        ModelIMPA.folder_outputs = os.path.join(data_path, output_path, f"alpha{formatted_alpha}")# "../../../data/" + output_path + f"_alpha{formatted_alpha}"
     else:
-        ModelIMPA.folder_outputs = "../../../data/"+ output_path
+        ModelIMPA.folder_outputs = os.path.join(data_path, output_path) #"../../../data/"+ output_path
 
     if POST_PROCESS_FLAG:
-        ModelIMPA.folder_outputs += "_pp"
+        ModelIMPA.folder_outputs = os.path.join(ModelIMPA.folder_outputs, "_pp") #"_pp"
 
     ModelIMPA.save_flag = SAVE_FLAG
 
@@ -125,7 +140,8 @@ if __name__ == "__main__":
     ModelIMPA.input_load = []
     if not RANDOM_TEST_FLAG:
         ModelIMPA.test_file = test_file
-        with open(str(folder_inputs) + "/inputs_set" + str(test_file) + ".pkl", "rb") as f:
+        input_file = os.path.join(folder_inputs, "inputs_set"+str(test_file)+".pkl")
+        with open(input_file, "rb") as f:
             ModelIMPA.input_load = pkl.load(f)
         #snr_fixed = np.load(str(folder_inputs) + "/fixed_test_set" + str(test_file) + ".npy")
         #snr_mobile = np.load(str(folder_inputs) + "/mobile_test_set" + str(test_file) + ".npy")
@@ -139,6 +155,8 @@ if __name__ == "__main__":
     ModelIMPA.start_time = time.time()
     
     ModelIMPA.run_impa()
+    
+    ModelIMPA.run_analysis()
 
     # Save outputs if saving is enabled and not doing random testing
     if ModelIMPA.save_flag and not ModelIMPA.random_test_flag:
