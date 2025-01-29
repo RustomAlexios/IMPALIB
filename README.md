@@ -36,6 +36,11 @@ Would you like to solve optimization problems using message-passing algorithms? 
   
   We also considered solving the $k$-SAT problem where the goal is to determine whether there exists an assignment of variables in a Boolean formula with clauses containing exactly $k$ variables, such that the entire formula is true.
 
+* *Application 4* :
+  
+  We also considered solving the MOBARP problem where the goal is to find the minimum order assignment of fixed and mobile transmitters to a set of receiver locations subject to capacities and set cover constraints.
+
+
 ## **Supported Constraints**
 
 Various constraints are implemented:
@@ -48,10 +53,12 @@ Various constraints are implemented:
    * These constraints do not allow matching to a project if a team is not formed
    * These constraints only allow matching to exactly one project if a team is formed
 4. Knapsack Constraints:
-   * These constraints enforce that the team assignments do not violate the capacity of each department
+   * These constraints enforce that the team assignments do not violate the capacity of each department or TX
 5. Degree Constraints which enforce that each city must be visited exactly once
 6. Subtour Elimination constraints prevent the existence of smaller loops or subtours within potential solutions
 7. K-SAT constraint ensures that a constraints is satisfied by the constituent variables (solid or dashed connections)
+8. Set Cover Constraints ($\ge 1$) which enforce a RX is covered by at least one TX
+9. Auxiliary constraints which are introduced to linearize the product of two binary variables $z=x\timesy$
 
 ### Code Parameters
 
@@ -82,6 +89,20 @@ Various constraints are implemented:
    * `var`: Variance of the Normal distribution used to set the incoming metrics
    * `overwrite`: whether to over-write the type of metrics in a pre-generated input files for analysis with a different type of incoming metrics initialization
    * `randomTestFlag`: whether to run IMPA on a random instant or from a pre-generated input files
+5. Variables related to *Application 4*:
+   * `nFTX`: Number of fixed TX
+   * `nMTX`: Number of mobile TX
+   * `nBands`: Number of bands
+   * `nTimeSteps`: Number of discrete time steps
+   * `nRX`: Number of RX
+   * `nMTXLoc`: Number of mobile TX locations
+   * `overWriteCapFlag`: Over Write Max Capacity or not
+   * `overWriteCapVal`: Over Write Max Capacity Value if overWriteCapFlag is True
+   * `excludeCapFlag`: Exclude capacities constraints or not
+   * `getSolApproach`: Approach for getting a solution for MOBARP problem after solving it using IMPA
+   * `criteriaIM`: Criterion for initialization of incoming metrics ($1$: initialization from a Normal distribution for all incoming metrics, $2$: initialization from a uniform distribution for the incoming metrics on TX and RX equality constraints, initialization from a Normal distribution for the incoming metrics on the mobile TX-location equality constraints)
+   * `percNegIM`: Percentage of Negative samples in IM
+   * `overWriteIM`: overwrite incoming metrics or not (happens when incoming metrics are usually read from a file)
 
 ## **Usage**
 
@@ -106,6 +127,7 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
   * [Application 1](examples/KcMwm/demo.cpp)
   * [Application 2](examples/Tsp/demo.cpp)
   * [Application 3](examples/Ksat/demo.cpp)
+  * [Application 4](examples/Mobarp/demo.cpp)
 
 <!--Graphical Model of Application $1$:
 
@@ -115,7 +137,7 @@ We assume in the code samples below you've copied them to an `impalib` subdirect
 ![graphicalModel](./img/demoGraphicalModel.png)-->
 
 * To run any of the above demos:
-  * Navigate to: [`/examples/KcMwm`](/examples/KcMwm) or [`/examples/Tsp`](/examples/Tsp) or [`/examples/Ksat`](/examples/Ksat)
+  * Navigate to: [`/examples/KcMwm`](/examples/KcMwm) or [`/examples/Tsp`](/examples/Tsp) or [`/examples/Ksat`](/examples/Ksat) or [`/examples/Mobarp`](/examples/Mobarp)
   
     ```bash
       cmake -B build
@@ -148,6 +170,12 @@ To run pure code using sample datasets:
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --alpha=0.5 --randomTestFlag=True --nConstraints=20 --nVariables=10 --kVariable=3
     ```
 
+* *Application 4*:
+  * Navigate to [`test/python_mobarp/src`](test/python_mobarp/src) and run:
+
+    ```bash
+        python3 main_mobarp.py --randomTestFlag=True --nFTX=2 --nMTX=2 --nBands=3 --nTimeSteps=4 --nRX=3 --nMTXLoc=4 --filteringFlag=True --alpha=0.5 --percNegIM=50 --nITER=200
+    ```
 ### *3. C++ Code with a Python wrapper*
 
 To compile the C++ library and install the Python wrapper, navigate to the project root and use:
@@ -188,6 +216,13 @@ To compile the C++ library and install the Python wrapper, navigate to the proje
 
     ```bash
         python3 main_ksat.py --filteringFlag=True --threshold=-0.0001 --nITER=200 --PPElements=2 --alpha=0.5 --var=8 --randomTestFlag=True --nConstraints=200 --nVariables=90 --kVariable=5 --PPFlag=True
+    ```
+
+* *Application 4*:
+  * To run wrapper code using randomly generated dataset:
+
+    ```bash
+        python3 main_mobarp.py --randomTestFlag=True --nFTX=7 --nMTX=7 --nBands=5 --nTimeSteps=4 --nRX=3 --nMTXLoc=4 --filteringFlag=True --alpha=0.1 --percNegIM=40 --nITER=200
     ```
 
     > ***NOTE***: Currently this option looks for a relevant sample dataset in the `data` directory, one directory up from the current working directory. This will be fixed in a future version.

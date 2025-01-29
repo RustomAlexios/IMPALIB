@@ -133,6 +133,7 @@ class GraphicalModelMOBARP:
             self.fixed_x_eq_const_to_fixed_capac_const_m = deepcopy(fixed_x_costs)
             self.mobile_x_eq_const_to_mobile_capac_const_m = deepcopy(mobile_x_costs)
 
+        print("num_iterations: ", self.num_iterations)
         print("num_fixed_tx: ", self.num_fixed_tx)
         print("num_mobile_tx: ", self.num_mobile_tx)
         print("num_bands: ", self.num_bands)
@@ -143,11 +144,11 @@ class GraphicalModelMOBARP:
         if (self.filtering_flag):
             print("alpha: ", self.formatted_alpha)
         print("exclude_cap_flag: ", self.exclude_cap_flag)
-        print("get_sol_approach: ", self.get_sol_approach)
-        print("self.criteria_im: ", self.criteria_im)
+        # print("get_sol_approach: ", self.get_sol_approach)
+        # print("self.criteria_im: ", self.criteria_im)
         print("self.percentage_neg_im: ", self.percentage_neg_im)
-        print("self.overwrite_im: ", self.overwrite_im)
-        print("self.snr_threshold: ", self.snr_threshold)
+        # print("self.overwrite_im: ", self.overwrite_im)
+        # print("self.snr_threshold: ", self.snr_threshold)
         
         #construct equality constraint object
         self.model_eq_constraint = EqualityConstraintMOBARP(
@@ -271,7 +272,7 @@ class GraphicalModelMOBARP:
         # r_costs = r_costs*r_array_sign.reshape((num_mobile_tx, num_mobile_tx_locs))
 
         z_costs = np.zeros((mobile_x_costs.size, num_mobile_tx_locs), dtype = np_impa_lib)
-
+        
         if (not self.random_test_flag):
             #set to extreme if reading from a file
             connectivity_fixed_tx = -10000*np.ones((num_fixed_tx, num_bands, num_time_steps, num_rx_locs), dtype=int)
@@ -300,7 +301,7 @@ class GraphicalModelMOBARP:
             #update messages from x equality constraint to auxiliary and set cover constraints
             self.model_eq_constraint.x_eq_const_to_auxiliary_and_set_cover_const_update(self.model_ineq_constraint.fixed_capac_const_to_fixed_x_eq_const_m, self.model_ineq_constraint.mobile_capac_const_to_mobile_x_eq_const_m, self.model_auxiliary_constraint.auxiliary_const_to_mobile_x_eq_const_m, self.model_ineq_constraint.set_cover_ineq_const_to_fixed_x_eq_const_m)
             #update messages from auxiliary constraint to z equality constraint
-            self.model_auxiliary_constraint.auxiliary_const_to_z_eq_const_update(iter, self.model_eq_constraint.mobile_x_eq_const_to_auxiliary_const_m, self.model_eq_constraint.r_eq_const_to_auxiliary_const_m)
+            self.model_auxiliary_constraint.auxiliary_const_to_z_eq_const_update(self.model_eq_constraint.mobile_x_eq_const_to_auxiliary_const_m, self.model_eq_constraint.r_eq_const_to_auxiliary_const_m)
             #update messages from auxiliary constraint to r equality constraint
             self.model_auxiliary_constraint.auxiliary_const_to_r_eq_const_update(self.model_eq_constraint.z_eq_const_to_auxiliary_const_m, self.model_eq_constraint.mobile_x_eq_const_to_auxiliary_const_m)
             #update messages from z equlaity constraint to set cover inequality constraint
@@ -368,11 +369,10 @@ class GraphicalModelMOBARP:
                     counter_wait+=1
             
             prev_extrinsic_fixed_x, prev_extrinsic_mobile_x, prev_extrinsic_r, prev_extrinsic_z = extrinsic_fixed_x, extrinsic_mobile_x, extrinsic_r, extrinsic_z
-        
+
             self.end_time = time.time()
             self.impa_runtime = self.end_time - self.start_time
             # print(f"IMPA run_time: {self.impa_runtime}")
-            
             self.extrinsic_fixed_x = extrinsic_fixed_x
             self.extrinsic_mobile_x = extrinsic_mobile_x
             self.extrinsic_r = extrinsic_r
@@ -403,10 +403,17 @@ class GraphicalModelMOBARP:
             hard_decision_data.append(data_iter)
             
             self.stopping_at_iter = iter #last iteration that is done
-            if (counter_wait==5):
-                self.stopping_at_iter = iter-counter_wait+1
-                break
-                
+            # if (counter_wait==5):
+            #     self.stopping_at_iter = iter-counter_wait+1
+            #     break
+        # print(self.model_auxiliary_constraint.auxiliary_const_to_mobile_x_eq_const_m)
+        # np.set_printoptions(precision=8, suppress=True, formatter={'float_kind': '{:0.8f}'.format})
+        # print(self.extrinsic_fixed_x)
+        # print(self.extrinsic_mobile_x)
+        # print(self.extrinsic_r)
+        # print(self.extrinsic_z)
+        
+        # exit()      
         self.hard_decision_data = hard_decision_data
         
         data_iter_fixed_tx_hd = [data["hard_decision_fixed_x"].tolist() for data in hard_decision_data]

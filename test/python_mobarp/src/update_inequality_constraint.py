@@ -4,7 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import np, np_impa_lib, zero_value, deepcopy
+from environmentModule import np, np_impa_lib, zero_value, deepcopy, os
         
 class InequalityConstraintMOBARP:
     def __init__(self, NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, fixed_capac_constraints, mobile_capac_constraints, ALPHA, FILTERING_FLAG, NUM_MOBILE_TX_LOCS, NUM_RX_LOCS, connectivity_mobile_tx, connectivity_fixed_tx):
@@ -41,6 +41,17 @@ class InequalityConstraintMOBARP:
         self.fixed_capac_const_to_fixed_x_eq_const_m_dummy = deepcopy(fixed_capac_const_to_fixed_x_eq_const_m)
         self.mobile_capac_const_to_mobile_x_eq_const_m_dummy = deepcopy(mobile_capac_const_to_mobile_x_eq_const_m)
         
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rFixedCapacConst2FixedXEqConstDummyM_"
+        # rFixedCapacConst2FixedXEqConstDummyM_ = self.fixed_capac_const_to_fixed_x_eq_const_m_dummy.astype(np_impa_lib)
+        # np.save(f_input_1, rFixedCapacConst2FixedXEqConstDummyM_.flatten())
+    
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/rMobileCapacConst2MobileXEqConstDummyM_"
+        # rMobileCapacConst2MobileXEqConstDummyM_ = self.mobile_capac_const_to_mobile_x_eq_const_m_dummy.astype(np_impa_lib)
+        # np.save(f_input_2, rMobileCapacConst2MobileXEqConstDummyM_.flatten())
+        
+        # exit()
+        
     def process_filtering_capac_const(self, iter):
         #perform fitering on messages from capacity constraints to fixed & mobile x
         alpha = self.alpha
@@ -67,6 +78,14 @@ class InequalityConstraintMOBARP:
         self.fixed_capac_const_to_fixed_x_eq_const_m = fixed_capac_const_to_fixed_x_eq_const_m     
         self.mobile_capac_const_to_mobile_x_eq_const_m = mobile_capac_const_to_mobile_x_eq_const_m
         
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rFixedCapacConst2FixedXEqConstM_"
+        # rFixedCapacConst2FixedXEqConstM_ = self.fixed_capac_const_to_fixed_x_eq_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rFixedCapacConst2FixedXEqConstM_.flatten())
+    
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/rMobileCapacConst2MobileXEqConstM_"
+        # rMobileCapacConst2MobileXEqConstM_ = self.mobile_capac_const_to_mobile_x_eq_const_m.astype(np_impa_lib)
+        # np.save(f_input_2, rMobileCapacConst2MobileXEqConstM_.flatten())
+        
     def mobile_loc_eq_const_to_r_eq_const_update(self, r_eq_const_to_mobile_loc_eq_const_m):
         #calculate messages from mobile-loc equality constraint to r equality constraint
         mobile_loc_eq_const_to_r_eq_const_m = np.zeros_like(r_eq_const_to_mobile_loc_eq_const_m, dtype = np_impa_lib)
@@ -77,6 +96,10 @@ class InequalityConstraintMOBARP:
             remaining_msgs = r_eq_const_to_mobile_loc_eq_const_m[:, mask]
             mobile_loc_eq_const_to_r_eq_const_m[:, index] = -np.min(remaining_msgs, axis=1)
         self.mobile_loc_eq_const_to_r_eq_const_m_dummy = deepcopy(mobile_loc_eq_const_to_r_eq_const_m)
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rMobileLocEqConst2REqConstDummyM_"
+        # rMobileLocEqConst2REqConstDummyM_ = self.mobile_loc_eq_const_to_r_eq_const_m_dummy.astype(np_impa_lib)
+        # np.save(f_input_1, rMobileLocEqConst2REqConstDummyM_.flatten())
 
     def process_filtering_mobile_loc_eq(self, iter):
         #perform messages on messages from mobile-loc equality constraint to r equality constraint
@@ -94,15 +117,19 @@ class InequalityConstraintMOBARP:
         elif not filtering_flag or alpha==0:
             mobile_loc_eq_const_to_r_eq_const_m = deepcopy(self.mobile_loc_eq_const_to_r_eq_const_m_dummy)
 
-        self.mobile_loc_eq_const_to_r_eq_const_m = mobile_loc_eq_const_to_r_eq_const_m     
-    
+        self.mobile_loc_eq_const_to_r_eq_const_m = mobile_loc_eq_const_to_r_eq_const_m  
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rMobileLocEqConst2REqConstM_"
+        # rMobileLocEqConst2REqConstM_ = self.mobile_loc_eq_const_to_r_eq_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rMobileLocEqConst2REqConstM_.flatten())
+        
     def set_cover_ineq_const_update(self, z_eq_const_to_set_cover_ineq_const_m, fixed_x_eq_const_to_set_cover_const_m):
         #calculate messages from set cover inequality constraint to fixed and mobile x
         reshaped_fixed_x_eq_const_to_set_cover_const_m = fixed_x_eq_const_to_set_cover_const_m.reshape(self.num_fixed_tx*self.num_bands, -1)
         reshaped_z_eq_const_to_set_cover_ineq_const_m = z_eq_const_to_set_cover_ineq_const_m.reshape(self.num_bands*self.num_mobile_tx,self.num_time_steps,self.num_mobile_tx_locs,self.num_rx_locs).transpose()
         
         temp_reshaped_connectivity_fixed_tx = self.conx_fixed_tx_per_num_rx_locs.reshape(self.num_fixed_tx*self.num_bands, -1)
-
+        
         set_cover_ineq_const_to_fixed_x_eq_const_m = np.zeros(reshaped_fixed_x_eq_const_to_set_cover_const_m.shape, dtype=np_impa_lib)
         
         temp_conx_mob_tx_rx = self.conx_mob_tx_rx.transpose(1,2,0,3)
@@ -115,6 +142,14 @@ class InequalityConstraintMOBARP:
             set_cover_ineq_const_to_fixed_x_eq_const_m[index, :] = np.where(temp_reshaped_connectivity_fixed_tx[index, :], -np.maximum(zero_value, np.minimum(min_remaining_fixed_msgs, min_mobile_msgs)), set_cover_ineq_const_to_fixed_x_eq_const_m[index, :])
         
         self.set_cover_ineq_const_to_fixed_x_eq_const_m_dummy = set_cover_ineq_const_to_fixed_x_eq_const_m.T.reshape(self.num_time_steps, self.num_rx_locs, self.num_fixed_tx*self.num_bands)
+        
+        # for k in range(self.num_time_steps):
+        #     print(f"Time Step: {k}")
+        #     for l in range(self.num_rx_locs):
+        #         print(f"  Rx Location: {l}")
+        #         for i_j in range(self.num_fixed_tx * self.num_bands):
+        #             print(f"{self.set_cover_ineq_const_to_fixed_x_eq_const_m_dummy[k][l][i_j]:10.4f}", end=" ")
+        #         print()
         
         temp_reshaped_z_eq_const_to_set_cover_ineq_const_m = np.swapaxes(reshaped_z_eq_const_to_set_cover_ineq_const_m, 0, 3).reshape(-1,self.num_time_steps*self.num_rx_locs)
         
@@ -138,9 +173,28 @@ class InequalityConstraintMOBARP:
                 reshaped_set_cover_ineq_const_to_z_eq_const_m[index, index_n] = arr
         
         temp_set_cover_ineq_const_to_z_eq_const_m = reshaped_set_cover_ineq_const_to_z_eq_const_m.reshape(self.num_time_steps, self.num_rx_locs, self.num_mobile_tx_locs, self.num_bands*self.num_mobile_tx)
-        temp_set_cover_ineq_const_to_z_eq_const_m = temp_set_cover_ineq_const_to_z_eq_const_m
+        # temp_set_cover_ineq_const_to_z_eq_const_m = temp_set_cover_ineq_const_to_z_eq_const_m
         self.set_cover_ineq_const_to_z_eq_const_m_dummy = temp_set_cover_ineq_const_to_z_eq_const_m
-                
+
+        # for k in range(self.num_time_steps):
+        #     print(f"Time Step: {k}")
+        #     for l in range(self.num_rx_locs):
+        #         print(f"  Rx Location: {l}")
+        #         for n in range(self.num_mobile_tx_locs):
+        #             print(f"    Mobile Tx Location: {n} -> ", end="")
+        #             for j_i in range(self.num_bands * self.num_mobile_tx):
+        #                 print(f"{self.set_cover_ineq_const_to_z_eq_const_m_dummy[k][l][n][j_i]:12.3f}", end=" ")
+        #             print()
+        
+        # exit()      
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rSetCoverIneqConst2ZEqConstDummyM_"
+        # rSetCoverIneqConst2ZEqConstDummyM_ = self.set_cover_ineq_const_to_z_eq_const_m_dummy.astype(np_impa_lib)
+        # np.save(f_input_1, rSetCoverIneqConst2ZEqConstDummyM_.flatten())
+        
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/rSetCoverIneqConst2FixedXEqConstDummyM_"
+        # rSetCoverIneqConst2FixedXEqConstDummyM_ = self.set_cover_ineq_const_to_fixed_x_eq_const_m_dummy.astype(np_impa_lib)
+        # np.save(f_input_2, rSetCoverIneqConst2FixedXEqConstDummyM_.flatten())
             
     def process_filtering_set_cover_const(self, iter):
         #perform filtering on messages from set cover inequality constraint to fixed and mobile x
@@ -167,4 +221,33 @@ class InequalityConstraintMOBARP:
 
         self.set_cover_ineq_const_to_fixed_x_eq_const_m = set_cover_ineq_const_to_fixed_x_eq_const_m     
         self.set_cover_ineq_const_to_z_eq_const_m = set_cover_ineq_const_to_z_eq_const_m
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rSetCoverIneqConst2ZEqConstM_"
+        # rSetCoverIneqConst2ZEqConstM_ = self.set_cover_ineq_const_to_z_eq_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rSetCoverIneqConst2ZEqConstM_.flatten())
+        
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/rSetCoverIneqConst2FixedXEqConstM_"
+        # rSetCoverIneqConst2FixedXEqConstM_ = self.set_cover_ineq_const_to_fixed_x_eq_const_m.astype(np_impa_lib)
+        # np.save(f_input_2, rSetCoverIneqConst2FixedXEqConstM_.flatten())
+        
+        # for k in range(self.num_time_steps):
+        #     print(f"Time Step: {k}")
+        #     for l in range(self.num_rx_locs):
+        #         print(f"  Rx Location: {l}")
+        #         for i_j in range(self.num_fixed_tx * self.num_bands):
+        #             print(f"{self.set_cover_ineq_const_to_fixed_x_eq_const_m[k][l][i_j]:10.4f}", end=" ")
+        #         print()
+        # exit()
+        
+        # for k in range(self.num_time_steps):
+        #     print(f"Time Step: {k}")
+        #     for l in range(self.num_rx_locs):
+        #         print(f"  Rx Location: {l}")
+        #         for n in range(self.num_mobile_tx_locs):
+        #             print(f"    Mobile Tx Location: {n} -> ", end="")
+        #             for j_i in range(self.num_bands * self.num_mobile_tx):
+        #                 print(f"{self.set_cover_ineq_const_to_z_eq_const_m[k][l][n][j_i]:12.3f}", end=" ")
+        #             print()
+        
+        # exit()
             

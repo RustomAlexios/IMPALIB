@@ -22,7 +22,7 @@ def ut_iterate(
     n_projects,
     threshold,
 ):
-    np.random.seed(17)
+    # np.random.seed(17)
     N_DEPARTMENTS = len(N_u)
     available_combinations = prune_teams(N_u)
     teams_weights_per_department, teams_types_per_department = team_reward_generation(available_combinations, N_u, team_types)

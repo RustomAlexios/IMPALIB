@@ -48,3 +48,5 @@ test/python_mobarp/src/overwrite_cpsat_inputs.py
 test/python_mobarp/src/solver_multiplerelay.ipynb
 test/python_mobarp/src/compare_solutions.py
 test/python_mobarp/src/run_analysis.py
+src/impa/external
+src/impa/ut_results

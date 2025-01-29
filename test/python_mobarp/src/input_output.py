@@ -4,7 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import np, np_impa_lib
+from environmentModule import np, np_impa_lib, os
 import time
 
 class OutputsMOBARP:
@@ -49,11 +49,28 @@ class OutputsMOBARP:
             extrinsic_fixed_x[conx_rows_fixed] = np.sum(reshaped_ineq_set_cover_const_to_fixed_x_eq_const_m, axis=1, where = self.conx_fixed_tx_per_num_rx_locs==1)[conx_rows_fixed]
 
         reshaped_auxiliary_const_to_r_eq_const_m = auxiliary_const_to_r_eq_const_m.reshape(self.num_mobile_tx, -1, self.num_mobile_tx_locs).transpose(0, 2, 1).reshape(-1, self.num_bands*self.num_time_steps)
-
-        conx_mob_tx_per_num_mob_tx_locs = self.conx_mob_tx_per_num_mob_tx_locs.reshape(self.num_mobile_tx, -1, self.num_mobile_tx_locs).transpose(0, 2, 1).reshape(-1, self.num_bands*self.num_time_steps)
-        extrinsic_r = np.sum(reshaped_auxiliary_const_to_r_eq_const_m, axis=1, where = conx_mob_tx_per_num_mob_tx_locs==1) + mobile_loc_eq_const_to_r_eq_const_m.flatten()
+        
+        conx_mob_tx_r = self.conx_mob_tx_per_num_mob_tx_locs.reshape(self.num_mobile_tx, -1, self.num_mobile_tx_locs).transpose(0, 2, 1).reshape(-1, self.num_bands*self.num_time_steps)
+        extrinsic_r = np.sum(reshaped_auxiliary_const_to_r_eq_const_m, axis=1, where = conx_mob_tx_r==1) + mobile_loc_eq_const_to_r_eq_const_m.flatten()
         
         reshaped_set_cover_ineq_const_to_z_eq_const_m = np.reshape(np.transpose(np.sum(set_cover_ineq_const_to_z_eq_const_m, axis=1, where=self.conx_mob_tx_rx==1).reshape(-1, set_cover_ineq_const_to_z_eq_const_m.shape[-1])), (self.mobile_x_costs.size,self.num_mobile_tx_locs))
         
         extrinsic_z = reshaped_set_cover_ineq_const_to_z_eq_const_m + auxiliary_const_to_z_eq_const_m
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_fixed_x"
+        # extrinsic_fixed_x_py = extrinsic_fixed_x.astype(np_impa_lib)
+        # np.save(f_input_1, extrinsic_fixed_x_py.flatten())
+        
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_mobile_x"
+        # extrinsic_mobile_x_py = extrinsic_mobile_x.astype(np_impa_lib)
+        # np.save(f_input_2, extrinsic_mobile_x_py.flatten())
+        
+        # f_input_3 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_r"
+        # extrinsic_r_py = extrinsic_r.astype(np_impa_lib)
+        # np.save(f_input_3, extrinsic_r_py.flatten())
+        
+        # f_input_4 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_z"
+        # extrinsic_z_py = extrinsic_z.astype(np_impa_lib)
+        # np.save(f_input_4, extrinsic_z_py.flatten())
+        # print(extrinsic_fixed_x)
         return extrinsic_fixed_x, extrinsic_mobile_x, extrinsic_r, extrinsic_z

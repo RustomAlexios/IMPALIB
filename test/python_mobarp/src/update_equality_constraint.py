@@ -4,7 +4,7 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import np, np_impa_lib
+from environmentModule import np, np_impa_lib, os
             
 class EqualityConstraintMOBARP:
     def __init__(self, NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, fixed_x_costs, mobile_x_costs, NUM_MOBILE_TX_LOCS, z_costs, NUM_RX_LOCS, connectivity_mobile_tx, connectivity_fixed_tx, r_costs, EXCLUDE_CAP_FLAG):
@@ -62,6 +62,14 @@ class EqualityConstraintMOBARP:
             fixed_x_eq_const_to_set_cover_const_m[conx_fixed_tx_cols[index], index] = sums_fixed_x_eq_const[conx_fixed_tx_cols[index]] - reshaped_ineq_set_cover_const_to_fixed_x_eq_const_m[conx_fixed_tx_cols[index], index]
         
         self.fixed_x_eq_const_to_set_cover_const_m = fixed_x_eq_const_to_set_cover_const_m
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rFixedXEqConst2SetCoverConstM_"
+        # rFixedXEqConst2SetCoverConstM_ = self.fixed_x_eq_const_to_set_cover_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rFixedXEqConst2SetCoverConstM_.flatten())
+    
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/rMobileXEqConst2AuxiliaryConstM_"
+        # rMobileXEqConst2AuxiliaryConstM_ = self.mobile_x_eq_const_to_auxiliary_const_m.astype(np_impa_lib)
+        # np.save(f_input_2, rMobileXEqConst2AuxiliaryConstM_.flatten())
 
 
     def r_eq_const_activation(self, auxiliary_const_to_r_eq_const_m, mobile_loc_eq_const_to_r_eq_const_m):
@@ -87,14 +95,27 @@ class EqualityConstraintMOBARP:
         
         self.r_eq_const_to_mobile_loc_eq_const_m = r_eq_const_to_mobile_loc_eq_const_m.reshape(self.num_mobile_tx, -1)
         
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rREqConst2AuxiliaryConstM_"
+        # rREqConst2AuxiliaryConstM_ = self.r_eq_const_to_auxiliary_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rREqConst2AuxiliaryConstM_.flatten())
+        
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/rREqConst2MobileLocEqConstM_"
+        # rREqConst2MobileLocEqConstM_ = self.r_eq_const_to_mobile_loc_eq_const_m.astype(np_impa_lib)
+        # np.save(f_input_2, rREqConst2MobileLocEqConstM_.flatten())
+        
     def z_eq_const_to_auxiliary_const_update(self, set_cover_ineq_const_to_z_eq_const_m):   
-        #calculate messages from z equality constraint to auxiliary constraint     
+        #calculate messages from z equality constraint to auxiliary constraint
         reshaped_set_cover_ineq_const_to_z_eq_const_m = np.reshape(np.transpose(np.sum(set_cover_ineq_const_to_z_eq_const_m, axis=1, where=self.conx_mob_tx_rx==1).reshape(-1, set_cover_ineq_const_to_z_eq_const_m.shape[-1])), (self.mobile_x_costs.size,self.num_mobile_tx_locs))
         z_eq_const_to_auxiliary_const_m = np.zeros_like(reshaped_set_cover_ineq_const_to_z_eq_const_m, dtype = np_impa_lib)
         mask = self.conx_mob_tx_per_num_mob_tx_locs == 1
         z_eq_const_to_auxiliary_const_m[mask] = self.z_costs[mask] + reshaped_set_cover_ineq_const_to_z_eq_const_m[mask]
         self.z_eq_const_to_auxiliary_const_m = z_eq_const_to_auxiliary_const_m
         
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rZEqConst2AuxiliaryConstM_"
+        # rZEqConst2AuxiliaryConstM_ = self.z_eq_const_to_auxiliary_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rZEqConst2AuxiliaryConstM_.flatten())
+        
+    
     def x_eq_const_activation(self, auxiliary_const_to_mobile_x_eq_const_m, set_cover_ineq_const_to_fixed_x_eq_const_m):
         #calculate messages from fixed and mobile x to capacity constraints 
         conx_rows_mobile = np.where(np.clip(np.sum(self.conx_mob_tx_per_num_mob_tx_locs, axis=1), 0, 1) ==1)[0]
@@ -109,12 +130,20 @@ class EqualityConstraintMOBARP:
         fixed_x_eq_const_to_fixed_capac_const_m = np.zeros_like(self.fixed_x_costs.flatten(), dtype = np_impa_lib)
         fixed_x_eq_const_to_fixed_capac_const_m[conx_rows_cols] = np.sum(reshaped_ineq_set_cover_const_to_fixed_x_eq_const_m, axis=1, where = self.conx_fixed_tx_per_num_rx_locs==1)[conx_rows_cols] + self.fixed_x_costs.flatten()[conx_rows_cols]
         reshaped_fixed_x_eq_const_to_fixed_capac_const_m = fixed_x_eq_const_to_fixed_capac_const_m.reshape(self.num_fixed_tx, self.num_bands, self.num_time_steps)
-
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rFixedXEqConst2FixedCapacConstM_"
+        # rFixedXEqConst2FixedCapacConstM_ = reshaped_fixed_x_eq_const_to_fixed_capac_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rFixedXEqConst2FixedCapacConstM_.flatten())
+        
+        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/rMobileXEqConst2MobileCapacConstM_"
+        # rMobileXEqConst2MobileCapacConstM_ = reshaped_mobile_x_eq_const_to_mobile_capac_const_m.astype(np_impa_lib)
+        # np.save(f_input_2, rMobileXEqConst2MobileCapacConstM_.flatten())
+        
         return reshaped_mobile_x_eq_const_to_mobile_capac_const_m, reshaped_fixed_x_eq_const_to_fixed_capac_const_m
 
     def z_eq_const_to_set_cover_ineq_const_update(self, auxiliary_const_to_z_eq_const_m, set_cover_ineq_const_to_z_eq_const_m):
         #calculate messages from z equality constraint to set cover inequality constraint
-        reshaped_auxiliary_const_to_z_eq_const_m = auxiliary_const_to_z_eq_const_m.reshape(self.num_mobile_tx, self.num_mobile_tx_locs, -1).transpose(0, 2, 1).reshape(-1,self.num_mobile_tx_locs)
+        # reshaped_auxiliary_const_to_z_eq_const_m = auxiliary_const_to_z_eq_const_m.reshape(self.num_mobile_tx, self.num_mobile_tx_locs, -1).transpose(0, 2, 1).reshape(-1,self.num_mobile_tx_locs)
         temp_set_cover_ineq_const_to_z_eq_const_m = set_cover_ineq_const_to_z_eq_const_m.transpose(3, 1, 0, 2)
         reshaped_set_cover_ineq_const_to_z_eq_const_m = np.array([temp_set_cover_ineq_const_to_z_eq_const_m[:, i].flatten() for i in range(self.num_rx_locs)]).transpose()
         
@@ -135,6 +164,12 @@ class EqualityConstraintMOBARP:
             z_eq_const_to_set_cover_ineq_const_m[conx_cols[index], index] = sums_z_eq_const[conx_cols[index]] - reshaped_set_cover_ineq_const_to_z_eq_const_m[conx_cols[index], index]
         
         self.z_eq_const_to_set_cover_ineq_const_m = z_eq_const_to_set_cover_ineq_const_m
+        
+        
+        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/rZEqConst2SetCoverIneqConstM_"
+        # rZEqConst2SetCoverIneqConstM_ = self.z_eq_const_to_set_cover_ineq_const_m.astype(np_impa_lib)
+        # np.save(f_input_1, rZEqConst2SetCoverIneqConstM_.flatten())
+        
 
         
         

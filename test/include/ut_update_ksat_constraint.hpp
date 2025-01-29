@@ -26,7 +26,8 @@ void ut_ksat_constraint(string& ut_name){
 
     const int NUM_VARIABLES = atoi(n_variables_bash);  
     const int K_VARIABLE = atoi(k_variable_bash);
-    const bool FILT_FLAG(filt_flag_bash);
+    // const bool FILT_FLAG(filt_flag_bash);
+    const bool FILT_FLAG = (filt_flag_bash != NULL && std::string(filt_flag_bash) == "1");
 
     cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/alpha.npy");
     impalib_type* alpha_pure = input_alpha.data<impalib_type>();

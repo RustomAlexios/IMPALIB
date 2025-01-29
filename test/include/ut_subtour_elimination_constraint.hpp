@@ -27,7 +27,8 @@ void ut_subtour_constraint(string& ut_name){
     const int N_NODES = atoi(n_nodes_bash);  
     const int N_SUBTOURS = atoi(n_subtours_bash);
     const int N_EDGE_VARIABLES = N_NODES*N_NODES-N_NODES;
-    const bool FILT_FLAG(filt_flag_bash);
+    // const bool FILT_FLAG(filt_flag_bash);
+    const bool FILT_FLAG = (filt_flag_bash != NULL && std::string(filt_flag_bash) == "1");
 
     cnpy::NpyArray input_alpha = cnpy::npy_load("../ut_inputs/alpha.npy");
     impalib_type* alpha_pure = input_alpha.data<impalib_type>();

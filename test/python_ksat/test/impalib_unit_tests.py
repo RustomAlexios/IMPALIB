@@ -87,7 +87,7 @@ parser.add_argument("--nConstraints", type=int, default=3, help="Number of const
 parser.add_argument("--kVariable", type=int, default=3, help="Number of variables per constraint")
 parser.add_argument("--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
 parser.add_argument("--PPElements", type=int, default=2, help="Number of elements in a PP combination")
-parser.add_argument("--filteringFlag", type=bool, default=True, help="Activate Filtering or not")
+parser.add_argument("--filteringFlag", type=bool, default=False, help="Activate Filtering or not")
 parser.add_argument("--alpha", type=np_impa_lib, default=0.5, help="Filtering Rate [0,1]")
 parser.add_argument("--typeMetrics", type=bool, default=False, help="True: biased, False: unbiased")
 parser.add_argument("--var", type=np_impa_lib, default=3, help="Variance of incoming metrics")

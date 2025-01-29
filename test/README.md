@@ -4,13 +4,13 @@
 
 > _**NOTE:**_ Unit testing input & output files are saved in `test/ut_inputs` & `test/ut_results` folders, respectively.
 
-- In order to perform unit-testing of a certain function $F$ with a function name $N$ in a class $C$ using the bash script files `unit_test_kc_mwm.sh` or `unit_test_tsp.sh`, do the following:
+- In order to perform unit-testing of a certain function $F$ with a function name $N$ in a class $C$ using the bash script files `unit_test_kc_mwm.sh` or `unit_test_tsp.sh` or `unit_test_ksat.sh` or `unit_test_mobarp.sh`, do the following:
   
   - Step $1$:
-    - Include the function's name $N$ in the variable `unit_tests` in `unit_test_kc_mwm.sh` or `unit_test_tsp.sh` files.
+    - Include the function's name $N$ in the variable `unit_tests` in `unit_test_kc_mwm.sh` or `unit_test_tsp.sh` or `unit_test_ksat.sh` or `unit_test_mobarp.sh` files.
   
   - Step $2$:
-    - Navigate to [`python_kc_mwm/test/`](python_kc_mwm/test/), [`python_tsp/test/`](python_tsp/test/) or [`python_ksat/test/`](python_ksat/test/) and add the python unit test for function $F$ in class $C$:
+    - Navigate to [`python_kc_mwm/test/`](python_kc_mwm/test/), [`python_tsp/test/`](python_tsp/test/) or [`python_ksat/test/`](python_ksat/test/) or [`python_mobarp/test/`](python_mobarp/test/) and add the python unit test for function $F$ in class $C$:
 
     - If class $C$ file exists, open `ut_class.py`. If class $C$ file does not exist, create a new file `ut_class.py`, and make sure to import this class in `impalib_unit_tests.py`.
 
@@ -29,11 +29,11 @@
 
     - Add a unit test function `ut_function()` in `ut_class.hpp`. Note that `ut_function()` takes specific arguments, and will generate C++ output files.
 
-    - Next, navigate to `test/src/impalib_unit_tests_kc_mwm.cpp` or `test/src/impalib_unit_tests_tsp.cpp` and call the function unit test `ut_function()`.
+    - Next, navigate to `test/src/impalib_unit_tests_kc_mwm.cpp` or `test/src/impalib_unit_tests_tsp.cpp` or `test/src/impalib_unit_tests_ksat.cpp` or `test/src/impalib_unit_tests_mobarp.cpp` and call the function unit test `ut_function()`.
 
     - _Example:_ Function $F$ `degree_constraint_to_edge_ec_update()` with function name $N$ `DegreeConstraint2EdgeEcUpdate` is already implemented for class $C$ with file `ut_update_degree_constraint.hpp`. Notice that $F$ is called in `impalib_unit_tests_tsp.cpp` based on its function name. The unit test of $F$ in `ut_update_degree_constraint.hpp` will read the input files from `test/ut_inputs/` and generate the output files in `test/ut_results/`.
 
-    - _**NOTE:**_ Some general variables are exported in `unit_test_kc_mwm.sh` or `unit_test_tsp.sh`, and these will be read in the unit test functions. These inputs are common across various unit tests.
+    - _**NOTE:**_ Some general variables are exported in `unit_test_kc_mwm.sh` or `unit_test_tsp.sh` or `unit_test_ksat.sh` or `unit_test_mobarp.sh`, and these will be read in the unit test functions. These inputs are common across various unit tests.
 
   - Step $4$:
     - `python3 ut_methods_utils.py` takes the function, and is called to read the outputs files of the Python and C++ codes, and check agreement or not.
@@ -46,7 +46,7 @@
     cmake -B build
     cmake --build build
     cd build/test/src
-    ./unit_test_kc_mwm.sh  OR  ./unit_test_tsp.sh  OR  ./unit_test_ksat.sh
+    ./unit_test_kc_mwm.sh  OR  ./unit_test_tsp.sh  OR  ./unit_test_ksat.sh OR  ./unit_test_mobarp.sh
   ```
 
 > _**NOTE:**_ In unit testing, we loop over all unit tests names & multiple sub-tests could be performed depending on the value of the `total_sub_tests` variable.

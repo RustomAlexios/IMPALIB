@@ -142,3 +142,27 @@ extern "C" void WrapperKsat(const int NUM_ITERATIONS, const int NUM_VARIABLES, c
     // Process the outputs of the model
     copy(model_graph.outputs.ExtrinsicOutputVariableEc.begin(), model_graph.outputs.ExtrinsicOutputVariableEc.begin() + NUM_VARIABLES, pExtrinsic_output_variable_ec);
 }
+
+extern "C" void WrapperMOBARP(const int NUM_ITERATIONS, const int NUM_FIXED_TX, const int NUM_MOBILE_TX, const int NUM_BANDS, const int NUM_TIME_STEPS, const int NUM_RX_LOCS,
+                            const int NUM_MOBILE_TX_LOCS, const impalib_type ALPHA, const bool FILTERING_FLAG, const bool EXCLUDE_CAP_FLAG,
+                            impalib_type *pFixed_x_eq_const_to_fixed_capac_const_m_py, impalib_type *pMobile_x_eq_const_to_mobile_capac_const_m_py,
+                            impalib_type *pR_eq_const_to_auxiliary_const_m_py, const impalib_type *pFIXED_X_COSTS_PY, const impalib_type *pMOBILE_X_COSTS_PY,
+                            const impalib_type *pZ_COSTS_PY, const impalib_type *pR_COSTS_PY, const int *pCONNECTIVITY_FIXED_TX_PY,
+                            const int *pCONNECTIVITY_MOBILE_TX_PY, impalib_type *pExtrinsic_fixed_x, impalib_type *pExtrinsic_mobile_x,
+                            impalib_type *pExtrinsic_z, impalib_type *pExtrinsic_r, const int *pFIXED_CAPACITY_CONSTRAINTS_PY, const int *pMOBILE_CAPAC_CONSTRAINTS_PY,
+                            const int *pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY, const int *CONX_FIXED_TX_PER_NUM_RX_LOCS_PY, const int *CONX_MOB_TX_RX_PY){
+    // Instantiate a GraphicalModelMOBARP object
+    GraphicalModelMOBARP model_graph(NUM_ITERATIONS, NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_RX_LOCS, NUM_MOBILE_TX_LOCS, ALPHA, FILTERING_FLAG, EXCLUDE_CAP_FLAG);
+
+    // Initialize the graphical model with provided data
+    model_graph.initialize(pFixed_x_eq_const_to_fixed_capac_const_m_py, pMobile_x_eq_const_to_mobile_capac_const_m_py, pR_eq_const_to_auxiliary_const_m_py, pFIXED_X_COSTS_PY, pMOBILE_X_COSTS_PY, pZ_COSTS_PY,
+                            pR_COSTS_PY, pCONNECTIVITY_FIXED_TX_PY, pCONNECTIVITY_MOBILE_TX_PY, pFIXED_CAPACITY_CONSTRAINTS_PY, pMOBILE_CAPAC_CONSTRAINTS_PY, pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY,
+                            CONX_FIXED_TX_PER_NUM_RX_LOCS_PY, CONX_MOB_TX_RX_PY);
+
+    // Perform IMPA on the graph
+    model_graph.iterate();
+
+    // Process the outputs of the model
+    model_graph.process_ouputs(pExtrinsic_fixed_x, pExtrinsic_mobile_x, pExtrinsic_z, pExtrinsic_r);
+
+}

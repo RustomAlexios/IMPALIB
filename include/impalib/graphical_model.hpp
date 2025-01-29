@@ -31,7 +31,7 @@ class GraphicalModelKcMwm {
     vector<vector<impalib_type>> project2EqConstraintM_;           ///< messages from project inequality constraint to project equality constraint
     vector<impalib_type> team2OricM_;                              ///< messages from team equality constraint to ORIC
     Knapsack modelKnapsacks_;                                      ///< Knapsack object
-    InequalityConstraint projectIneqConstraint_;                   ///< Project Inequality constraint object
+    InequalityConstraintKcMwm projectIneqConstraint_;                   ///< Project Inequality constraint object
     // EqualityConstraintKcMwm modelEqConstraint_; ///< Equality constraint object
     EqualityConstraint modelEqConstraint_;  ///< Equality constraint object
     OrInequalityConstraint modelOric_;      ///< ORIC object
@@ -950,4 +950,180 @@ inline void GraphicalModelKsat::iterate() {
     }
     /// process outputs of k-sat problem
     outputs.update_extrinsic(KsatConstraint2EqConstraintM_);
+}
+
+
+/**
+ * Represents a graphical model for the MOBARP problem for
+ * computing the assignment of variables to satisfy constraints.
+ */
+class GraphicalModelMOBARP {
+   private:
+    int numIterations_; ///< number of iterations
+    int numFixedTx_;
+    int numMobileTx_;
+    int numBands_;
+    int numTimeSteps_;
+    int numRxLocs_;
+    int numMobileTxLocs_;
+    impalib_type alpha_;
+    bool filteringFlag_;
+    bool excludeCapFlag_;
+    InequalityConstraintMOBARP modelIneqConstraint_;
+    EqualityConstraint modelEqConstraint_;
+    AuxiliaryConstraint modelAuxConstraint_;
+
+   public:
+        InputsMOBARP modelInputs_;                ///< input object
+        OutputsMOBARP outputs;
+        vector<vector<vector<impalib_type>>> FixedCapacConst2FixedXEqConstDummyM_;
+        vector<vector<vector<impalib_type>>> MobileCapacConst2MobileXEqConstDummyM_;
+        vector<vector<vector<impalib_type>>> FixedCapacConst2FixedXEqConstM_;
+        vector<vector<vector<impalib_type>>> MobileCapacConst2MobileXEqConstM_;
+        vector<vector<impalib_type>> AuxiliaryConst2MobileXEqConstM_;
+        vector<vector<vector<impalib_type>>> SetCoverIneqConst2FixedXEqConstM_;
+        vector<vector<vector<impalib_type>>> SetCoverIneqConst2FixedXEqConstDummyM_;
+        vector<vector<impalib_type>> MobileXEqConst2AuxiliaryConstM_;
+        vector<vector<impalib_type>> FixedXEqConst2SetCoverConstM_;
+        vector<vector<impalib_type>> AuxiliaryConst2ZEqConstM_;
+        vector<vector<impalib_type>> ZEqConst2AuxiliaryConstM_;
+        vector<vector<impalib_type>> AuxiliaryConst2REqConstM_;
+        vector<vector<vector<vector<impalib_type>>>> SetCoverIneqConst2ZEqConstM_;
+        vector<vector<vector<vector<impalib_type>>>> SetCoverIneqConst2ZEqConstDummyM_;
+        vector<vector<impalib_type>> ZEqConst2SetCoverIneqConstM_;
+        vector<vector<impalib_type>> MobileLocEqConst2REqConstM_;
+        // vector<vector<impalib_type>> REqConst2AuxiliaryConstM_;
+        vector<vector<impalib_type>> REqConst2MobileLocEqConstM_;
+        vector<vector<impalib_type>> MobileLocEqConst2REqConstDummyM_;
+
+        void initialize(impalib_type *, impalib_type *, impalib_type *, const impalib_type *, const impalib_type *,
+                    const impalib_type *, const impalib_type *, const int *, const int *, const int *, const int *, const int *,
+                    const int *, const int *);  ///< initialize graphical model
+        void iterate();     ///< iterate function
+        void process_ouputs(impalib_type *, impalib_type *, impalib_type *, impalib_type *);
+        GraphicalModelMOBARP(int NUM_ITERATIONS, int NUM_FIXED_TX, int NUM_MOBILE_TX, int NUM_BANDS, int NUM_TIME_STEPS, int NUM_RX_LOCS, 
+                        int NUM_MOBILE_TX_LOCS, impalib_type ALPHA, bool FILTERING_FLAG, bool EXCLUDE_CAP_FLAG);  ///< constructor for mobarp graphical model
+};
+
+inline GraphicalModelMOBARP::GraphicalModelMOBARP(const int NUM_ITERATIONS, const int NUM_FIXED_TX, const int NUM_MOBILE_TX, const int NUM_BANDS, const int NUM_TIME_STEPS, const int NUM_RX_LOCS, 
+                        const int NUM_MOBILE_TX_LOCS, const impalib_type ALPHA, const bool FILTERING_FLAG, const bool EXCLUDE_CAP_FLAG)
+        : numIterations_(NUM_ITERATIONS), 
+        numFixedTx_(NUM_FIXED_TX),
+        numMobileTx_(NUM_MOBILE_TX),
+        numBands_(NUM_BANDS),
+        numTimeSteps_(NUM_TIME_STEPS),
+        numRxLocs_(NUM_RX_LOCS),
+        numMobileTxLocs_(NUM_MOBILE_TX_LOCS),
+        alpha_(ALPHA),
+        filteringFlag_(FILTERING_FLAG),
+        excludeCapFlag_(EXCLUDE_CAP_FLAG),
+        modelInputs_(NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_RX_LOCS, NUM_MOBILE_TX_LOCS),
+        outputs(NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_RX_LOCS, NUM_MOBILE_TX_LOCS, EXCLUDE_CAP_FLAG),
+        modelIneqConstraint_(NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_RX_LOCS, NUM_MOBILE_TX_LOCS, ALPHA, FILTERING_FLAG), 
+        FixedCapacConst2FixedXEqConstDummyM_(NUM_FIXED_TX, vector<vector<impalib_type>>(NUM_BANDS, vector<impalib_type>(NUM_TIME_STEPS, 0))),
+        MobileCapacConst2MobileXEqConstDummyM_(NUM_MOBILE_TX, vector<vector<impalib_type>>(NUM_BANDS, vector<impalib_type>(NUM_TIME_STEPS, 0))),
+        FixedCapacConst2FixedXEqConstM_(NUM_FIXED_TX, vector<vector<impalib_type>>(NUM_BANDS, vector<impalib_type>(NUM_TIME_STEPS, 0))),
+        MobileCapacConst2MobileXEqConstM_(NUM_MOBILE_TX, vector<vector<impalib_type>>(NUM_BANDS, vector<impalib_type>(NUM_TIME_STEPS, 0))),
+        AuxiliaryConst2MobileXEqConstM_(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0)),
+        SetCoverIneqConst2FixedXEqConstM_(NUM_TIME_STEPS, vector<vector<impalib_type>>(NUM_RX_LOCS, vector<impalib_type>(NUM_FIXED_TX*NUM_BANDS, 0))),
+        SetCoverIneqConst2FixedXEqConstDummyM_(NUM_TIME_STEPS, vector<vector<impalib_type>>(NUM_RX_LOCS, vector<impalib_type>(NUM_FIXED_TX*NUM_BANDS, 0))),
+        modelEqConstraint_(NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_RX_LOCS, NUM_MOBILE_TX_LOCS, ALPHA, FILTERING_FLAG, EXCLUDE_CAP_FLAG),
+        MobileXEqConst2AuxiliaryConstM_(vector<vector<impalib_type>>(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0))),
+        FixedXEqConst2SetCoverConstM_(vector<vector<impalib_type>>(NUM_FIXED_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_RX_LOCS, 0))),
+        modelAuxConstraint_(NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_MOBILE_TX_LOCS),
+        AuxiliaryConst2ZEqConstM_(vector<vector<impalib_type>>(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0))),
+        ZEqConst2AuxiliaryConstM_(vector<vector<impalib_type>>(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0))),
+        AuxiliaryConst2REqConstM_(vector<vector<impalib_type>>(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0))),
+        SetCoverIneqConst2ZEqConstM_(vector<vector<vector<vector<impalib_type>>>>(NUM_TIME_STEPS, vector<vector<vector<impalib_type>>>(NUM_RX_LOCS, vector<vector<impalib_type>>(NUM_MOBILE_TX_LOCS, vector<impalib_type>(NUM_BANDS*NUM_MOBILE_TX, 0))))),
+        SetCoverIneqConst2ZEqConstDummyM_(vector<vector<vector<vector<impalib_type>>>>(NUM_TIME_STEPS, vector<vector<vector<impalib_type>>>(NUM_RX_LOCS, vector<vector<impalib_type>>(NUM_MOBILE_TX_LOCS, vector<impalib_type>(NUM_BANDS*NUM_MOBILE_TX, 0))))),
+        ZEqConst2SetCoverIneqConstM_(vector<vector<impalib_type>>(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS*NUM_MOBILE_TX_LOCS, vector<impalib_type>(NUM_RX_LOCS, 0))),
+        MobileLocEqConst2REqConstM_(NUM_MOBILE_TX, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0)),
+        // REqConst2AuxiliaryConstM_(vector<vector<impalib_type>>(NUM_MOBILE_TX*NUM_MOBILE_TX_LOCS, vector<impalib_type>(NUM_BANDS*NUM_TIME_STEPS, 0))),
+        REqConst2MobileLocEqConstM_(vector<vector<impalib_type>>(NUM_MOBILE_TX, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0))),
+        MobileLocEqConst2REqConstDummyM_(NUM_MOBILE_TX, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0)){};
+
+inline void GraphicalModelMOBARP::initialize(impalib_type *pFixed_x_eq_const_to_fixed_capac_const_m_py, impalib_type *pMobile_x_eq_const_to_mobile_capac_const_m_py,
+                                            impalib_type *pR_eq_const_to_auxiliary_const_m_py, const impalib_type *pFIXED_X_COSTS_PY, const impalib_type *pMOBILE_X_COSTS_PY,
+                                            const impalib_type *pZ_COSTS_PY, const impalib_type *pR_COSTS_PY, const int *pCONNECTIVITY_FIXED_TX_PY,
+                                            const int *pCONNECTIVITY_MOBILE_TX_PY, const int* pFIXED_CAPACITY_CONSTRAINTS_PY, const int* pMOBILE_CAPACITY_CONSTRAINTS_PY,
+                                            const int *pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY, const int * pCONX_FIXED_TX_PER_NUM_RX_LOCS_PY, const int *pCONX_MOB_TX_RX_PY) {
+    /// calls a method process_inputs() on an object modelInputs_, passing
+    /// several pointers to Python objects as arguments
+    modelInputs_.process_inputs(pFixed_x_eq_const_to_fixed_capac_const_m_py, pMobile_x_eq_const_to_mobile_capac_const_m_py, pR_eq_const_to_auxiliary_const_m_py, pFIXED_X_COSTS_PY, 
+                                pMOBILE_X_COSTS_PY, pZ_COSTS_PY, pR_COSTS_PY, pCONNECTIVITY_FIXED_TX_PY, pCONNECTIVITY_MOBILE_TX_PY, pFIXED_CAPACITY_CONSTRAINTS_PY, pMOBILE_CAPACITY_CONSTRAINTS_PY,
+                                pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY, pCONX_FIXED_TX_PER_NUM_RX_LOCS_PY, pCONX_MOB_TX_RX_PY);
+}
+
+
+inline void GraphicalModelMOBARP::iterate() {
+    for (int iter = 0; iter < numIterations_; iter++) {
+        // cout<<iter<<" ";
+        // cout<<"excludeCapFlag_: "<<excludeCapFlag_<<"\n";
+        if (!(excludeCapFlag_)){
+            modelIneqConstraint_.ineq_capac_const_update(modelInputs_.FixedXEqConst2FixedCapacConstM, modelInputs_.MobileXEqConst2MobileCapacConstM, 
+                                                        modelInputs_.FixedCapacConstraints, modelInputs_.MobileCapacConstraints, FixedCapacConst2FixedXEqConstDummyM_, MobileCapacConst2MobileXEqConstDummyM_);
+
+            modelIneqConstraint_.process_filtering(iter, FixedCapacConst2FixedXEqConstDummyM_, MobileCapacConst2MobileXEqConstDummyM_, FixedCapacConst2FixedXEqConstM_, MobileCapacConst2MobileXEqConstM_);
+        }
+
+        modelEqConstraint_.x_eq_const_to_auxiliary_and_set_cover_const_update(FixedCapacConst2FixedXEqConstM_, MobileCapacConst2MobileXEqConstM_,
+                                                        AuxiliaryConst2MobileXEqConstM_, SetCoverIneqConst2FixedXEqConstM_, modelInputs_.FixedTxCosts, modelInputs_.MobileTxCosts,
+                                                        modelInputs_.ConxMobTxPerNumMobTxLocs, MobileXEqConst2AuxiliaryConstM_, modelInputs_.ConxFixedTxPerNumRXLocs,
+                                                        FixedXEqConst2SetCoverConstM_);
+
+        modelAuxConstraint_.auxiliary_const_to_z_eq_const_update(MobileXEqConst2AuxiliaryConstM_, modelInputs_.REqConst2AuxiliaryConstM, AuxiliaryConst2ZEqConstM_, modelInputs_.ConxMobTxPerNumMobTxLocs);
+        
+        modelAuxConstraint_.auxiliary_const_to_r_eq_const_update(ZEqConst2AuxiliaryConstM_, MobileXEqConst2AuxiliaryConstM_, modelInputs_.ConxMobTxPerNumMobTxLocs, AuxiliaryConst2REqConstM_);
+        
+        modelEqConstraint_.z_eq_const_to_set_cover_ineq_const_update(AuxiliaryConst2ZEqConstM_, SetCoverIneqConst2ZEqConstM_, ZEqConst2SetCoverIneqConstM_, modelInputs_.TransposedConxMobTxRx, modelInputs_.ZCosts);
+        
+        modelEqConstraint_.r_eq_const_activation(AuxiliaryConst2REqConstM_, MobileLocEqConst2REqConstM_, modelInputs_.REqConst2AuxiliaryConstM,
+                                                    REqConst2MobileLocEqConstM_, modelInputs_.ConxMobTxR, modelInputs_.RCosts);
+
+        modelIneqConstraint_.mobile_loc_eq_const_to_r_eq_const_update(REqConst2MobileLocEqConstM_, MobileLocEqConst2REqConstDummyM_);
+
+        modelIneqConstraint_.process_filtering_mobile_loc_eq(iter, MobileLocEqConst2REqConstDummyM_, MobileLocEqConst2REqConstM_);
+
+        modelIneqConstraint_.set_cover_ineq_const_update(ZEqConst2SetCoverIneqConstM_, FixedXEqConst2SetCoverConstM_, modelInputs_.TempConxMobTxRx,
+                                                   modelInputs_.TempReshapedConnectivityFixedTx, modelInputs_.TempReshapedConxMobTxRx, SetCoverIneqConst2FixedXEqConstDummyM_,
+                                                   SetCoverIneqConst2ZEqConstDummyM_);
+
+
+        modelIneqConstraint_.process_filtering_set_cover_const(iter,SetCoverIneqConst2FixedXEqConstDummyM_, SetCoverIneqConst2ZEqConstDummyM_, SetCoverIneqConst2FixedXEqConstM_, SetCoverIneqConst2ZEqConstM_);
+
+
+        modelEqConstraint_.z_eq_const_to_auxiliary_const_update(SetCoverIneqConst2ZEqConstM_, modelInputs_.ConxMobTxRx, modelInputs_.ConxMobTxPerNumMobTxLocs, ZEqConst2AuxiliaryConstM_, modelInputs_.ZCosts);
+        
+        modelAuxConstraint_.auxiliary_const_to_mobile_x_eq_const_update(ZEqConst2AuxiliaryConstM_, modelInputs_.REqConst2AuxiliaryConstM, modelInputs_.ConxMobTxPerNumMobTxLocs, AuxiliaryConst2MobileXEqConstM_);
+        
+        if (!(excludeCapFlag_)){
+            modelEqConstraint_.x_eq_const_activation(AuxiliaryConst2MobileXEqConstM_, SetCoverIneqConst2FixedXEqConstM_, modelInputs_.MobileXEqConst2MobileCapacConstM, modelInputs_.FixedXEqConst2FixedCapacConstM,
+                                                    modelInputs_.ConxMobTxPerNumMobTxLocs, modelInputs_.ConxFixedTxPerNumRXLocs, modelInputs_.MobileTxCosts, modelInputs_.FixedTxCosts);
+        }
+    }
+
+    // /// process outputs of MOBARP problem
+    outputs.extrinsic_update(FixedCapacConst2FixedXEqConstM_, MobileCapacConst2MobileXEqConstM_, AuxiliaryConst2MobileXEqConstM_, SetCoverIneqConst2FixedXEqConstM_, AuxiliaryConst2REqConstM_,
+                            MobileLocEqConst2REqConstM_, AuxiliaryConst2ZEqConstM_, SetCoverIneqConst2ZEqConstM_, modelInputs_.ConxMobTxPerNumMobTxLocs, modelInputs_.ConxFixedTxPerNumRXLocs,
+                            modelInputs_.ConxMobTxRx, modelInputs_.ConxMobTxR);
+
+    // cout<<"DONE"<<"\n";
+    // exit(0);
+}
+
+
+inline void GraphicalModelMOBARP::process_ouputs(impalib_type *pExtrinsic_fixed_x, impalib_type *pExtrinsic_mobile_x, impalib_type *pExtrinsic_z, impalib_type *pExtrinsic_r) {
+    
+
+    copy(outputs.ExtrinsicFixedX.begin(), outputs.ExtrinsicFixedX.begin() + numFixedTx_*numBands_*numTimeSteps_, pExtrinsic_fixed_x);
+    copy(outputs.ExtrinsicMobileX.begin(), outputs.ExtrinsicMobileX.begin() + numMobileTx_*numBands_*numTimeSteps_, pExtrinsic_mobile_x);
+    copy(outputs.ExtrinsicR.begin(), outputs.ExtrinsicR.begin() + numMobileTx_*numMobileTxLocs_, pExtrinsic_r);
+
+
+    vector<impalib_type> flattened_extrinsic_z = accumulate(outputs.ExtrinsicZ.begin(), outputs.ExtrinsicZ.end(), vector<impalib_type>{}, [](vector<impalib_type> &acc, const vector<impalib_type> &inner) {
+        acc.insert(acc.end(), inner.begin(), inner.end());
+        return acc;
+    });
+
+    copy(flattened_extrinsic_z.begin(), flattened_extrinsic_z.begin() + static_cast<int>(flattened_extrinsic_z.size()), pExtrinsic_z);
 }

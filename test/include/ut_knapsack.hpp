@@ -20,7 +20,8 @@ void ut_forward_backward(string& ut_name){
     if(filt_flag_bash == NULL)
     {cout << "filt_flag_bash not available\n";}
 
-    const bool FILT_FLAG(filt_flag_bash);
+    // const bool FILT_FLAG(filt_flag_bash);
+    const bool FILT_FLAG = (filt_flag_bash != NULL && std::string(filt_flag_bash) == "1");
 
     const char *Nu_bash=getenv("Nu");
     if(Nu_bash == NULL){cout << "Nu_bash not available\n";}
@@ -112,7 +113,8 @@ void ut_extrinsic_output_department(string& ut_name){
     if(filt_flag_bash == NULL)
     {cout << "filt_flag_bash not available\n";}
     
-    const bool FILT_FLAG(filt_flag_bash);
+    // const bool FILT_FLAG(filt_flag_bash);
+    const bool FILT_FLAG = (filt_flag_bash != NULL && std::string(filt_flag_bash) == "1");
 
     const char *Nu_bash=getenv("Nu");
     if(Nu_bash == NULL){cout << "Nu_bash not available\n";}
@@ -186,7 +188,8 @@ void ut_team_to_knapsack_update(string& ut_name){
     if(filt_flag_bash == NULL)
     {cout << "filt_flag_bash not available\n";}
     
-    const bool FILT_FLAG(filt_flag_bash);
+    // const bool FILT_FLAG(filt_flag_bash);
+    const bool FILT_FLAG = (filt_flag_bash != NULL && std::string(filt_flag_bash) == "1");
 
     const char *Nu_bash=getenv("Nu");
     if(Nu_bash == NULL){cout << "Nu_bash not available\n";}
@@ -265,7 +268,8 @@ void ut_process_extrinsic_output_department(string& ut_name){
     if(n_iter_bash == NULL)
     {cout << "n_iter_bash not available\n";} 
 
-    const bool FILT_FLAG(filt_flag_bash);
+    // const bool FILT_FLAG(filt_flag_bash);
+    const bool FILT_FLAG = (filt_flag_bash != NULL && std::string(filt_flag_bash) == "1");
     const int N_ITER = atoi(n_iter_bash);
 
     const char *Nu_bash=getenv("Nu");

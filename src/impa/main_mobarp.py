@@ -4,8 +4,8 @@
 # (See accompanying LICENSE file or at
 #  https://opensource.org/licenses/MIT)
 
-from environmentModule import *
-from graphical_model import *
+from impa.environmentModule import time, argparse, np_impa_lib, os, pkl, sys
+from impa.Impa import GraphicalModelMOBARP
 
 # Define command-line arguments
 parser = argparse.ArgumentParser()
@@ -22,7 +22,7 @@ parser.add_argument("--overWriteCapVal", type=int, default=4, help="Over Write M
 parser.add_argument("--alpha", type=np_impa_lib, default=0.0, help="Filtering Rate [0,1]")
 parser.add_argument("--testFile", type=int, default=9000, help="Test File Index")
 parser.add_argument("--saveFlag", type=bool, default=False, help="Save Outputs or not")
-parser.add_argument("--excludeCapFlag", type=bool, default=False, help="Save Outputs or not")
+parser.add_argument("--excludeCapFlag", type=bool, default=False, help="excludes capacities constraints")
 parser.add_argument("--threshold", type=np_impa_lib, default=-0.0001, help="Threshold on hard decision")
 parser.add_argument("--getSolApproach", type=int, default=2, help="Approach for getting a solution")
 parser.add_argument("--criteriaIM", type=int, default=2, help="1: normal, 2: pos X, normal R")
@@ -78,6 +78,7 @@ if __name__ == "__main__":
     CRITERIA_IM = args.criteriaIM
     PERCENTAGE_NEGATIVE_IM = args.percNegIM
     OVERWRITE_IM = args.overWriteIM
+    
 
     if OVER_WRITE_CAP_FLAG and OVER_WRITE_CAP_VAL >= NUM_BANDS:
         raise ValueError(f"OVER_WRITE_CAP_VAL ({OVER_WRITE_CAP_VAL}) cannot be greater than or equal to NUM_BANDS ({NUM_BANDS})")
