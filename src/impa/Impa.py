@@ -3280,9 +3280,9 @@ class GraphicalModelMOBARP:
         self.used_fixed_tx_capacities = used_fixed_tx_capacities
         self.indices_violated_fixed_tx_capacities = indices_violated_fixed_tx_capacities
 
-        print("Used Capacity\t\t\t\t       Max Capacity")
+        print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
         for row1, row2 in zip(used_fixed_tx_capacities, self.fixed_capac_constraints[..., np.newaxis]):
-            print("{:<50}{}".format(str(row1),str(row2)))
+            print("{:<80}{}".format(str(row1),str(row2)))
 
         #check mobile capacity constraints
         self.reshaped_hard_decision_mobile_x = self.hard_decision_mobile_x.reshape(self.num_mobile_tx, self.num_bands, self.num_time_steps)
@@ -3299,9 +3299,9 @@ class GraphicalModelMOBARP:
         self.used_mobile_tx_capacities = used_mobile_tx_capacities
         self.indices_violated_mobile_tx_capacities = indices_violated_mobile_tx_capacities
 
-        print("Used Capacity\t\t\t\t       Max Capacity")
+        print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
         for row1, row2 in zip(used_mobile_tx_capacities, self.mobile_capac_constraints[..., np.newaxis]):
-            print("{:<50}{}".format(str(row1), str(row2)))
+            print("{:<80}{}".format(str(row1), str(row2)))
 
         #check mobile-loc assignment constraints
         self.reshaped_hard_decision_r = self.hard_decision_r.reshape(self.num_mobile_tx, self.num_mobile_tx_locs)

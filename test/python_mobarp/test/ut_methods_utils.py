@@ -40,6 +40,9 @@ if __name__ == "__main__":
     elif ut_name == "AuxiliaryConst2REqConstUpdate":
         f_path_pure = "../ut_results/auxiliary_const_to_r_eq_const_m_pure"
         f_path_wrapper = "../ut_results/AuxiliaryConst2REqConstM_wrapper" 
+    elif ut_name == "AuxiliaryConst2ZAndREqConstUpdate":
+        f_path_pure_list = ["../ut_results/auxiliary_const_to_z_eq_const_m_pure", "../ut_results/auxiliary_const_to_r_eq_const_m_pure"]
+        f_path_wrapper_list = ["../ut_results/AuxiliaryConst2ZEqConstM_wrapper", "../ut_results/AuxiliaryConst2REqConstM_wrapper"] 
     elif ut_name == "AuxiliaryConst2MobileXEqConstUpdate":
         f_path_pure = "../ut_results/auxiliary_const_to_mobile_x_eq_const_m_pure"
         f_path_wrapper = "../ut_results/AuxiliaryConst2MobileXEqConstM_wrapper" 
@@ -66,6 +69,7 @@ if __name__ == "__main__":
         ut_name == "ExtrinsicUpdate"
         or ut_name == "IneqCapacConstUpdate"
         or ut_name == "SetCoverIneqConstUpdate"
+        or ut_name == "AuxiliaryConst2ZAndREqConstUpdate"
         or ut_name == "XEqConst2AuxiliaryAndSetCoverConstUpdate"
         or ut_name == "ReqConstActivation"
         or ut_name == "XEqConstActivation"
@@ -84,7 +88,9 @@ if __name__ == "__main__":
             # y_wrapper = np.fromfile(f_path_wrapper, dtype=np.int32); #for integer y_wrapper
             check_agreement(sub_test_num, total_sub_tests, ut_name, y_pure, y_wrapper, rtol=rtol, atol=atol)
             
-    elif (ut_name == "MobileLocEqConst2REqConstUpdate" or ut_name == "AuxiliaryConst2ZEqConstUpdate" or ut_name == "AuxiliaryConst2REqConstUpdate" or ut_name == "AuxiliaryConst2MobileXEqConstUpdate"
+    # elif (ut_name == "MobileLocEqConst2REqConstUpdate" or ut_name == "AuxiliaryConst2ZEqConstUpdate" or ut_name == "AuxiliaryConst2REqConstUpdate" or ut_name == "AuxiliaryConst2MobileXEqConstUpdate"
+    #       or ut_name == "ZEqConst2AuxiliaryConstUpdate" or ut_name == "ZEqConst2SetCoverIneqConstUpdate"):
+    elif (ut_name == "MobileLocEqConst2REqConstUpdate" or ut_name == "AuxiliaryConst2MobileXEqConstUpdate"
           or ut_name == "ZEqConst2AuxiliaryConstUpdate" or ut_name == "ZEqConst2SetCoverIneqConstUpdate"):
             file_array_pure = open(f_path_pure, "rb")
             y_pure = np.load(file_array_pure)

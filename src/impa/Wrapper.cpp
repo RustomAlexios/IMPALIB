@@ -152,6 +152,7 @@ extern "C" void WrapperMOBARP(const int NUM_ITERATIONS, const int NUM_FIXED_TX, 
                             impalib_type *pExtrinsic_z, impalib_type *pExtrinsic_r, const int *pFIXED_CAPACITY_CONSTRAINTS_PY, const int *pMOBILE_CAPAC_CONSTRAINTS_PY,
                             const int *pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY, const int *CONX_FIXED_TX_PER_NUM_RX_LOCS_PY, const int *CONX_MOB_TX_RX_PY){
     // Instantiate a GraphicalModelMOBARP object
+    auto start_sim = chrono::high_resolution_clock::now();
     GraphicalModelMOBARP model_graph(NUM_ITERATIONS, NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_RX_LOCS, NUM_MOBILE_TX_LOCS, ALPHA, FILTERING_FLAG, EXCLUDE_CAP_FLAG);
 
     // Initialize the graphical model with provided data
@@ -164,5 +165,8 @@ extern "C" void WrapperMOBARP(const int NUM_ITERATIONS, const int NUM_FIXED_TX, 
 
     // Process the outputs of the model
     model_graph.process_ouputs(pExtrinsic_fixed_x, pExtrinsic_mobile_x, pExtrinsic_z, pExtrinsic_r);
-
+    
+    auto end_sim = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed_sim = end_sim - start_sim;
+    cout << "Execution time IMPA: " << elapsed_sim.count() << " seconds\n";
 }

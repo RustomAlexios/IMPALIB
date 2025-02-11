@@ -150,8 +150,8 @@ if __name__=="__main__":
     # input_file_name = "inputs_mobarp_fixed9_cpsat_im_avg1"
     # output_file_name = "outputs_mobarp_fixed9_cpsat_im_avg1"
     
-    snr_threshold = 18
-    # fixed_size = 5
+    snr_threshold = 10
+    fixed_size = 20
     
     # input_file_name = f"inputs_mobarp_fixed{fixed_size}_cpsat_snr_threshold{snr_threshold}"
     # output_file_name = f"outputs_mobarp_fixed{fixed_size}_cpsat_snr_threshold{snr_threshold}"
@@ -170,7 +170,7 @@ if __name__=="__main__":
 
     index_sample = 0
     n_samples = 200
-    save_flag = True
+    save_flag = False
     
     criteria_im = 2
     # low_im = 10
@@ -193,11 +193,11 @@ if __name__=="__main__":
         max_num_rx_locs = 10
         max_num_mobile_tx_locs = 10
         
-        NUM_MOBILE_TX = np.random.randint(low = 1, high = max_num_mobile_tx+1, dtype = int) # fixed_size 
-        NUM_BANDS =  np.random.randint(low = 2, high = max_band_value+1, dtype = int) # np.minimum(fixed_size, max_band_value)
-        NUM_TIME_STEPS = np.random.randint(low = 1, high = max_num_time_steps+1, dtype = int)  # fixed_size
-        NUM_RX_LOCS =  np.random.randint(low = 1, high = max_num_rx_locs+1, dtype = int) # fixed_size
-        NUM_MOBILE_TX_LOCS =  np.random.randint(low = 2, high = max_num_mobile_tx_locs+1, dtype = int) # fixed_size
+        NUM_MOBILE_TX = fixed_size #np.random.randint(low = 1, high = max_num_mobile_tx+1, dtype = int) # fixed_size 
+        NUM_BANDS =  np.minimum(fixed_size, max_band_value) #np.random.randint(low = 2, high = max_band_value+1, dtype = int) # np.minimum(fixed_size, max_band_value)
+        NUM_TIME_STEPS = fixed_size #np.random.randint(low = 1, high = max_num_time_steps+1, dtype = int)  # fixed_size
+        NUM_RX_LOCS =  fixed_size #np.random.randint(low = 1, high = max_num_rx_locs+1, dtype = int) # fixed_size
+        NUM_MOBILE_TX_LOCS =  fixed_size #np.random.randint(low = 2, high = max_num_mobile_tx_locs+1, dtype = int) # fixed_size
         
         bands_sel = np.sort(np.random.choice(np.arange(master_connectivity_fixed_tx.shape[3]), NUM_BANDS, replace=False))
         rx_sel = np.sort(np.random.choice(np.arange(master_connectivity_fixed_tx.shape[1]), NUM_RX_LOCS, replace=False))
@@ -231,7 +231,7 @@ if __name__=="__main__":
         NUM_BANDS = connectivity_fixed_tx.shape[3]  # bands
         NUM_MOBILE_TX_LOCS = connectivity_mobile_tx.shape[0]  # relay locs
 
-        EXCLUDE_CAP_FLAG = np.random.randint(low = 0, high = 2, dtype = int)
+        EXCLUDE_CAP_FLAG = 0# np.random.randint(low = 0, high = 2, dtype = int)
         
         if EXCLUDE_CAP_FLAG:
             capacity_fixed = (NUM_BANDS*np.ones(NUM_FIXED_TX, dtype=int)).tolist()
@@ -288,8 +288,8 @@ if __name__=="__main__":
             SNR_THRESHOLD = snr_threshold #because connectivities were already thresholded       
 
             used_x_list, configurations_activated_r = get_solution(NUM_FIXED_TX, NUM_TIME_STEPS, NUM_BANDS, NUM_MOBILE_TX, NUM_MOBILE_TX_LOCS, result, dec_vars_sites, dec_vars_relay_locs, dec_vars_relay_broadcast)
-            print(f"used_x_list: \n {used_x_list}")
-            print(f"configurations_activated_r: {configurations_activated_r}")
+            # print(f"used_x_list: \n {used_x_list}")
+            # print(f"configurations_activated_r: {configurations_activated_r}")
             # exit()
             # print("configurations_activated_r: ", configurations_activated_r)
             # exit()

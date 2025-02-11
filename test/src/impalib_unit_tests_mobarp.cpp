@@ -21,7 +21,8 @@ int main(){
         ut_ineq_const_mobarp_update(test_name);
     }
 
-    if (test_name == "AuxiliaryConst2ZEqConstUpdate" || test_name == "AuxiliaryConst2REqConstUpdate" || test_name == "AuxiliaryConst2MobileXEqConstUpdate"){
+    // if (test_name == "AuxiliaryConst2ZEqConstUpdate" || test_name == "AuxiliaryConst2REqConstUpdate" || test_name == "AuxiliaryConst2MobileXEqConstUpdate" || test_name == "AuxiliaryConst2ZAndREqConstUpdate"){
+    if (test_name == "AuxiliaryConst2ZAndREqConstUpdate" || test_name == "AuxiliaryConst2MobileXEqConstUpdate"){
         ut_auxiliary_const_update(test_name);
     }
 

@@ -109,6 +109,9 @@ private:
     vector<vector<impalib_type>> MobileLocEqConst2REqConstOld_;
     vector<vector<vector<impalib_type>>> SetCoverIneqConst2FixedXEqConstOld_;
     vector<vector<vector<vector<impalib_type>>>> SetCoverIneqConst2ZEqConstOld_;
+    impalib_type                 initial_forward_message_; ///< initial forward message of forward-backward algorithm
+    impalib_type                 initial_backward_message_; ///< initial backward message of forward-backward algorithm
+    int maxState_=1;
 
 public:
     void ineq_capac_const_update(const vector<vector<vector<impalib_type>>> &, const vector<vector<vector<impalib_type>>> &, const vector<int> &, const vector<int> &, 
@@ -137,7 +140,8 @@ inline InequalityConstraintMOBARP::InequalityConstraintMOBARP(const int NUM_FIXE
         MobileCapacConst2MobileXEqConstOld_(NUM_MOBILE_TX, vector<vector<impalib_type>>(NUM_BANDS, vector<impalib_type>(NUM_TIME_STEPS, 0))),
         MobileLocEqConst2REqConstOld_(NUM_MOBILE_TX, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0)),
         SetCoverIneqConst2FixedXEqConstOld_(NUM_TIME_STEPS, vector<vector<impalib_type>>(NUM_RX_LOCS, vector<impalib_type>(NUM_FIXED_TX*NUM_BANDS, 0))),
-        SetCoverIneqConst2ZEqConstOld_(vector<vector<vector<vector<impalib_type>>>>(NUM_TIME_STEPS, vector<vector<vector<impalib_type>>>(NUM_RX_LOCS, vector<vector<impalib_type>>(NUM_MOBILE_TX_LOCS, vector<impalib_type>(NUM_BANDS*NUM_MOBILE_TX, 0))))){};
+        SetCoverIneqConst2ZEqConstOld_(vector<vector<vector<vector<impalib_type>>>>(NUM_TIME_STEPS, vector<vector<vector<impalib_type>>>(NUM_RX_LOCS, vector<vector<impalib_type>>(NUM_MOBILE_TX_LOCS, vector<impalib_type>(NUM_BANDS*NUM_MOBILE_TX, 0))))),
+        initial_forward_message_(value_inf), initial_backward_message_(value_inf){};
 
 
 inline void InequalityConstraintMOBARP::ineq_capac_const_update(const vector<vector<vector<impalib_type>>> &rFixedXEqConst2FixedCapacConstM, const vector<vector<vector<impalib_type>>> & rMobileXEqConst2MobileCapacConstM, 
@@ -145,44 +149,259 @@ inline void InequalityConstraintMOBARP::ineq_capac_const_update(const vector<vec
                                 vector<vector<vector<impalib_type>>> & rFixedCapacConst2FixedXEqConstDummyM, vector<vector<vector<impalib_type>>> & rMobileCapacConst2MobileXEqConstDummyM) const
 {
 
+    // for (int i=0; i<numFixedTx_; i++){
+    //     for (int k=0; k<numTimeSteps_; k++){
+
+    //         for (int j=0; j<numBands_; j++){
+    //            vector<impalib_type> fixed_result;
+    //            fixed_result.reserve(numBands_-1);
+
+    //            for (int indx_j = 0; indx_j< numBands_; indx_j++){
+    //             if (indx_j != j){
+    //                 fixed_result.push_back(rFixedXEqConst2FixedCapacConstM[i][indx_j][k]);
+    //             }
+    //            }
+    //             sort(fixed_result.begin(), fixed_result.end());
+    //             rFixedCapacConst2FixedXEqConstDummyM[i][j][k] = max(-fixed_result[rFixedCapacConstraints[i]-1], zero_value);
+    //         }
+    // }
+
+    // }
+
+    // cout<<"Fixed: \n";
     for (int i=0; i<numFixedTx_; i++){
+        // cout<<"maxState_ Calculation:\n";
+        int maxState_ = rFixedCapacConstraints[i];
+        // cout<<"maxState_: "<<maxState_<<"\n";
+
+        vector<vector<impalib_type>> stage_forward_messages(numBands_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+        vector<vector<impalib_type>> stage_backward_messages(numBands_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+
         for (int k=0; k<numTimeSteps_; k++){
+            // cout<<"i"<<i<<", k"<<k<<"\n";
+            vector<impalib_type> initial_forward_messages( maxState_+ 1, zero_value);
+            vector<impalib_type>  initial_backward_messages(maxState_ + 1, zero_value);
+            fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
+            stage_forward_messages[0] = initial_forward_messages;
+            stage_backward_messages[numBands_] = initial_backward_messages;
 
-            for (int j=0; j<numBands_; j++){
-               vector<impalib_type> fixed_result;
-               fixed_result.reserve(numBands_-1);
-
-               for (int indx_j = 0; indx_j< numBands_; indx_j++){
-                if (indx_j != j){
-                    fixed_result.push_back(rFixedXEqConst2FixedCapacConstM[i][indx_j][k]);
+            for (int j=0; j< numBands_; j++){
+                // cout<<"rFixedXEqConst2FixedCapacConstM[i][j][k]: "<<rFixedXEqConst2FixedCapacConstM[i][j][k]<<"\n";
+                // for (int a=0; a<=min(maxState_, j+1); a++){
+                for (int a=0; a<=maxState_; a++){
+                    // if (a - 1>=0){
+                        if (a-1>=0 && a<=min(maxState_, j+1)){
+                        stage_forward_messages[j + 1][a] =
+                            min(initial_forward_messages[a],
+                                initial_forward_messages[a - 1]
+                                    + rFixedXEqConst2FixedCapacConstM[i][j][k]);
+                        }
+                        else{
+                            stage_forward_messages[j + 1][a] = initial_forward_messages[a];
+                        }
                 }
-               }
-                sort(fixed_result.begin(), fixed_result.end());
-                rFixedCapacConst2FixedXEqConstDummyM[i][j][k] = max(-fixed_result[rFixedCapacConstraints[i]-1], zero_value);
+
+                initial_forward_messages = stage_forward_messages[j + 1];
             }
+
+            // for (int index=0; index<numBands_; index++){
+            //     for (int a=0; a<=maxState_; a++){
+            //         cout<<stage_forward_messages[index][a]<<" ";
+            //     }
+            //     cout<<"\n";
+            // }
+            // cout<<"\n";
+
+            for (int j = numBands_ - 1; j >= 0; j--)
+            {
+                for (int a = 0; a <= min(j, maxState_); a++)
+                {
+                    if (a == maxState_){
+                        stage_backward_messages[j][a] = initial_backward_messages[a];
+                    }
+                    else{
+                        stage_backward_messages[j][a] =
+                            min(initial_backward_messages[a],
+                                initial_backward_messages[a + 1]
+                                    + rFixedXEqConst2FixedCapacConstM[i][j][k]);
+                    }
+
+                    }
+                initial_backward_messages = stage_backward_messages[j];
+
+            }
+
+            // for (int index=0; index<numBands_; index++){
+            //     for (int a=0; a<=maxState_; a++){
+            //         cout<<stage_backward_messages[index][a]<<" ";
+            //     }
+            //     cout<<"\n";
+            // }
+            // cout<<"\n";
+
+            vector<impalib_type> metric_path_solid, metric_path_dash;
+
+            for (int j = 0; j < numBands_; j++)
+            {
+                // cout<<"j: "<<j<<"\n";
+                metric_path_dash.clear();
+                metric_path_solid.clear();
+
+                if (j == 0)
+                {
+                    metric_path_solid.push_back(
+                        stage_forward_messages[j][0]
+                        + stage_backward_messages[j + 1][1]
+                        + rFixedXEqConst2FixedCapacConstM[i][j][k]);
+                    
+                    metric_path_dash.push_back(stage_forward_messages[0][0]
+                                            + stage_backward_messages[j + 1][0]);
+                }
+                else
+                {
+                    for (int a = 0; a <= min(j, maxState_-1); a++)
+                    {
+                        metric_path_solid.push_back(stage_forward_messages[j][a]+ stage_backward_messages[j + 1][a + 1] + rFixedXEqConst2FixedCapacConstM[i][j][k]);
+                    }
+
+                    for (int a = 0; a <= min(j,maxState_); a++)
+                    {
+                        metric_path_dash.push_back(stage_forward_messages[j][a] + stage_backward_messages[j + 1][a]);
+                    }
+
+                }
+
+                // cout<<"j: "<<j<<"\n";
+                // cout<<"metric_path_solid\n";
+                // for (auto& e: metric_path_solid){
+                //     cout<<e<<" ";
+                // }
+                // cout<<"\nmetric_path_dash\n";
+                // for (auto& e: metric_path_dash){
+                //     cout<<e<<" ";
+                // }
+                // cout<<"\n";
+                rFixedCapacConst2FixedXEqConstDummyM[i][j][k]=
+                    *min_element(metric_path_solid.begin(), metric_path_solid.end())
+                    - *min_element(metric_path_dash.begin(), metric_path_dash.end())
+                    - rFixedXEqConst2FixedCapacConstM[i][j][k];
+                // cout<<"rFixedCapacConst2FixedXEqConstDummyM[i][j][k]: "<<rFixedCapacConst2FixedXEqConstDummyM[i][j][k]<<"\n";
+            }
+        }
     }
 
-    }
 
-
+    // cout<<"Mobile: \n";
     for (int i=0; i<numMobileTx_; i++){
+        // cout<<"maxState_ Calculation:\n";
+        int maxState_ = rMobileCapacConstraints[i];
+        // cout<<"maxState_: "<<maxState_<<"\n";
+
+        vector<vector<impalib_type>> stage_forward_messages(numBands_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+        vector<vector<impalib_type>> stage_backward_messages(numBands_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+
         for (int k=0; k<numTimeSteps_; k++){
+            // cout<<"i"<<i<<", k"<<k<<"\n";
+            
+            vector<impalib_type> initial_forward_messages( maxState_+ 1, zero_value);
+            vector<impalib_type>  initial_backward_messages(maxState_ + 1, zero_value);
 
-            for (int j=0; j<numBands_; j++){
-               vector<impalib_type> mobile_result;
-               mobile_result.reserve(numBands_-1);
+            fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
+            stage_forward_messages[0] = initial_forward_messages;
+            stage_backward_messages[numBands_] = initial_backward_messages;
 
-               for (int indx_j = 0; indx_j< numBands_; indx_j++){
-                if (indx_j != j){
-                    mobile_result.push_back(rMobileXEqConst2MobileCapacConstM[i][indx_j][k]);
+            for (int j=0; j< numBands_; j++){
+                for (int a=0; a<=maxState_; a++){
+                    // if (a - 1>=0){
+                        if (a-1>=0 && a<=min(maxState_, j+1)){
+                        stage_forward_messages[j + 1][a] =
+                            min(initial_forward_messages[a],
+                                initial_forward_messages[a - 1]
+                                    + rMobileXEqConst2MobileCapacConstM[i][j][k]);
+                        }
+                        else{
+                            stage_forward_messages[j + 1][a] = initial_forward_messages[a];
+                        }
                 }
-               }
-                sort(mobile_result.begin(), mobile_result.end());
-                rMobileCapacConst2MobileXEqConstDummyM[i][j][k] = max(-mobile_result[rMobileCapacConstraints[i]-1], zero_value);
+
+                initial_forward_messages = stage_forward_messages[j + 1];
             }
+
+            for (int j = numBands_ - 1; j >= 0; j--)
+            {
+                for (int a = 0; a <= min(j, maxState_); a++)
+                {
+                    if (a==maxState_){
+                        stage_backward_messages[j][a]  = initial_backward_messages[a];
+                    }
+                    else{
+                        stage_backward_messages[j][a] =
+                            min(initial_backward_messages[a],
+                                initial_backward_messages[a + 1]
+                                    + rMobileXEqConst2MobileCapacConstM[i][j][k]);
+                    }
+
+                    }
+                initial_backward_messages = stage_backward_messages[j];
+
+            }
+
+            vector<impalib_type> metric_path_solid, metric_path_dash;
+
+            for (int j = 0; j < numBands_; j++)
+            {
+                // cout<<"j: "<<j<<"\n";
+                metric_path_dash.clear();
+                metric_path_solid.clear();
+
+                if (j == 0)
+                {
+                    metric_path_solid.push_back(
+                        stage_forward_messages[j][0]
+                        + stage_backward_messages[j + 1][1]
+                        + rMobileXEqConst2MobileCapacConstM[i][j][k]);
+                    
+                    metric_path_dash.push_back(stage_forward_messages[0][0]
+                                            + stage_backward_messages[j + 1][0]);
+                }
+                else
+                {
+                    for (int a = 0; a <= min(j, maxState_-1); a++)
+                    {
+                        metric_path_solid.push_back(stage_forward_messages[j][a]+ stage_backward_messages[j + 1][a + 1] + rMobileXEqConst2MobileCapacConstM[i][j][k]);
+                    }
+
+                    for (int a = 0; a <= min(j,maxState_); a++)
+                    {
+                        metric_path_dash.push_back(stage_forward_messages[j][a] + stage_backward_messages[j + 1][a]);
+                    }
+
+                }
+                rMobileCapacConst2MobileXEqConstDummyM[i][j][k]=
+                    *min_element(metric_path_solid.begin(), metric_path_solid.end())
+                    - *min_element(metric_path_dash.begin(), metric_path_dash.end())
+                    - rMobileXEqConst2MobileCapacConstM[i][j][k];
+            }
+        }
     }
 
-    }
+    // for (int i=0; i<numMobileTx_; i++){
+    //     for (int k=0; k<numTimeSteps_; k++){
+
+    //         for (int j=0; j<numBands_; j++){
+    //            vector<impalib_type> mobile_result;
+    //            mobile_result.reserve(numBands_-1);
+
+    //            for (int indx_j = 0; indx_j< numBands_; indx_j++){
+    //             if (indx_j != j){
+    //                 mobile_result.push_back(rMobileXEqConst2MobileCapacConstM[i][indx_j][k]);
+    //             }
+    //            }
+    //             sort(mobile_result.begin(), mobile_result.end());
+    //             rMobileCapacConst2MobileXEqConstDummyM[i][j][k] = max(-mobile_result[rMobileCapacConstraints[i]-1], zero_value);
+    //         }
+    // }
+    // }
 
     // cout<<"Printing"<<"\n";
     // for (int i = 0; i < numFixedTx_; ++i) {
@@ -318,19 +537,89 @@ inline void InequalityConstraintMOBARP::process_filtering(const int iter, vector
 
 inline void InequalityConstraintMOBARP::mobile_loc_eq_const_to_r_eq_const_update(vector<vector<impalib_type>> & rREqConst2MobileLocEqConstM,vector<vector<impalib_type>> & rMobileLocEqConst2REqConstDummyM) const {
 
-
-    for (size_t n = 0; n < numMobileTxLocs_; n++) {
+    //need to do it using FBA
+    // auto start_1 = chrono::high_resolution_clock::now();
+    // for (size_t n = 0; n < numMobileTxLocs_; n++) {
         
-        for (size_t i = 0; i < numMobileTx_; i++) {
-            impalib_type min_value = value_inf;
-            for (size_t col = 0; col < numMobileTxLocs_; ++col) {
-                if (col != n) {
-                    min_value = min(min_value, rREqConst2MobileLocEqConstM[i][col]);
-                }
+    //     for (size_t i = 0; i < numMobileTx_; i++) {
+    //         impalib_type min_value = value_inf;
+    //         for (size_t col = 0; col < numMobileTxLocs_; ++col) {
+    //             if (col != n) {
+    //                 min_value = min(min_value, rREqConst2MobileLocEqConstM[i][col]);
+    //             }
+    //         }
+    //         rMobileLocEqConst2REqConstDummyM[i][n] = -min_value;
+    //     }
+    // }
+    // auto end_1 = chrono::high_resolution_clock::now();
+    // chrono::duration<double> elapsed_1 = end_1 - start_1;
+    // cout << "Execution time unoptimized: " << elapsed_1.count() << " seconds\n";
+
+    // auto start_2 = chrono::high_resolution_clock::now();
+    // vector<vector<impalib_type>> MobileLocEqConst2REqConstDummyMNew(numMobileTx_, vector<impalib_type>(numMobileTxLocs_, zero_value));
+
+    vector<vector<impalib_type>> stage_forward_messages(numMobileTxLocs_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+    vector<vector<impalib_type>> stage_backward_messages(numMobileTxLocs_ + 1, vector<impalib_type>(maxState_ + 1, zero_value));
+
+    for (size_t i=0; i< numMobileTx_; i++){
+            vector<impalib_type> initial_forward_messages(maxState_ + 1, zero_value), initial_backward_messages(maxState_ + 1, zero_value);
+            fill(initial_forward_messages.begin() + 1, initial_forward_messages.end(), value_inf);
+
+            stage_forward_messages[0] = initial_forward_messages;
+            
+            for (int stage = 0; stage < numMobileTxLocs_; stage++)
+            {
+                stage_forward_messages[stage + 1][0] = stage_forward_messages[stage][0];
+                stage_forward_messages[stage + 1][1] = min(stage_forward_messages[stage][1], stage_forward_messages[stage][0] + rREqConst2MobileLocEqConstM[i][stage]);
             }
-            rMobileLocEqConst2REqConstDummyM[i][n] = -min_value;
+
+            stage_backward_messages[numMobileTxLocs_] = initial_backward_messages;
+
+            for (int stage = numMobileTxLocs_ - 1; stage >= 0; stage--)
+            {
+                if (stage == numMobileTxLocs_ - 1){
+                    stage_backward_messages[stage][0] = rREqConst2MobileLocEqConstM[i][stage];
+                }
+                else{
+                    stage_backward_messages[stage][0] = min(stage_backward_messages[stage + 1][0], stage_backward_messages[stage + 1][1] + rREqConst2MobileLocEqConstM[i][stage]);
+                }
+                stage_backward_messages[stage][1] = stage_backward_messages[stage + 1][1];
+            }
+
+        impalib_type min_dashed_edges = zero_value;
+        impalib_type min_solid_edges = zero_value;
+
+        for (int n = 0; n < numMobileTxLocs_; n++)
+        {
+            min_solid_edges = stage_forward_messages[n][0] + stage_backward_messages[n+1][1] + rREqConst2MobileLocEqConstM[i][n];
+            
+            if (n == numMobileTxLocs_-1){
+                min_dashed_edges = stage_forward_messages[n][1] + stage_backward_messages[n+1][1];
+            }
+            else {
+                min_dashed_edges = min(stage_forward_messages[n][0] + stage_backward_messages[n+1][0], stage_forward_messages[n][1] + stage_backward_messages[n+1][1]);
+            }
+
+            rMobileLocEqConst2REqConstDummyM[i][n] = (min_solid_edges  - min_dashed_edges - rREqConst2MobileLocEqConstM[i][n]);
         }
-    }
+
+        }
+
+    // auto end_2 = chrono::high_resolution_clock::now();
+    // chrono::duration<double> elapsed_2 = end_2 - start_2;
+    // cout << "Execution time optimized: " << elapsed_2.count() << " seconds\n";
+
+    // for (int i = 0; i < numMobileTx_; ++i) {
+    //     for (int n = 0; n < numMobileTxLocs_; ++n) {
+    //         if (std::abs(MobileLocEqConst2REqConstDummyMNew[i][n] - rMobileLocEqConst2REqConstDummyM[i][n]) > 1e-7) {
+    //             cout << "Error: Values are not equal at index [" << i << "][" << n << "]\n";
+    //             cout<<"MobileLocEqConst2REqConstDummyMNew[i][n]: "<<MobileLocEqConst2REqConstDummyMNew[i][n]<<"\n";
+    //             cout<<"rMobileLocEqConst2REqConstDummyM[i][n]: "<<rMobileLocEqConst2REqConstDummyM[i][n]<<"\n";
+    //             exit(EXIT_FAILURE);
+    //         }
+    //     }
+    // }
+
 
     // fstream file_output_1("./ut_results/rMobileLocEqConst2REqConstDummyM_wrapper", ios::out | ios::binary | ios:: trunc);
     // if (file_output_1.is_open()) {
@@ -436,15 +725,16 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
             }
         }
 
-        vector<vector<vector<vector<impalib_type>>>> temp_1(numBands_*numMobileTx_, vector<vector<vector<impalib_type>>>(numTimeSteps_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numRxLocs_, 0))));
+        // vector<vector<vector<vector<impalib_type>>>> temp_1(numBands_*numMobileTx_, vector<vector<vector<impalib_type>>>(numTimeSteps_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numRxLocs_, 0))));
         
         int index_2 = 0;
         for (int j_i = 0; j_i < numBands_*numMobileTx_; j_i++){
             for (int k=0; k<numTimeSteps_; k++){
                 for (int n=0;n<numMobileTxLocs_; n++){
                     for (int l=0; l<numRxLocs_; l++){
-                        temp_1[j_i][k][n][l] = flat_data_2[index_2++];
-                        reshaped_z_eq_const_to_set_cover_ineq_const_m[l][n][k][j_i] = temp_1[j_i][k][n][l];
+                        // temp_1[j_i][k][n][l] = flat_data_2[index_2++];
+                        // reshaped_z_eq_const_to_set_cover_ineq_const_m[l][n][k][j_i] = temp_1[j_i][k][n][l];
+                        reshaped_z_eq_const_to_set_cover_ineq_const_m[l][n][k][j_i] = flat_data_2[index_2++];
                     }
                 }
             }
@@ -474,31 +764,105 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
             }
         }
 
-        for (int index = 0; index<numFixedTx_*numBands_; index++){
-            vector<bool> mask(numFixedTx_*numBands_, true);
-            mask[index] = false;
-            vector<impalib_type> min_remaining_fixed_msgs(rTempReshapedConnectivityFixedTx[0].size(), numeric_limits<impalib_type>::infinity());
+        // // auto start_1 = chrono::high_resolution_clock::now();
+        // //TempReshapedConnectivityFixedTx(vector<vector<int>>(NUM_FIXED_TX*NUM_BANDS, vector<int>(NUM_TIME_STEPS*NUM_RX_LOCS, 0)))
+        // for (int index = 0; index<numFixedTx_*numBands_; index++){
+        //     vector<bool> mask(numFixedTx_*numBands_, true);
+        //     mask[index] = false;
+        //     vector<impalib_type> min_remaining_fixed_msgs(rTempReshapedConnectivityFixedTx[0].size(), numeric_limits<impalib_type>::infinity());
 
-            for (int i=0; i<numFixedTx_*numBands_; i++){
-                if (!mask[i]) continue;
-                for (int j=0; j<rTempReshapedConnectivityFixedTx[i].size(); j++){
-                    if (rTempReshapedConnectivityFixedTx[i][j] == 1){
-                        min_remaining_fixed_msgs[j] = min(min_remaining_fixed_msgs[j], reshaped_fixed_x_eq_const_to_set_cover_const_m[i][j]);
-                    }
-                }
-            }
+        //     for (int i=0; i<numFixedTx_*numBands_; i++){
+        //         if (!mask[i]) continue;
+        //         for (int j=0; j<rTempReshapedConnectivityFixedTx[i].size(); j++){
+        //             if (rTempReshapedConnectivityFixedTx[i][j] == 1){
+        //                 min_remaining_fixed_msgs[j] = min(min_remaining_fixed_msgs[j], reshaped_fixed_x_eq_const_to_set_cover_const_m[i][j]);
+        //             }
+        //         }
+        //     }
 
-            for (int j=0; j<numTimeSteps_*numRxLocs_; j++){
-                if (rTempReshapedConnectivityFixedTx[index][j] ==1){
-                    impalib_type min_val = 0.0;
-                    min_val = min(min_remaining_fixed_msgs[j], min_mobile_msgs[j]);
-                    temp_set_cover_ineq_const_to_fixed_x_eq_const_m[index][j] = -max(0.0, min_val);
+        //     for (int j=0; j<numTimeSteps_*numRxLocs_; j++){
+        //         if (rTempReshapedConnectivityFixedTx[index][j] ==1){
+        //             impalib_type min_val = 0.0;
+        //             min_val = min(min_remaining_fixed_msgs[j], min_mobile_msgs[j]);
+        //             temp_set_cover_ineq_const_to_fixed_x_eq_const_m[index][j] = -max(0.0, min_val);
                     
-                }
-            }
+        //         }
+        //     }
 
+        // }
+
+    // auto end_1 = chrono::high_resolution_clock::now();
+    // chrono::duration<double> elapsed_1 = end_1 - start_1;
+    // cout << "Execution time unoptimized: " << elapsed_1.count() << " seconds\n";
+
+    // auto start_2 = chrono::high_resolution_clock::now();
+
+    vector<impalib_type> stage_forward_messages_1(numFixedTx_*numBands_ + 1, zero_value);
+    vector<impalib_type> stage_backward_messages_1(numFixedTx_*numBands_  + 1, zero_value);
+
+    // vector<vector<impalib_type>> temp_set_cover_ineq_const_to_fixed_x_eq_const_m_new(numFixedTx_*numBands_, vector<impalib_type>(numTimeSteps_*numRxLocs_, 0));
+
+    for (int k_l=0; k_l < numTimeSteps_*numRxLocs_; k_l++){
+
+        vector<int> connections;
+
+        for (int i_j = 0; i_j < rTempReshapedConnectivityFixedTx.size(); i_j++)
+        {
+            if (rTempReshapedConnectivityFixedTx[i_j][k_l]==1){
+                connections.push_back(i_j);
+            }
         }
 
+        if (connections.size()==0){
+            continue;
+        }
+
+        // Calculate forward messages
+        stage_forward_messages_1[connections[0]] = initial_forward_message_;
+
+        for (int stage = 1; stage < connections.size(); stage++)
+        {
+
+            stage_forward_messages_1[connections[stage]] =
+                min(stage_forward_messages_1[connections[stage - 1]],
+                    reshaped_fixed_x_eq_const_to_set_cover_const_m[connections[stage - 1]][k_l]);
+        }
+
+        // Calculate backward messages
+        stage_backward_messages_1[connections[connections.size() - 1] + 1] = initial_backward_message_;
+        
+        for (size_t stage = connections.size() - 1; stage >= 1; stage--)
+        {
+            stage_backward_messages_1[connections[stage - 1] + 1] =
+                min(stage_backward_messages_1[connections[stage] + 1],
+                    reshaped_fixed_x_eq_const_to_set_cover_const_m[connections[stage]][k_l]);
+        }
+
+        for (int conx_index = 0; conx_index < connections.size(); conx_index++)
+        {
+            impalib_type minimumValue = min(stage_forward_messages_1[connections[conx_index]],
+                                            stage_backward_messages_1[connections[conx_index] + 1]);
+            minimumValue = min(minimumValue, min_mobile_msgs[k_l]);                       
+            temp_set_cover_ineq_const_to_fixed_x_eq_const_m[connections[conx_index]][k_l] = -max(minimumValue, 0.0);
+        }
+    }
+   
+    // auto end_2 = chrono::high_resolution_clock::now();
+    // chrono::duration<double> elapsed_2 = end_2 - start_2;
+    // cout << "Execution time optimized: " << elapsed_2.count() << " seconds\n";
+
+    // for (int i = 0; i < numFixedTx_*numBands_; ++i) {
+    //     for (int n = 0; n < numTimeSteps_*numRxLocs_; ++n) {
+    //         if (std::abs(temp_set_cover_ineq_const_to_fixed_x_eq_const_m_new[i][n] - temp_set_cover_ineq_const_to_fixed_x_eq_const_m[i][n]) > 1e-7) {
+    //             cout << "Error: Values are not equal at index [" << i << "][" << n << "]\n";
+    //             cout<<"temp_set_cover_ineq_const_to_fixed_x_eq_const_m_new[i][n]: "<<temp_set_cover_ineq_const_to_fixed_x_eq_const_m_new[i][n]<<"\n";
+    //             cout<<"temp_set_cover_ineq_const_to_fixed_x_eq_const_m[i][n]: "<<temp_set_cover_ineq_const_to_fixed_x_eq_const_m[i][n]<<"\n";
+    //             exit(EXIT_FAILURE);
+    //         }
+    //     }
+    // }
+
+    // exit(0);
     //self.set_cover_ineq_const_to_fixed_x_eq_const_m_dummy = set_cover_ineq_const_to_fixed_x_eq_const_m.T.reshape(self.num_time_steps, self.num_rx_locs, self.num_fixed_tx*self.num_bands)
     vector<vector<impalib_type>> temp_2(numTimeSteps_*numRxLocs_, vector<impalib_type>(numFixedTx_*numBands_, 0));
 
@@ -507,6 +871,7 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
             temp_2[j][index] = temp_set_cover_ineq_const_to_fixed_x_eq_const_m[index][j];
         }
     }
+
 
     vector<impalib_type> flat_data_3;
     for (const auto& row : temp_2) {
@@ -552,18 +917,18 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
     }
 
     //temp_reshaped_z_eq_const_to_set_cover_ineq_const_m = np.swapaxes(reshaped_z_eq_const_to_set_cover_ineq_const_m, 0, 3).reshape(-1,self.num_time_steps*self.num_rx_locs)
-    vector<vector<vector<vector<impalib_type>>>> swaped_reshaped_z_eq_const_to_set_cover_ineq_const_m(numBands_*numMobileTx_, vector<vector<vector<impalib_type>>>(numMobileTxLocs_, vector<vector<impalib_type>>(numTimeSteps_, vector<impalib_type>(numRxLocs_, 0))));
+    // vector<vector<vector<vector<impalib_type>>>> swaped_reshaped_z_eq_const_to_set_cover_ineq_const_m(numBands_*numMobileTx_, vector<vector<vector<impalib_type>>>(numMobileTxLocs_, vector<vector<impalib_type>>(numTimeSteps_, vector<impalib_type>(numRxLocs_, 0))));
     vector<vector<impalib_type>> temp_reshaped_z_eq_const_to_set_cover_ineq_const_m(numBands_*numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numTimeSteps_*numRxLocs_, 0));
     
-    for (int k=0; k< numTimeSteps_; k++){
-        for (int l=0; l<numRxLocs_; l++){
-            for (int n=0; n< numMobileTxLocs_; n++){
-                for (int j_i=0; j_i <numBands_*numMobileTx_; j_i++){
-                    swaped_reshaped_z_eq_const_to_set_cover_ineq_const_m[j_i][n][k][l] = reshaped_z_eq_const_to_set_cover_ineq_const_m[l][n][k][j_i];
-                }
-            }
-        }
-    }
+    // for (int k=0; k< numTimeSteps_; k++){
+    //     for (int l=0; l<numRxLocs_; l++){
+    //         for (int n=0; n< numMobileTxLocs_; n++){
+    //             for (int j_i=0; j_i <numBands_*numMobileTx_; j_i++){
+    //                 swaped_reshaped_z_eq_const_to_set_cover_ineq_const_m[j_i][n][k][l] = reshaped_z_eq_const_to_set_cover_ineq_const_m[l][n][k][j_i];
+    //             }
+    //         }
+    //     }
+    // }
 
     for (int j_i = 0; j_i < numBands_*numMobileTx_; ++j_i) {
         for (int n = 0; n < numMobileTxLocs_; ++n) {
@@ -571,7 +936,8 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
             int col_index = 0;
             for (int k = 0; k < numTimeSteps_; ++k) {
                 for (int l = 0; l < numRxLocs_; ++l) {
-                    temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[row_index][col_index] = swaped_reshaped_z_eq_const_to_set_cover_ineq_const_m[j_i][n][k][l];
+                    // temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[row_index][col_index] = swaped_reshaped_z_eq_const_to_set_cover_ineq_const_m[j_i][n][k][l];
+                    temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[row_index][col_index] = reshaped_z_eq_const_to_set_cover_ineq_const_m[l][n][k][j_i];
                     ++col_index;
                 }
             }
@@ -580,56 +946,167 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
 
     vector<vector<impalib_type>> set_cover_ineq_const_to_z_eq_const_m(numBands_*numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numTimeSteps_*numRxLocs_, 0));
 
-    for (int index = 0; index<numBands_*numMobileTx_*numMobileTxLocs_; index++){
+    // auto start_3 = chrono::high_resolution_clock::now();
+
+    // for (int index = 0; index<numBands_*numMobileTx_*numMobileTxLocs_; index++){
         
-        vector<bool> mask(numBands_*numMobileTx_*numMobileTxLocs_, true);
-        mask[index] = false;
-        //rTempReshapedConxMobTxRx(vector<vector<int>>(NUM_MOBILE_TX_LOCS*NUM_BANDS*NUM_MOBILE_TX, vector<int>(NUM_RX_LOCS*NUM_TIME_STEPS, 0))),
-        vector<impalib_type> min_remaining_mobile_msgs(rTempReshapedConxMobTxRx[0].size(), numeric_limits<impalib_type>::infinity());
+    //     vector<bool> mask(numBands_*numMobileTx_*numMobileTxLocs_, true);
+    //     mask[index] = false;
+    //     //rTempReshapedConxMobTxRx(vector<vector<int>>(NUM_MOBILE_TX_LOCS*NUM_BANDS*NUM_MOBILE_TX, vector<int>(NUM_RX_LOCS*NUM_TIME_STEPS, 0))),
+    //     vector<impalib_type> min_remaining_mobile_msgs(rTempReshapedConxMobTxRx[0].size(), numeric_limits<impalib_type>::infinity());
 
-        for (int i=0; i<numBands_*numMobileTx_*numMobileTxLocs_; i++){
-            if (!mask[i]) continue;
-            for (int j=0; j<rTempReshapedConxMobTxRx[i].size(); j++){
-                if (rTempReshapedConxMobTxRx[i][j] == 1){
-                    min_remaining_mobile_msgs[j] = min(min_remaining_mobile_msgs[j], temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[i][j]);
-                }
-            }
-        }
+    //     for (int i=0; i<numBands_*numMobileTx_*numMobileTxLocs_; i++){
+    //         if (!mask[i]) continue;
+    //         for (int j=0; j<rTempReshapedConxMobTxRx[i].size(); j++){
+    //             if (rTempReshapedConxMobTxRx[i][j] == 1){
+    //                 min_remaining_mobile_msgs[j] = min(min_remaining_mobile_msgs[j], temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[i][j]);
+    //             }
+    //         }
+    //     }
 
-        // set_cover_ineq_const_to_z_eq_const_m[index, :] = np.where(temp_reshaped_conx_mob_tx_rx[index, :], -np.maximum(zero_value, np.minimum(min_remaining_mobile_msgs, min_fixed_msgs)), set_cover_ineq_const_to_z_eq_const_m[index, :])
+    //     // set_cover_ineq_const_to_z_eq_const_m[index, :] = np.where(temp_reshaped_conx_mob_tx_rx[index, :], -np.maximum(zero_value, np.minimum(min_remaining_mobile_msgs, min_fixed_msgs)), set_cover_ineq_const_to_z_eq_const_m[index, :])
 
-        for (int j=0; j<numTimeSteps_*numRxLocs_; j++){
-            if (rTempReshapedConxMobTxRx[index][j] ==1){
-                impalib_type min_val = 0.0;
-                min_val = min(min_fixed_msgs[j], min_remaining_mobile_msgs[j]);
-                set_cover_ineq_const_to_z_eq_const_m[index][j] = -max(0.0, min_val);
+    //     for (int j=0; j<numTimeSteps_*numRxLocs_; j++){
+    //         if (rTempReshapedConxMobTxRx[index][j] ==1){
+    //             impalib_type min_val = 0.0;
+    //             min_val = min(min_fixed_msgs[j], min_remaining_mobile_msgs[j]);
+    //             set_cover_ineq_const_to_z_eq_const_m[index][j] = -max(0.0, min_val);
                 
+    //         }
+    //     }
+    // }
+
+
+    // auto end_3 = chrono::high_resolution_clock::now();
+    // chrono::duration<double> elapsed_3 = end_3 - start_3;
+    // cout << "Execution time unoptimized: " << elapsed_3.count() << " seconds\n";
+
+
+    // auto start_4 = chrono::high_resolution_clock::now();
+
+    vector<impalib_type> stage_forward_messages_2(numMobileTx_*numMobileTxLocs_*numBands_ + 1, zero_value);
+    vector<impalib_type> stage_backward_messages_2(numMobileTx_*numMobileTxLocs_*numBands_  + 1, zero_value);
+
+    // vector<vector<impalib_type>> set_cover_ineq_const_to_z_eq_const_m_new(numBands_*numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numTimeSteps_*numRxLocs_, 0));
+
+    for (int k_l=0; k_l < numTimeSteps_*numRxLocs_; k_l++){
+
+        vector<int> connections;
+
+        for (int i_j = 0; i_j < rTempReshapedConxMobTxRx.size(); i_j++)
+        {
+            if (rTempReshapedConxMobTxRx[i_j][k_l]==1){
+                connections.push_back(i_j);
+                // cout<<i_j<<" ";
             }
         }
 
-    }
+        if (connections.size()==0){
+            continue;
+        }
+        // cout<<"\n";
+        // Calculate forward messages
+        // cout<<"connections.size(): "<<connections.size()<<"\n";
+        // cout<<"connections[0]: "<<connections[0]<<"\n";
+        // cout<<"stage_forward_messages_2.size(): "<<stage_forward_messages_2.size()<<"\n";
 
-    vector<vector<impalib_type>> temp_transpose(numTimeSteps_*numRxLocs_, vector<impalib_type>(numBands_*numMobileTx_*numMobileTxLocs_, 0));
+        stage_forward_messages_2[connections[0]] = initial_forward_message_;
 
-    for (size_t i = 0; i < set_cover_ineq_const_to_z_eq_const_m.size(); ++i) {
-        for (size_t j = 0; j < set_cover_ineq_const_to_z_eq_const_m[0].size(); ++j) {
-            temp_transpose[j][i] = set_cover_ineq_const_to_z_eq_const_m[i][j];
+        // cout<<"DONE"<<"\n";
+        // exit(0);
+
+        // cout<<"temp_reshaped_z_eq_const_to_set_cover_ineq_const_m.size(): "<<temp_reshaped_z_eq_const_to_set_cover_ineq_const_m.size()<<"\n";
+        // cout<<"temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[0].size(): "<<temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[0].size()<<"\n";
+        // cout<<"k_l: "<<k_l<<"\n";
+
+        for (int stage = 1; stage < connections.size(); stage++)
+        {
+            // cout<<"connections[stage]: "<<connections[stage]<<"\n";
+            stage_forward_messages_2[connections[stage]] =
+                min(stage_forward_messages_2[connections[stage - 1]],
+                    temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[connections[stage - 1]][k_l]);
+        }
+
+        // Calculate backward messages
+        stage_backward_messages_2[connections[connections.size() - 1] + 1] = initial_backward_message_;
+
+        for (size_t stage = connections.size() - 1; stage >= 1; stage--)
+        {
+            stage_backward_messages_2[connections[stage - 1] + 1] =
+                min(stage_backward_messages_2[connections[stage] + 1],
+                    temp_reshaped_z_eq_const_to_set_cover_ineq_const_m[connections[stage]][k_l]);
+        }
+
+        for (int conx_index = 0; conx_index < connections.size(); conx_index++)
+        {
+            impalib_type minimumValue = min(stage_forward_messages_2[connections[conx_index]],
+                                            stage_backward_messages_2[connections[conx_index] + 1]);
+            minimumValue = min(minimumValue, min_fixed_msgs[k_l]);                       
+            set_cover_ineq_const_to_z_eq_const_m[connections[conx_index]][k_l] = -max(minimumValue, 0.0);
         }
     }
 
-    vector<vector<vector<impalib_type>>> reshaped_set_cover_ineq_const_to_z_eq_const_m(numTimeSteps_ * numRxLocs_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numBands_ * numMobileTx_, 0)));
+    // auto end_4 = chrono::high_resolution_clock::now();
+    // chrono::duration<double> elapsed_4 = end_4 - start_4;
+    // cout << "Execution time optimized: " << elapsed_4.count() << " seconds\n";
+
+    // for (int i = 0; i < numBands_*numMobileTx_*numMobileTxLocs_; ++i) {
+    //     for (int n = 0; n < numTimeSteps_*numRxLocs_; ++n) {
+    //         if (std::abs(set_cover_ineq_const_to_z_eq_const_m_new[i][n] - set_cover_ineq_const_to_z_eq_const_m[i][n]) > 1e-7) {
+    //             cout << "Error: Values are not equal at index [" << i << "][" << n << "]\n";
+    //             cout<<"set_cover_ineq_const_to_z_eq_const_m_new[i][n]: "<<set_cover_ineq_const_to_z_eq_const_m_new[i][n]<<"\n";
+    //             cout<<"set_cover_ineq_const_to_z_eq_const_m[i][n]: "<<set_cover_ineq_const_to_z_eq_const_m[i][n]<<"\n";
+    //             exit(EXIT_FAILURE);
+    //         }
+    //     }
+    // }
+
+    // cout<<"DONE"<<"\n";
+    // exit(0);
+
+    //vector<vector<impalib_type>> set_cover_ineq_const_to_z_eq_const_m(numBands_*numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numTimeSteps_*numRxLocs_, 0));
+    // vector<vector<impalib_type>> temp_transpose(numTimeSteps_*numRxLocs_, vector<impalib_type>(numBands_*numMobileTx_*numMobileTxLocs_, 0));
+
+    // for (size_t i = 0; i < set_cover_ineq_const_to_z_eq_const_m.size(); ++i) { //numBands_*numMobileTx_*numMobileTxLocs_
+    //     for (size_t j = 0; j < set_cover_ineq_const_to_z_eq_const_m[0].size(); ++j) {//numTimeSteps_*numRxLocs_
+    //         temp_transpose[j][i] = set_cover_ineq_const_to_z_eq_const_m[i][j];
+    //     }
+    // }
+
+    // vector<vector<vector<impalib_type>>> reshaped_set_cover_ineq_const_to_z_eq_const_m(numTimeSteps_ * numRxLocs_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numBands_ * numMobileTx_, 0)));
 
     vector<impalib_type> flat_data_4;
     
     for (int k_l = 0; k_l < numTimeSteps_ * numRxLocs_; ++k_l) {
         for (int n = 0; n < numMobileTxLocs_; ++n) {
             for (int j_i = 0; j_i < numBands_ * numMobileTx_; ++j_i) {
-                flat_data_4.push_back(temp_transpose[k_l][n + j_i * numMobileTxLocs_]);
+                // flat_data_4.push_back(temp_transpose[k_l][n + j_i * numMobileTxLocs_]);
+                flat_data_4.push_back(set_cover_ineq_const_to_z_eq_const_m[n + j_i * numMobileTxLocs_][k_l]);
                 // reshaped_set_cover_ineq_const_to_z_eq_const_m[k_l][n][j_i] = 
                 //     temp_transpose[k_l][n + j_i * numMobileTxLocs_];
             }
         }
     }
+
+    // vector<impalib_type> flat_data_5;
+    
+    // for (int k_l = 0; k_l < numTimeSteps_ * numRxLocs_; ++k_l) {
+    //     for (int n = 0; n < numMobileTxLocs_; ++n) {
+    //         for (int j_i = 0; j_i < numBands_ * numMobileTx_; ++j_i) {
+    //             flat_data_5.push_back(temp_transpose[k_l][n + j_i * numMobileTxLocs_]);
+    //         }
+    //     }
+    // }
+
+    // for (int i = 0; i < flat_data_5.size(); ++i) {
+    //         // cout<<flat_data_5[i]<< ", "<<flat_data_4[i]<<"\n";
+    //         if (std::abs(flat_data_5[i] - flat_data_4[i]) > 1e-7) {
+    //             cout << "Error: Values are not equal at index [" << i <<"\n";
+    //             cout<<"flat_data_4[i]: "<<flat_data_4[i]<<"\n";
+    //             cout<<"flat_data_5[i]: "<<flat_data_5[i]<<"\n";
+    //             exit(EXIT_FAILURE);
+    //         }
+    // }
 
     //temp_set_cover_ineq_const_to_z_eq_const_m = reshaped_set_cover_ineq_const_to_z_eq_const_m.reshape(self.num_time_steps, self.num_rx_locs, self.num_mobile_tx_locs, self.num_bands*self.num_mobile_tx)
 
@@ -644,6 +1121,7 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
         }
     }
 
+    // cout<<"DONE \n";
     // for (int k = 0; k < numTimeSteps_; ++k) {
     //     cout << "Time Step: " << k << "\n";
     //     for (int l = 0; l < numRxLocs_; ++l) {
@@ -682,7 +1160,8 @@ inline void InequalityConstraintMOBARP::set_cover_ineq_const_update(vector<vecto
     //         file_output_2.close();
     //         }
     // else {cout << "Error! File cannot be opened!" << "\n";}
-
+    
+    // cout<<"DONE"<<"\n";
 }
 
 

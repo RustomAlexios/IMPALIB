@@ -8,12 +8,12 @@ echo "Unit Tests"
 
 declare -i total_sub_tests=1
 
-NUM_FIXED_TX=4
-NUM_MOBILE_TX=5
-NUM_BANDS=6
-NUM_TIME_STEPS=5
+NUM_FIXED_TX=7
+NUM_MOBILE_TX=3
+NUM_BANDS=8
+NUM_TIME_STEPS=12
 NUM_RX_LOCS=7
-NUM_MOBILE_TX_LOCS=7
+NUM_MOBILE_TX_LOCS=12
 EXCLUDE_CAP_FLAG=0
 FILT_FLAG=1 #1 or ''
 ALPHA=0.9
@@ -25,11 +25,13 @@ test_counter=1
 ut="TEST"
 
 if [ "$EXCLUDE_CAP_FLAG" -eq 1 ]; then
-    unit_tests=("ExtrinsicUpdate" "MobileLocEqConst2REqConstUpdate" "SetCoverIneqConstUpdate" "AuxiliaryConst2ZEqConstUpdate" "AuxiliaryConst2REqConstUpdate" "AuxiliaryConst2MobileXEqConstUpdate" "XEqConst2AuxiliaryAndSetCoverConstUpdate" "ReqConstActivation" "ZEqConst2AuxiliaryConstUpdate" "ZEqConst2SetCoverIneqConstUpdate" "Iterate")
+    # unit_tests=("ExtrinsicUpdate" "MobileLocEqConst2REqConstUpdate" "SetCoverIneqConstUpdate" "AuxiliaryConst2ZEqConstUpdate" "AuxiliaryConst2REqConstUpdate" "AuxiliaryConst2MobileXEqConstUpdate" "XEqConst2AuxiliaryAndSetCoverConstUpdate" "ReqConstActivation" "ZEqConst2AuxiliaryConstUpdate" "ZEqConst2SetCoverIneqConstUpdate" "Iterate")
+    unit_tests=("ExtrinsicUpdate" "MobileLocEqConst2REqConstUpdate" "SetCoverIneqConstUpdate" "AuxiliaryConst2ZAndREqConstUpdate" "AuxiliaryConst2MobileXEqConstUpdate" "XEqConst2AuxiliaryAndSetCoverConstUpdate" "ReqConstActivation" "ZEqConst2AuxiliaryConstUpdate" "ZEqConst2SetCoverIneqConstUpdate" "Iterate")
 else
-    unit_tests=("ExtrinsicUpdate" "IneqCapacConstUpdate" "MobileLocEqConst2REqConstUpdate" "SetCoverIneqConstUpdate" "AuxiliaryConst2ZEqConstUpdate" "AuxiliaryConst2REqConstUpdate" "AuxiliaryConst2MobileXEqConstUpdate" "XEqConst2AuxiliaryAndSetCoverConstUpdate" "ReqConstActivation" "ZEqConst2AuxiliaryConstUpdate" "XEqConstActivation" "ZEqConst2SetCoverIneqConstUpdate" "Iterate")
+    # unit_tests=("ExtrinsicUpdate" "IneqCapacConstUpdate" "MobileLocEqConst2REqConstUpdate" "SetCoverIneqConstUpdate" "AuxiliaryConst2ZEqConstUpdate" "AuxiliaryConst2REqConstUpdate" "AuxiliaryConst2MobileXEqConstUpdate" "XEqConst2AuxiliaryAndSetCoverConstUpdate" "ReqConstActivation" "ZEqConst2AuxiliaryConstUpdate" "XEqConstActivation" "ZEqConst2SetCoverIneqConstUpdate" "Iterate")
+    unit_tests=("ExtrinsicUpdate" "IneqCapacConstUpdate" "MobileLocEqConst2REqConstUpdate" "SetCoverIneqConstUpdate" "AuxiliaryConst2ZAndREqConstUpdate" "AuxiliaryConst2MobileXEqConstUpdate" "XEqConst2AuxiliaryAndSetCoverConstUpdate" "ReqConstActivation" "ZEqConst2AuxiliaryConstUpdate" "XEqConstActivation" "ZEqConst2SetCoverIneqConstUpdate" "Iterate")
 fi
-
+# unit_tests=("IneqCapacConstUpdate")
 for test_name in ${unit_tests[@]}; do
     mkdir -p ../ut_inputs
     mkdir -p ../ut_results

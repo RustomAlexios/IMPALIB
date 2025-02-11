@@ -46,7 +46,78 @@ void ut_auxiliary_const_update(string& ut_name){
 
     AuxiliaryConstraint modelAuxiliaryConstraint(NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_MOBILE_TX_LOCS);
 
-    if (ut_name == "AuxiliaryConst2ZEqConstUpdate"){
+    // if (ut_name == "AuxiliaryConst2ZEqConstUpdate"){
+
+    //     cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/mobile_x_eq_const_to_auxiliary_const_m.npy");
+    //     impalib_type* mobile_x_eq_const_to_auxiliary_const_m_pure = input2.data<impalib_type>();
+    //     vector<vector<impalib_type>> mobile_x_eq_const_to_auxiliary_const_m;
+
+    //     for (int i=0; i< NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS; i++){
+    //         mobile_x_eq_const_to_auxiliary_const_m.push_back(vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
+    //         copy(mobile_x_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * i, mobile_x_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * (i + 1), mobile_x_eq_const_to_auxiliary_const_m[i].begin());
+    //     }
+
+    //     cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/r_eq_const_to_auxiliary_const_m.npy");
+    //     impalib_type* r_eq_const_to_auxiliary_const_m_pure = input3.data<impalib_type>();
+    //     vector<vector<impalib_type>> r_eq_const_to_auxiliary_const_m;
+
+    //     for (int i=0; i< NUM_MOBILE_TX*NUM_MOBILE_TX_LOCS; i++){
+    //         r_eq_const_to_auxiliary_const_m.push_back(vector<impalib_type>(NUM_BANDS*NUM_TIME_STEPS, 0));
+    //         copy(r_eq_const_to_auxiliary_const_m_pure + NUM_BANDS*NUM_TIME_STEPS * i, r_eq_const_to_auxiliary_const_m_pure + NUM_BANDS*NUM_TIME_STEPS * (i + 1), r_eq_const_to_auxiliary_const_m[i].begin());
+    //     }
+
+    //     vector<vector<impalib_type>> AuxiliaryConst2ZEqConstM(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
+
+    //     modelAuxiliaryConstraint.auxiliary_const_to_z_eq_const_update(mobile_x_eq_const_to_auxiliary_const_m, r_eq_const_to_auxiliary_const_m, AuxiliaryConst2ZEqConstM, 
+    //                                         ConxMobTxPerNumMobTxLocs);
+
+    //     fstream file_output_1("../ut_results/AuxiliaryConst2ZEqConstM_wrapper", ios::out | ios::binary | ios:: trunc);
+    //     if (file_output_1.is_open()) {
+    //         for (int i=0; i<AuxiliaryConst2ZEqConstM.size(); i++){
+    //         for (int j=0; j<AuxiliaryConst2ZEqConstM[0].size(); j++){
+    //             file_output_1.write((char*)(&AuxiliaryConst2ZEqConstM[i][j]), sizeof(AuxiliaryConst2ZEqConstM[i][j]));}}
+    //             file_output_1.close();
+    //             }
+    //     else {cout << "Error! File cannot be opened!" << "\n";}
+
+    // }
+
+    // else if (ut_name == "AuxiliaryConst2REqConstUpdate"){
+        
+    //     cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/z_eq_const_to_auxiliary_const_m.npy");
+    //     impalib_type* z_eq_const_to_auxiliary_const_m_pure = input2.data<impalib_type>();
+    //     vector<vector<impalib_type>> z_eq_const_to_auxiliary_const_m;
+
+    //     for (int i=0; i< NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS; i++){
+    //         z_eq_const_to_auxiliary_const_m.push_back(vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
+    //         copy(z_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * i, z_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * (i + 1), z_eq_const_to_auxiliary_const_m[i].begin());
+    //     }
+
+    //     cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/mobile_x_eq_const_to_auxiliary_const_m.npy");
+    //     impalib_type* mobile_x_eq_const_to_auxiliary_const_m_pure = input3.data<impalib_type>();
+    //     vector<vector<impalib_type>> mobile_x_eq_const_to_auxiliary_const_m;
+
+    //     for (int i=0; i< NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS; i++){
+    //         mobile_x_eq_const_to_auxiliary_const_m.push_back(vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
+    //         copy(mobile_x_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * i, mobile_x_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * (i + 1), mobile_x_eq_const_to_auxiliary_const_m[i].begin());
+    //     }
+
+    //     vector<vector<impalib_type>> AuxiliaryConst2REqConstM(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
+
+    //     modelAuxiliaryConstraint.auxiliary_const_to_r_eq_const_update(z_eq_const_to_auxiliary_const_m, mobile_x_eq_const_to_auxiliary_const_m, ConxMobTxPerNumMobTxLocs, AuxiliaryConst2REqConstM);
+
+    //     fstream file_output_1("../ut_results/AuxiliaryConst2REqConstM_wrapper", ios::out | ios::binary | ios:: trunc);
+    //     if (file_output_1.is_open()) {
+    //         for (int i=0; i<AuxiliaryConst2REqConstM.size(); i++){
+    //         for (int j=0; j<AuxiliaryConst2REqConstM[0].size(); j++){
+    //             file_output_1.write((char*)(&AuxiliaryConst2REqConstM[i][j]), sizeof(AuxiliaryConst2REqConstM[i][j]));}}
+    //             file_output_1.close();
+    //             }
+    //     else {cout << "Error! File cannot be opened!" << "\n";}
+
+    // }
+
+    if (ut_name == "AuxiliaryConst2ZAndREqConstUpdate"){
 
         cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/mobile_x_eq_const_to_auxiliary_const_m.npy");
         impalib_type* mobile_x_eq_const_to_auxiliary_const_m_pure = input2.data<impalib_type>();
@@ -68,8 +139,24 @@ void ut_auxiliary_const_update(string& ut_name){
 
         vector<vector<impalib_type>> AuxiliaryConst2ZEqConstM(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
 
-        modelAuxiliaryConstraint.auxiliary_const_to_z_eq_const_update(mobile_x_eq_const_to_auxiliary_const_m, r_eq_const_to_auxiliary_const_m, AuxiliaryConst2ZEqConstM, 
-                                            ConxMobTxPerNumMobTxLocs);
+        // modelAuxiliaryConstraint.auxiliary_const_to_z_eq_const_update(mobile_x_eq_const_to_auxiliary_const_m, r_eq_const_to_auxiliary_const_m, AuxiliaryConst2ZEqConstM, 
+        //                                     ConxMobTxPerNumMobTxLocs);
+
+        cnpy::NpyArray input4 = cnpy::npy_load("../ut_inputs/z_eq_const_to_auxiliary_const_m.npy");
+        impalib_type* z_eq_const_to_auxiliary_const_m_pure = input4.data<impalib_type>();
+        vector<vector<impalib_type>> z_eq_const_to_auxiliary_const_m;
+
+        for (int i=0; i< NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS; i++){
+            z_eq_const_to_auxiliary_const_m.push_back(vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
+            copy(z_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * i, z_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * (i + 1), z_eq_const_to_auxiliary_const_m[i].begin());
+        }
+
+        vector<vector<impalib_type>> AuxiliaryConst2REqConstM(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
+
+        // modelAuxiliaryConstraint.auxiliary_const_to_r_eq_const_update(z_eq_const_to_auxiliary_const_m, mobile_x_eq_const_to_auxiliary_const_m, ConxMobTxPerNumMobTxLocs, AuxiliaryConst2REqConstM);
+
+        modelAuxiliaryConstraint.auxiliary_const_to_z_and_r_eq_const_update(z_eq_const_to_auxiliary_const_m, mobile_x_eq_const_to_auxiliary_const_m,
+                                ConxMobTxPerNumMobTxLocs, r_eq_const_to_auxiliary_const_m, AuxiliaryConst2ZEqConstM, AuxiliaryConst2REqConstM);
 
         fstream file_output_1("../ut_results/AuxiliaryConst2ZEqConstM_wrapper", ios::out | ios::binary | ios:: trunc);
         if (file_output_1.is_open()) {
@@ -80,43 +167,17 @@ void ut_auxiliary_const_update(string& ut_name){
                 }
         else {cout << "Error! File cannot be opened!" << "\n";}
 
-    }
-
-    else if (ut_name == "AuxiliaryConst2REqConstUpdate"){
-        
-        cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/z_eq_const_to_auxiliary_const_m.npy");
-        impalib_type* z_eq_const_to_auxiliary_const_m_pure = input2.data<impalib_type>();
-        vector<vector<impalib_type>> z_eq_const_to_auxiliary_const_m;
-
-        for (int i=0; i< NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS; i++){
-            z_eq_const_to_auxiliary_const_m.push_back(vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
-            copy(z_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * i, z_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * (i + 1), z_eq_const_to_auxiliary_const_m[i].begin());
-        }
-
-        cnpy::NpyArray input3 = cnpy::npy_load("../ut_inputs/mobile_x_eq_const_to_auxiliary_const_m.npy");
-        impalib_type* mobile_x_eq_const_to_auxiliary_const_m_pure = input3.data<impalib_type>();
-        vector<vector<impalib_type>> mobile_x_eq_const_to_auxiliary_const_m;
-
-        for (int i=0; i< NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS; i++){
-            mobile_x_eq_const_to_auxiliary_const_m.push_back(vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
-            copy(mobile_x_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * i, mobile_x_eq_const_to_auxiliary_const_m_pure + NUM_MOBILE_TX_LOCS * (i + 1), mobile_x_eq_const_to_auxiliary_const_m[i].begin());
-        }
-
-        vector<vector<impalib_type>> AuxiliaryConst2REqConstM(NUM_MOBILE_TX*NUM_BANDS*NUM_TIME_STEPS, vector<impalib_type>(NUM_MOBILE_TX_LOCS, 0));
-
-        modelAuxiliaryConstraint.auxiliary_const_to_r_eq_const_update(z_eq_const_to_auxiliary_const_m, mobile_x_eq_const_to_auxiliary_const_m, ConxMobTxPerNumMobTxLocs, AuxiliaryConst2REqConstM);
-
-        fstream file_output_1("../ut_results/AuxiliaryConst2REqConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-        if (file_output_1.is_open()) {
+        fstream file_output_2("../ut_results/AuxiliaryConst2REqConstM_wrapper", ios::out | ios::binary | ios:: trunc);
+        if (file_output_2.is_open()) {
             for (int i=0; i<AuxiliaryConst2REqConstM.size(); i++){
             for (int j=0; j<AuxiliaryConst2REqConstM[0].size(); j++){
-                file_output_1.write((char*)(&AuxiliaryConst2REqConstM[i][j]), sizeof(AuxiliaryConst2REqConstM[i][j]));}}
-                file_output_1.close();
+                file_output_2.write((char*)(&AuxiliaryConst2REqConstM[i][j]), sizeof(AuxiliaryConst2REqConstM[i][j]));}}
+                file_output_2.close();
                 }
         else {cout << "Error! File cannot be opened!" << "\n";}
 
     }
-
+    
     else if (ut_name == "AuxiliaryConst2MobileXEqConstUpdate"){
         
         cnpy::NpyArray input2 = cnpy::npy_load("../ut_inputs/z_eq_const_to_auxiliary_const_m.npy");

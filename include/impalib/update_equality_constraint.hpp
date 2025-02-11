@@ -375,22 +375,28 @@ inline void EqualityConstraint::x_eq_const_to_auxiliary_and_set_cover_const_upda
 
 {
     vector<impalib_type> sums_mobile_x_eq_const(numMobileTx_*numBands_*numTimeSteps_, 0);
-
     vector<int> sums_conx_per_row(rConxMobTxPerNumMobTxLocs.size(), 0);
     vector<int> conx_rows;
 
     vector<impalib_type> flattened_mobile_tx_costs;
 
-    for (const auto& matrix : rMobileTxCosts) {
-        for (const auto& row : matrix) {
-            flattened_mobile_tx_costs.insert(flattened_mobile_tx_costs.end(), row.begin(), row.end());
-        }
-    }
+    // for (const auto& matrix : rMobileTxCosts) {
+    //     for (const auto& row : matrix) {
+    //         flattened_mobile_tx_costs.insert(flattened_mobile_tx_costs.end(), row.begin(), row.end());
+    //     }
+    // }
     std::vector<impalib_type> flattened_mobile_capac_const_2_mobile_x_eq_const;
 
-    for (const auto& matrix : rMobileCapacConst2MobileXEqConstM) {
-        for (const auto& row : matrix) {
-            flattened_mobile_capac_const_2_mobile_x_eq_const.insert(flattened_mobile_capac_const_2_mobile_x_eq_const.end(), row.begin(), row.end());
+    // for (const auto& matrix : rMobileCapacConst2MobileXEqConstM) {
+    //     for (const auto& row : matrix) {
+    //         flattened_mobile_capac_const_2_mobile_x_eq_const.insert(flattened_mobile_capac_const_2_mobile_x_eq_const.end(), row.begin(), row.end());
+    //     }
+    // }
+
+    for (int i=0; i<numMobileTx_; i++){
+        for (int j=0; j<numBands_; j++){
+                flattened_mobile_tx_costs.insert(flattened_mobile_tx_costs.end(), rMobileTxCosts[i][j].begin(), rMobileTxCosts[i][j].end());
+                flattened_mobile_capac_const_2_mobile_x_eq_const.insert(flattened_mobile_capac_const_2_mobile_x_eq_const.end(), rMobileCapacConst2MobileXEqConstM[i][j].begin(), rMobileCapacConst2MobileXEqConstM[i][j].end());
         }
     }
 
@@ -445,16 +451,23 @@ inline void EqualityConstraint::x_eq_const_to_auxiliary_and_set_cover_const_upda
 
     vector<impalib_type> flattened_fixed_tx_costs;
 
-    for (const auto& matrix : rFixedTxCosts) {
-        for (const auto& row : matrix) {
-            flattened_fixed_tx_costs.insert(flattened_fixed_tx_costs.end(), row.begin(), row.end());
-        }
-    }
+    // for (const auto& matrix : rFixedTxCosts) {
+    //     for (const auto& row : matrix) {
+    //         flattened_fixed_tx_costs.insert(flattened_fixed_tx_costs.end(), row.begin(), row.end());
+    //     }
+    // }
     std::vector<impalib_type> flattened_fixed_capac_const_2_fixed_x_eq_const;
 
-    for (const auto& matrix : rFixedCapacConst2FixedXEqConstM) {
-        for (const auto& row : matrix) {
-            flattened_fixed_capac_const_2_fixed_x_eq_const.insert(flattened_fixed_capac_const_2_fixed_x_eq_const.end(), row.begin(), row.end());
+    // for (const auto& matrix : rFixedCapacConst2FixedXEqConstM) {
+    //     for (const auto& row : matrix) {
+    //         flattened_fixed_capac_const_2_fixed_x_eq_const.insert(flattened_fixed_capac_const_2_fixed_x_eq_const.end(), row.begin(), row.end());
+    //     }
+    // }
+
+    for (int i=0; i<numFixedTx_; i++){
+        for (int j=0; j<numBands_; j++){
+            flattened_fixed_tx_costs.insert(flattened_fixed_tx_costs.end(), rFixedTxCosts[i][j].begin(), rFixedTxCosts[i][j].end());
+            flattened_fixed_capac_const_2_fixed_x_eq_const.insert(flattened_fixed_capac_const_2_fixed_x_eq_const.end(), rFixedCapacConst2FixedXEqConstM[i][j].begin(), rFixedCapacConst2FixedXEqConstM[i][j].end());
         }
     }
 
@@ -530,20 +543,21 @@ inline vector<vector<impalib_type>> EqualityConstraint::transpose_reshape(vector
 
     vector<vector<impalib_type>> reshaped_matrix;
 
-    for (int i = 0; i < numTimeSteps_; ++i) {
-        for (int j = 0; j < numRxLocs_; ++j) {
-            for (int k = 0; k < numFixedTx_*numBands_; ++k) {
-                transposed_matrix[k][i][j] = rSetCoverIneqConst2FixedXEqConstM[i][j][k];
-            }
-        }
-    }
+    // for (int i = 0; i < numTimeSteps_; ++i) {
+    //     for (int j = 0; j < numRxLocs_; ++j) {
+    //         for (int k = 0; k < numFixedTx_*numBands_; ++k) {
+    //             transposed_matrix[k][i][j] = rSetCoverIneqConst2FixedXEqConstM[i][j][k];
+    //         }
+    //     }
+    // }
 
     for (int k = 0; k < numFixedTx_*numBands_; ++k) {
         for (int i = 0; i < numTimeSteps_; ++i) {
             vector<impalib_type> row;
             row.reserve(numRxLocs_);
             for (int j = 0; j < numRxLocs_; ++j) {
-                row.push_back(transposed_matrix[k][i][j]);
+                // row.push_back(transposed_matrix[k][i][j]);
+                row.push_back(rSetCoverIneqConst2FixedXEqConstM[i][j][k]);
             }
             reshaped_matrix.push_back(row);
         }
@@ -556,19 +570,19 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
                                 vector<vector<vector<vector<impalib_type>>>>& rSetCoverIneqConst2ZEqConstM, vector<vector<impalib_type>>& rZEqConst2SetCoverIneqConstM,
                                 vector<vector<vector<vector<int>>>>& rTransposedConxMobTxRx, vector<vector<impalib_type>>& rZcosts) const{
         
-        vector<vector<vector<vector<impalib_type>>>> temp_set_cover_ineq_const_to_z_eq_const_m(numMobileTx_*numBands_, vector<vector<vector<impalib_type>>>(numRxLocs_, vector<vector<impalib_type>>(numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0))));
+        // vector<vector<vector<vector<impalib_type>>>> temp_set_cover_ineq_const_to_z_eq_const_m(numMobileTx_*numBands_, vector<vector<vector<impalib_type>>>(numRxLocs_, vector<vector<impalib_type>>(numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0))));
 
-        for (size_t k = 0; k < numTimeSteps_; k++)
-        {
-            for (size_t l = 0; l < numRxLocs_; l++){
-                for (size_t n = 0; n < numMobileTxLocs_; n++)
-                {
-                    for (size_t j_i = 0; j_i < numMobileTx_*numBands_; j_i++){
-                        temp_set_cover_ineq_const_to_z_eq_const_m[j_i][l][k][n] = rSetCoverIneqConst2ZEqConstM[k][l][n][j_i];
-                    }   
-                }
-            }
-        }
+        // for (size_t k = 0; k < numTimeSteps_; k++)
+        // {
+        //     for (size_t l = 0; l < numRxLocs_; l++){
+        //         for (size_t n = 0; n < numMobileTxLocs_; n++)
+        //         {
+        //             for (size_t j_i = 0; j_i < numMobileTx_*numBands_; j_i++){
+        //                 temp_set_cover_ineq_const_to_z_eq_const_m[j_i][l][k][n] = rSetCoverIneqConst2ZEqConstM[k][l][n][j_i];
+        //             }   
+        //         }
+        //     }
+        // }
 
         vector<vector<impalib_type>> reshaped_set_cover_ineq_const_to_z_eq_const_m;
         vector<vector<int>> reshaped_connectivity_mobile_tx_rx;
@@ -579,7 +593,8 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
             for (size_t j_i =0; j_i< numMobileTx_*numBands_; j_i++){
                 for (size_t k=0; k<numTimeSteps_; k++){
                     for (size_t n=0; n<numMobileTxLocs_; n++){
-                        flattened.push_back(temp_set_cover_ineq_const_to_z_eq_const_m[j_i][l][k][n]);
+                        // flattened.push_back(temp_set_cover_ineq_const_to_z_eq_const_m[j_i][l][k][n]);
+                        flattened.push_back(rSetCoverIneqConst2ZEqConstM[k][l][n][j_i]);
                         flattened_conx.push_back(rTransposedConxMobTxRx[j_i][l][k][n]);
                     }
                 }
@@ -589,12 +604,12 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
         }
 
 
-    vector<vector<impalib_type>> transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m(numMobileTx_*numBands_*numTimeSteps_*numMobileTxLocs_, vector<impalib_type>(numRxLocs_, 0));
+    // vector<vector<impalib_type>> transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m(numMobileTx_*numBands_*numTimeSteps_*numMobileTxLocs_, vector<impalib_type>(numRxLocs_, 0));
     vector<vector<int>> transposed_reshaped_connectivity_mobile_tx_rx(numMobileTx_*numBands_*numTimeSteps_*numMobileTxLocs_, vector<int>(numRxLocs_, 0));
 
     for (size_t i = 0; i < numRxLocs_; ++i) {
         for (size_t j = 0; j < numMobileTx_*numBands_*numTimeSteps_*numMobileTxLocs_; ++j) {
-            transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[j][i] = reshaped_set_cover_ineq_const_to_z_eq_const_m[i][j];
+            // transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[j][i] = reshaped_set_cover_ineq_const_to_z_eq_const_m[i][j];
             transposed_reshaped_connectivity_mobile_tx_rx[j][i] = reshaped_connectivity_mobile_tx_rx[i][j];
         }
     }
@@ -627,7 +642,8 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
         
         for (size_t l = 0; l < numRxLocs_; l++) {
             if (transposed_reshaped_connectivity_mobile_tx_rx[conx_rows[i]][l] == 1) {
-                sum_elements += transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[conx_rows[i]][l];
+                // sum_elements += transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[conx_rows[i]][l];
+                sum_elements += reshaped_set_cover_ineq_const_to_z_eq_const_m[l][conx_rows[i]];
             }
         }
         
@@ -638,7 +654,8 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
     for (int i=0; i<conx_rows.size(); i++){
         for (int l = 0; l< numRxLocs_; l++){
             if (transposed_reshaped_connectivity_mobile_tx_rx[conx_rows[i]][l] == 1){
-                rZEqConst2SetCoverIneqConstM[conx_rows[i]][l] = sums_z_eq_const[conx_rows[i]] - transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[conx_rows[i]][l];
+                // rZEqConst2SetCoverIneqConstM[conx_rows[i]][l] = sums_z_eq_const[conx_rows[i]] - transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[conx_rows[i]][l];
+                rZEqConst2SetCoverIneqConstM[conx_rows[i]][l] = sums_z_eq_const[conx_rows[i]] - reshaped_set_cover_ineq_const_to_z_eq_const_m[l][conx_rows[i]];
             }
     }
     }
@@ -667,33 +684,34 @@ inline void EqualityConstraint::r_eq_const_activation(vector<vector<impalib_type
                                            vector<vector<impalib_type>> & rREqConst2MobileLocEqConstM, vector<vector<int>> &rConxMobTxR, vector<vector<impalib_type>> & rRCosts) const {
 
     
-    vector<vector<vector<impalib_type>>> reshaped_1(numMobileTx_, vector<vector<impalib_type>>(numBands_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0)));
+    // vector<vector<vector<impalib_type>>> reshaped_1(numMobileTx_, vector<vector<impalib_type>>(numBands_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0)));
 
-    for (size_t i = 0; i < numMobileTx_; i++) {
-        for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-            for (size_t n = 0; n < numMobileTxLocs_; n++) {
-                reshaped_1[i][j_k][n] = rAuxiliaryConst2REqConstM[i * numBands_ * numTimeSteps_ + j_k][n];
-            }
-        }
-    }
+    // for (size_t i = 0; i < numMobileTx_; i++) {
+    //     for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
+    //         for (size_t n = 0; n < numMobileTxLocs_; n++) {
+    //             reshaped_1[i][j_k][n] = rAuxiliaryConst2REqConstM[i * numBands_ * numTimeSteps_ + j_k][n];
+    //         }
+    //     }
+    // }
 
-    vector<vector<vector<impalib_type>>> reshaped_2(numMobileTx_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0)));
+    // vector<vector<vector<impalib_type>>> reshaped_2(numMobileTx_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0)));
 
 
-    for (size_t i = 0; i < numMobileTx_; i++) {
-        for (size_t n = 0; n < numMobileTxLocs_; n++) {
-            for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-                reshaped_2[i][n][j_k] = reshaped_1[i][j_k][n];
-            }
-        }
-    }
+    // for (size_t i = 0; i < numMobileTx_; i++) {
+    //     for (size_t n = 0; n < numMobileTxLocs_; n++) {
+    //         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
+    //             reshaped_2[i][n][j_k] = reshaped_1[i][j_k][n];
+    //         }
+    //     }
+    // }
 
     vector<vector<impalib_type>> reshaped_auxiliary_const_to_r_eq_const_m(numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0));
 
     for (size_t i = 0; i < numMobileTx_; i++) {
         for (size_t n = 0; n < numMobileTxLocs_; n++) {
             for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-                reshaped_auxiliary_const_to_r_eq_const_m[i * numMobileTxLocs_ + n][j_k] = reshaped_2[i][n][j_k];
+                // reshaped_auxiliary_const_to_r_eq_const_m[i * numMobileTxLocs_ + n][j_k] = reshaped_2[i][n][j_k];
+                reshaped_auxiliary_const_to_r_eq_const_m[i * numMobileTxLocs_ + n][j_k] = rAuxiliaryConst2REqConstM[i * numBands_ * numTimeSteps_ + j_k][n];
             }
         }
     }
@@ -800,7 +818,7 @@ inline void EqualityConstraint::r_eq_const_activation(vector<vector<impalib_type
 inline void EqualityConstraint::z_eq_const_to_auxiliary_const_update(vector<vector<vector<vector<impalib_type>>>> & rSetCoverIneqConst2ZEqConstM, vector<vector<vector<vector<int>>>> & rConxMobTxRx, vector<vector<int>> & rConxMobTxPerNumMobTxLocs,
                                 vector<vector<impalib_type>> & rZEqConst2AuxiliaryConstM, vector<vector<impalib_type>> &rZCosts) const {
 
-    vector<vector<impalib_type>> reshaped_set_cover_ineq_const_to_z_eq_const_m(numBands_*numMobileTx_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0));
+    // vector<vector<impalib_type>> reshaped_set_cover_ineq_const_to_z_eq_const_m(numBands_*numMobileTx_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0));
 
     for (int j_i=0; j_i< numBands_*numMobileTx_; j_i++){
         for (int k=0; k< numTimeSteps_; k++){
@@ -811,9 +829,10 @@ inline void EqualityConstraint::z_eq_const_to_auxiliary_const_update(vector<vect
                         temp_sum += rSetCoverIneqConst2ZEqConstM[k][l][n][j_i];
                     }
                 }
-            reshaped_set_cover_ineq_const_to_z_eq_const_m[j_i*numTimeSteps_ + k][n] =  temp_sum;  
+            // reshaped_set_cover_ineq_const_to_z_eq_const_m[j_i*numTimeSteps_ + k][n] =  temp_sum;  
             if (rConxMobTxPerNumMobTxLocs[j_i*numTimeSteps_ + k][n] ==1){
-                rZEqConst2AuxiliaryConstM[j_i*numTimeSteps_ + k][n] = reshaped_set_cover_ineq_const_to_z_eq_const_m[j_i*numTimeSteps_ + k][n] + rZCosts[j_i*numTimeSteps_ + k][n];
+                // rZEqConst2AuxiliaryConstM[j_i*numTimeSteps_ + k][n] = reshaped_set_cover_ineq_const_to_z_eq_const_m[j_i*numTimeSteps_ + k][n] + rZCosts[j_i*numTimeSteps_ + k][n];
+                rZEqConst2AuxiliaryConstM[j_i*numTimeSteps_ + k][n] = temp_sum + rZCosts[j_i*numTimeSteps_ + k][n];
             }
             }
         }

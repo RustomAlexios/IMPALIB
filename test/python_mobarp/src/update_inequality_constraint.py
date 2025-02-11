@@ -137,6 +137,8 @@ class InequalityConstraintMOBARP:
         remaining_indices = np.arange(self.num_fixed_tx*self.num_bands)
         for index in range(self.num_fixed_tx*self.num_bands):
             mask = remaining_indices != index
+            # print(f"temp_conx_mob_tx_rx: \n {temp_conx_mob_tx_rx}")
+            # print(f"temp_reshaped_connectivity_fixed_tx: \n {temp_reshaped_connectivity_fixed_tx}")
             min_remaining_fixed_msgs = np.min(reshaped_fixed_x_eq_const_to_set_cover_const_m[mask, :], axis=0, where = temp_reshaped_connectivity_fixed_tx[mask, :]==1, initial=np.inf)
             min_mobile_msgs = np.min(reshaped_z_eq_const_to_set_cover_ineq_const_m, axis=(3,1), where = temp_conx_mob_tx_rx==1, initial=np.inf).T.flatten()
             set_cover_ineq_const_to_fixed_x_eq_const_m[index, :] = np.where(temp_reshaped_connectivity_fixed_tx[index, :], -np.maximum(zero_value, np.minimum(min_remaining_fixed_msgs, min_mobile_msgs)), set_cover_ineq_const_to_fixed_x_eq_const_m[index, :])
