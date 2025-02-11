@@ -124,7 +124,6 @@ if __name__ == "__main__":
         ut_update_inequality_constraint.ut_ineq_capac_const_update(
             ut_name, NUM_FIXED_TX, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, fixed_capac_constraints, mobile_capac_constraints, 
             ALPHA, FILTERING_FLAG, NUM_MOBILE_TX_LOCS, NUM_RX_LOCS, connectivity_mobile_tx, connectivity_fixed_tx)
-    # elif ut_name == "AuxiliaryConst2ZEqConstUpdate" or ut_name == "AuxiliaryConst2REqConstUpdate" or ut_name == "AuxiliaryConst2MobileXEqConstUpdate" or ut_name == "AuxiliaryConst2ZAndREqConstUpdate":
     elif ut_name == "AuxiliaryConst2ZAndREqConstUpdate" or ut_name == "AuxiliaryConst2MobileXEqConstUpdate":
         ut_update_auxiliary_constraint.ut_auxiliary_constraint(
             ut_name, NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS, NUM_MOBILE_TX_LOCS, ALPHA, FILTERING_FLAG, connectivity_mobile_tx)

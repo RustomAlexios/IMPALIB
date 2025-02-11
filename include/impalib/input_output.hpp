@@ -523,13 +523,6 @@ inline void InputsMOBARP::process_inputs(impalib_type *pFixed_x_eq_const_to_fixe
         copy(pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY + numMobileTxLocs_ * i, pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY + numMobileTxLocs_ * (i + 1), ConxMobTxPerNumMobTxLocs[i].begin());
     }
 
-    // for (int i=0; i< numMobileTx_; i++){
-    //     MobileTxCosts.push_back(vector<vector<impalib_type>>(numBands_, vector<impalib_type>(numTimeSteps_, 0)));
-    //     for (int j=0; j< numBands_; j++){
-    //         copy(pMOBILE_X_COSTS_PY + numTimeSteps_ * j + numBands_*numTimeSteps_*i, pMOBILE_X_COSTS_PY + numTimeSteps_ * (j + 1) + numBands_*numTimeSteps_*i, MobileTxCosts[i][j].begin());
-    //     }
-    // }
-
     for (int i=0; i< numFixedTx_; i++){
         FixedTxCosts.push_back(vector<vector<impalib_type>>(numBands_, vector<impalib_type>(numTimeSteps_, 0)));
         ConnectivityFixedTx.push_back(vector<vector<vector<int>>>(numBands_, vector<vector<int>>(numTimeSteps_, vector<int>(numRxLocs_, 0))));
@@ -543,15 +536,6 @@ inline void InputsMOBARP::process_inputs(impalib_type *pFixed_x_eq_const_to_fixe
             }
         }
     }
-
-    // for (int i=0; i< numFixedTx_; i++){
-    //     ConnectivityFixedTx.push_back(vector<vector<vector<int>>>(numBands_, vector<vector<int>>(numTimeSteps_, vector<int>(numRxLocs_, 0))));
-    //     for (int j=0; j<numBands_; j++){
-    //         for (int k=0; k< numTimeSteps_; k++){
-    //             copy(pCONNECTIVITY_FIXED_TX_PY + numRxLocs_*k + numRxLocs_*numTimeSteps_ * j + numRxLocs_*numBands_*numTimeSteps_*i, pCONNECTIVITY_FIXED_TX_PY + numRxLocs_*(k+1) + numRxLocs_*numTimeSteps_ * j + numRxLocs_*numBands_*numTimeSteps_*i, ConnectivityFixedTx[i][j][k].begin());
-    //     }
-    //     }
-    // }
 
     for (int n=0; n< numMobileTxLocs_; n++){
         ConnectivityMobileTx.push_back(vector<vector<vector<int>>>(numBands_, vector<vector<int>>(numTimeSteps_, vector<int>(numRxLocs_, 0))));
@@ -567,124 +551,32 @@ inline void InputsMOBARP::process_inputs(impalib_type *pFixed_x_eq_const_to_fixe
         copy(pR_eq_const_to_auxiliary_const_m_py + numBands_*numTimeSteps_ * i, pR_eq_const_to_auxiliary_const_m_py + numBands_*numTimeSteps_ * (i + 1), REqConst2AuxiliaryConstM[i].begin());
     }
 
-    // for (int i=0; i< numMobileTx_; i++){
-    //     MobileXEqConst2MobileCapacConstM.push_back(vector<vector<impalib_type>>(numBands_, vector<impalib_type>(numTimeSteps_, 0)));
-    //     for (int j=0; j< numBands_; j++){
-    //         copy(pMobile_x_eq_const_to_mobile_capac_const_m_py + numTimeSteps_ * j + numBands_*numTimeSteps_*i, pMobile_x_eq_const_to_mobile_capac_const_m_py + numTimeSteps_ * (j + 1) + numBands_*numTimeSteps_*i, MobileXEqConst2MobileCapacConstM[i][j].begin());
-    //     }
-    // }
-
-    // for (int i=0; i< numFixedTx_; i++){
-    //     FixedXEqConst2FixedCapacConstM.push_back(vector<vector<impalib_type>>(numBands_, vector<impalib_type>(numTimeSteps_, 0)));
-    //     for (int j=0; j< numBands_; j++){
-    //         copy(pFixed_x_eq_const_to_fixed_capac_const_m_py + numTimeSteps_ * j + numBands_*numTimeSteps_*i, pFixed_x_eq_const_to_fixed_capac_const_m_py + numTimeSteps_ * (j + 1) + numBands_*numTimeSteps_*i, FixedXEqConst2FixedCapacConstM[i][j].begin());
-    //     }
-    // }
-
     copy(pFIXED_CAPACITY_CONSTRAINTS_PY, pFIXED_CAPACITY_CONSTRAINTS_PY + numFixedTx_, back_inserter(FixedCapacConstraints));
 
     copy(pMOBILE_CAPACITY_CONSTRAINTS_PY, pMOBILE_CAPACITY_CONSTRAINTS_PY + numMobileTx_, back_inserter(MobileCapacConstraints));
-
-    // for (int i=0; i< numMobileTx_*numBands_*numTimeSteps_; i++){
-    //     ConxMobTxPerNumMobTxLocs.push_back(vector<int>(numMobileTxLocs_, 0));
-    //     copy(pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY + numMobileTxLocs_ * i, pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY + numMobileTxLocs_ * (i + 1), ConxMobTxPerNumMobTxLocs[i].begin());
-    // }
 
     for (int i=0; i< numFixedTx_*numBands_*numTimeSteps_; i++){
         ConxFixedTxPerNumRXLocs.push_back(vector<int>(numRxLocs_, 0));
         copy(pCONX_FIXED_TX_PER_NUM_RX_LOCS_PY + numRxLocs_ * i, pCONX_FIXED_TX_PER_NUM_RX_LOCS_PY + numRxLocs_ * (i + 1), ConxFixedTxPerNumRXLocs[i].begin());
     }
 
-    //self.conx_mob_tx_rx = np.concatenate([np.transpose(self.connectivity_mobile_tx, (2,3,0,1))]*self.num_mobile_tx, axis=3)
-
     for (int k=0; k< numTimeSteps_; k++){
         ConxMobTxRx.push_back(vector<vector<vector<int>>>(numRxLocs_, vector<vector<int>>(numMobileTxLocs_, vector<int>(numBands_*numMobileTx_, 0))));
         for (int l=0; l<numRxLocs_; l++){
             for (int n=0; n< numMobileTxLocs_; n++){
                 copy(pCONX_MOB_TX_RX_PY + numBands_*numMobileTx_*n + numBands_*numMobileTx_*numMobileTxLocs_*l + numBands_*numMobileTx_*numMobileTxLocs_*numRxLocs_*k, pCONX_MOB_TX_RX_PY + numBands_*numMobileTx_*(n+1) + numBands_*numMobileTx_*numMobileTxLocs_*l + numBands_*numMobileTx_*numMobileTxLocs_*numRxLocs_*k, ConxMobTxRx[k][l][n].begin());
-                // for (int j_i=0; j_i <numBands_*numMobileTx_; j_i++){
-                //     TransposedConxMobTxRx[j_i][l][k][n] = ConxMobTxRx[k][l][n][j_i];
-                // }
         }
         }
     }
 
-    // temp_connectivity_mobile_tx_rx = self.conx_mob_tx_rx.transpose(3, 1, 0, 2)
-    //need to add this expression here instead of update_equality_constraint.hpp: reshaped_temp_connectivity_mobile_tx_rx = np.array([temp_connectivity_mobile_tx_rx[:, i].flatten() for i in range(self.num_rx_locs)]).transpose()
-    
-    // for (int k=0; k< numTimeSteps_; k++){
-    //     for (int l=0; l<numRxLocs_; l++){
-    //         for (int n=0; n< numMobileTxLocs_; n++){
-    //             for (int j_i=0; j_i <numBands_*numMobileTx_; j_i++){
-    //                 TransposedConxMobTxRx[j_i][l][k][n] = ConxMobTxRx[k][l][n][j_i];
-    //             }
-    //         }
-    //     }
-    // }
-
-    //modelEqConstraint_.r_eq_const_activation
-    // vector<vector<vector<int>>> reshaped_1(numMobileTx_, vector<vector<int>>(numBands_*numTimeSteps_, vector<int>(numMobileTxLocs_, 0)));
-
     for (size_t i = 0; i < numMobileTx_; i++) {
         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
             for (size_t n = 0; n < numMobileTxLocs_; n++) {
-                // reshaped_1[i][j_k][n] = ConxMobTxPerNumMobTxLocs[i * numBands_ * numTimeSteps_ + j_k][n];
                 ConxMobTxR[i * numMobileTxLocs_ + n][j_k] = ConxMobTxPerNumMobTxLocs[i * numBands_ * numTimeSteps_+ j_k][n];
             }
         }
     }
 
-    // vector<vector<vector<int>>> reshaped_2(numMobileTx_, vector<vector<int>>(numMobileTxLocs_, vector<int>(numBands_*numTimeSteps_, 0)));
-
-
-    // for (size_t i = 0; i < numMobileTx_; i++) {
-    //     for (size_t n = 0; n < numMobileTxLocs_; n++) {
-    //         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-    //             // reshaped_2[i][n][j_k] = reshaped_1[i][j_k][n];
-    //             // ConxMobTxR[i * numMobileTxLocs_ + n][j_k] = reshaped_2[i][n][j_k];
-    //             ConxMobTxR[i * numMobileTxLocs_ + n][j_k] = reshaped_1[i][j_k][n];
-    //         }
-    //     }
-    // }
-
-    // for (size_t i = 0; i < numMobileTx_; i++) {
-    //     for (size_t n = 0; n < numMobileTxLocs_; n++) {
-    //         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-    //             ConxMobTxR[i * numMobileTxLocs_ + n][j_k] = reshaped_2[i][n][j_k];
-    //         }
-    //     }
-    // }
-
-    // temp_conx_mob_tx_rx = self.conx_mob_tx_rx.transpose(1,2,0,3)
-
-    // vector<vector<vector<vector<int>>>> swaped_temp_conx_mob_tx_rx(numBands_*numMobileTx_, vector<vector<vector<int>>>(numMobileTxLocs_, vector<vector<int>>(numTimeSteps_, vector<int>(numRxLocs_, 0))));
-
-    // for (int k=0; k< numTimeSteps_; k++){
-    //     for (int l=0; l<numRxLocs_; l++){
-    //         for (int n=0; n< numMobileTxLocs_; n++){
-    //             for (int j_i=0; j_i <numBands_*numMobileTx_; j_i++){
-    //                 TempConxMobTxRx[l][n][k][j_i] = ConxMobTxRx[k][l][n][j_i];
-    //                 swaped_temp_conx_mob_tx_rx[j_i][n][k][l] = TempConxMobTxRx[l][n][k][j_i];
-    //             }
-    //         }
-    //     }
-    // }
-    
-
-    //TempReshapedConxMobTxRx(vector<vector<int>>(NUM_MOBILE_TX_LOCS*NUM_BANDS*NUM_MOBILE_TX, vector<int>(NUM_RX_LOCS*NUM_TIME_STEPS, 0)))
-    // temp_reshaped_conx_mob_tx_rx = np.swapaxes(temp_conx_mob_tx_rx, 0, 3).reshape(-1,self.num_time_steps*self.num_rx_locs)
-
-    // vector<vector<vector<vector<int>>>> swaped_temp_conx_mob_tx_rx(numBands_*numMobileTx_, vector<vector<vector<int>>>(numMobileTxLocs_, vector<vector<int>>(numTimeSteps_, vector<int>(numRxLocs_, 0))));
-    
-    // for (int k=0; k< numTimeSteps_; k++){
-    //     for (int l=0; l<numRxLocs_; l++){
-    //         for (int n=0; n< numMobileTxLocs_; n++){
-    //             for (int j_i=0; j_i <numBands_*numMobileTx_; j_i++){
-    //                 swaped_temp_conx_mob_tx_rx[j_i][n][k][l] = TempConxMobTxRx[l][n][k][j_i];
-    //             }
-    //         }
-    //     }
-    // }
 
     for (int j_i = 0; j_i < numBands_*numMobileTx_; ++j_i) {
         for (int n = 0; n < numMobileTxLocs_; ++n) {
@@ -692,7 +584,6 @@ inline void InputsMOBARP::process_inputs(impalib_type *pFixed_x_eq_const_to_fixe
             int col_index = 0;
             for (int k = 0; k < numTimeSteps_; ++k) {
                 for (int l = 0; l < numRxLocs_; ++l) {
-                    // TempReshapedConxMobTxRx[row_index][col_index] = swaped_temp_conx_mob_tx_rx[j_i][n][k][l];
                     TempConxMobTxRx[l][n][k][j_i] = ConxMobTxRx[k][l][n][j_i];
                     TempReshapedConxMobTxRx[row_index][col_index] = TempConxMobTxRx[l][n][k][j_i];
                     ++col_index;
@@ -702,10 +593,6 @@ inline void InputsMOBARP::process_inputs(impalib_type *pFixed_x_eq_const_to_fixe
             }
         }
     }
-
-    //temp_reshaped_connectivity_fixed_tx = self.conx_fixed_tx_per_num_rx_locs.reshape(self.num_fixed_tx*self.num_bands, -1)
-    //use ConxFixedTxPerNumRXLocs(numFixedTx_*numBands_*numTimeSteps_, numRxLocs)
-    //TempReshapedConnectivityFixedTx(vector<vector<int>>(NUM_FIXED_TX*NUM_BANDS, vector<int>(NUM_TIME_STEPS*NUM_RX_LOCS, 0)))
 
     vector<int> flatData;
     for (const auto& row : ConxFixedTxPerNumRXLocs) {
@@ -768,20 +655,11 @@ inline vector<vector<impalib_type>> OutputsMOBARP::transpose_reshape(vector<vect
 
     vector<vector<impalib_type>> reshaped_matrix;
 
-    // for (int i = 0; i < numTimeSteps_; ++i) {
-    //     for (int j = 0; j < numRxLocs_; ++j) {
-    //         for (int k = 0; k < numFixedTx_*numBands_; ++k) {
-    //             transposed_matrix[k][i][j] = rSetCoverIneqConst2FixedXEqConstM[i][j][k];
-    //         }
-    //     }
-    // }
-
     for (int k = 0; k < numFixedTx_*numBands_; ++k) {
         for (int i = 0; i < numTimeSteps_; ++i) {
             vector<impalib_type> row;
             row.reserve(numRxLocs_);
             for (int j = 0; j < numRxLocs_; ++j) {
-                // row.push_back(transposed_matrix[k][i][j]);
                 row.push_back(rSetCoverIneqConst2FixedXEqConstM[i][j][k]);
             }
             reshaped_matrix.push_back(row);
@@ -816,8 +694,6 @@ inline void OutputsMOBARP::extrinsic_update(vector<vector<vector<impalib_type>>>
     }
     
 
-    // vector<impalib_type> temp_extrinsic_mobile_x(numMobileTx_*numBands_*numTimeSteps_, 0); //extrinsic mobile x
-
     for (int i=0; i<conx_rows_mobile.size(); i++) {
         impalib_type row_sum = 0;
         for (int j = 0; j < numMobileTxLocs_; j++) {
@@ -844,7 +720,6 @@ inline void OutputsMOBARP::extrinsic_update(vector<vector<vector<impalib_type>>>
         }
     }
 
-    // vector<impalib_type> temp_extrinsic_fixed_x(numFixedTx_*numBands_*numTimeSteps_, 0);
     vector<impalib_type> flattened_fixed_capac_const_to_fixed_x_eq_const_m;
 
     auto reshaped_set_cover_ineq_const_to_fixed_x_eq_const = transpose_reshape(rSetCoverIneqConst2FixedXEqConstM);
@@ -872,42 +747,15 @@ inline void OutputsMOBARP::extrinsic_update(vector<vector<vector<impalib_type>>>
         }
     }
 
-
-    // vector<vector<vector<impalib_type>>> reshaped_1(numMobileTx_, vector<vector<impalib_type>>(numBands_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0)));
     vector<vector<impalib_type>> reshaped_auxiliary_const_to_r_eq_const_m(numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0));
 
     for (size_t i = 0; i < numMobileTx_; i++) {
         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
             for (size_t n = 0; n < numMobileTxLocs_; n++) {
-                // reshaped_1[i][j_k][n] = rAuxiliaryConst2REqConstM[i * numBands_ * numTimeSteps_ + j_k][n];
                 reshaped_auxiliary_const_to_r_eq_const_m[i * numMobileTxLocs_ + n][j_k] = rAuxiliaryConst2REqConstM[i * numBands_ * numTimeSteps_ + j_k][n];
             }
         }
     }
-
-    // vector<vector<vector<impalib_type>>> reshaped_2(numMobileTx_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0)));
-
-
-    // for (size_t i = 0; i < numMobileTx_; i++) {
-    //     for (size_t n = 0; n < numMobileTxLocs_; n++) {
-    //         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-    //             reshaped_2[i][n][j_k] = reshaped_1[i][j_k][n];
-    //         }
-    //     }
-    // }
-
-    // vector<vector<impalib_type>> reshaped_auxiliary_const_to_r_eq_const_m(numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0));
-
-    // for (size_t i = 0; i < numMobileTx_; i++) {
-    //     for (size_t n = 0; n < numMobileTxLocs_; n++) {
-    //         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-    //             reshaped_auxiliary_const_to_r_eq_const_m[i * numMobileTxLocs_ + n][j_k] = reshaped_2[i][n][j_k];
-    //         }
-    //     }
-    // }
-
-
-    // vector<impalib_type> temp_extrinsic_r(numMobileTx_*numMobileTxLocs_, 0);
 
     vector<int> sums_conx_per_row(numMobileTx_*numMobileTxLocs_, 0);
     vector<int> conx_rows;
@@ -936,11 +784,6 @@ inline void OutputsMOBARP::extrinsic_update(vector<vector<vector<impalib_type>>>
         ExtrinsicR[conx_rows[i]] = sum_elements + flattened_mobile_loc_eq_const_to_r_eq_const_m[conx_rows[i]];
     }
 
-
-    // vector<vector<impalib_type>> reshaped_set_cover_ineq_const_to_z_eq_const_m(numBands_*numMobileTx_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0));
-
-    // vector<vector<impalib_type>> temp_extrinsic_z(reshaped_set_cover_ineq_const_to_z_eq_const_m);
-
     for (int j_i=0; j_i< numBands_*numMobileTx_; j_i++){
         for (int k=0; k< numTimeSteps_; k++){
             for (int n=0; n< numMobileTxLocs_; n++){
@@ -950,45 +793,10 @@ inline void OutputsMOBARP::extrinsic_update(vector<vector<vector<impalib_type>>>
                         temp_sum += rSetCoverIneqConst2ZEqConstM[k][l][n][j_i];
                     }
                 }
-            // reshaped_set_cover_ineq_const_to_z_eq_const_m[j_i*numTimeSteps_ + k][n] =  temp_sum;
             ExtrinsicZ[j_i*numTimeSteps_ + k][n] = temp_sum + rAuxiliaryConst2ZEqConstM[j_i*numTimeSteps_ + k][n];
             }
         }
     }
-
-
-    // fstream file_output_1("./ut_results/extrinsic_fixed_x_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_1.is_open()) {
-    //     for (int i=0; i<ExtrinsicFixedX.size(); i++){
-    //         file_output_1.write((char*)(&ExtrinsicFixedX[i]), sizeof(ExtrinsicFixedX[i]));}
-    //         file_output_1.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // fstream file_output_2("./ut_results/extrinsic_mobile_x_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_2.is_open()) {
-    //     for (int i=0; i<ExtrinsicMobileX.size(); i++){
-    //         file_output_2.write((char*)(&ExtrinsicMobileX[i]), sizeof(ExtrinsicMobileX[i]));}
-    //         file_output_2.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // fstream file_output_3("./ut_results/extrinsic_r_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_3.is_open()) {
-    //     for (int i=0; i<ExtrinsicR.size(); i++){
-    //         file_output_3.write((char*)(&ExtrinsicR[i]), sizeof(ExtrinsicR[i]));}
-    //         file_output_3.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // fstream file_output_4("./ut_results/extrinsic_z_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_4.is_open()) {
-    //     for (int i=0; i<ExtrinsicZ.size(); i++){
-    //     for (int j=0; j<ExtrinsicZ[0].size(); j++){
-    //         file_output_4.write((char*)(&ExtrinsicZ[i][j]), sizeof(ExtrinsicZ[i][j]));}}
-    //         file_output_4.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
 
 }
 

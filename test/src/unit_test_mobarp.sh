@@ -6,7 +6,7 @@
 
 echo "Unit Tests"
 
-declare -i total_sub_tests=1
+declare -i total_sub_tests=10
 
 NUM_FIXED_TX=7
 NUM_MOBILE_TX=3

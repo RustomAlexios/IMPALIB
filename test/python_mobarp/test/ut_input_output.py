@@ -13,14 +13,6 @@ from ut_utils import *
 def ut_io(ut_name, num_fixed_tx, num_mobile_tx, num_bands, num_time_steps, num_rx_locs, num_mobile_tx_locs, exclude_cap_flag,
             fixed_x_costs, mobile_x_costs, connectivity_fixed_tx, connectivity_mobile_tx, r_costs, z_costs,):
     
-    # NUM_VARIABLES = n_variables
-    # NUM_CONSTRAINTS = n_constraints
-
-    # f_input1 = os.getcwd() + "/../ut_inputs/ksat_constraint_to_eq_constraint_m_pure.npy"
-    # ksat_constraint_to_eq_constraint_m_pure = np.random.uniform(10, 500, size=(NUM_CONSTRAINTS, NUM_VARIABLES))
-    # ksat_constraint_to_eq_constraint_m_pure = ksat_constraint_to_eq_constraint_m_pure.astype(np_impa_lib)
-    # np.save(f_input1, ksat_constraint_to_eq_constraint_m_pure.flatten())
-    
     NUM_FIXED_TX = num_fixed_tx
     NUM_MOBILE_TX = num_mobile_tx
     NUM_BANDS = num_bands
@@ -55,17 +47,14 @@ def ut_io(ut_name, num_fixed_tx, num_mobile_tx, num_bands, num_time_steps, num_r
                                         connectivity_mobile_tx, connectivity_fixed_tx, 
                                         EXCLUDE_CAP_FLAG)
     
-    # conx_mob_tx_per_num_mob_tx_locs = np.vstack([np.clip(np.sum(connectivity_mobile_tx, axis=3).transpose(1,2,0).reshape(-1, num_mobile_tx_locs), 0, 1)] * num_mobile_tx)
     f_input6 = os.getcwd() + "/../ut_inputs/conx_mob_tx_per_num_mob_tx_locs.npy"
     conx_mob_tx_per_num_mob_tx_locs = outputs.conx_mob_tx_per_num_mob_tx_locs.astype(np.int32)
     np.save(f_input6, conx_mob_tx_per_num_mob_tx_locs.flatten())
     
-    # conx_fixed_tx_per_num_rx_locs =  connectivity_fixed_tx.reshape(-1, num_rx_locs)
     f_input7 = os.getcwd() + "/../ut_inputs/conx_fixed_tx_per_num_rx_locs.npy"
     conx_fixed_tx_per_num_rx_locs = outputs.conx_fixed_tx_per_num_rx_locs.astype(np.int32)
     np.save(f_input7, conx_fixed_tx_per_num_rx_locs.flatten())
     
-    # conx_mob_tx_rx = np.concatenate([np.transpose(connectivity_mobile_tx, (2,3,0,1))]*num_mobile_tx, axis=3)
     f_input8 = os.getcwd() + "/../ut_inputs/conx_mob_tx_rx.npy"
     conx_mob_tx_rx = outputs.conx_mob_tx_rx.astype(np.int32)
     np.save(f_input8, conx_mob_tx_rx.flatten())
@@ -119,11 +108,6 @@ def ut_io(ut_name, num_fixed_tx, num_mobile_tx, num_bands, num_time_steps, num_r
                             auxiliary_const_to_mobile_x_eq_const_m_pure, set_cover_ineq_const_to_fixed_x_eq_const_m_pure, 
                             auxiliary_const_to_r_eq_const_m_pure, mobile_loc_eq_const_to_r_eq_const_m_pure, 
                             auxiliary_const_to_z_eq_const_m_pure, set_cover_ineq_const_to_z_eq_const_m_pure)
-        
-        # f_output_path = os.getcwd() + "/../ut_results/extrinsic_output_variable_ec_pure"
-        # output_file_python_pure = open(f_output_path, "wb")
-        # np.save(output_file_python_pure, extrinsic_output_variable_ec_pure.flatten(), allow_pickle=True)
-        # output_file_python_pure.close()
         
         f_output_1 = os.getcwd() + "/../ut_results/extrinsic_fixed_x_pure"
         output_file_1 = open(f_output_1, "wb")

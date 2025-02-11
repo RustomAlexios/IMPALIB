@@ -1047,138 +1047,59 @@ inline void GraphicalModelMOBARP::initialize(impalib_type *pFixed_x_eq_const_to_
                                             const impalib_type *pZ_COSTS_PY, const impalib_type *pR_COSTS_PY, const int *pCONNECTIVITY_FIXED_TX_PY,
                                             const int *pCONNECTIVITY_MOBILE_TX_PY, const int* pFIXED_CAPACITY_CONSTRAINTS_PY, const int* pMOBILE_CAPACITY_CONSTRAINTS_PY,
                                             const int *pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY, const int * pCONX_FIXED_TX_PER_NUM_RX_LOCS_PY, const int *pCONX_MOB_TX_RX_PY) {
-    /// calls a method process_inputs() on an object modelInputs_, passing
-    /// several pointers to Python objects as arguments
-
-    // auto start_1 = chrono::high_resolution_clock::now();
 
     modelInputs_.process_inputs(pFixed_x_eq_const_to_fixed_capac_const_m_py, pMobile_x_eq_const_to_mobile_capac_const_m_py, pR_eq_const_to_auxiliary_const_m_py, pFIXED_X_COSTS_PY, 
                                 pMOBILE_X_COSTS_PY, pZ_COSTS_PY, pR_COSTS_PY, pCONNECTIVITY_FIXED_TX_PY, pCONNECTIVITY_MOBILE_TX_PY, pFIXED_CAPACITY_CONSTRAINTS_PY, pMOBILE_CAPACITY_CONSTRAINTS_PY,
                                 pCONX_MOB_TX_PER_NUM_MOB_TX_LOCS_PY, pCONX_FIXED_TX_PER_NUM_RX_LOCS_PY, pCONX_MOB_TX_RX_PY);
-    // auto end_1 = chrono::high_resolution_clock::now();
-    // chrono::duration<double> elapsed_1 = end_1 - start_1;
-    // cout << "Execution time process_inputs: " << elapsed_1.count() << " seconds\n";
 }
 
 
 inline void GraphicalModelMOBARP::iterate() {
     for (int iter = 0; iter < numIterations_; iter++) {
-        // cout<<"-------------\n";
+
         if (!(excludeCapFlag_)){
-            // auto start_1 = chrono::high_resolution_clock::now();
             modelIneqConstraint_.ineq_capac_const_update(modelInputs_.FixedXEqConst2FixedCapacConstM, modelInputs_.MobileXEqConst2MobileCapacConstM, 
                                                         modelInputs_.FixedCapacConstraints, modelInputs_.MobileCapacConstraints, FixedCapacConst2FixedXEqConstDummyM_, MobileCapacConst2MobileXEqConstDummyM_);
-            // auto end_1 = chrono::high_resolution_clock::now();
-            // chrono::duration<double> elapsed_1 = end_1 - start_1;
-            // cout << "Execution time ineq_capac_const_update: " << elapsed_1.count() << " seconds\n";
-
-            // auto start_2 = chrono::high_resolution_clock::now();
             modelIneqConstraint_.process_filtering(iter, FixedCapacConst2FixedXEqConstDummyM_, MobileCapacConst2MobileXEqConstDummyM_, FixedCapacConst2FixedXEqConstM_, MobileCapacConst2MobileXEqConstM_);
-            // auto end_2 = chrono::high_resolution_clock::now();
-            // chrono::duration<double> elapsed_2 = end_2 - start_2;
-            // cout << "Execution time process_filtering ineq_capac_const_update: " << elapsed_2.count() << " seconds\n";
         }
 
-
-        // auto start_3 = chrono::high_resolution_clock::now();
         modelEqConstraint_.x_eq_const_to_auxiliary_and_set_cover_const_update(FixedCapacConst2FixedXEqConstM_, MobileCapacConst2MobileXEqConstM_,
                                                         AuxiliaryConst2MobileXEqConstM_, SetCoverIneqConst2FixedXEqConstM_, modelInputs_.FixedTxCosts, modelInputs_.MobileTxCosts,
                                                         modelInputs_.ConxMobTxPerNumMobTxLocs, MobileXEqConst2AuxiliaryConstM_, modelInputs_.ConxFixedTxPerNumRXLocs,
                                                         FixedXEqConst2SetCoverConstM_);
-        // auto end_3 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_3 = end_3 - start_3;
-        // cout << "Execution time x_eq_const_to_auxiliary_and_set_cover_const_update: " << elapsed_3.count() << " seconds\n";
         
-        // // void auxiliary_const_to_z_eq_const_update(vector<vector<impalib_type>> &, vector<vector<impalib_type>>&, vector<vector<impalib_type>>&, vector<vector<int>> &) const;
-        // modelAuxConstraint_.auxiliary_const_to_z_eq_const_update(MobileXEqConst2AuxiliaryConstM_, modelInputs_.REqConst2AuxiliaryConstM, AuxiliaryConst2ZEqConstM_, modelInputs_.ConxMobTxPerNumMobTxLocs);
-        
-        // // void auxiliary_const_to_r_eq_const_update(vector<vector<impalib_type>>&, vector<vector<impalib_type>> &, vector<vector<int>> &, vector<vector<impalib_type>> &) const;
-        // modelAuxConstraint_.auxiliary_const_to_r_eq_const_update(ZEqConst2AuxiliaryConstM_, MobileXEqConst2AuxiliaryConstM_, modelInputs_.ConxMobTxPerNumMobTxLocs, AuxiliaryConst2REqConstM_);
-
-        // auto start_4 = chrono::high_resolution_clock::now();
         modelAuxConstraint_.auxiliary_const_to_z_and_r_eq_const_update(ZEqConst2AuxiliaryConstM_, MobileXEqConst2AuxiliaryConstM_,
                                 modelInputs_.ConxMobTxPerNumMobTxLocs, modelInputs_.REqConst2AuxiliaryConstM, AuxiliaryConst2ZEqConstM_, AuxiliaryConst2REqConstM_);
-        // auto end_4 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_4 = end_4 - start_4;
-        // cout << "Execution time auxiliary_const_to_z_and_r_eq_const_update: " << elapsed_4.count() << " seconds\n";
 
-        // // auto end_2 = chrono::high_resolution_clock::now();
-        // // chrono::duration<double> elapsed_2 = end_2 - start_2;
-        // // cout << "Execution time optimized: " << elapsed_2.count() << " seconds\n";
-
-        // auto start_5 = chrono::high_resolution_clock::now();
         modelEqConstraint_.z_eq_const_to_set_cover_ineq_const_update(AuxiliaryConst2ZEqConstM_, SetCoverIneqConst2ZEqConstM_, ZEqConst2SetCoverIneqConstM_, modelInputs_.TransposedConxMobTxRx, modelInputs_.ZCosts);
-        // auto end_5 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_5 = end_5 - start_5;
-        // cout << "Execution time z_eq_const_to_set_cover_ineq_const_update: " << elapsed_5.count() << " seconds\n";
 
-        // auto start_6 = chrono::high_resolution_clock::now();
         modelEqConstraint_.r_eq_const_activation(AuxiliaryConst2REqConstM_, MobileLocEqConst2REqConstM_, modelInputs_.REqConst2AuxiliaryConstM,
                                                     REqConst2MobileLocEqConstM_, modelInputs_.ConxMobTxR, modelInputs_.RCosts);
-        // auto end_6 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_6 = end_6 - start_6;
-        // cout << "Execution time r_eq_const_activation: " << elapsed_6.count() << " seconds\n";
 
-        // auto start_7 = chrono::high_resolution_clock::now();
         modelIneqConstraint_.mobile_loc_eq_const_to_r_eq_const_update(REqConst2MobileLocEqConstM_, MobileLocEqConst2REqConstDummyM_);
-        // auto end_7 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_7 = end_7 - start_7;
-        // cout << "Execution time mobile_loc_eq_const_to_r_eq_const_update: " << elapsed_7.count() << " seconds\n";
 
-        // auto start_8 = chrono::high_resolution_clock::now();
         modelIneqConstraint_.process_filtering_mobile_loc_eq(iter, MobileLocEqConst2REqConstDummyM_, MobileLocEqConst2REqConstM_);
-        // auto end_8 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_8 = end_8 - start_8;
-        // cout << "Execution time process_filtering_mobile_loc_eq: " << elapsed_8.count() << " seconds\n";
 
-        // auto start_9 = chrono::high_resolution_clock::now();
         modelIneqConstraint_.set_cover_ineq_const_update(ZEqConst2SetCoverIneqConstM_, FixedXEqConst2SetCoverConstM_, modelInputs_.TempConxMobTxRx,
                                                    modelInputs_.TempReshapedConnectivityFixedTx, modelInputs_.TempReshapedConxMobTxRx, SetCoverIneqConst2FixedXEqConstDummyM_,
                                                    SetCoverIneqConst2ZEqConstDummyM_);
-        // auto end_9 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_9 = end_9 - start_9;
-        // cout << "Execution time set_cover_ineq_const_update: " << elapsed_9.count() << " seconds\n";
 
-        // auto start_10 = chrono::high_resolution_clock::now();
         modelIneqConstraint_.process_filtering_set_cover_const(iter,SetCoverIneqConst2FixedXEqConstDummyM_, SetCoverIneqConst2ZEqConstDummyM_, SetCoverIneqConst2FixedXEqConstM_, SetCoverIneqConst2ZEqConstM_);
-        // auto end_10 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_10 = end_10 - start_10;
-        // cout << "Execution time process_filtering_set_cover_const: " << elapsed_10.count() << " seconds\n";
 
-        // auto start_11 = chrono::high_resolution_clock::now();
         modelEqConstraint_.z_eq_const_to_auxiliary_const_update(SetCoverIneqConst2ZEqConstM_, modelInputs_.ConxMobTxRx, modelInputs_.ConxMobTxPerNumMobTxLocs, ZEqConst2AuxiliaryConstM_, modelInputs_.ZCosts);
-        // auto end_11 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_11 = end_11 - start_11;
-        // cout << "Execution time z_eq_const_to_auxiliary_const_update: " << elapsed_11.count() << " seconds\n";
 
-        // auto start_12 = chrono::high_resolution_clock::now();
         modelAuxConstraint_.auxiliary_const_to_mobile_x_eq_const_update(ZEqConst2AuxiliaryConstM_, modelInputs_.REqConst2AuxiliaryConstM, modelInputs_.ConxMobTxPerNumMobTxLocs, AuxiliaryConst2MobileXEqConstM_);
-        // auto end_12 = chrono::high_resolution_clock::now();
-        // chrono::duration<double> elapsed_12 = end_12 - start_12;
-        // cout << "Execution time auxiliary_const_to_mobile_x_eq_const_update: " << elapsed_12.count() << " seconds\n";
 
         
         if (!(excludeCapFlag_)){
-            // auto start_13 = chrono::high_resolution_clock::now();
             modelEqConstraint_.x_eq_const_activation(AuxiliaryConst2MobileXEqConstM_, SetCoverIneqConst2FixedXEqConstM_, modelInputs_.MobileXEqConst2MobileCapacConstM, modelInputs_.FixedXEqConst2FixedCapacConstM,
                                                     modelInputs_.ConxMobTxPerNumMobTxLocs, modelInputs_.ConxFixedTxPerNumRXLocs, modelInputs_.MobileTxCosts, modelInputs_.FixedTxCosts);
-            // auto end_13 = chrono::high_resolution_clock::now();
-            // chrono::duration<double> elapsed_13 = end_13 - start_13;
-            // cout << "Execution time x_eq_const_activation: " << elapsed_13.count() << " seconds\n";
         }
 
     }
-
-    // auto start_14 = chrono::high_resolution_clock::now();
-    // /// process outputs of MOBARP problem
     outputs.extrinsic_update(FixedCapacConst2FixedXEqConstM_, MobileCapacConst2MobileXEqConstM_, AuxiliaryConst2MobileXEqConstM_, SetCoverIneqConst2FixedXEqConstM_, AuxiliaryConst2REqConstM_,
                             MobileLocEqConst2REqConstM_, AuxiliaryConst2ZEqConstM_, SetCoverIneqConst2ZEqConstM_, modelInputs_.ConxMobTxPerNumMobTxLocs, modelInputs_.ConxFixedTxPerNumRXLocs,
                             modelInputs_.ConxMobTxRx, modelInputs_.ConxMobTxR);
-    // auto end_14 = chrono::high_resolution_clock::now();
-    // chrono::duration<double> elapsed_14 = end_14 - start_14;
-    // cout << "Execution time extrinsic_update: " << elapsed_14.count() << " seconds\n";
-    // cout<<"-------------\n";
-    // exit(0);
 }
 
 

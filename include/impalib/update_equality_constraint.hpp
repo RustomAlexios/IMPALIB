@@ -380,18 +380,7 @@ inline void EqualityConstraint::x_eq_const_to_auxiliary_and_set_cover_const_upda
 
     vector<impalib_type> flattened_mobile_tx_costs;
 
-    // for (const auto& matrix : rMobileTxCosts) {
-    //     for (const auto& row : matrix) {
-    //         flattened_mobile_tx_costs.insert(flattened_mobile_tx_costs.end(), row.begin(), row.end());
-    //     }
-    // }
     std::vector<impalib_type> flattened_mobile_capac_const_2_mobile_x_eq_const;
-
-    // for (const auto& matrix : rMobileCapacConst2MobileXEqConstM) {
-    //     for (const auto& row : matrix) {
-    //         flattened_mobile_capac_const_2_mobile_x_eq_const.insert(flattened_mobile_capac_const_2_mobile_x_eq_const.end(), row.begin(), row.end());
-    //     }
-    // }
 
     for (int i=0; i<numMobileTx_; i++){
         for (int j=0; j<numBands_; j++){
@@ -434,16 +423,6 @@ inline void EqualityConstraint::x_eq_const_to_auxiliary_and_set_cover_const_upda
 
     }
 
-    // cout << "Matrix rMobileXEqConst2AuxiliaryConstM_:" << "\n";
-    // for (int i = 0; i < rMobileXEqConst2AuxiliaryConstM_.size(); i++) {
-    //     for (int n = 0; n < rMobileXEqConst2AuxiliaryConstM_[i].size(); n++) {
-    //         cout << rMobileXEqConst2AuxiliaryConstM_[i][n] << " ";
-    //     }
-    //     cout << "\n";
-    // }
-
-
-
     vector<impalib_type> sums_fixed_x_eq_const(numFixedTx_*numBands_*numTimeSteps_, 0);
 
     vector<int> sums_fixed_conx_per_row(rConxFixedTxPerNumRXLocs.size(), 0);
@@ -451,18 +430,7 @@ inline void EqualityConstraint::x_eq_const_to_auxiliary_and_set_cover_const_upda
 
     vector<impalib_type> flattened_fixed_tx_costs;
 
-    // for (const auto& matrix : rFixedTxCosts) {
-    //     for (const auto& row : matrix) {
-    //         flattened_fixed_tx_costs.insert(flattened_fixed_tx_costs.end(), row.begin(), row.end());
-    //     }
-    // }
     std::vector<impalib_type> flattened_fixed_capac_const_2_fixed_x_eq_const;
-
-    // for (const auto& matrix : rFixedCapacConst2FixedXEqConstM) {
-    //     for (const auto& row : matrix) {
-    //         flattened_fixed_capac_const_2_fixed_x_eq_const.insert(flattened_fixed_capac_const_2_fixed_x_eq_const.end(), row.begin(), row.end());
-    //     }
-    // }
 
     for (int i=0; i<numFixedTx_; i++){
         for (int j=0; j<numBands_; j++){
@@ -506,33 +474,6 @@ inline void EqualityConstraint::x_eq_const_to_auxiliary_and_set_cover_const_upda
 
     }
 
-    // cout << "Matrix rFixedXEqConst2SetCoverConstM_:" << "\n";
-    // for (int i = 0; i < rFixedXEqConst2SetCoverConstM_.size(); i++) {
-    //     for (int l = 0; l < rFixedXEqConst2SetCoverConstM_[i].size(); l++) {
-    //         cout << rFixedXEqConst2SetCoverConstM_[i][l] << " ";
-    //     }
-    //     cout << "\n";
-    // }
-    // exit(0);
-
-    // fstream file_output_1("./ut_results/rFixedXEqConst2SetCoverConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_1.is_open()) {
-    //     for (int i=0; i<rFixedXEqConst2SetCoverConstM.size(); i++){
-    //     for (int j=0; j<rFixedXEqConst2SetCoverConstM[0].size(); j++){
-    //         file_output_1.write((char*)(&rFixedXEqConst2SetCoverConstM[i][j]), sizeof(rFixedXEqConst2SetCoverConstM[i][j]));}}
-    //         file_output_1.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // fstream file_output_2("./ut_results/rMobileXEqConst2AuxiliaryConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_2.is_open()) {
-    //     for (int i=0; i<rMobileXEqConst2AuxiliaryConstM.size(); i++){
-    //     for (int j=0; j<rMobileXEqConst2AuxiliaryConstM[0].size(); j++){
-    //         file_output_2.write((char*)(&rMobileXEqConst2AuxiliaryConstM[i][j]), sizeof(rMobileXEqConst2AuxiliaryConstM[i][j]));}}
-    //         file_output_2.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
 }
 
 
@@ -543,20 +484,11 @@ inline vector<vector<impalib_type>> EqualityConstraint::transpose_reshape(vector
 
     vector<vector<impalib_type>> reshaped_matrix;
 
-    // for (int i = 0; i < numTimeSteps_; ++i) {
-    //     for (int j = 0; j < numRxLocs_; ++j) {
-    //         for (int k = 0; k < numFixedTx_*numBands_; ++k) {
-    //             transposed_matrix[k][i][j] = rSetCoverIneqConst2FixedXEqConstM[i][j][k];
-    //         }
-    //     }
-    // }
-
     for (int k = 0; k < numFixedTx_*numBands_; ++k) {
         for (int i = 0; i < numTimeSteps_; ++i) {
             vector<impalib_type> row;
             row.reserve(numRxLocs_);
             for (int j = 0; j < numRxLocs_; ++j) {
-                // row.push_back(transposed_matrix[k][i][j]);
                 row.push_back(rSetCoverIneqConst2FixedXEqConstM[i][j][k]);
             }
             reshaped_matrix.push_back(row);
@@ -569,20 +501,6 @@ inline vector<vector<impalib_type>> EqualityConstraint::transpose_reshape(vector
 inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector<vector<impalib_type>>& rAuxiliaryConst2ZEqConstM, 
                                 vector<vector<vector<vector<impalib_type>>>>& rSetCoverIneqConst2ZEqConstM, vector<vector<impalib_type>>& rZEqConst2SetCoverIneqConstM,
                                 vector<vector<vector<vector<int>>>>& rTransposedConxMobTxRx, vector<vector<impalib_type>>& rZcosts) const{
-        
-        // vector<vector<vector<vector<impalib_type>>>> temp_set_cover_ineq_const_to_z_eq_const_m(numMobileTx_*numBands_, vector<vector<vector<impalib_type>>>(numRxLocs_, vector<vector<impalib_type>>(numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0))));
-
-        // for (size_t k = 0; k < numTimeSteps_; k++)
-        // {
-        //     for (size_t l = 0; l < numRxLocs_; l++){
-        //         for (size_t n = 0; n < numMobileTxLocs_; n++)
-        //         {
-        //             for (size_t j_i = 0; j_i < numMobileTx_*numBands_; j_i++){
-        //                 temp_set_cover_ineq_const_to_z_eq_const_m[j_i][l][k][n] = rSetCoverIneqConst2ZEqConstM[k][l][n][j_i];
-        //             }   
-        //         }
-        //     }
-        // }
 
         vector<vector<impalib_type>> reshaped_set_cover_ineq_const_to_z_eq_const_m;
         vector<vector<int>> reshaped_connectivity_mobile_tx_rx;
@@ -593,7 +511,6 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
             for (size_t j_i =0; j_i< numMobileTx_*numBands_; j_i++){
                 for (size_t k=0; k<numTimeSteps_; k++){
                     for (size_t n=0; n<numMobileTxLocs_; n++){
-                        // flattened.push_back(temp_set_cover_ineq_const_to_z_eq_const_m[j_i][l][k][n]);
                         flattened.push_back(rSetCoverIneqConst2ZEqConstM[k][l][n][j_i]);
                         flattened_conx.push_back(rTransposedConxMobTxRx[j_i][l][k][n]);
                     }
@@ -603,13 +520,10 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
             reshaped_connectivity_mobile_tx_rx.push_back(flattened_conx);
         }
 
-
-    // vector<vector<impalib_type>> transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m(numMobileTx_*numBands_*numTimeSteps_*numMobileTxLocs_, vector<impalib_type>(numRxLocs_, 0));
     vector<vector<int>> transposed_reshaped_connectivity_mobile_tx_rx(numMobileTx_*numBands_*numTimeSteps_*numMobileTxLocs_, vector<int>(numRxLocs_, 0));
 
     for (size_t i = 0; i < numRxLocs_; ++i) {
         for (size_t j = 0; j < numMobileTx_*numBands_*numTimeSteps_*numMobileTxLocs_; ++j) {
-            // transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[j][i] = reshaped_set_cover_ineq_const_to_z_eq_const_m[i][j];
             transposed_reshaped_connectivity_mobile_tx_rx[j][i] = reshaped_connectivity_mobile_tx_rx[i][j];
         }
     }
@@ -642,7 +556,6 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
         
         for (size_t l = 0; l < numRxLocs_; l++) {
             if (transposed_reshaped_connectivity_mobile_tx_rx[conx_rows[i]][l] == 1) {
-                // sum_elements += transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[conx_rows[i]][l];
                 sum_elements += reshaped_set_cover_ineq_const_to_z_eq_const_m[l][conx_rows[i]];
             }
         }
@@ -654,63 +567,21 @@ inline void EqualityConstraint::z_eq_const_to_set_cover_ineq_const_update(vector
     for (int i=0; i<conx_rows.size(); i++){
         for (int l = 0; l< numRxLocs_; l++){
             if (transposed_reshaped_connectivity_mobile_tx_rx[conx_rows[i]][l] == 1){
-                // rZEqConst2SetCoverIneqConstM[conx_rows[i]][l] = sums_z_eq_const[conx_rows[i]] - transposed_reshaped_set_cover_ineq_const_to_z_eq_const_m[conx_rows[i]][l];
                 rZEqConst2SetCoverIneqConstM[conx_rows[i]][l] = sums_z_eq_const[conx_rows[i]] - reshaped_set_cover_ineq_const_to_z_eq_const_m[l][conx_rows[i]];
             }
     }
     }
-
-    // cout << "rZEqConst2SetCoverIneqConstM_ elements:" << "\n";
-    // for (size_t i = 0; i < conx_rows.size(); ++i) {
-    //     for (size_t l = 0; l < numRxLocs_; ++l) {
-    //         cout << setw(10)<<rZEqConst2SetCoverIneqConstM_[conx_rows[i]][l] << " ";
-    //     }
-    //     cout << "\n";
-    // }
-
-    // fstream file_output_1("./ut_results/rZEqConst2SetCoverIneqConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_1.is_open()) {
-    //     for (int i=0; i<rZEqConst2SetCoverIneqConstM.size(); i++){
-    //     for (int j=0; j<rZEqConst2SetCoverIneqConstM[0].size(); j++){
-    //         file_output_1.write((char*)(&rZEqConst2SetCoverIneqConstM[i][j]), sizeof(rZEqConst2SetCoverIneqConstM[i][j]));}}
-    //         file_output_1.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
 
 }
 
 inline void EqualityConstraint::r_eq_const_activation(vector<vector<impalib_type>> & rAuxiliaryConst2REqConstM, vector<vector<impalib_type>> & rMobileLocEqConst2REqConstM, vector<vector<impalib_type>> & rREqConst2AuxiliaryConstM,
                                            vector<vector<impalib_type>> & rREqConst2MobileLocEqConstM, vector<vector<int>> &rConxMobTxR, vector<vector<impalib_type>> & rRCosts) const {
 
-    
-    // vector<vector<vector<impalib_type>>> reshaped_1(numMobileTx_, vector<vector<impalib_type>>(numBands_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0)));
-
-    // for (size_t i = 0; i < numMobileTx_; i++) {
-    //     for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-    //         for (size_t n = 0; n < numMobileTxLocs_; n++) {
-    //             reshaped_1[i][j_k][n] = rAuxiliaryConst2REqConstM[i * numBands_ * numTimeSteps_ + j_k][n];
-    //         }
-    //     }
-    // }
-
-    // vector<vector<vector<impalib_type>>> reshaped_2(numMobileTx_, vector<vector<impalib_type>>(numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0)));
-
-
-    // for (size_t i = 0; i < numMobileTx_; i++) {
-    //     for (size_t n = 0; n < numMobileTxLocs_; n++) {
-    //         for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-    //             reshaped_2[i][n][j_k] = reshaped_1[i][j_k][n];
-    //         }
-    //     }
-    // }
-
     vector<vector<impalib_type>> reshaped_auxiliary_const_to_r_eq_const_m(numMobileTx_*numMobileTxLocs_, vector<impalib_type>(numBands_*numTimeSteps_, 0));
 
     for (size_t i = 0; i < numMobileTx_; i++) {
         for (size_t n = 0; n < numMobileTxLocs_; n++) {
             for (size_t j_k = 0; j_k < numBands_ * numTimeSteps_; j_k++) {
-                // reshaped_auxiliary_const_to_r_eq_const_m[i * numMobileTxLocs_ + n][j_k] = reshaped_2[i][n][j_k];
                 reshaped_auxiliary_const_to_r_eq_const_m[i * numMobileTxLocs_ + n][j_k] = rAuxiliaryConst2REqConstM[i * numBands_ * numTimeSteps_ + j_k][n];
             }
         }
@@ -760,23 +631,6 @@ inline void EqualityConstraint::r_eq_const_activation(vector<vector<impalib_type
     }
     }
 
-    // fstream file_output_1("./ut_results/rREqConst2AuxiliaryConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_1.is_open()) {
-    //     for (int i=0; i<rREqConst2AuxiliaryConstM.size(); i++){
-    //     for (int j=0; j<rREqConst2AuxiliaryConstM[0].size(); j++){
-    //         file_output_1.write((char*)(&rREqConst2AuxiliaryConstM[i][j]), sizeof(rREqConst2AuxiliaryConstM[i][j]));}}
-    //         file_output_1.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // cout << "rREqConst2AuxiliaryConstM_:" << "\n";
-    // for (size_t i = 0; i < numMobileTx_*numMobileTxLocs_; ++i) {
-    //     for (size_t j = 0; j < numBands_*numTimeSteps_; ++j) {
-    //         cout << setw(8) << rREqConst2AuxiliaryConstM_[i][j] << " ";
-    //     }
-    //     cout << "\n";
-    // }
-
     vector<impalib_type> flattened_r_eq_const_to_mobile_loc_eq_const_m(numMobileTx_*numMobileTxLocs_, 0);
     
     for (size_t i=0; i<numMobileTx_*numMobileTxLocs_; i++){
@@ -795,30 +649,11 @@ inline void EqualityConstraint::r_eq_const_activation(vector<vector<impalib_type
         }
     }
 
-    // fstream file_output_2("./ut_results/rREqConst2MobileLocEqConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_2.is_open()) {
-    //     for (int i=0; i<rREqConst2MobileLocEqConstM.size(); i++){
-    //     for (int j=0; j<rREqConst2MobileLocEqConstM[0].size(); j++){
-    //         file_output_2.write((char*)(&rREqConst2MobileLocEqConstM[i][j]), sizeof(rREqConst2MobileLocEqConstM[i][j]));}}
-    //         file_output_2.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // cout << "rREqConst2MobileLocEqConstM_:" << "\n";
-    // for (const auto& row : rREqConst2MobileLocEqConstM_) {
-    //     for (const auto& val : row) {
-    //         cout << setw(8)<<val << " ";
-    //     }
-    //     cout << "\n";
-    // }
-
     }
 
 
 inline void EqualityConstraint::z_eq_const_to_auxiliary_const_update(vector<vector<vector<vector<impalib_type>>>> & rSetCoverIneqConst2ZEqConstM, vector<vector<vector<vector<int>>>> & rConxMobTxRx, vector<vector<int>> & rConxMobTxPerNumMobTxLocs,
                                 vector<vector<impalib_type>> & rZEqConst2AuxiliaryConstM, vector<vector<impalib_type>> &rZCosts) const {
-
-    // vector<vector<impalib_type>> reshaped_set_cover_ineq_const_to_z_eq_const_m(numBands_*numMobileTx_*numTimeSteps_, vector<impalib_type>(numMobileTxLocs_, 0));
 
     for (int j_i=0; j_i< numBands_*numMobileTx_; j_i++){
         for (int k=0; k< numTimeSteps_; k++){
@@ -828,32 +663,13 @@ inline void EqualityConstraint::z_eq_const_to_auxiliary_const_update(vector<vect
                     if (rConxMobTxRx[k][l][n][j_i] == 1){
                         temp_sum += rSetCoverIneqConst2ZEqConstM[k][l][n][j_i];
                     }
-                }
-            // reshaped_set_cover_ineq_const_to_z_eq_const_m[j_i*numTimeSteps_ + k][n] =  temp_sum;  
+                } 
             if (rConxMobTxPerNumMobTxLocs[j_i*numTimeSteps_ + k][n] ==1){
-                // rZEqConst2AuxiliaryConstM[j_i*numTimeSteps_ + k][n] = reshaped_set_cover_ineq_const_to_z_eq_const_m[j_i*numTimeSteps_ + k][n] + rZCosts[j_i*numTimeSteps_ + k][n];
                 rZEqConst2AuxiliaryConstM[j_i*numTimeSteps_ + k][n] = temp_sum + rZCosts[j_i*numTimeSteps_ + k][n];
             }
             }
         }
     }
-
-    // fstream file_output_2("./ut_results/rZEqConst2AuxiliaryConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_2.is_open()) {
-    //     for (int i=0; i<rZEqConst2AuxiliaryConstM.size(); i++){
-    //     for (int j=0; j<rZEqConst2AuxiliaryConstM[0].size(); j++){
-    //         file_output_2.write((char*)(&rZEqConst2AuxiliaryConstM[i][j]), sizeof(rZEqConst2AuxiliaryConstM[i][j]));}}
-    //         file_output_2.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // for (int i=0; i<numBands_*numMobileTx_*numTimeSteps_; i++){
-    //     for (int j=0; j<numMobileTxLocs_; j++){
-    //         cout<<setw(11)<<rZEqConst2AuxiliaryConstM_[i][j];
-    //     }
-    //     cout<<"\n";
-    // }
-    // exit(0);
 }
 
 
@@ -939,33 +755,6 @@ inline void EqualityConstraint::x_eq_const_activation(vector<vector<impalib_type
             }
         }
     }
-
-    // std::cout << "[ ";
-    // for (int i = 0; i < flat_data_2.size(); i++) {
-    //     cout << setw(12) << setprecision(8)<<flat_data_2[i] << " ";
-    // }
-    // cout << "]" << "\n";
-    // exit(0);
-
-    // fstream file_output_1("./ut_results/rMobileXEqConst2MobileCapacConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_1.is_open()) {
-    //     for (int i=0; i<numMobileTx_; i++){
-    //     for (int j=0; j<numBands_; j++){
-    //         for (int k=0; k<numTimeSteps_; k++){
-    //         file_output_1.write((char*)(&rMobileXEqConst2MobileCapacConstM[i][j][k]), sizeof(rMobileXEqConst2MobileCapacConstM[i][j][k]));}}}
-    //         file_output_1.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
-
-    // fstream file_output_2("./ut_results/rFixedXEqConst2FixedCapacConstM_wrapper", ios::out | ios::binary | ios:: trunc);
-    // if (file_output_2.is_open()) {
-    //     for (int i=0; i<numFixedTx_; i++){
-    //     for (int j=0; j<numBands_; j++){
-    //         for (int k=0; k<numTimeSteps_; k++){
-    //         file_output_2.write((char*)(&rFixedXEqConst2FixedCapacConstM[i][j][k]), sizeof(rFixedXEqConst2FixedCapacConstM[i][j][k]));}}}
-    //         file_output_2.close();
-    //         }
-    // else {cout << "Error! File cannot be opened!" << "\n";}
 
 
 }

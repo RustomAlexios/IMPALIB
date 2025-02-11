@@ -57,20 +57,4 @@ class OutputsMOBARP:
         
         extrinsic_z = reshaped_set_cover_ineq_const_to_z_eq_const_m + auxiliary_const_to_z_eq_const_m
         
-        # f_input_1 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_fixed_x"
-        # extrinsic_fixed_x_py = extrinsic_fixed_x.astype(np_impa_lib)
-        # np.save(f_input_1, extrinsic_fixed_x_py.flatten())
-        
-        # f_input_2 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_mobile_x"
-        # extrinsic_mobile_x_py = extrinsic_mobile_x.astype(np_impa_lib)
-        # np.save(f_input_2, extrinsic_mobile_x_py.flatten())
-        
-        # f_input_3 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_r"
-        # extrinsic_r_py = extrinsic_r.astype(np_impa_lib)
-        # np.save(f_input_3, extrinsic_r_py.flatten())
-        
-        # f_input_4 = os.getcwd() + "/../../../src/impa/ut_results/extrinsic_z"
-        # extrinsic_z_py = extrinsic_z.astype(np_impa_lib)
-        # np.save(f_input_4, extrinsic_z_py.flatten())
-        # print(extrinsic_fixed_x)
         return extrinsic_fixed_x, extrinsic_mobile_x, extrinsic_r, extrinsic_z

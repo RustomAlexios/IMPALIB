@@ -60,13 +60,11 @@ def ut_ineq_capac_const_update(ut_name, num_fixed_tx, num_mobile_tx, num_bands, 
     if ut_name == "IneqCapacConstUpdate":
     
         f_input1 = os.getcwd() + "/../ut_inputs/fixed_x_eq_const_to_fixed_capac_const_m.npy"
-        # fixed_x_eq_const_to_fixed_capac_const_m_pure = np.random.normal(normal_mean, normal_variance, size=(NUM_FIXED_TX, NUM_BANDS, NUM_TIME_STEPS))
         fixed_x_eq_const_to_fixed_capac_const_m_pure = np.random.uniform(low=-100, high=-1, size=(NUM_FIXED_TX, NUM_BANDS, NUM_TIME_STEPS))
         fixed_x_eq_const_to_fixed_capac_const_m_pure = fixed_x_eq_const_to_fixed_capac_const_m_pure.astype(np_impa_lib)
         np.save(f_input1, fixed_x_eq_const_to_fixed_capac_const_m_pure.flatten())
         
         f_input2 = os.getcwd() + "/../ut_inputs/mobile_x_eq_const_to_mobile_capac_const_m.npy"
-        # mobile_x_eq_const_to_mobile_capac_const_m_pure = np.random.normal(normal_mean, normal_variance, size=(NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS))
         mobile_x_eq_const_to_mobile_capac_const_m_pure = np.random.uniform(low=-100, high=-1, size=(NUM_MOBILE_TX, NUM_BANDS, NUM_TIME_STEPS))
         mobile_x_eq_const_to_mobile_capac_const_m_pure = mobile_x_eq_const_to_mobile_capac_const_m_pure.astype(np_impa_lib)
         np.save(f_input2, mobile_x_eq_const_to_mobile_capac_const_m_pure.flatten())
