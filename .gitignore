@@ -50,3 +50,10 @@ test/python_mobarp/src/compare_solutions.py
 test/python_mobarp/src/run_analysis.py
 src/impa/external
 src/impa/ut_results
+data/phase1_APPLEsim
+src/impa/plot_time.ipynb
+src/impa/run_analysis_time.py
+src/impa/run_analysis.py
+src/impa/generate_images_paper.py
+test/python_kc_mwm/src/ortools/notes.txt
+test/python_kc_mwm/src/ortools/readme.md

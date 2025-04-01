@@ -111,27 +111,30 @@ if __name__ == "__main__":
     
     file_path = "main_mobarp"
     current_directory = os.path.dirname(os.path.realpath(__file__))
-    data_path = os.path.join(current_directory, '..', '..', '..', 'data')
+    data_path = os.path.join(current_directory, '..', '..', 'data')
     # print(data_path)
     
     # Set folder paths for inputs and outputs
     folder_inputs = os.path.join(data_path, input_path) #"../../../data/" + input_path
 
     ModelIMPA.formatted_alpha = formatted_alpha
-    if FILTERING_FLAG:
-        ModelIMPA.folder_outputs = os.path.join(data_path, output_path, f"alpha{formatted_alpha}")# "../../../data/" + output_path + f"_alpha{formatted_alpha}"
-    else:
-        ModelIMPA.folder_outputs = os.path.join(data_path, output_path) #"../../../data/"+ output_path
-
+    
     if POST_PROCESS_FLAG:
-        ModelIMPA.folder_outputs = os.path.join(ModelIMPA.folder_outputs, "_pp") #"_pp"
+        ModelIMPA.folder_outputs = output_path + "_pp"
+    else:
+        ModelIMPA.folder_outputs = output_path
+    
+    if FILTERING_FLAG:
+        ModelIMPA.folder_outputs = os.path.join(data_path, ModelIMPA.folder_outputs, f"alpha{formatted_alpha}")# "../../../data/" + output_path + f"_alpha{formatted_alpha}"
+    else:
+        ModelIMPA.folder_outputs = os.path.join(data_path, ModelIMPA.folder_outputs) #"../../../data/"+ output_path
 
     ModelIMPA.save_flag = SAVE_FLAG
 
     # Create output folder if it doesn't exist and saving is enabled
     if not (os.path.exists(f"{ModelIMPA.folder_outputs}")) and ModelIMPA.save_flag:
         os.makedirs(f"{ModelIMPA.folder_outputs}")
-
+    
     if not RANDOM_TEST_FLAG:
         print(f"Test File: {test_file}")
     else:
@@ -158,6 +161,8 @@ if __name__ == "__main__":
     ModelIMPA.run_impa()
     
     ModelIMPA.run_analysis()
+    
+    ModelIMPA.run_post_processing()
 
     # Save outputs if saving is enabled and not doing random testing
     if ModelIMPA.save_flag and not ModelIMPA.random_test_flag:

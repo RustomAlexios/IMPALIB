@@ -143,21 +143,23 @@ def get_solution(NUM_FIXED_TX, NUM_TIME_STEPS, NUM_BANDS, NUM_MOBILE_TX, NUM_MOB
     return used_x_list, configurations_activated_r
 
 if __name__=="__main__":
-    
     # input_file_name = "inputs_mobarp_random_cpsat"
     # output_file_name = "outputs_mobarp_random_cpsat"
     
     # input_file_name = "inputs_mobarp_fixed9_cpsat_im_avg1"
     # output_file_name = "outputs_mobarp_fixed9_cpsat_im_avg1"
     
-    snr_threshold = 10
+    snr_threshold = 13
     fixed_size = 20
     
     # input_file_name = f"inputs_mobarp_fixed{fixed_size}_cpsat_snr_threshold{snr_threshold}"
     # output_file_name = f"outputs_mobarp_fixed{fixed_size}_cpsat_snr_threshold{snr_threshold}"
     
-    input_file_name = f"inputs_mobarp_random_cpsat_snr_threshold{snr_threshold}"
-    output_file_name = f"outputs_mobarp_random_cpsat_snr_threshold{snr_threshold}"
+    set_number = 4
+    type_sim = 'time_analysis'
+    input_file_name = f"inputs_mobarp_optimized_random_{type_sim}_cpsat_snr_threshold{snr_threshold}/set{set_number}"
+    
+    output_file_name = f"outputs_mobarp_optimized_random_{type_sim}_cpsat_snr_threshold{snr_threshold}/set{set_number}"
     
     x = np.load("../../../data/inputs_mobarp_master_real/rx_SNR_relay_master.npy") 
     y = np.load("../../../data/inputs_mobarp_master_real/rx_SNR_master.npy")
@@ -169,8 +171,8 @@ if __name__=="__main__":
     # print(f"Pre-sampled master_connectivity_fixed_tx shape: {master_connectivity_fixed_tx.shape}")
 
     index_sample = 0
-    n_samples = 200
-    save_flag = False
+    n_samples = 50
+    save_flag = True
     
     criteria_im = 2
     # low_im = 10
@@ -183,21 +185,30 @@ if __name__=="__main__":
     selected_indices_list = []
     
     while (index_sample<n_samples):
-        
+        print("trying")
         # capacity_fixed = 5
         # capacity_mobile = 5
         
-        max_num_mobile_tx = 13
-        max_band_value = 10
-        max_num_time_steps = 10
-        max_num_rx_locs = 10
-        max_num_mobile_tx_locs = 10
+        # min_num_mobile_tx = 2
+        # max_num_mobile_tx = 7
         
-        NUM_MOBILE_TX = fixed_size #np.random.randint(low = 1, high = max_num_mobile_tx+1, dtype = int) # fixed_size 
-        NUM_BANDS =  np.minimum(fixed_size, max_band_value) #np.random.randint(low = 2, high = max_band_value+1, dtype = int) # np.minimum(fixed_size, max_band_value)
-        NUM_TIME_STEPS = fixed_size #np.random.randint(low = 1, high = max_num_time_steps+1, dtype = int)  # fixed_size
-        NUM_RX_LOCS =  fixed_size #np.random.randint(low = 1, high = max_num_rx_locs+1, dtype = int) # fixed_size
-        NUM_MOBILE_TX_LOCS =  fixed_size #np.random.randint(low = 2, high = max_num_mobile_tx_locs+1, dtype = int) # fixed_size
+        # max_band_value = 10
+        
+        # max_num_time_steps = 12 #24
+        
+        # #(20, 60), (10, 40), (5, 15)
+        # min_num_rx_locs = 5 #10 #20
+        # max_num_rx_locs = 15 #40 #60
+        
+        # #(20, 60), (10, 40), (5, 15)
+        # min_num_mobile_tx_locs = 5 #10 #20
+        # max_num_mobile_tx_locs = 15 #40 #60
+        
+        NUM_MOBILE_TX = 6 #np.random.randint(low = min_num_mobile_tx, high = max_num_mobile_tx+1, dtype = int) #np.random.randint(low = 1, high = max_num_mobile_tx+1, dtype = int) # fixed_size 
+        NUM_BANDS =  10#2*NUM_MOBILE_TX #np.random.randint(low = 5, high = max_band_value+1, dtype = int) #np.random.randint(low = 2, high = max_band_value+1, dtype = int) # np.minimum(fixed_size, max_band_value)
+        NUM_TIME_STEPS = 3*NUM_MOBILE_TX #max_num_time_steps #np.random.randint(low = 1, high = max_num_time_steps+1, dtype = int)  # fixed_size
+        NUM_RX_LOCS =  7*NUM_MOBILE_TX #np.random.randint(low = min_num_rx_locs, high = max_num_rx_locs+1, dtype = int) #np.random.randint(low = 1, high = max_num_rx_locs+1, dtype = int) # fixed_size
+        NUM_MOBILE_TX_LOCS =  8*NUM_MOBILE_TX #np.random.randint(low = min_num_mobile_tx_locs, high = max_num_mobile_tx_locs+1, dtype = int) #np.random.randint(low = 2, high = max_num_mobile_tx_locs+1, dtype = int) # fixed_size
         
         bands_sel = np.sort(np.random.choice(np.arange(master_connectivity_fixed_tx.shape[3]), NUM_BANDS, replace=False))
         rx_sel = np.sort(np.random.choice(np.arange(master_connectivity_fixed_tx.shape[1]), NUM_RX_LOCS, replace=False))
@@ -240,13 +251,14 @@ if __name__=="__main__":
             capacity_fixed = np.random.randint(low = 1, high=NUM_BANDS, size=NUM_FIXED_TX).tolist()
             capacity_mobile = np.random.randint(low = 1, high=NUM_BANDS, size=NUM_MOBILE_TX).tolist()
         
+        start_time = time.time()
         model_relay = mathopt.Model(name="Fixed transmitters with taskable mobile transmitters")
         
         model_relay, dec_vars_sites, dec_vars_relay_locs, dec_vars_relay_broadcast, dec_vars_aux = create_vars(model_relay, NUM_FIXED_TX, NUM_TIME_STEPS, NUM_BANDS, NUM_MOBILE_TX, NUM_MOBILE_TX_LOCS)
 
         model_relay = create_set_cover_constraints(model_relay, NUM_RX_LOCS, NUM_TIME_STEPS, NUM_FIXED_TX, NUM_BANDS, NUM_MOBILE_TX, NUM_MOBILE_TX_LOCS, connectivity_fixed_tx, connectivity_mobile_tx, \
                                         dec_vars_sites, dec_vars_aux)
-                                        
+                         
         model_relay = create_capacity_constraints(model_relay, NUM_FIXED_TX, NUM_TIME_STEPS, NUM_BANDS, NUM_MOBILE_TX, dec_vars_sites, dec_vars_relay_broadcast, capacity_fixed, capacity_mobile)
 
         model_relay = create_auxiliary_constraints(model_relay, NUM_MOBILE_TX, NUM_MOBILE_TX_LOCS, NUM_TIME_STEPS, NUM_BANDS, dec_vars_aux, dec_vars_relay_locs, dec_vars_relay_broadcast)
@@ -261,10 +273,9 @@ if __name__=="__main__":
         # print(dir(params))
         # print("Number of threads set to:", params.threads)
         # exit()
-        start_time = time.time()
         result = mathopt.solve(model_relay, mathopt.SolverType.CP_SAT, params=params)
         if result.termination.reason == mathopt.TerminationReason.OPTIMAL:
-            print(f"Test file: {index_sample} & NUM_FIXED_TX: {NUM_FIXED_TX} & NUM_MOBILE_TX: {NUM_MOBILE_TX} & NUM_BANDS: {NUM_BANDS} & NUM_TIME_STEPS: {NUM_TIME_STEPS} & NUM_RX_LOCS: {NUM_RX_LOCS} & NUM_MOBILE_TX_LOCS: {NUM_MOBILE_TX_LOCS} & EXCLUDE_CAP_FLAG: {EXCLUDE_CAP_FLAG}")
+            print(f"Test file: {index_sample} & NUM_FIXED_TX: {NUM_FIXED_TX} & NUM_MOBILE_TX: {NUM_MOBILE_TX} & NUM_BANDS: {NUM_BANDS} & NUM_TIME_STEPS: {NUM_TIME_STEPS} & NUM_RX_LOCS: {NUM_RX_LOCS} & NUM_MOBILE_TX_LOCS: {NUM_MOBILE_TX_LOCS} & EXCLUDE_CAP_FLAG: {EXCLUDE_CAP_FLAG} & snr_threshold: {snr_threshold}")
             # print("Optimal solution found!")
             end_time = time.time()
             objective_value = result.objective_value()

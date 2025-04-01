@@ -23,7 +23,8 @@ from impa.environmentModule import (
     pkl,
     chain,
     random,
-    defaultdict
+    defaultdict,
+    os
 )
 
 # Import necessary variables and functions from the initializationModule
@@ -3270,38 +3271,42 @@ class GraphicalModelMOBARP:
         mask_fixed = self.reshaped_hard_decision_fixed_x !=-100
         used_fixed_tx_capacities = np.sum(self.reshaped_hard_decision_fixed_x , axis=1, where=mask_fixed ==1).astype(np.int64)
         reshaped_fixed_tx_capacities = np.concatenate([self.fixed_capac_constraints[..., np.newaxis]]*self.num_time_steps, axis=1)
+        self.reshaped_fixed_tx_capacities = reshaped_fixed_tx_capacities
         flag_fixed_tx_capacities = np.all(used_fixed_tx_capacities<=reshaped_fixed_tx_capacities)
         indices_violated_fixed_tx_capacities = np.where(used_fixed_tx_capacities>reshaped_fixed_tx_capacities)
         
         print('-----------')
         print("Fixed TX Capacity Flag: ", flag_fixed_tx_capacities)
-
+        self.flag_fixed_tx_capacities_before_pp = flag_fixed_tx_capacities
+        
         self.flag_fixed_tx_capacities = flag_fixed_tx_capacities
         self.used_fixed_tx_capacities = used_fixed_tx_capacities
         self.indices_violated_fixed_tx_capacities = indices_violated_fixed_tx_capacities
 
-        print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
-        for row1, row2 in zip(used_fixed_tx_capacities, self.fixed_capac_constraints[..., np.newaxis]):
-            print("{:<80}{}".format(str(row1),str(row2)))
+        # print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
+        # for row1, row2 in zip(used_fixed_tx_capacities, self.fixed_capac_constraints[..., np.newaxis]):
+        #     print("{:<80}{}".format(str(row1),str(row2)))
 
         #check mobile capacity constraints
         self.reshaped_hard_decision_mobile_x = self.hard_decision_mobile_x.reshape(self.num_mobile_tx, self.num_bands, self.num_time_steps)
         mask_mobile = self.reshaped_hard_decision_mobile_x !=-100
         used_mobile_tx_capacities = np.sum(self.reshaped_hard_decision_mobile_x, axis=1, where = mask_mobile==1).astype(np.int64)
         reshaped_mobile_tx_capacities = np.concatenate([self.mobile_capac_constraints[..., np.newaxis]]*self.num_time_steps, axis=1)
+        self.reshaped_mobile_tx_capacities = reshaped_mobile_tx_capacities
         flag_mobile_tx_capacities = np.all(used_mobile_tx_capacities<=reshaped_mobile_tx_capacities)
         indices_violated_mobile_tx_capacities = np.where(used_mobile_tx_capacities>reshaped_mobile_tx_capacities)
 
-        print('-----------')
+        # print('-----------')
         print("Mobile TX Capacity Flag: ", flag_mobile_tx_capacities)
+        self.flag_mobile_tx_capacities_before_pp = flag_mobile_tx_capacities
 
         self.flag_mobile_tx_capacities = flag_mobile_tx_capacities
         self.used_mobile_tx_capacities = used_mobile_tx_capacities
         self.indices_violated_mobile_tx_capacities = indices_violated_mobile_tx_capacities
 
-        print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
-        for row1, row2 in zip(used_mobile_tx_capacities, self.mobile_capac_constraints[..., np.newaxis]):
-            print("{:<80}{}".format(str(row1), str(row2)))
+        # print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
+        # for row1, row2 in zip(used_mobile_tx_capacities, self.mobile_capac_constraints[..., np.newaxis]):
+        #     print("{:<80}{}".format(str(row1), str(row2)))
 
         #check mobile-loc assignment constraints
         self.reshaped_hard_decision_r = self.hard_decision_r.reshape(self.num_mobile_tx, self.num_mobile_tx_locs)
@@ -3314,6 +3319,7 @@ class GraphicalModelMOBARP:
         print("Mobile TX-Location Assignment")
         print('-----------')
         print("Mobile TX-Location Assignment Flag: ", flag_sum_used_mobile_loc)
+        self.flag_sum_used_mobile_loc_before_pp = flag_sum_used_mobile_loc
         
         self.flag_sum_used_mobile_loc = flag_sum_used_mobile_loc
         self.sum_used_mobile_loc = sum_used_mobile_loc
@@ -3329,7 +3335,8 @@ class GraphicalModelMOBARP:
         for (i_prime, n) in configurations_activated_r:
             results_r[i_prime].append(n)
 
-        self.configurations_activated_r = configurations_activated_r
+        self.results_r = results_r
+        # self.configurations_activated_r = configurations_activated_r
         
         for i_prime in range(self.num_mobile_tx):
             print(f"Mobile TX {i_prime} is at location {results_r[i_prime]}")
@@ -3337,23 +3344,85 @@ class GraphicalModelMOBARP:
         missing_mobile_tx_to_loc_assignment = [key for key in range(self.num_mobile_tx) if not results_r[key]]
 
         # if missing_mobile_tx_to_loc_assignment:
-        #     print(f"Missing Assignments for Mobile TX: {missing_mobile_tx_to_loc_assignment}")
+        #     print(f"Missing Assignments for Mobile TX: {missing_mobile_tx_to_loc_assignment}")'
         
-        print('-----------')
-        print("Set Cover Constraints")
-        print('-----------')
+        indices_activated_fixed_x = np.where(self.reshaped_hard_decision_fixed_x == 1)
+        configurations_activated_fixed_x = list(zip(*indices_activated_fixed_x))
+        satisifed_k_l_fixed_x = set((element[2], l) for element in configurations_activated_fixed_x for l in np.where(self.connectivity_fixed_tx[element[0], element[1], element[2], :] == 1)[0])
+        
+        indices_activated_mobile_x = np.where(self.reshaped_hard_decision_mobile_x == 1)
+        configurations_activated_mobile_x = list(zip(*indices_activated_mobile_x))
+        satisifed_k_l_mobile_x = set((element[2], l) for element in configurations_activated_mobile_x for location in results_r[element[0]] for l in np.where(self.connectivity_mobile_tx[location, element[1], element[2], :] == 1)[0])
+        
+        satisifed_k_l = satisifed_k_l_fixed_x.union(satisifed_k_l_mobile_x)
+        
+        self.len_violated_k_l_before = self.num_time_steps*self.num_rx_locs - len(satisifed_k_l)
+        
+        if self.len_violated_k_l_before == 0:
+            self.flag_k_l_before_pp = True
+        else:
+            self.flag_k_l_before_pp = False
+        
+        print('-----------')  
+        if (not self.flag_k_l_before_pp):
+            print("Set Cover Constraints Flag: ", self.flag_k_l_before_pp)
+            print(f"{self.len_violated_k_l_before}/{self.num_time_steps*self.num_rx_locs} violated set cover constraints.")
+        else:
+            print("Set Cover Constraints Flag: ", self.flag_k_l_before_pp)
+            print(f"All {self.num_time_steps*self.num_rx_locs} Set Cover Constraints are satisfied.")
+        
+        if (self.flag_fixed_tx_capacities_before_pp and self.flag_mobile_tx_capacities_before_pp and self.flag_sum_used_mobile_loc_before_pp and self.flag_k_l_before_pp):
+            print("Before Post-Processing: All constraints are satisfied.")
+        else:
+            not_satisfied = []
+            if not self.flag_fixed_tx_capacities_before_pp:
+                not_satisfied.append("Fixed Capacities")
+            if not self.flag_mobile_tx_capacities_before_pp:
+                not_satisfied.append("Mobile Capacities")
+            if not self.flag_sum_used_mobile_loc_before_pp:
+                not_satisfied.append("Mobile TX-LOC Assignment")
+            if not self.flag_k_l_before_pp:
+                not_satisfied.append("Set Cover Constraints")
+            print("Before Post-Processing: Constraints not satisfied:", ", ".join(not_satisfied))
+            
+    def run_post_processing(self, ):
+        
+        reshaped_intrinsic_r = self.intrinsic_r.reshape(self.num_mobile_tx, self.num_mobile_tx_locs)
+        mask_r = self.reshaped_hard_decision_r !=-100
+        
+        mobile_assignment_more_than_one = {k: v for k, v in self.results_r.items() if len(v) > 1}
+        
+        if mobile_assignment_more_than_one:
+            disable_locations_set = {}
+            for key, values in mobile_assignment_more_than_one.items():
+                sorted_indices = np.argsort(reshaped_intrinsic_r[key][values]) #small to large
+                remove_locations = [values[i] for i in sorted_indices[1:]]
+                assigned_location = values[sorted_indices[0]]
+                disable_locations_set[key] = remove_locations
+                self.reshaped_hard_decision_r[key, remove_locations] = 0
+                self.results_r[key] = [assigned_location]
+
+            sum_used_mobile_loc = np.sum(self.reshaped_hard_decision_r, axis=1, where=mask_r==1).astype(np.int64)
+            self.flag_sum_used_mobile_loc = np.all(sum_used_mobile_loc==1)
+
+        indices_activated_r = np.where(self.reshaped_hard_decision_r == 1)
+        self.configurations_activated_r = list(zip(*indices_activated_r))
         
         #only select activated z that are satisfied to get selected mobile TX
-        indices_activated_z = np.where(self.reshaped_hard_decision_z==1)
+        indices_activated_z = np.where(self.reshaped_hard_decision_z==1) #i_prime, n, j, k
         configurations_activated_z = list(zip(*indices_activated_z))
-        print(f"{len(configurations_activated_z)} activated auxiliary constraints")
+        # print("--------")
+        # print(f"{len(configurations_activated_z)} activated auxiliary constraints")
         set_z_i_prime_n = [(config[0], config[1]) for config in configurations_activated_z]
-        matching_z_configurations = [configurations_activated_z[index] for index, config in enumerate(set_z_i_prime_n) if config in configurations_activated_r]
+        matching_z_configurations = [configurations_activated_z[index] for index, config in enumerate(set_z_i_prime_n) if config in self.configurations_activated_r]
         set_z_i_prime_j_k = [(config[0], config[2], config[3]) for config in matching_z_configurations]
+        
         indices_activated_mobile_x = np.where(self.reshaped_hard_decision_mobile_x==1)
         configurations_activated_mobile_x = list(zip(*indices_activated_mobile_x))
+        self.reshaped_intrinsic_mobile_x = self.intrinsic_mobile_x.reshape(self.num_mobile_tx, self.num_bands, self.num_time_steps)
         matching_z_configurations = [matching_z_configurations[index] for index, config in enumerate(set_z_i_prime_j_k) if config in configurations_activated_mobile_x]
-        print(f"{len(matching_z_configurations)} valid activated auxiliary constraints")
+
+        # print(f"{len(matching_z_configurations)} valid activated auxiliary constraints")
         results_mobile_tx = defaultdict(list)
         for matching_z_config in matching_z_configurations:
             assigned_rxs = np.where(self.connectivity_mobile_tx[matching_z_config[1], matching_z_config[2], matching_z_config[3]])
@@ -3362,9 +3431,9 @@ class GraphicalModelMOBARP:
                 if (candidate_config not in results_mobile_tx[index]):
                     results_mobile_tx[index].append(candidate_config)
         results_mobile_tx = {key: results_mobile_tx[key] for key in sorted(results_mobile_tx)}
-
         #select fixed TX
         indices_activated_fixed_tx = np.where(self.reshaped_hard_decision_fixed_x==1)
+        self.reshaped_intrinsic_fixed_x = self.intrinsic_fixed_x.reshape(self.num_fixed_tx, self.num_bands, self.num_time_steps)
         configurations_activated_fixed_tx = list(zip(*indices_activated_fixed_tx))
         results_fixed_tx = defaultdict(list)
         for fixed_config in configurations_activated_fixed_tx:
@@ -3373,7 +3442,6 @@ class GraphicalModelMOBARP:
                 if (fixed_config not in results_fixed_tx[index]):
                     results_fixed_tx[index].append(fixed_config)
         results_fixed_tx = {key: results_fixed_tx[key] for key in sorted(results_fixed_tx)}
-
         # print('----')
         #get approach for finding solution, efficient one is 2 (default)
         approach = self.get_sol_approach
@@ -3387,7 +3455,11 @@ class GraphicalModelMOBARP:
             activated_x = defaultdict(list)
             self.get_activations_x_approach_2(results_mobile_tx, activated_x, counts_k_l, is_mobile=True)
             self.get_activations_x_approach_2(results_fixed_tx, activated_x, counts_k_l, is_mobile=False)
-        
+        elif (approach==3):
+            activated_x = defaultdict(list)
+            self.get_activations_x_approach_3(results_mobile_tx, activated_x, counts_k_l, is_mobile=True)
+            self.get_activations_x_approach_3(results_fixed_tx, activated_x, counts_k_l, is_mobile=False)        
+            
         #investigate Set Cover Constraints
         self.set_cover_investigation(counts_k_l)
         self.activated_x = activated_x
@@ -3395,33 +3467,264 @@ class GraphicalModelMOBARP:
         self.results_mobile_tx = results_mobile_tx
         self.results_fixed_tx = results_fixed_tx
 
-        
+        print("-----------")
+        print("Post-Processing")
         #get solution that minimizes the objective function
         if (approach==1):
             x_assignment, used_x_list = self.get_solution_approach_1(results_mobile_tx, results_fixed_tx)
         elif (approach==2):
             x_assignment, used_x_list = self.get_solution_approach_2(results_mobile_tx, results_fixed_tx)
+        elif (approach ==3):
+            x_assignment, used_x_list = self.get_solution_approach_3(results_mobile_tx, results_fixed_tx)
             
         #exit()
         self.x_assignment = x_assignment
         self.used_x_list = used_x_list
+        
+        used_fixed_tx_capacities_pp = np.zeros(self.used_fixed_tx_capacities.shape)
+        used_mobile_tx_capacities_pp = np.zeros(self.used_mobile_tx_capacities.shape)
+        
+        self.reshaped_hard_decision_mobile_x_pp = np.zeros_like(self.reshaped_hard_decision_mobile_x)
+        self.reshaped_hard_decision_fixed_x_pp = np.zeros_like(self.reshaped_hard_decision_fixed_x)
+        
+        used_x_list_pp = []
+        for element in used_x_list:
+            if element[0]=='m':
+                if (used_mobile_tx_capacities_pp[element[1][0]][element[1][-1]] < self.mobile_capac_constraints[element[1][0]]):
+                    used_mobile_tx_capacities_pp[element[1][0]][element[1][-1]]+=1
+                    used_x_list_pp.append(element)
+                    self.reshaped_hard_decision_mobile_x_pp[element[1][0], element[1][1], element[1][2]] = 1
+            else:
+                if (used_fixed_tx_capacities_pp[element[1][0]][element[1][-1]] < self.fixed_capac_constraints[element[1][0]]):
+                    used_fixed_tx_capacities_pp[element[1][0]][element[1][-1]]+=1
+                    used_x_list_pp.append(element)
+                    self.reshaped_hard_decision_fixed_x_pp[element[1][0], element[1][1], element[1][2]] = 1
+        
+        self.used_x_list_pp = used_x_list_pp
+        
+        indices_activated_fixed_x = np.where(self.reshaped_hard_decision_fixed_x_pp == 1)
+        configurations_activated_fixed_x = list(zip(*indices_activated_fixed_x))
+        satisifed_k_l_fixed_x = set((element[2], l) for element in configurations_activated_fixed_x for l in np.where(self.connectivity_fixed_tx[element[0], element[1], element[2], :] == 1)[0])
+        
+        indices_activated_mobile_x = np.where(self.reshaped_hard_decision_mobile_x_pp == 1)
+        configurations_activated_mobile_x = list(zip(*indices_activated_mobile_x))
+        satisifed_k_l_mobile_x = set((element[2], l) for element in configurations_activated_mobile_x for location in self.results_r[element[0]] for l in np.where(self.connectivity_mobile_tx[location, element[1], element[2], :] == 1)[0])
+        
+        satisifed_k_l = satisifed_k_l_fixed_x.union(satisifed_k_l_mobile_x)
+        
+        all_k_l_combinations = {(k, l) for k in range(self.num_time_steps) for l in range(self.num_rx_locs)}
+        self.violated_k_l = all_k_l_combinations - satisifed_k_l
+        
+        if (len(self.violated_k_l)):
+            self.flag_k_l = False
+        else:
+            self.flag_k_l = True
+        
+        mobile_loc_assignment_satisfied = {k: v for k, v in self.results_r.items() if len(v) == 1}
+        # print(mobile_loc_assignment_satisfied)
+        if mobile_loc_assignment_satisfied:
+            potential_mobile_tx = list(set((key, j, k) for key in mobile_loc_assignment_satisfied for j in range(self.num_bands) for (k, l) in self.violated_k_l if self.reshaped_hard_decision_mobile_x_pp[key, j, k] == 0 and self.connectivity_mobile_tx[mobile_loc_assignment_satisfied[key][0], j, k, l] == 1))
+            sorted_elements = sorted([((i, j, k), list(np.where(self.connectivity_mobile_tx[mobile_loc_assignment_satisfied[i][0], j, k, :] == 1)[0])) for (i, j, k) in potential_mobile_tx], key=lambda x: len(x[1]), reverse=True)
+            for element in sorted_elements:
+                if (not self.violated_k_l):
+                    break
+                (i,j,k), indices = element
+                if (used_mobile_tx_capacities_pp[i][k] >= self.mobile_capac_constraints[i]):
+                    continue
+                for idx in indices:
+                    pair_to_remove = (k, idx)
+                    if pair_to_remove in self.violated_k_l:
+                        self.violated_k_l.remove(pair_to_remove)
+                        added_element = ("m", (i,j,k))
+                        if (added_element not in used_x_list_pp):
+                            used_x_list_pp.append(added_element)
+                            self.reshaped_hard_decision_mobile_x_pp[i, j, k] = 1
+                            used_mobile_tx_capacities_pp[i][k]+=1
+                        if (len(self.violated_k_l) ==0):
+                            self.flag_k_l = True
+ 
+        if (not self.flag_sum_used_mobile_loc):
+            reshaped_intrinsic_r_masked = np.where(reshaped_intrinsic_r > 0, reshaped_intrinsic_r, np.inf) 
+            flat_indices = np.argsort(reshaped_intrinsic_r_masked, axis=None)
+            sorted_positions = np.unravel_index(flat_indices, reshaped_intrinsic_r.shape)
+            list_sorted_positions = list(zip(sorted_positions[0], sorted_positions[1]))
 
-        self.objective_cost = len(used_x_list)
+        # print(used_x_list_pp)
+        # print(list_sorted_positions)
+        self.arbitrary_assig_txloc_flag = False
+        self.arbitrary_assign_tx = []
+        
+        while (not self.flag_sum_used_mobile_loc):# or not self.flag_k_l):
+            # print(self.results_r, self.flag_k_l, len(self.violated_k_l))
+            sum_used_mobile_loc = np.sum(self.reshaped_hard_decision_r, axis=1, where=mask_r==1).astype(np.int64)
+            # print(self.reshaped_hard_decision_r)
+            self.flag_sum_used_mobile_loc = np.all(sum_used_mobile_loc==1)
+            
+            empty_keys = [key for key, value in self.results_r.items() if (value == [])]
+            # print(empty_keys)
+            # print(self.results_r.items())
+            
+            if (self.flag_k_l or not list_sorted_positions):
+                
+                if (empty_keys):
+                    self.arbitrary_assig_txloc_flag = True
+                
+                print(f"len(list_sorted_positions): {list_sorted_positions}")
+                print(f"self.flag_k_l: {self.flag_k_l}")
+                
+                for key in empty_keys:
+                    self.arbitrary_assign_tx.append(key)
+                    print(f"Assignment of {key} to a location since flag_kl is True or list_sorted_positions is empty")
+                    potential_location = next((tup for tup in list_sorted_positions if tup[0] == key), None)
+                    if (potential_location):  
+                        self.results_r[key] = [potential_location[1]]
+                        self.reshaped_hard_decision_r[key][potential_location[1]] = 1
+                    else:
+                        #place it at an arbitrary location because it does not matter
+                        self.results_r[key] = [0]
+                        self.reshaped_hard_decision_r[key][0] = 1
+                
+                sum_used_mobile_loc = np.sum(self.reshaped_hard_decision_r, axis=1, where=mask_r==1).astype(np.int64)
+                self.flag_sum_used_mobile_loc = np.all(sum_used_mobile_loc==1)
+                
+                break
+                # continue
+            
+            if (not empty_keys):
+                break
+            
+            else:
+                potential_location = next((tup for tup in list_sorted_positions if tup[0] == empty_keys[0]), None)
+                if (potential_location is not None):
+                    potential_location = potential_location[1]
+                else:
+                    #python3 main_mobarp.py --filteringFlag=True --inputPath=inputs_mobarp_optimized_random_small_cpsat_snr_threshold15 --percNegIM=100 --nITER=200 --alpha=0.4 --testFile=30
+                    self.results_r[empty_keys[0]] = [0]
+                    self.reshaped_hard_decision_r[empty_keys[0]][self.results_r[empty_keys[0]]] = 1
+                    potential_injk = set((empty_keys[0], n, j, k) for (n, j, k, l) in np.argwhere(self.connectivity_mobile_tx == 1) if (k, l) in self.violated_k_l and self.reshaped_hard_decision_mobile_x_pp[empty_keys[0], j, k] == 0)
+                    print(f"ALERT: {empty_keys[0]} has been assigned to a random location since {len(potential_injk)} (i,n,j,k) allows coverage of a violated (k,l)")
+                    self.arbitrary_assig_txloc_flag = True
+                    self.arbitrary_assign_tx.append(empty_keys[0])
+                    continue
+                       
+                count = 0
+                
+                indices_coverage = np.argwhere(self.connectivity_mobile_tx[potential_location] == 1)
+                indices_coverage = [tuple(idx) for idx in indices_coverage] #(j,k,l)
+                potential_mobile_tx = list(set((empty_keys[0], j, k) for (j, k, l) in indices_coverage if (k, l) in self.violated_k_l and self.reshaped_hard_decision_mobile_x_pp[empty_keys[0], j, k] == 0))
+                # print(f"potential_mobile_tx: {potential_mobile_tx}")
+                if (not potential_mobile_tx):
+                    list_sorted_positions.remove((empty_keys[0], potential_location))
+                    continue
+
+                sorted_elements = sorted([((i, j, k), list(np.where(self.connectivity_mobile_tx[potential_location, j, k, :] == 1)[0])) for (i, j, k) in potential_mobile_tx], key=lambda x: len(x[1]), reverse=True)
+
+                for element in sorted_elements:
+                    if (not self.violated_k_l):
+                        break
+                    (i,j,k), indices = element
+                    if (used_mobile_tx_capacities_pp[i][k] >= self.mobile_capac_constraints[i]):
+                        continue
+                    for idx in indices:
+                        pair_to_remove = (k, idx)
+                        if pair_to_remove in self.violated_k_l:
+                            count+=1
+                            self.violated_k_l.remove(pair_to_remove)
+                            self.results_r[empty_keys[0]] = [potential_location]
+                            self.reshaped_hard_decision_r[empty_keys[0]][potential_location] = 1
+                            added_element = ("m", (i,j,k))
+                            
+                            list_sorted_positions = [sublist for sublist in list_sorted_positions if sublist[0] != empty_keys[0]]
+                            if (added_element not in used_x_list_pp):
+                                used_x_list_pp.append(added_element)
+                                self.reshaped_hard_decision_mobile_x_pp[empty_keys[0], j, k] = 1
+                                used_mobile_tx_capacities_pp[i][k]+=1
+                            if (len(self.violated_k_l) ==0):
+                                self.flag_k_l = True
+                if (count==0):
+                    list_sorted_positions.remove((empty_keys[0], potential_location)) 
+        
+        print('-----------')
+        print("Mobile TX-Location Assignment Flag: ", self.flag_sum_used_mobile_loc)
+        
+        results_r = self.results_r
+        for i_prime in range(self.num_mobile_tx):
+            print(f"Mobile TX {i_prime} is at location {results_r[i_prime]}")
+        
+
+        if (not self.flag_k_l):
+            potential_fixed_tx = list(set((i, j, k) for i in range(self.num_fixed_tx) for j in range(self.num_bands) for (k, l) in self.violated_k_l if self.reshaped_hard_decision_fixed_x_pp[i, j, k] == 0 and self.connectivity_fixed_tx[i, j, k, l] == 1))
+            if (potential_fixed_tx):
+                sorted_elements = sorted([((i, j, k), list(np.where(self.connectivity_fixed_tx[i, j, k, :] == 1)[0])) for (i, j, k) in potential_fixed_tx], key=lambda x: len(x[1]), reverse=True)
+                for element in sorted_elements:
+                    if (not self.violated_k_l):
+                        break
+                    (i,j,k), indices = element
+                    if (used_fixed_tx_capacities_pp[i][k] >= self.fixed_capac_constraints[i]):
+                        continue
+                    for idx in indices:
+                        pair_to_remove = (k, idx)
+                        if pair_to_remove in self.violated_k_l:
+                            self.violated_k_l.remove(pair_to_remove)
+                            added_element = ("f", (i,j,k))
+                            if (added_element not in used_x_list_pp):
+                                used_x_list_pp.append(added_element)
+                                self.reshaped_hard_decision_fixed_x_pp[i, j, k] = 1
+                                used_fixed_tx_capacities_pp[i][k]+=1
+                            if (len(self.violated_k_l) ==0):
+                                self.flag_k_l = True
+
+        self.impa_runtime = time.time() - self.start_time
+        
+        flag_fixed_tx_capacities = np.all(used_fixed_tx_capacities_pp<=self.reshaped_fixed_tx_capacities)
+        self.flag_fixed_tx_capacities = flag_fixed_tx_capacities
+        print('-----------')
+        print("Fixed TX Capacity Flag: ", flag_fixed_tx_capacities)
+
+        flag_mobile_tx_capacities = np.all(used_mobile_tx_capacities_pp<=self.reshaped_mobile_tx_capacities)
+        self.flag_mobile_tx_capacities = flag_mobile_tx_capacities
+        
+        print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
+        for row1, row2 in zip(used_fixed_tx_capacities_pp, self.fixed_capac_constraints[..., np.newaxis]):
+            print("{:<80}{}".format(str(row1),str(row2)))
+
+        print('-----------')
+        print("Mobile TX Capacity Flag: ", flag_mobile_tx_capacities)
+
+        print("Used Capacity\t\t\t\t\t\t\t\t       Max Capacity")
+        for row1, row2 in zip(used_mobile_tx_capacities_pp, self.mobile_capac_constraints[..., np.newaxis]):
+            print("{:<80}{}".format(str(row1), str(row2)))
+            
+        print('-----------')  
+        if (self.violated_k_l):
+            print("Set Cover Constraints Flag: ", self.flag_k_l)
+            print(f"{len(self.violated_k_l)}/{self.num_time_steps*self.num_rx_locs} violated set cover constraints.")
+        else:
+            print("Set Cover Constraints Flag: ", self.flag_k_l)
+            print(f"All {self.num_time_steps*self.num_rx_locs} Set Cover Constraints are satisfied.")
+            
+        activated_x_before_pp = len(activated_x)
+        activated_x_after_pp = len(used_x_list_pp)
+        print(f"Number of activated TX before post-processing: {activated_x_before_pp}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
+        print(f"Number of selected TX after post-processing: {activated_x_after_pp}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
+        
+        self.objective_cost = len(used_x_list_pp)
         #for key, value in x_assignment.items():
         #    print(f"(k,l) = {key}: {value}")
         
-        count_m = sum(1 for item in used_x_list if item[0] == 'm')
-        count_f = sum(1 for item in used_x_list if item[0] == 'f')
+        count_m = sum(1 for item in used_x_list_pp if item[0] == 'm')
+        count_f = sum(1 for item in used_x_list_pp if item[0] == 'f')
         self.count_m = count_m
         self.count_f = count_f
 
         print('-----------')
-        print(f"Objective Value: {len(used_x_list)}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
+        print(f"Objective Value: {len(used_x_list_pp)}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
         print(f"Number of Mobile TX: {count_m}")
         print(f"Number of Fixed TX: {count_f}")
-        print('-----------')
+        print('-----------')        
+          
         if (self.flag_fixed_tx_capacities and self.flag_mobile_tx_capacities and self.flag_sum_used_mobile_loc and self.flag_k_l):
-            print("All constraints are satisfied.")
+            print("After Post-Processing: All constraints are satisfied.")
         else:
             not_satisfied = []
             if not self.flag_fixed_tx_capacities:
@@ -3432,45 +3735,69 @@ class GraphicalModelMOBARP:
                 not_satisfied.append("Mobile TX-LOC Assignment")
             if not self.flag_k_l:
                 not_satisfied.append("Set Cover Constraints")
-            print("Constraints not satisfied:", ", ".join(not_satisfied))
-
-        # print('-----------')
-        activated_x_before_pp = len(activated_x)
-        activated_x_after_pp = len(used_x_list)
-        print(f"Number of activated TX before post-processing: {activated_x_before_pp}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
-        print(f"Number of selected TX after post-processing: {activated_x_after_pp}/{self.fixed_x_costs.size + self.mobile_x_costs.size}")
-        print("self.used_x_list: \n", self.used_x_list)
+            print("After Post-Processing: Constraints not satisfied:", ", ".join(not_satisfied))
         
+        set_satisfied_kl = set()
+        
+        # print(used_x_list_pp)
+        if (self.flag_fixed_tx_capacities and self.flag_mobile_tx_capacities and self.flag_sum_used_mobile_loc and self.flag_k_l):
+            for element in used_x_list_pp:
+                i,j,k = element[1]
+                if element[0] == 'm':
+                    n = self.results_r[i][0]
+                    indices_locations_mobile = np.where(self.connectivity_mobile_tx[n, j, k, :] == 1)[0]
+                    for l in indices_locations_mobile:
+                        set_satisfied_kl.add((k, l))
+                else:
+                    indices_locations_fixed = np.where(self.connectivity_fixed_tx[i, j, k, :] == 1)[0]
+                    for l in indices_locations_fixed:
+                        set_satisfied_kl.add((k, l))
+        
+            if (len(set_satisfied_kl) != self.num_time_steps*self.num_rx_locs):
+                print(len(set_satisfied_kl), self.num_time_steps*self.num_rx_locs)
+                print('ERROR')
+                exit()
+        
+        print(f"used_x_list_pp: \n {used_x_list_pp}") 
+            
         if (self.save_flag):
             self.results_composed = [
                     self.filtering_flag, #0
                     self.alpha, #1
                     self.impa_runtime, #2
                     self.objective_cost, #3
-                    dict(self.activated_x), #4
-                    dict(self.sorted_activated_x), #5
-                    self.count_m, #6
-                    self.count_f, #7
-                    self.used_x_list, #8
-                    self.configurations_activated_r, #9
-                    self.counts_k_l, #10
-                    self.violated_k_l, #11
-                    self.flag_fixed_tx_capacities, #12
-                    self.flag_mobile_tx_capacities, #13
-                    self.flag_sum_used_mobile_loc, #14
-                    self.flag_k_l, #15
-                    self.used_fixed_tx_capacities, #16
-                    self.used_mobile_tx_capacities, #17
-                    self.sum_used_mobile_loc, #18
-                    self.indices_violated_fixed_tx_capacities, #19
-                    self.indices_violated_mobile_tx_capacities, #20
-                    self.indices_violated_tx_loc_assignment, #21
-                    self.fixed_x_costs, #22
-                    self.mobile_x_costs, #23
-                    self.r_costs, #24
-                    self.stopping_at_iter, #25
-                    self.hard_decision_data, #26
-                    self.stable_hd_iter, #27
+                    # dict(self.activated_x), #4
+                    # dict(self.sorted_activated_x), #5
+                    # self.count_m, #6
+                    # self.count_f, #7
+                    # self.used_x_list, #8
+                    # self.configurations_activated_r, #9
+                    # self.counts_k_l, #10
+                    # self.violated_k_l, #11
+                    self.flag_fixed_tx_capacities_before_pp, #4
+                    self.flag_fixed_tx_capacities, #5
+                    self.flag_mobile_tx_capacities_before_pp, #6
+                    self.flag_mobile_tx_capacities, #7
+                    self.flag_sum_used_mobile_loc_before_pp, #8
+                    self.flag_sum_used_mobile_loc, #9
+                    self.flag_k_l_before_pp, #10
+                    self.flag_k_l, #11
+                    self.len_violated_k_l_before, #12
+                    len(self.violated_k_l), #13
+                    self.arbitrary_assig_txloc_flag, #14
+                    self.arbitrary_assign_tx, #15
+                    # self.used_fixed_tx_capacities, #16
+                    # self.used_mobile_tx_capacities, #17
+                    # self.sum_used_mobile_loc, #18
+                    # self.indices_violated_fixed_tx_capacities, #19
+                    # self.indices_violated_mobile_tx_capacities, #20
+                    # self.indices_violated_tx_loc_assignment, #21
+                    # self.fixed_x_costs, #22
+                    # self.mobile_x_costs, #23
+                    # self.r_costs, #24
+                    # self.stopping_at_iter, #25
+                    # self.hard_decision_data, #26
+                    # self.stable_hd_iter, #27
             ]
 
     def get_activations_x_approach_1(self, results, x, count_dict, is_mobile):
@@ -3509,6 +3836,26 @@ class GraphicalModelMOBARP:
                     if (key not in x[config]):
                         x[config].append(key)
 
+    def get_activations_x_approach_3(self, results, x, count_dict, is_mobile):
+        for key, value_list in results.items():
+            for value in value_list:
+                index_tx, j, k = value
+                if (k, key) in count_dict:
+                    count_dict[(k, key)] += 1
+                else:
+                    count_dict[(k, key)] = 1
+                
+                if is_mobile:
+                    belief = self.reshaped_intrinsic_mobile_x[index_tx, j, k]
+                    config = ('m', value, belief)
+                    if (key not in x[config]):
+                        x[config].append(key)
+                else:
+                    belief = self.reshaped_intrinsic_fixed_x[index_tx, j, k]
+                    config = ('f', value, belief)
+                    if (key not in x[config]):
+                        x[config].append(key)
+                        
     def set_cover_investigation(self, counts):
         #statistics on set cover constraints
         all_k_l_combinations = {(k, l) for k in range(self.num_time_steps) for l in range(self.num_rx_locs)}
@@ -3550,12 +3897,12 @@ class GraphicalModelMOBARP:
                 k_l_combinations.remove((config[-1], element))
                 if (used_x not in used_x_list):
                     used_x_list.append(used_x)
-        if (k_l_combinations):
-            print("Set Cover Constraints Flag: ", self.flag_k_l)
-            print(f"{len(k_l_combinations)}/{self.num_time_steps*self.num_rx_locs} violated set cover constraints.")
-        else:
-            print("Set Cover Constraints Flag: ", self.flag_k_l)
-            print(f"All {self.num_time_steps*self.num_rx_locs} Set Cover Constraints are satisfied.")
+        # if (k_l_combinations):
+        #     print("Set Cover Constraints Flag: ", self.flag_k_l)
+        #     print(f"{len(k_l_combinations)}/{self.num_time_steps*self.num_rx_locs} violated set cover constraints.")
+        # else:
+        #     print("Set Cover Constraints Flag: ", self.flag_k_l)
+        #     print(f"All {self.num_time_steps*self.num_rx_locs} Set Cover Constraints are satisfied.")
 
         return x_assignment, used_x_list
 
@@ -3577,15 +3924,48 @@ class GraphicalModelMOBARP:
                 k_l_combinations.remove((config[1][-1], element))
                 if (config not in used_x_list):
                     used_x_list.append(config)
-        if (k_l_combinations):
-            print("Set Cover Constraints Flag: ", self.flag_k_l)
-            print(f"{len(k_l_combinations)}/{self.num_time_steps*self.num_rx_locs} violated set cover constraints.")
-        else:
-            print("Set Cover Constraints Flag: ", self.flag_k_l)
-            print(f"All {self.num_time_steps*self.num_rx_locs} Set Cover Constraints are satisfied.")
+        # if (k_l_combinations):
+        #     print("Set Cover Constraints Flag: ", self.flag_k_l)
+        #     print(f"{len(k_l_combinations)}/{self.num_time_steps*self.num_rx_locs} violated set cover constraints.")
+        # else:
+        #     print("Set Cover Constraints Flag: ", self.flag_k_l)
+        #     print(f"All {self.num_time_steps*self.num_rx_locs} Set Cover Constraints are satisfied.")
 
         return x_assignment, used_x_list
 
+
+    def get_solution_approach_3(self, results_mobile_tx, results_fixed_tx):
+
+        activated_x = self.activated_x
+        
+        # sorted_activated_x_items = sorted(activated_x.items(), key=self.length_coverage, reverse=True)
+
+        sorted_activated_x_items = sorted(activated_x.items(), key=lambda x: len(x[1])*x[0][2])
+
+        sorted_activated_x = defaultdict(lambda: defaultdict(list), sorted_activated_x_items)
+        self.sorted_activated_x = sorted_activated_x
+
+        x_assignment = defaultdict(list)
+        used_x_list = []
+        k_l_combinations = [(k, l) for k in range(self.num_time_steps) for l in range(self.num_rx_locs)]
+        for config in sorted_activated_x:
+            tx_id = config[:2]
+            for element in sorted_activated_x[config]:
+                if ((config[1][-1], element) not in k_l_combinations):
+                    continue
+                x_assignment[(config[1][-1], element)] = tx_id
+                k_l_combinations.remove((config[1][-1], element))
+                if (tx_id not in used_x_list):
+                    used_x_list.append(tx_id)
+        # if (k_l_combinations):
+        #     print("Set Cover Constraints Flag: ", self.flag_k_l)
+        #     print(f"{len(k_l_combinations)}/{self.num_time_steps*self.num_rx_locs} violated set cover constraints.")
+        # else:
+        #     print("Set Cover Constraints Flag: ", self.flag_k_l)
+        #     print(f"All {self.num_time_steps*self.num_rx_locs} Set Cover Constraints are satisfied.")
+
+        return x_assignment, used_x_list
+    
     def sum_fixed_mobile_per_x(self, item):
         #used to sort the dictionary obtained in approach 1
         m_len = len(item[1].get('m', []))
